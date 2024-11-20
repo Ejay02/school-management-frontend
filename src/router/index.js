@@ -4,11 +4,11 @@ import Home from "../views/home.vue";
 import Login from "../views/auth/login.vue";
 import Signup from "../views/auth/signup.vue";
 import NotFound from "../components/notFound.vue";
+import Dashboard from "../views/layout/dashboard.vue";
 import AdminLayout from "../views/layout/adminLayout.vue";
 import ParentLayout from "../views/layout/parentLayout.vue";
 import TeacherLayout from "../views/layout/teacherLayout.vue";
 import StudentLayout from "../views/layout/studentLayout.vue";
-import DashboardLayout from "../views/layout/dashboardLayout.vue";
 
 const routes = [
   {
@@ -27,37 +27,31 @@ const routes = [
     component: Signup,
   },
   {
-    path: "/layout",
-    name: "DashboardLayout",
-    component: DashboardLayout,
+    path: "/dashboard",
+    name: "Dashboard",
+    component: Dashboard,
     children: [
       {
-        path: "/layout/admin",
+        path: "/dashboard/admin",
         name: "AdminLayout",
         component: AdminLayout,
       },
       {
-        path: "/layout/parent",
+        path: "/dashboard/parent",
         name: "ParentLayout",
         component: ParentLayout,
       },
       {
-        path: "/layout/student",
+        path: "/dashboard/student",
         name: "StudentLayout",
         component: StudentLayout,
       },
       {
-        path: "/layout/teacher",
+        path: "/dashboard/teacher",
         name: "TeacherLayout",
         component: TeacherLayout,
       },
     ],
-  },
-
-  {
-    path: "/student",
-    name: "StudentLayout",
-    component: StudentLayout,
   },
   {
     // path: "*",
