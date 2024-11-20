@@ -1,11 +1,13 @@
 <template>
-  <RouterView />
   <div class="h-screen flex">
     <!-- side Nav -->
     <LeftNav />
 
     <!-- right -->
-    <RightNav />
+    <div class="w-full">
+      <RightNav />
+      <RouterView />
+    </div>
   </div>
 </template>
 
