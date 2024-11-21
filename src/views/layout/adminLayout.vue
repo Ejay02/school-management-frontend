@@ -1,7 +1,15 @@
 <template>
-  <div class="bg-pink-400 h-full">Admin layout</div>
+  <div class="p-4 flex gap-4 flex-col md:flex-row">
+    <!-- left -->
+    <LeftCard />
+    <!-- right -->
+    <RightCard />
+  </div>
 </template>
 
-<script setup></script>
+<script setup>
+import LeftCard from "../../components/admin/leftPage.vue";
+import RightCard from "../../components/admin/rightPage.vue";
+</script>
 
 <style scoped></style>
