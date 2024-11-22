@@ -1,11 +1,11 @@
 <template>
-  <div class="p-4 bg-white mt-4 rounded-lg shadow-lg cursor-pointer">
+  <div class="p-4 bg-white rounded-lg shadow-lg cursor-pointer">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-lg font-semibold">Announcements</h1>
       <span class="text-gray-400 text-xs">View All</span>
     </div>
 
-    <div class="flex flex-col gap-4 ">
+    <div class="flex flex-col gap-4">
       <div
         class="p-5 rounded-md odd:bg-eduSkyLight even:bg-eduPurpleLight hover:bg-gray-100"
         v-for="announce in announcements"

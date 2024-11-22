@@ -10,11 +10,11 @@
     </router-link>
     <menu class="m-4 text-sm">
       <ul v-for="menuItem in filteredMenuItems" :key="menuItem?.title" class="">
-        <li class="flex flex-col gap-2">{{ menuItem?.title }}</li>
+        <li class="flex flex-col gap-2 text-gray-400 text-left">{{ menuItem?.title }}</li>
         <li v-for="item in menuItem?.items" :key="item?.label" class="mb-2">
           <router-link
             :to="item?.href || '/'"
-            class="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-eduSkyLight"
+            class="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-eduSkyLight text-sm"
           >
             <img :src="item?.icon" :alt="item?.label" class="w-5 h-5" />
             <span class="hidden lg:block">{{ item?.label }}</span>
