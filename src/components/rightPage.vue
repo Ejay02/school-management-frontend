@@ -6,8 +6,8 @@
 </template>
 
 <script setup>
-import CalenderCard from "../cards/calenderCard.vue";
-import AnnouncementCard from "../cards/announcementCard.vue";
+import CalenderCard from "./cards/calenderCard.vue";
+import AnnouncementCard from "./cards/announcementCard.vue";
 </script>
 
 <style scoped></style>

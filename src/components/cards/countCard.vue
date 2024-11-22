@@ -1,12 +1,12 @@
 <template>
   <div class="bg-white rounded-xl w-full h-full p-4">
     <!-- title -->
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center ">
       <h1 class="text-lg font-semibold">Students</h1>
       <img src="/moreDark.png" alt="more icon" class="h-5 w-5" />
     </div>
     <!-- chart -->
-    <div class="w-full h-[65%] flex justify-center items-center mb-6 relative">
+    <div class="w-full h-[65%] flex justify-center items-center mb-2 p-2 relative">
       <canvas ref="radialChartCanvas"></canvas>
       <img
         src="/maleFemale.png"
@@ -15,7 +15,7 @@
       />
     </div>
     <!-- bottom -->
-    <div class="flex justify-center gap-16">
+    <div class="flex justify-center gap-16 mb-4 p-2">
       <div class="flex flex-col gap-1">
         <div class="w-5 h-5 bg-eduSky rounded-full"></div>
         <h1 class="font-bold">1,234</h1>

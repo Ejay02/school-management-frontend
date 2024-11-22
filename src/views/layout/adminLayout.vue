@@ -1,15 +1,38 @@
 <template>
-  <div class="p-4 flex gap-4 flex-col md:flex-row  bg-gray-200">
-    <!-- left -->
-    <LeftCard />
-    <!-- right -->
-    <RightCard />
+  <div class="mt-4">
+    <!-- user cards -->
+    <div class="flex gap-4 justify-between flex-wrap mb-4">
+      <UserCard />
+      <UserCard />
+      <UserCard />
+      <UserCard />
+    </div>
+
+    <!-- middle charts -->
+    <div class="flex gap-4 flex-col lg:flex-row mb-4">
+      <!-- count -->
+      <div class="w-full lg:w-1/3 h-[450px]">
+        <CountCard />
+      </div>
+
+      <!-- attendance -->
+      <div class="w-full lg:w-2/3 h-[450px]">
+        <AttendanceCard />
+      </div>
+    </div>
+
+    <!-- bottom -->
+    <div class="w-full h-[500px]">
+      <FinanceCard />
+    </div>
   </div>
 </template>
 
 <script setup>
-import LeftCard from "../../components/admin/leftPage.vue";
-import RightCard from "../../components/admin/rightPage.vue";
+import UserCard from "../../components/cards/userCard.vue";
+import CountCard from "../../components/cards/countCard.vue";
+import FinanceCard from "../../components/cards/financeCard.vue";
+import AttendanceCard from "../../components/cards/attendanceCard.vue";
 </script>
 
 <style scoped></style>

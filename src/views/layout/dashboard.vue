@@ -6,7 +6,6 @@
     <!-- right -->
     <div class="w-full">
       <RightNav />
-      <RouterView />
     </div>
   </div>
 </template>
