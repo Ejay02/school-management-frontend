@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-xl w-full h-full p-4">
+  <div class="bg-white rounded-xl w-auto h-full p-4 shadow-lg">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-lg font-semibold">Finance</h1>
       <img src="/moreDark.png" alt="more icon" class="h-5 w-5" />
