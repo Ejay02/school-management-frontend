@@ -16,6 +16,9 @@ export default {
         eduYellow: "#FAE27C",
         eduYellowLight: "#FEFCE8",
       },
+      animation: {
+        "bounce-once": "bounce 0.5s ease-in-out 2",
+      },
     },
   },
   plugins: [],

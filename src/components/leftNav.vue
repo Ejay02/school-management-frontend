@@ -1,8 +1,12 @@
 <template>
   <div class="w-[14%] md:w-[8%] lg:w-[16%] xl:w-[14%]">
     <router-link to="/" class="flex items-center lg:justify-start gap-2 p-2">
-      <img src="/edu.jpeg" alt="logo" class="w-12 h-12 rounded-md" />
-      <span class="hidden lg:block text-sm">EduHub Portal</span>
+      <img
+        src="/edu.png"
+        alt="logo"
+        class="w-12 h-12 rounded-md animate-bounce-once duration-200"
+      />
+      <span class="hidden lg:block text-sm font-bold">EduHub Portal</span>
     </router-link>
     <menu class="m-4 text-sm">
       <ul v-for="menuItem in menuItems" :key="menuItem?.title" class="">
