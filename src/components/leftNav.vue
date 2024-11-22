@@ -4,7 +4,7 @@
       <img
         src="/edu.png"
         alt="logo"
-        class="w-12 h-12 rounded-md animate-bounce-once duration-200"
+        class="mt-4 w-10 h-10 rounded-md animate-bounce-once duration-200 items-center justify-center"
       />
       <span class="hidden lg:block text-sm font-bold">EduHub Portal</span>
     </router-link>
