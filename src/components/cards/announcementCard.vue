@@ -12,17 +12,18 @@
         :key="announce?.id"
       >
         <div class="flex items-center justify-between mb-2">
-          <h1 class="font-medium text-gray-600 capitalize">
-            {{ announce.title }}
+          <h1 class="font-medium text-gray-600 capitalize text-sm">
+            {{ announce?.title }}
           </h1>
-          <span class="text-gray-300 text-xs bg-white rounded-md px-1 py-1">{{
-            announce.date
-          }}</span>
+          <span
+            class="text-gray-300 text-[10px] bg-white rounded-md px-[2px] py-[2px]"
+            >{{ announce?.date }}</span
+          >
         </div>
 
         <div class="mt-2">
           <span class="text-gray-400 text-sm line-clamp-2">{{
-            announce.description
+            announce?.description
           }}</span>
         </div>
       </div>
