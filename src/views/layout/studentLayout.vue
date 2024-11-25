@@ -69,8 +69,8 @@ const calendarOptions = ref({
       title: "Meeting",
       start: "2024-11-25T10:30:00",
       display: "dot",
-      backgroundColor: "#CFCEFF",
-      borderColor: "#CFCEFF",
+      backgroundColor: "#FAE27C",
+      borderColor: "#FAE27C",
     },
     {
       title: "Lunch",
@@ -83,7 +83,7 @@ const calendarOptions = ref({
       start: "2024-11-04",
       end: "2024-11-14",
       display: "block",
-      backgroundColor: "#CFCEFF",
+      backgroundColor: "#FAE27C",
     },
 
     {
@@ -95,8 +95,8 @@ const calendarOptions = ref({
     {
       title: "Lunch",
       start: "2024-11-28T12:00:00",
-      backgroundColor: "#CFCEFF",
-      borderColor: "#CFCEFF",
+      backgroundColor: "#FAE27C",
+      borderColor: "#FAE27C",
     },
     {
       title: "Meeting",
@@ -107,8 +107,8 @@ const calendarOptions = ref({
     {
       title: "Happy Hour",
       start: "2024-11-25T17:30:00",
-      backgroundColor: "#CFCEFF",
-      borderColor: "#CFCEFF",
+      backgroundColor: "#FAE27C",
+      borderColor: "#FAE27C",
     },
     {
       title: "Dinner",
