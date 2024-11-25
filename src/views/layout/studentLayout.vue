@@ -1,5 +1,5 @@
 <template>
-  <div class=" gap-4 flex-col xl:flex-row w-full mt-4">
+  <div class="gap-4 flex-col xl:flex-row w-full mt-4">
     <div class="">
       <div class="w-full xl:w-2/3">
         <div class="h-full bg-white p-4 rounded-md w-full">
@@ -23,6 +23,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { INITIAL_EVENTS, createEventId } from "./event-utils";
 
 const currentEvents = ref([]);
+const calendarRef = ref(null);
 
 const calendarOptions = ref({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
@@ -37,18 +38,95 @@ const calendarOptions = ref({
   editable: true,
   selectable: true,
   selectMirror: true,
-  dayMaxEvents: true,
+  // dayMaxEvents: true,
+  dayMaxEventRows: 3, // Only show 1 event initially
+  moreLinkClick: "popover", // Show popover when clicking "+more"
+  views: {
+    dayGrid: {
+      dayMaxEventRows: 3, // Ensure consistency across views
+    },
+  },
+
   weekends: true,
+  // handle date click so to add here or in daily planner??
+  dateClick: function (info) {
+    const calendarApi = info.view.calendar;
+    calendarApi.changeView("timeGridDay", info.dateStr);
+  },
   select: handleDateSelect,
   eventClick: handleEventClick,
   eventsSet: handleEvents,
   events: [
-    { title: "Study", date: "2024-11-24" },
-    { title: "Exams", date: "2024-11-25" },
-    { title: "Conference", start: "2024-11-04", end: "2024-11-14" },
+    {
+      title: "Study",
+      start: "2024-11-24",
+      end: "2024-11-28",
+      display: "block",
+      backgroundColor: "#CFCEFF",
+      borderColor: "#CFCEFF",
+    },
+    {
+      title: "Meeting",
+      start: "2024-11-25T10:30:00",
+      display: "dot",
+      backgroundColor: "#CFCEFF",
+      borderColor: "#CFCEFF",
+    },
+    {
+      title: "Lunch",
+      start: "2024-11-25T12:00:00",
+      backgroundColor: "#CFCEFF",
+      borderColor: "#CFCEFF",
+    },
+    {
+      title: "Conference",
+      start: "2024-11-04",
+      end: "2024-11-14",
+      display: "block",
+      backgroundColor: "#CFCEFF",
+    },
+
+    {
+      title: "Meeting",
+      start: "2024-11-25T10:30:00",
+      backgroundColor: "#CFCEFF",
+      borderColor: "#CFCEFF",
+    },
+    {
+      title: "Lunch",
+      start: "2024-11-28T12:00:00",
+      backgroundColor: "#CFCEFF",
+      borderColor: "#CFCEFF",
+    },
+    {
+      title: "Meeting",
+      start: "2024-11-25T14:30:00",
+      backgroundColor: "#CFCEFF",
+      borderColor: "#CFCEFF",
+    },
+    {
+      title: "Happy Hour",
+      start: "2024-11-25T17:30:00",
+      backgroundColor: "#CFCEFF",
+      borderColor: "#CFCEFF",
+    },
+    {
+      title: "Dinner",
+      start: "2024-11-25T20:00:00",
+      backgroundColor: "#CFCEFF",
+      borderColor: "#CFCEFF",
+    },
   ],
+
+  eventTimeFormat: {
+    hour: "numeric",
+    minute: "2-digit",
+    meridiem: "short",
+    omitZeroMinute: false,
+  },
 });
 
+// #TODO move to modal
 function handleDateSelect(selectInfo) {
   let title = prompt("Please enter a new title for your event");
   let calendarApi = selectInfo.view.calendar;
@@ -66,6 +144,7 @@ function handleDateSelect(selectInfo) {
   }
 }
 
+//#TODO move to a modal
 function handleEventClick(clickInfo) {
   if (
     confirm(
@@ -83,12 +162,12 @@ function handleEvents(events) {
 
 <style>
 .fc-custom-theme {
-  --fc-button-bg-color: #6366f1;
-  --fc-button-border-color: transparent;
-  --fc-button-hover-bg-color: #4c1d95;
-  --fc-button-hover-border-color: transparent;
-  --fc-button-active-bg-color: #5b21b6;
-  --fc-button-active-border-color: transparent;
+  --fc-button-bg-color: #c3ebfa;
+  --fc-button-border-color: none !important;
+  --fc-button-hover-bg-color: none !important;
+  --fc-button-hover-border-color: none !important;
+  --fc-button-active-bg-color: #cfceff;
+  --fc-button-active-border-color: none !important;
   --fc-today-bg-color: #eef2ff;
   --fc-border-color: #e5e7eb;
 }
@@ -106,36 +185,24 @@ function handleEvents(events) {
 }
 
 /* Target active state */
+.fc-custom-theme .fc-button:hover,
+.fc-custom-theme .fc-button-primary:hover,
 .fc-custom-theme .fc-button-active,
 .fc-custom-theme .fc-button-primary.fc-button-active {
-  background-color: #4c1d95 !important;
   border: none !important;
   box-shadow: none !important;
 }
 
-/* Target hover state */
-.fc-custom-theme .fc-button:hover,
-.fc-custom-theme .fc-button-primary:hover {
-  background-color: #4c1d95 !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* Target focus state */
-.fc-custom-theme .fc-button:focus,
-.fc-custom-theme .fc-button-primary:focus {
-  outline: none;
-  border: none !important;
-}
-
+/* Month text */
 .fc-custom-theme .fc-toolbar-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #111827;
+  color: #686e7a;
 }
 
+/* bottom bg color */
 .fc-custom-theme .fc-day-today {
-  background-color: #eef2ff !important;
+  background-color: #fefce8 !important;
 }
 
 .fc-custom-theme .fc-button-group {
@@ -143,16 +210,57 @@ function handleEvents(events) {
 }
 
 /* Additional specific targeting for button group buttons */
+.fc-toolbar-chunk:hover,
 .fc-custom-theme .fc-button-group .fc-button {
   border: none !important;
-  background-color: var(--fc-button-bg-color) !important;
+  background-color: none !important;
 }
 
+/* actual button */
 .fc-custom-theme .fc-button-group .fc-button-active {
-  background-color: #4c1d95 !important;
+  background-color: #cfceff !important;
+  border: none !important;
+  outline: none;
 }
 
+/* calender view */
 .fc-custom-theme .fc-view {
-  border-color: #e5e7eb;
+  background-color: #edf9fd;
+  border: none !important;
+  cursor: pointer;
 }
+
+.fc-daygrid-more-link {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+.fc-popover {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.fc-popover-header {
+  background-color: #f3f4f6;
+  padding: 8px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.fc-popover-body {
+  padding: 8px;
+}
+
+/* dropdown dot */
+.fc-daygrid-event-dot {
+  border-color: pink !important;
+}
+
+.fc-event {
+  border-radius: 4px;
+  border: none;
+}
+
+/* #CFCEFF */
 </style>
