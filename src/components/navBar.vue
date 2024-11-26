@@ -4,7 +4,7 @@
     <div class="flex justify-between items-center p-4 cursor-pointer">
       <!-- left section-->
       <div
-        class="hidden md:flex justify-center rounded-md text-xs gap-2 bg-white cursor-pointer items-center ring-[1.5px] ring-gray-300 px-2"
+        class="hidden md:flex justify-center rounded-full text-xs gap-2 bg-white cursor-pointer items-center ring-[1.5px] ring-gray-300 px-2"
       >
         <img
           src="/search.png"

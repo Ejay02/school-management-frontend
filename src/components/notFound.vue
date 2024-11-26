@@ -1,5 +1,7 @@
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center bg-yellow-400">
+  <div
+    class="min-h-screen flex flex-col items-center justify-center bg-yellow-400"
+  >
     <div class="flex items-center">
       <p class="text-2xl font-semibold mr-2">404</p>
       <p class="text-2xl font-semibold mr-2">|</p>
@@ -7,7 +9,7 @@
     </div>
 
     <!--  -->
-    <router-link to="/">
+    <router-link :to="`/dashboard/${role}`">
       <div class="container mt-20">
         <div class="center">
           <button class="btn">
@@ -27,7 +29,13 @@
     </router-link>
   </div>
 </template>
-<script setup></script>
+<script setup>
+import { useUserStore } from "../store/userStore";
+
+const userStore = useUserStore();
+
+const role = userStore.currentRole;
+</script>
 
 <style scoped>
 /* @import url("https://fonts.googleapis.com/css?family=Lato:100&display=swap"); */

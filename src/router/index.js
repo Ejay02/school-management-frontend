@@ -10,16 +10,21 @@ import AdminLayout from "../views/layout/adminLayout.vue";
 import ParentLayout from "../views/layout/parentLayout.vue";
 import TeacherLayout from "../views/layout/teacherLayout.vue";
 import StudentLayout from "../views/layout/studentLayout.vue";
+import Teachers from "../components/lists/teachers.vue";
+import Students from "../components/lists/students.vue";
+import Parents from "../components/lists/parents.vue";
+import Subjects from "../components/lists/subjects.vue";
+import Classes from "../components/lists/classes.vue";
 
 // Define public routes that don't require authentication
 const publicRoutes = ["Home", "Login", "Signup"];
 
 const routes = [
-  {
-    path: "/",
-    name: "Home",
-    component: Home,
-  },
+  // {
+  //   path: "/",
+  //   name: "Home",
+  //   component: Home,
+  // },
   {
     path: "/login",
     name: "Login",
@@ -31,7 +36,7 @@ const routes = [
     component: Signup,
   },
   {
-    path: "/dashboard",
+    path: "/",
     name: "Dashboard",
     component: Dashboard,
     meta: { requiresAuth: true },
@@ -60,8 +65,34 @@ const routes = [
         component: TeacherLayout,
         meta: { role: "teacher" },
       },
+      {
+        path: "/list/teachers",
+        name: "Teachers",
+        component: Teachers,
+      },
+      {
+        path: "/list/students",
+        name: "Students",
+        component: Students,
+      },
+      {
+        path: "/list/parents",
+        name: "Parents",
+        component: Parents,
+      },
+      {
+        path: "/list/subjects",
+        name: "Subjects",
+        component: Subjects,
+      },
+      {
+        path: "/list/classes",
+        name: "Classes",
+        component: Classes,
+      },
     ],
   },
+
   {
     path: "/:catchAll(.*)",
     name: "NotFound",
