@@ -1,41 +1,37 @@
 <template>
   <div class="bg-white p-4 rounded-md flex-1 m-4 mt-0">
     <!-- top -->
-    <TopList :txt="'All Parents'" />
+    <TopList :txt="'All Announcements'" />
 
     <!-- list -->
     <div class="">
-      <ParentsTable :columns="columns" :data="parentsData" />
+      <AnnouncementsTable :columns="columns" :data="announcementsData" />
     </div>
 
     <!-- pagination -->
-
     <Pagination />
   </div>
 </template>
 
 <script setup>
-import TopList from "./topList.vue";
+import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
-import { parentsData } from "../../utils/data";
-import ParentsTable from "../table/parentsTable.vue";
+import { announcementsData } from "../../utils/data";
+import AnnouncementsTable from "./announcementsTable.vue";
 
 const columns = [
-  { header: "Info", accessor: "info" },
   {
-    header: "Student Name",
-    accessor: "students",
-    class: "hidden md:table-cell",
+    header: "Title",
+    accessor: "title",
   },
-
   {
-    header: "Phone",
-    accessor: "phone",
+    header: "Class",
+    accessor: "class",
     class: "hidden md:table-cell",
   },
   {
-    header: "Address",
-    accessor: "address",
+    header: "Date",
+    accessor: "date",
     class: "hidden md:table-cell",
   },
   {

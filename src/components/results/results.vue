@@ -14,10 +14,10 @@
 </template>
 
 <script setup>
-import TopList from "./topList.vue";
+import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
 import { resultsData } from "../../utils/data";
-import ResultsTable from "../table/resultsTable.vue";
+import ResultsTable from "./resultsTable.vue";
 
 const columns = [
   {

@@ -15,10 +15,10 @@
 </template>
 
 <script setup>
-import TopList from "./topList.vue";
+import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
 import { teachersData } from "../../utils/data";
-import TeacherTable from "../table/teacherTable.vue";
+import TeacherTable from "./teacherTable.vue";
 
 const columns = [
   { header: "Info", accessor: "info" },

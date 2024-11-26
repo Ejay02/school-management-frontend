@@ -1,11 +1,11 @@
 <template>
   <div class="bg-white p-4 rounded-md flex-1 m-4 mt-0">
     <!-- top -->
-    <TopList :txt="'All Classes'" />
+    <TopList :txt="'All Exams'" />
 
     <!-- list -->
     <div class="">
-      <ClassesTable :columns="columns" :data="classesData" />
+      <ExamsTable :columns="columns" :data="examsData" />
     </div>
 
     <!-- pagination -->
@@ -14,29 +14,29 @@
 </template>
 
 <script setup>
-import TopList from "./topList.vue";
+import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
-import { classesData } from "../../utils/data";
-import ClassesTable from "../table/classesTable.vue";
+import { examsData } from "../../utils/data";
+import ExamsTable from "./examsTable.vue";
 
 const columns = [
   {
-    header: "Class Name",
-    accessor: "name",
+    header: "Subject Name",
+    accessor: "subject",
   },
   {
-    header: "Capacity",
-    accessor: "capacity",
+    header: "Class",
+    accessor: "class",
     class: "hidden md:table-cell",
   },
   {
-    header: "Grade",
-    accessor: "grade",
+    header: "Teacher",
+    accessor: "teacher",
     class: "hidden md:table-cell",
   },
   {
-    header: "Supervisor",
-    accessor: "supervisor",
+    header: "Date",
+    accessor: "date",
     class: "hidden md:table-cell",
   },
   {

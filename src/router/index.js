@@ -10,19 +10,20 @@ import AdminLayout from "../views/layout/adminLayout.vue";
 import ParentLayout from "../views/layout/parentLayout.vue";
 import TeacherLayout from "../views/layout/teacherLayout.vue";
 import StudentLayout from "../views/layout/studentLayout.vue";
-import Teachers from "../components/lists/teachers.vue";
-import TeacherView from "../components/lists/teacherView.vue";
-import Students from "../components/lists/students.vue";
-import StudentView from "../components/lists/studentView.vue";
-import Parents from "../components/lists/parents.vue";
-import Subjects from "../components/lists/subjects.vue";
-import Classes from "../components/lists/classes.vue";
-import Lessons from "../components/lists/lessons.vue";
-import Exams from "../components/lists/exams.vue";
-import Assignments from "../components/lists/assignments.vue";
-import Results from "../components/lists/results.vue";
-import Events from "../components/lists/events.vue";
-import Announcements from "../components/lists/announcements.vue";
+
+import Exams from "../components/exams/exams.vue";
+import Events from "../components/events/events.vue";
+import Classes from "../components/classes/classes.vue";
+import Parents from "../components/parents/parents.vue";
+import Results from "../components/results/results.vue";
+import Lessons from "../components/lessons/lessons.vue";
+import Teachers from "../components/teacher/teachers.vue";
+import Subjects from "../components/subjects/subjects.vue";
+import Students from "../components/students/students.vue";
+import TeacherView from "../components/teacher/teacherView.vue";
+import StudentView from "../components/students/studentView.vue";
+import Assignments from "../components/assignments/assignments.vue";
+import Announcements from "../components/announcements/announcements.vue";
 
 // Define public routes that don't require authentication
 const publicRoutes = ["Home", "Login", "Signup"];
