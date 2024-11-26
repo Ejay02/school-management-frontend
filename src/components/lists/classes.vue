@@ -23,22 +23,21 @@ const columns = [
   {
     header: "Class Name",
     accessor: "name",
-    class: "hidden md:table-cell",
   },
   {
     header: "Capacity",
     accessor: "capacity",
-    class: "hidden lg:table-cell",
+    class: "hidden md:table-cell",
   },
   {
     header: "Grade",
     accessor: "grade",
-    class: "hidden lg:table-cell",
+    class: "hidden md:table-cell",
   },
   {
     header: "Supervisor",
     accessor: "supervisor",
-    class: "hidden lg:table-cell",
+    class: "hidden md:table-cell",
   },
   {
     header: "Actions",

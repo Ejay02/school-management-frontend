@@ -36,12 +36,12 @@ const columns = [
   {
     header: "Phone",
     accessor: "phone",
-    class: "hidden lg:table-cell",
+    class: "hidden md:table-cell",
   },
   {
     header: "Address",
     accessor: "address",
-    class: "hidden lg:table-cell",
+    class: "hidden md:table-cell",
   },
   {
     header: "Actions",

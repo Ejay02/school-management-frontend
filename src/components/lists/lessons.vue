@@ -1,15 +1,14 @@
 <template>
   <div class="bg-white p-4 rounded-md flex-1 m-4 mt-0">
     <!-- top -->
-    <TopList :txt="'All Parents'" />
+    <TopList :txt="'All Lessons'" />
 
     <!-- list -->
     <div class="">
-      <ParentsTable :columns="columns" :data="parentsData" />
+      <LessonsTable :columns="columns" :data="lessonsData" />
     </div>
 
     <!-- pagination -->
-
     <Pagination />
   </div>
 </template>
@@ -17,25 +16,22 @@
 <script setup>
 import TopList from "./topList.vue";
 import Pagination from "../pagination.vue";
-import { parentsData } from "../../utils/data";
-import ParentsTable from "../table/parentsTable.vue";
+import { lessonsData } from "../../utils/data";
+import LessonsTable from "../table/lessonsTable.vue";
 
 const columns = [
-  { header: "Info", accessor: "info" },
   {
-    header: "Student Name",
-    accessor: "students",
-    class: "hidden md:table-cell",
+    header: "Subject Name",
+    accessor: "subject",
   },
-
   {
-    header: "Phone",
-    accessor: "phone",
+    header: "Class",
+    accessor: "class",
     class: "hidden md:table-cell",
   },
   {
-    header: "Address",
-    accessor: "address",
+    header: "Teachers",
+    accessor: "teachers",
     class: "hidden md:table-cell",
   },
   {

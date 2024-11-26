@@ -15,6 +15,7 @@ import Students from "../components/lists/students.vue";
 import Parents from "../components/lists/parents.vue";
 import Subjects from "../components/lists/subjects.vue";
 import Classes from "../components/lists/classes.vue";
+import Lessons from "../components/lists/lessons.vue";
 
 // Define public routes that don't require authentication
 const publicRoutes = ["Home", "Login", "Signup"];
@@ -89,6 +90,11 @@ const routes = [
         path: "/list/classes",
         name: "Classes",
         component: Classes,
+      },
+      {
+        path: "/list/lessons",
+        name: "Lessons",
+        component: Lessons,
       },
     ],
   },
