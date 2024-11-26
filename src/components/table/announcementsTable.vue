@@ -18,29 +18,21 @@
         class="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-eduPurpleLight"
       >
         <td class="flex items-center gap-4 p-2">
-          <img
-            :src="item?.photo"
-            alt="user"
-            class="w-10 h-10 rounded-full mr-3 xl:block object-cover"
-          />
-
           <div class="flex flex-col">
-            <div class="font-semibold">{{ item?.name }}</div>
-            <div class="text-xs text-gray-400">{{ item?.class }}</div>
+            <div class="font-semibold">{{ item?.title }}</div>
           </div>
         </td>
-        <td class="hidden md:table-cell">{{ item?.studentId }}</td>
-        <td class="hidden md:table-cell">{{ item?.grade }}</td>
 
-        <td class="hidden md:table-cell">{{ item?.phone }}</td>
-        <td class="hidden md:table-cell">{{ item?.address }}</td>
+        <td class="hidden md:table-cell">{{ item?.class }}</td>
+        <td class="hidden md:table-cell">{{ item?.date }}</td>
+
         <td>
           <div class="flex items-center gap-2">
-            <router-link :to="`/list/students/${item?.id}`">
+            <router-link :to="`/list/announcements/${item?.id}`">
               <button
                 class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
               >
-                <img src="/view.png" alt="view" class="h-3 w-3" />
+                <img src="/edit.png" alt="view" class="h-3 w-3" />
               </button>
             </router-link>
 

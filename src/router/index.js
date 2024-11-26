@@ -11,7 +11,9 @@ import ParentLayout from "../views/layout/parentLayout.vue";
 import TeacherLayout from "../views/layout/teacherLayout.vue";
 import StudentLayout from "../views/layout/studentLayout.vue";
 import Teachers from "../components/lists/teachers.vue";
+import TeacherView from "../components/lists/teacherView.vue";
 import Students from "../components/lists/students.vue";
+import StudentView from "../components/lists/studentView.vue";
 import Parents from "../components/lists/parents.vue";
 import Subjects from "../components/lists/subjects.vue";
 import Classes from "../components/lists/classes.vue";
@@ -20,6 +22,7 @@ import Exams from "../components/lists/exams.vue";
 import Assignments from "../components/lists/assignments.vue";
 import Results from "../components/lists/results.vue";
 import Events from "../components/lists/events.vue";
+import Announcements from "../components/lists/announcements.vue";
 
 // Define public routes that don't require authentication
 const publicRoutes = ["Home", "Login", "Signup"];
@@ -76,9 +79,19 @@ const routes = [
         component: Teachers,
       },
       {
+        path: "/list/teachers/:id",
+        name: "TeacherView",
+        component: TeacherView,
+      },
+      {
         path: "/list/students",
         name: "Students",
         component: Students,
+      },
+      {
+        path: "/list/students/:id",
+        name: "StudentView",
+        component: StudentView,
       },
       {
         path: "/list/parents",
@@ -119,6 +132,11 @@ const routes = [
         path: "/list/events",
         name: "Events",
         component: Events,
+      },
+      {
+        path: "/list/announcements",
+        name: "Announcements",
+        component: Announcements,
       },
     ],
   },
