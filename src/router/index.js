@@ -17,6 +17,9 @@ import Subjects from "../components/lists/subjects.vue";
 import Classes from "../components/lists/classes.vue";
 import Lessons from "../components/lists/lessons.vue";
 import Exams from "../components/lists/exams.vue";
+import Assignments from "../components/lists/assignments.vue";
+import Results from "../components/lists/results.vue";
+import Events from "../components/lists/events.vue";
 
 // Define public routes that don't require authentication
 const publicRoutes = ["Home", "Login", "Signup"];
@@ -101,6 +104,21 @@ const routes = [
         path: "/list/exams",
         name: "Exams",
         component: Exams,
+      },
+      {
+        path: "/list/assignments",
+        name: "Assignments",
+        component: Assignments,
+      },
+      {
+        path: "/list/results",
+        name: "Results",
+        component: Results,
+      },
+      {
+        path: "/list/events",
+        name: "Events",
+        component: Events,
       },
     ],
   },

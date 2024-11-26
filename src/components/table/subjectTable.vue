@@ -27,11 +27,11 @@
 
         <td>
           <div class="flex items-center gap-2">
-            <router-link :to="`/list/teacher/${item?.id}`">
+            <router-link :to="`/list/subjects/${item?.id}`">
               <button
                 class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
               >
-                <img src="/view.png" alt="view" class="h-3 w-3" />
+                <img src="/edit.png" alt="view" class="h-3 w-3" />
               </button>
             </router-link>
 

@@ -25,11 +25,11 @@
 
         <td class="hidden md:table-cell">{{ item?.class }}</td>
         <td class="hidden md:table-cell">{{ item?.teacher }}</td>
-        <td class="hidden md:table-cell">{{ item?.date }}</td>
+        <td class="hidden md:table-cell">{{ item?.dueDate }}</td>
 
         <td>
           <div class="flex items-center gap-2">
-            <router-link :to="`/list/exams/${item?.id}`">
+            <router-link :to="`/list/assignments/${item?.id}`">
               <button
                 class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
               >
