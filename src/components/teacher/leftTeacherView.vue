@@ -11,8 +11,8 @@
     </div>
 
     <!-- bottom Section -->
-    <div class="mt-4  bg-white rounded-md p-2 h-[600px] ">
-      <h1 class="mt-4 mb-4">Teacher's Schedule</h1>
+    <div class="mt-4 mb-4 bg-white rounded-md p-2 h-[730px] cursor-pointer">
+      <h1 class="mt-4 mb-4 text-xl font-semibold">Teacher's Schedule</h1>
 
       <PlannerCard />
     </div>

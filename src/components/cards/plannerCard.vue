@@ -1,5 +1,5 @@
 <template>
-  <div class="fc-custom-theme w-full">
+  <div class="fc-custom-theme w-full cursor-pointer">
     <div class="w-full overflow-x-auto min-h-screen">
       <div class="w-full min-w-[768px] lg:min-w-0">
         <FullCalendar
