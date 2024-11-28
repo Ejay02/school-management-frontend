@@ -1,6 +1,5 @@
 <template>
-  <div class=" bg-[#F7F8FA] h-20">
-    <!-- w-[86%] md:w-[92%] lg:w-[84%] xl:w-[86%] bg-[#F7F8FA] -->
+  <div class="bg-[#F7F8FA] h-20">
     <div class="flex justify-between items-center p-4 cursor-pointer">
       <!-- left section-->
       <div
@@ -22,19 +21,21 @@
       <!-- right section -->
       <div class="flex items-center gap-6 justify-end w-full">
         <!-- msg -->
-        <div
-          class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer"
+        <router-link
+          to="/list/messages"
+          class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer hover:bg-eduPurple"
         >
           <img
             src="/message.png"
             alt="message icon"
             class="h-8 w-8 items-center p-2"
           />
-        </div>
+        </router-link>
 
         <!-- announcement -->
-        <div
-          class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer relative"
+        <router-link
+          to="/list/announcements"
+          class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer relative hover:bg-eduPurple"
         >
           <img
             src="/announcement.png"
@@ -47,12 +48,14 @@
           >
             12
           </div>
-        </div>
+        </router-link>
 
         <!-- user -->
         <div class="flex flex-col">
           <span class="text-sm leading-3 font-medium">Mandy Max</span>
-          <span class="text-[10px] text-gray-400 text-right">Admin</span>
+          <span class="text-[10px] text-gray-400 text-right capitalize">{{
+            role
+          }}</span>
         </div>
 
         <!-- avatar -->
@@ -68,6 +71,12 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { useUserStore } from "../store/userStore";
+
+const userStore = useUserStore();
+
+const role = userStore.currentRole;
+</script>
 
 <style scoped></style>

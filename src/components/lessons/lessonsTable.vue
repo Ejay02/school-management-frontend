@@ -38,6 +38,7 @@
 
             <button
               v-if="role == 'admin'"
+               @click="showDelModal(item.id, item.subject, 'lessonList')"
               class="w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
             >
               <img src="/delete.png" alt="delete" class="h-3 w-3" />
@@ -51,6 +52,7 @@
 
 <script setup>
 import { useUserStore } from "../../store/userStore";
+import { useModalStore } from "../../store/useModalStore";
 
 const props = defineProps({
   columns: {
@@ -66,6 +68,15 @@ const props = defineProps({
 const userStore = useUserStore();
 
 const role = userStore.currentRole;
+
+const modalStore = useModalStore();
+
+const showDelModal = (id, title, type) => {
+  modalStore.deleteModal = true;
+  modalStore.modalId = id;
+  modalStore.modalTitle = title;
+  modalStore.source = type;
+};
 </script>
 
 <style scoped></style>

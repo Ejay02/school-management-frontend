@@ -45,6 +45,7 @@
             </router-link>
 
             <button
+              @click="showDelModal(item.id, item.name, 'teacherList')"
               v-if="role == 'admin'"
               class="w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
             >
@@ -59,6 +60,7 @@
 
 <script setup>
 import { useUserStore } from "../../store/userStore";
+import { useModalStore } from "../../store/useModalStore";
 
 const props = defineProps({
   columns: {
@@ -72,8 +74,16 @@ const props = defineProps({
 });
 
 const userStore = useUserStore();
+const modalStore = useModalStore();
 
 const role = userStore.currentRole;
+
+const showDelModal = (id, title, type) => {
+  modalStore.deleteModal = true;
+  modalStore.modalId = id;
+  modalStore.modalTitle = title;
+  modalStore.source = type;
+};
 </script>
 
 <style scoped></style>
