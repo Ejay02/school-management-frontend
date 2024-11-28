@@ -18,7 +18,7 @@
             class="p-2 h-8 w-8 flex items-center justify-center rounded-full bg-eduYellow"
           />
         </button>
-        <button>
+        <button @click="showAddModal(`${url}`)">
           <img
             src="/plus.png"
             alt="filter icon"
@@ -31,7 +31,10 @@
 </template>
 
 <script setup>
+import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import TableSearch from "../tableSearch.vue";
+import { useModalStore } from "../../store/useModalStore";
 
 const props = defineProps({
   txt: {
@@ -39,6 +42,28 @@ const props = defineProps({
     required: true,
   },
 });
+
+const modalStore = useModalStore();
+
+const route = useRoute();
+
+const url = ref("");
+
+const extractUrlPath = () => {
+  // Use a regex to match the last word after the final slash
+  const match = route.path.match(/\/([^/]+)$/);
+  url.value = match ? match[1].toLowerCase() : "";
+};
+
+// Extract URL path when component is mounted
+onMounted(extractUrlPath);
+
+const showAddModal = (type) => {
+  modalStore.addModal = true;
+  // modalStore.modalId = id;
+  // modalStore.modalTitle = title;
+  modalStore.source = type;
+};
 </script>
 
 <style scoped></style>
