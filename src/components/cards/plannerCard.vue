@@ -1,14 +1,14 @@
 <template>
   <div class="fc-custom-theme w-full cursor-pointer">
-    <div class="w-full overflow-x-auto min-h-screen">
-      <div class="w-full min-w-[768px] lg:min-w-0">
-        <FullCalendar
-          ref="calendarRef"
-          :options="calendarOptions"
-          class="w-full"
-        />
-      </div>
+    <!-- <div class="w-full "> -->
+    <div class="w-full min-w-[768px] lg:min-w-0 overflow-x-auto min-h-screen">
+      <FullCalendar
+        ref="calendarRef"
+        :options="calendarOptions"
+        class="w-full"
+      />
     </div>
+    <!-- </div> -->
   </div>
 </template>
 
@@ -260,6 +260,4 @@ function handleEvents(events) {
   border-radius: 4px;
   border: none;
 }
-
-/* #CFCEFF */
 </style>

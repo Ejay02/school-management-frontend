@@ -31,17 +31,19 @@
 
         <td>
           <div class="flex items-center gap-2">
-            <router-link :to="`/list/results/${item?.id}`">
+            <div
+              @click="showEditModal(item.id, item.title, item, 'resultList')"
+            >
               <button
                 class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
               >
                 <img src="/edit.png" alt="view" class="h-3 w-3" />
               </button>
-            </router-link>
+            </div>
 
             <button
               v-if="role == 'admin'"
-               @click="showDelModal(item.id, item.subject, 'resultList')"
+              @click="showDelModal(item.id, item.subject, 'resultList')"
               class="w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
             >
               <img src="/delete.png" alt="delete" class="h-3 w-3" />
@@ -78,6 +80,14 @@ const showDelModal = (id, title, type) => {
   modalStore.deleteModal = true;
   modalStore.modalId = id;
   modalStore.modalTitle = title;
+  modalStore.source = type;
+};
+
+const showEditModal = (id, title, data, type) => {
+  modalStore.editModal = true;
+  modalStore.modalId = id;
+  modalStore.modalTitle = title;
+  modalStore.data = data;
   modalStore.source = type;
 };
 </script>

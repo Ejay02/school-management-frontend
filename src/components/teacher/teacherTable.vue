@@ -35,21 +35,50 @@
         <td class="hidden md:table-cell">{{ item?.phone }}</td>
         <td class="hidden md:table-cell">{{ item?.address }}</td>
         <td>
-          <div class="flex items-center gap-2">
-            <router-link :to="`/list/teachers/${item?.id}`">
+          <div class="flex items-center gap-2 relative">
+            <router-link
+              :to="`/list/teachers/${item?.id}`"
+              class="group relative"
+            >
               <button
                 class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
               >
                 <img src="/view.png" alt="view" class="h-3 w-3" />
               </button>
+              <span
+                class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex"
+              >
+                View
+              </span>
             </router-link>
 
+            <div
+              class="group relative"
+              @click="showEditModal(item.id, item.title, item, 'teacherList')"
+            >
+              <button
+                class="w-6 h-6 flex items-center justify-center rounded-full bg-eduYellow"
+              >
+                <img src="/edit.png" alt="view" class="h-3 w-3" />
+              </button>
+              <span
+                class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+              >
+                Edit
+              </span>
+            </div>
+
             <button
-              @click="showDelModal(item.id, item.name, 'teacherList')"
               v-if="role == 'admin'"
-              class="w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
+              @click="showDelModal(item.id, item.name, 'teacherList')"
+              class="group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
             >
               <img src="/delete.png" alt="delete" class="h-3 w-3" />
+              <span
+                class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+              >
+                Delete
+              </span>
             </button>
           </div>
         </td>
@@ -80,6 +109,21 @@ const role = userStore.currentRole;
 
 const showDelModal = (id, title, type) => {
   modalStore.deleteModal = true;
+  modalStore.modalId = id;
+  modalStore.modalTitle = title;
+  modalStore.source = type;
+};
+
+const showEditModal = (id, title, data, type) => {
+  modalStore.editModal = true;
+  modalStore.modalId = id;
+  modalStore.modalTitle = title;
+  modalStore.data = data;
+  modalStore.source = type;
+};
+
+const showAddModal = (id, title, type) => {
+  modalStore.addModal = true;
   modalStore.modalId = id;
   modalStore.modalTitle = title;
   modalStore.source = type;

@@ -23,19 +23,22 @@
             <div class="text-xs text-gray-400">{{ item?.email }}</div>
           </div>
         </td>
+
         <td class="hidden md:table-cell">{{ item?.students.join(", ") }}</td>
 
         <td class="hidden md:table-cell">{{ item?.phone }}</td>
         <td class="hidden md:table-cell">{{ item?.address }}</td>
         <td>
           <div class="flex items-center gap-2">
-            <router-link :to="`/list/parents/${item?.id}`">
+            <div
+              @click="showEditModal(item.id, item.title, item, 'parentList')"
+            >
               <button
                 class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
               >
                 <img src="/edit.png" alt="view" class="h-3 w-3" />
               </button>
-            </router-link>
+            </div>
 
             <button
               v-if="role == 'admin'"
@@ -76,6 +79,14 @@ const showDelModal = (id, title, type) => {
   modalStore.deleteModal = true;
   modalStore.modalId = id;
   modalStore.modalTitle = title;
+  modalStore.source = type;
+};
+
+const showEditModal = (id, title, data, type) => {
+  modalStore.editModal = true;
+  modalStore.modalId = id;
+  modalStore.modalTitle = title;
+  modalStore.data = data;
   modalStore.source = type;
 };
 </script>
