@@ -31,21 +31,32 @@
         <td>
           <div class="flex items-center gap-2">
             <div
+              class="group relative"
               @click="showEditModal(item.id, item.title, item, 'parentList')"
             >
               <button
                 class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
               >
                 <img src="/edit.png" alt="view" class="h-3 w-3" />
+                <span
+                  class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                >
+                  Edit
+                </span>
               </button>
             </div>
 
             <button
               v-if="role == 'admin'"
               @click="showDelModal(item.id, item.name, 'parentList')"
-              class="w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
+              class="group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
             >
               <img src="/delete.png" alt="delete" class="h-3 w-3" />
+              <span
+                class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+              >
+                Delete
+              </span>
             </button>
           </div>
         </td>
