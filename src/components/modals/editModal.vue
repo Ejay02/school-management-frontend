@@ -90,6 +90,85 @@
           />
         </template>
 
+        <!-- teacher card -->
+        <template v-if="source === 'teacherCard'">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Name</label
+            >
+
+            <input
+              v-model="name"
+              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Photo</label
+            >
+            <input
+              v-model="data.photo"
+              type="email"
+              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Description</label
+            >
+            <input
+              v-model="data.description"
+              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </div>
+
+          <div class="flex gap-2">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Email</label
+              >
+              <input
+                v-model="transformedData.email"
+                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Birthday</label
+              >
+              <input
+                v-model="transformedData.date"
+                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Blood Group</label
+              >
+              <input
+                v-model="transformedData.bloodgroup"
+                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Phone</label
+              >
+              <input
+                v-model="transformedData.phone"
+                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+        </template>
+
         <!-- student List -->
         <template v-if="source === 'studentList'">
           <div>
@@ -155,7 +234,7 @@
             class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           />
         </template>
-        
+
         <!-- parent list -->
         <template v-if="source === 'parentList'">
           <div>
@@ -578,6 +657,20 @@ const title = ref(modalStore.modalTitle);
 const source = ref(modalStore.source);
 const data = ref(modalStore.data);
 
+const transformedData = ref({});
+
+// watch(
+//   data,
+//   (newValue) => {
+//     const transformed = {};
+//     newValue.forEach((item) => {
+//       transformed[item.label.toLowerCase().replace(/\s+/g, "")] = item.value;
+//     });
+//     transformedData.value = transformed;
+//   },
+//   { immediate: true }
+// );
+
 // Watchers to sync with modal store
 watch(
   () => modalStore.editModal,
@@ -623,6 +716,8 @@ const handleEdit = async () => {
   try {
     if (source.value === "teacherList") {
       console.log("hello from teachers");
+    } else if (source.value === "teacherCard") {
+      console.log("hello from teacherCard");
     } else if (source.value === "studentList") {
       console.log("hello from students");
     } else if (source.value === "parentList") {

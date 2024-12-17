@@ -161,8 +161,22 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore();
   const isAuthenticated = userStore.userInfo.id !== null; // Assuming null id means not authenticated
+
   const requiredRole = to.meta.role;
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+
+  // Handle root path and authentication
+  if (to.path === "/") {
+    if (isAuthenticated || !isAuthenticated) {
+      // If authenticated, redirect to role-specific dashboard
+      const userRole = userStore.currentRole.toLowerCase();
+      next(`/dashboard/${userRole}`);
+      return;
+    }
+    // If not authenticated, proceed to home or login
+    next();
+    return;
+  }
 
   // Allow access to public routes
   if (publicRoutes.includes(to.name)) {

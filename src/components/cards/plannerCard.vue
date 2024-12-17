@@ -1,7 +1,9 @@
 <template>
   <div class="fc-custom-theme w-full cursor-pointer">
     <!-- <div class="w-full "> -->
-    <div class="w-full min-w-[768px] lg:min-w-0 overflow-x-auto min-h-screen">
+    <div
+      class="w-full min-w-[768px] lg:min-w-0 overflow-x-auto min-h-screen h-[700px]"
+    >
       <FullCalendar
         ref="calendarRef"
         :options="calendarOptions"
@@ -248,6 +250,7 @@ function handleEvents(events) {
 }
 
 .fc-popover-body {
+  background-color: #edf9fd !important;
   padding: 8px;
 }
 

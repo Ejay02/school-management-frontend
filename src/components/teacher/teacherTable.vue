@@ -122,12 +122,12 @@ const showEditModal = (id, title, data, type) => {
   modalStore.source = type;
 };
 
-const showAddModal = (id, title, type) => {
-  modalStore.addModal = true;
-  modalStore.modalId = id;
-  modalStore.modalTitle = title;
-  modalStore.source = type;
-};
+// const showAddModal = (id, title, type) => {
+//   modalStore.addModal = true;
+//   modalStore.modalId = id;
+//   modalStore.modalTitle = title;
+//   modalStore.source = type;
+// };
 </script>
 
 <style scoped></style>

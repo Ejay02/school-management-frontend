@@ -6,11 +6,11 @@
     :key="isModalVisible"
   >
     <div
-      class="bg-white cursor-pointer rounded-md w-96 h-auto mt-4 shadow-md overflow-auto"
+      class="bg-white cursor-pointer rounded-md w-96 h-auto mt-4 shadow-md overflow-y-auto"
     >
       <div class="bg-eduPurple text-white p-4">
         <h3 class="text-xl font-medium capitalize items-center text-center">
-          Add {{ source }}
+          Add New {{ source }}
         </h3>
       </div>
 
@@ -39,17 +39,50 @@
             </div>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Photo</label
-            >
-            <input
-              v-model="photo"
-              type="email"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
+          <div class="flex gap-2">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Birthday</label
+              >
+              <input
+                type="date"
+                v-model="birthday"
+                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Blood Group</label
+              >
+              <input
+                type="text"
+                v-model="bloodGroup"
+                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+            </div>
           </div>
 
+          <div class="flex gap-2 justify-between">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Image</label
+              >
+              <input
+                type="file"
+                accept=".jpg, .png, .jpeg"
+                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+            </div>
+            <div class="">
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Address</label
+              >
+              <input
+                v-model="address"
+                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+            </div>
+          </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
               >Subjects</label
@@ -80,14 +113,6 @@
               />
             </div>
           </div>
-
-          <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Address</label
-          >
-          <input
-            v-model="address"
-            class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          />
         </template>
 
         <!-- student List -->
@@ -593,6 +618,8 @@ const student = ref("");
 const address = ref("");
 const date = ref("");
 const dueDate = ref("");
+const birthday = ref("");
+const bloodGroup = ref("");
 
 const startTime = ref("");
 const endTime = ref("");
