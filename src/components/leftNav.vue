@@ -1,5 +1,5 @@
 <template>
-  <div class="w-[14%] md:w-[8%] lg:w-[16%] xl:w-[14%]">
+  <div class="w-[14%] md:w-[8%] lg:w-[16%] xl:w-[14%] bg-gray-200">
     <router-link to="/" class="flex items-center lg:justify-start gap-2 p-2">
       <img
         src="/edu.png"
@@ -10,9 +10,9 @@
     </router-link>
     <menu class="m-4 text-sm">
       <ul v-for="menuItem in filteredMenuItems" :key="menuItem?.title" class="">
-        <li class="flex flex-col gap-2 text-gray-400 text-left">
+        <!-- <li class="flex flex-col gap-2 text-gray-400 text-left">
           {{ menuItem?.title }}
-        </li>
+        </li> -->
         <li v-for="item in menuItem?.items" :key="item?.label" class="mb-2">
           <router-link
             :to="item?.href || '/'"

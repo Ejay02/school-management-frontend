@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-2xl odd:bg-eduPurple even:bg-eduYellow p-4 flex-1">
+  <div class="cursor-pointer rounded-2xl odd:bg-eduPurple even:bg-eduYellow p-4 flex-1">
     <div class="flex justify-between items-center text-xs">
       <span class="text-[10px] bg-white px-2 py-1 rounded-full text-green-600"
         >2024/25</span
@@ -14,7 +14,7 @@
 <script setup>
 import { computed, ref } from "vue";
 
-const type = ref("teacher");
+const type = ref("");
 
 const userType = computed(() => {
   switch (type.value) {

@@ -29,11 +29,11 @@ import Announcements from "../components/announcements/announcements.vue";
 const publicRoutes = ["Home", "Login", "Signup"];
 
 const routes = [
-  // {
-  //   path: "/",
-  //   name: "Home",
-  //   component: Home,
-  // },
+  {
+    path: "/home",
+    name: "Home",
+    component: Home,
+  },
   {
     path: "/login",
     name: "Login",
