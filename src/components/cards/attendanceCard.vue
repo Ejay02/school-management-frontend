@@ -1,8 +1,23 @@
 <template>
-  <div class="bg-white rounded-lg p-4 h-full">
+  <div class="bg-white rounded-lg p-4 h-full cursor-pointer">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-lg font-semibold">Attendance</h1>
-      <img src="/moreDark.png" alt="more icon" class="h-5 w-5" />
+      <div class="">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="size-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"
+          />
+        </svg>
+      </div>
     </div>
 
     <!-- chart -->

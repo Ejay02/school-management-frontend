@@ -10,7 +10,22 @@
 
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-lg font-semibold">Events</h1>
-      <img src="/moreDark.png" alt="more icon" class="h-5 w-5" />
+      <div class="">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="size-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"
+          />
+        </svg>
+      </div>
     </div>
 
     <div class="flex flex-col gap-4">
@@ -33,15 +48,18 @@
             event.description
           }}</span>
           <span
-            class="items-end text-[10px] rounded-full p-2 cursor-pointer"
-            :class="
-              event.isComplete
-                ? 'bg-green-300 text-green-500 '
-                : 'bg-eduYellow text-yellow-500'
-            "
+            class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+            :class="{
+              'text-green-700 bg-green-50 ring-green-600/20':
+                event.status === 'completed',
+              'bg-yellow-50 text-yellow-800 ring-yellow-600/20':
+                event.status === 'scheduled',
+              'bg-red-50 text-red-700 ring-red-600/10':
+                event.status === 'cancelled',
+            }"
           >
-            {{ event.isComplete ? "complete" : "pending" }}
-          </span>
+            {{ event.status }}</span
+          >
         </div>
       </div>
     </div>
@@ -59,7 +77,7 @@ const todos = ref([
     id: 1,
     title: "learn",
     description: "DSA practice.",
-    isComplete: false,
+    status: "completed",
     startTime: "11:11AM",
     endTime: "12:12PM",
     dates: { repeat: { weekdays: 5 } }, // Every Friday
@@ -69,7 +87,7 @@ const todos = ref([
     id: 2,
     title: "cook",
     description: "Cook friedrice",
-    isComplete: false,
+    status: "cancelled",
     dates: Date.now(), //Should be selected date so a vmodel
     // dates: { repeat: { weekdays: 1 } },
     color: "green",
@@ -80,7 +98,7 @@ const todos = ref([
     id: 3,
     title: "school",
     description: "Submit thesis",
-    isComplete: true,
+    status: "scheduled",
     dates: "2024, 11, 20", //Should be selected date so a vmodel
     // dates: { repeat: { weekdays: 1 } },
     color: "blue",

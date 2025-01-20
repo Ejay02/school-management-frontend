@@ -37,14 +37,14 @@
         <div
           v-for="(detail, index) in details"
           :key="index"
-          class="w-full md:w-1/3 lg:w-1/3 2xl:w-1/3 flex items-center gap-1"
+          class="w-full md:w-1/3 lg:w-1/3 2xl:w-1/3 flex items-center"
         >
           <img
             :src="detail.icon"
             :alt="`${detail.label} icon`"
             class="h-3 w-3"
           />
-          <span class=""> {{ detail.value || "NA" }}</span>
+          <span class="flex text-xs ml-2"> {{ detail.value || "NA" }}</span>
         </div>
       </div>
     </div>

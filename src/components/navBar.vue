@@ -1,7 +1,7 @@
 <template>
   <div class="bg-[#F7F8FA] h-20 rounded border border-gray-300 m-4 mb-0">
     <div class="flex justify-between items-center p-2 cursor-pointer">
-      <!-- left section-->
+      <!-- left section stays the same -->
       <div
         class="ml-2 hidden md:flex justify-center rounded-full text-xs gap-2 bg-white cursor-pointer items-center ring-[1.5px] ring-gray-300 px-2"
       >
@@ -19,23 +19,34 @@
       </div>
 
       <!-- right section -->
-      <div class="flex items-center gap-6 justify-end w-full">
+      <div class="flex items-center gap-6 justify-end w-full text-center">
         <!-- msg -->
         <router-link
           to="/list/messages"
-          class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer hover:bg-eduPurple"
+          class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer hover:bg-eduSky"
         >
-          <img
-            src="/message.png"
-            alt="message icon"
-            class="h-8 w-8 items-center p-2"
-          />
+          <div class="">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="h-8 w-8 items-center p-2 hover:text-purple-500 text-gray-400"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"
+              />
+            </svg>
+          </div>
         </router-link>
 
         <!-- announcement -->
         <router-link
           to="/list/announcements"
-          class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer relative hover:bg-eduPurple"
+          class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer relative hover:bg-eduSky"
         >
           <img
             src="/announcement.png"
@@ -44,7 +55,7 @@
           />
           <!-- counter -->
           <div
-            class="absolute -top-3 -right-3 w-5 h-5 flex items-center justify-center bg-purple-500 text-white rounded-full text-xs"
+            class="absolute -top-3 -right-3 w-5 h-5 flex items-center justify-center bg-eduPurple text-white rounded-full text-xs font-medium"
           >
             12
           </div>
@@ -58,15 +69,13 @@
           }}</span>
         </div>
 
-        <!-- avatar -->
+        <!-- Here's the fixed avatar section -->
         <div class="" @click="toggleDropdown">
-          <img
-            src="/avatar.png"
-            alt="avatar"
-            class="h-14 w-14 items-center p-2 rounded-full"
-          />
-          <!-- Dropdown -->
-
+          <div
+            class="h-14 w-14 rounded-full bg-eduPurple flex items-center justify-center text-white font-medium"
+          >
+            JS
+          </div>
           <ProfileDropdown v-if="showDropdown" />
         </div>
       </div>
@@ -80,13 +89,9 @@ import { useUserStore } from "../store/userStore";
 import ProfileDropdown from "./dropdown/profileDropdown.vue";
 
 const userStore = useUserStore();
-
 const role = userStore.currentRole;
-
 const showDropdown = ref(false);
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value;
 };
 </script>
-
-<style scoped></style>

@@ -5,30 +5,30 @@
   >
     <!-- Profile -->
     <div
-      class="flex items-center gap-3 p-2 border-b border-gray-300 hover:bg-eduPurpleLight rounded-md group"
+      class="flex items-center gap-3 p-2 border-b border-gray-300 hover:bg-eduSky rounded-md group"
     >
       <div
-        class="flex items-center justify-center rounded-full border bg-eduPurple w-10 h-10"
+        class="flex items-center justify-center rounded-full border bg-indigo-300 w-10 h-10"
       >
         <span class="text-sm font-medium text-white">JS</span>
       </div>
       <div>
         <span
-          class="text-sm font-medium text-gray-800 group-hover:text-indigo-500"
+          class="text-xs font-medium text-gray-800 group-hover:text-indigo-500 mb-0"
         >
           James Smith
         </span>
         <br />
-        <span class="text-xs text-gray-400 group-hover:text-indigo-500 block">
-          Admin@hello.com
-        </span>
+        <span class="text-xs text-gray-400 group-hover:text-indigo-500"
+          >Admin@hello.com</span
+        >
       </div>
     </div>
 
     <!-- Settings -->
     <router-link
       to="/settings"
-      class="flex items-center gap-3 p-2 border-b border-gray-300 hover:bg-indigo-100 rounded-md group"
+      class="flex items-center gap-3 p-2 border-b border-gray-300 hover:bg-eduSky rounded-md group"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -56,7 +56,7 @@
 
     <!-- Logout -->
     <div
-      class="flex items-center gap-3 p-2 hover:bg-indigo-100 rounded-md cursor-pointer group"
+      class="flex items-center gap-3 p-2 hover:bg-eduSky rounded-md cursor-pointer group"
       @click="logout"
     >
       <svg

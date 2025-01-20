@@ -1,12 +1,29 @@
 <template>
-  <div class="bg-white rounded-xl w-full h-full p-4">
+  <div class="bg-white cursor-pointer rounded-xl w-full h-full p-4">
     <!-- title -->
-    <div class="flex justify-between items-center ">
+    <div class="flex justify-between items-center">
       <h1 class="text-lg font-semibold">Students</h1>
-      <img src="/moreDark.png" alt="more icon" class="h-5 w-5" />
+      <div class="">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="size-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"
+          />
+        </svg>
+      </div>
     </div>
     <!-- chart -->
-    <div class="w-full h-[65%] flex justify-center items-center mb-2 p-2 relative">
+    <div
+      class="w-full h-[65%] flex justify-center items-center mb-2 p-2 relative"
+    >
       <canvas ref="radialChartCanvas"></canvas>
       <img
         src="/maleFemale.png"

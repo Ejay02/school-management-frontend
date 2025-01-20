@@ -11,6 +11,7 @@ import ParentLayout from "../views/layout/parentLayout.vue";
 import TeacherLayout from "../views/layout/teacherLayout.vue";
 import StudentLayout from "../views/layout/studentLayout.vue";
 
+import Settings from "../views/settings.vue";
 import Exams from "../components/exams/exams.vue";
 import Events from "../components/events/events.vue";
 import Classes from "../components/classes/classes.vue";
@@ -24,6 +25,7 @@ import TeacherView from "../components/teacher/teacherView.vue";
 import StudentView from "../components/students/studentView.vue";
 import Assignments from "../components/assignments/assignments.vue";
 import Announcements from "../components/announcements/announcements.vue";
+import Messages from "../components/messages/messages.vue";
 
 // Define public routes that don't require authentication
 const publicRoutes = ["Home", "Login", "Signup"];
@@ -135,9 +137,19 @@ const routes = [
         component: Events,
       },
       {
+        path: "/list/messages",
+        name: "Messages",
+        component: Messages,
+      },
+      {
         path: "/list/announcements",
         name: "Announcements",
         component: Announcements,
+      },
+      {
+        path: "/settings",
+        name: "Settings",
+        component: Settings,
       },
     ],
   },

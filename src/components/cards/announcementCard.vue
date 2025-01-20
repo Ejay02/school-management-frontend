@@ -2,7 +2,9 @@
   <div class="p-4 bg-white rounded-lg shadow-lg cursor-pointer">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-lg font-semibold">Announcements</h1>
-      <span class="text-gray-400 text-xs">View All</span>
+      <router-link to="/list/announcements" class="text-gray-400 text-xs"
+        >View All</router-link
+      >
     </div>
 
     <div class="flex flex-col gap-4">
@@ -12,17 +14,17 @@
         :key="announce?.id"
       >
         <div class="flex items-center justify-between mb-2">
-          <h1 class="font-medium text-gray-600 capitalize text-sm">
+          <h1 class="font-medium text-gray-600 capitalize text-xs">
             {{ announce?.title }}
           </h1>
           <span
-            class="text-gray-300 text-[10px] bg-white rounded-md px-[2px] py-[2px]"
+            class="text-[10px] bg-gray-50 rounded-md px-1 py-1 inline-flex items-center font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
             >{{ announce?.date }}</span
           >
         </div>
 
         <div class="mt-2">
-          <span class="text-gray-400 text-sm line-clamp-2">{{
+          <span class="text-gray-400 line-clamp-2 text-xs">{{
             announce?.description
           }}</span>
         </div>
