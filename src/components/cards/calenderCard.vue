@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 bg-white mt-4 rounded-lg shadow-lg cursor-pointer">
+  <div class="p-4 bg-white mt-1 mb-2 rounded-lg shadow-lg cursor-pointer">
     <VCalendar
       :color="selectedColor"
       :attributes="attrs"

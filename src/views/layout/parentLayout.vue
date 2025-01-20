@@ -1,5 +1,6 @@
 <template>
-  <div class="gap-4 flex-col xl:flex-row w-full mt-4">
+    <div class="rounded border-l border-t border-b border-gray-300 p-2 w-full">
+  <div class="gap-4 flex-col xl:flex-row w-full mt-1">
     <div class="">
       <div class="w-full xl:w-2/3">
         <div class="h-full bg-white p-4 rounded-md w-full">
@@ -12,6 +13,7 @@
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <script setup>

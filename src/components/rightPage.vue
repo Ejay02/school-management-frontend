@@ -1,7 +1,10 @@
 <template>
   <div class="w-full lg:w-1/3 flex flex-col gap-8">
-    <CalenderCard />
-    <AnnouncementCard />
+    <!-- <div class="rounded border border-gray-300 p-2 w-full"> -->
+    <div class="rounded border-r border-t border-b border-gray-300 p-2 w-full">
+      <CalenderCard />
+      <AnnouncementCard />
+    </div>
   </div>
 </template>
 
