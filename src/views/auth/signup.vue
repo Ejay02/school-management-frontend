@@ -11,7 +11,7 @@
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="mx-auto h-10 w-auto text-purple-500"
+          class="mx-auto h-10 w-auto text-indigo-500"
         >
           <path
             stroke-linecap="round"
@@ -21,7 +21,7 @@
         </svg>
 
         <h2
-          class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900"
+          class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-800"
         >
           Create your account
         </h2>
@@ -31,7 +31,7 @@
         <form class="space-y-6" action="#" method="POST">
           <!-- Username -->
           <div>
-            <label for="email" class="block text-sm/6 font-medium text-gray-900"
+            <label for="email" class="block text-sm/6 font-medium text-gray-800"
               >Username</label
             >
             <div class="mt-2">
@@ -40,14 +40,15 @@
                 name="email"
                 id="email"
                 autocomplete="email"
+                placeholder="janebond007"
                 required
-                class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               />
             </div>
           </div>
           <!-- Email -->
           <div>
-            <label for="email" class="block text-sm/6 font-medium text-gray-900"
+            <label for="email" class="block text-sm/6 font-medium text-gray-800"
               >Email address</label
             >
             <div class="mt-2">
@@ -57,7 +58,8 @@
                 id="email"
                 autocomplete="email"
                 required
-                class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                placeholder="janebond@007.com"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               />
             </div>
           </div>
@@ -67,7 +69,7 @@
             <div class="flex items-center justify-between">
               <label
                 for="password"
-                class="block text-sm/6 font-medium text-gray-900"
+                class="block text-sm/6 font-medium text-gray-800"
                 >Password</label
               >
             </div>
@@ -77,8 +79,9 @@
                 name="password"
                 id="password"
                 autocomplete="current-password"
+                placeholder="my-super-secret-password"
                 required
-                class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               />
             </div>
           </div>
