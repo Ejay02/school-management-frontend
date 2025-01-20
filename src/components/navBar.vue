@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-[#F7F8FA] h-20 rounded border border-gray-300 m-4">
+  <div class="bg-[#F7F8FA] h-20 rounded border border-gray-300 m-4 mb-0">
     <div class="flex justify-between items-center p-2 cursor-pointer">
       <!-- left section-->
       <div

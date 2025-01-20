@@ -1,15 +1,18 @@
 <template>
-  <div class="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-    <!-- top -->
-    <TopList :txt="'All Classes'" />
+  <div class="rounded border border-gray-300 p-2 w-full">
+    <div class="bg-white p-4 rounded-md flex-1 m-1 mt-0 shadow-xl">
+      <!-- top -->
+      <div class="border-b p-4">
+        <TopList :txt="'All Classes'" />
+      </div>
+      <!-- list -->
+      <div class="">
+        <ClassesTable :columns="columns" :data="classesData" />
+      </div>
 
-    <!-- list -->
-    <div class="">
-      <ClassesTable :columns="columns" :data="classesData" />
+      <!-- pagination -->
+      <Pagination />
     </div>
-
-    <!-- pagination -->
-    <Pagination />
   </div>
 </template>
 
