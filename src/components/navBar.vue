@@ -59,12 +59,15 @@
         </div>
 
         <!-- avatar -->
-        <div class="">
+        <div class="" @click="toggleDropdown">
           <img
             src="/avatar.png"
             alt="avatar"
             class="h-14 w-14 items-center p-2 rounded-full"
           />
+          <!-- Dropdown -->
+
+          <ProfileDropdown v-if="showDropdown" />
         </div>
       </div>
     </div>
@@ -72,11 +75,18 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
 import { useUserStore } from "../store/userStore";
+import ProfileDropdown from "./dropdown/profileDropdown.vue";
 
 const userStore = useUserStore();
 
 const role = userStore.currentRole;
+
+const showDropdown = ref(false);
+const toggleDropdown = () => {
+  showDropdown.value = !showDropdown.value;
+};
 </script>
 
 <style scoped></style>

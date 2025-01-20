@@ -1,17 +1,19 @@
 <template>
-  <div class="flex-1 p-4 flex flex-col md:flex-row gap-4">
-    <div class="w-full md:w-2/3">
-      <LeftSingleView
-        :heading="`Student's Schedule`"
-        :infoCards="studentInfoCards"
-        :profileImage="'https://images.pexels.com/photos/1102341/pexels-photo-1102341.jpeg?auto=compress&cs=tinysrgb&w=1200'"
-        :name="'Rain Xazi'"
-        :description="'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam, accusantium?'"
-        :details="studentDetails"
-      />
-    </div>
-    <div class="w-full md:w-1/3">
-      <RightSingleView :shortcuts="studentShortcuts" />
+  <div class="rounded border border-gray-300 p-2 w-full">
+    <div class="flex-1 flex flex-col md:flex-row gap-4">
+      <div class="w-full md:w-2/3">
+        <LeftSingleView
+          :heading="`Student's Schedule`"
+          :infoCards="studentInfoCards"
+          :profileImage="'https://images.pexels.com/photos/1102341/pexels-photo-1102341.jpeg?auto=compress&cs=tinysrgb&w=1200'"
+          :name="'Rain Xazi'"
+          :description="'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam, accusantium?'"
+          :details="studentDetails"
+        />
+      </div>
+      <div class="w-full md:w-1/3">
+        <RightSingleView :shortcuts="studentShortcuts" />
+      </div>
     </div>
   </div>
 </template>

@@ -1,17 +1,19 @@
 <template>
-  <div class="flex-1 p-4 flex flex-col md:flex-row gap-4">
-    <div class="w-full md:w-2/3">
-      <LeftSingleView
-        :heading="`Teacher's Schedule`"
-        :infoCards="teacherInfoCards"
-        :profileImage="'https://images.pexels.com/photos/2888150/pexels-photo-2888150.jpeg?auto=compress&cs=tinysrgb&w=1200'"
-        :name="'Didi Gobbler'"
-        :description="'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam, accusantium?'"
-        :details="teacherDetails"
-      />
-    </div>
-    <div class="w-full md:w-1/3">
-      <RightSingleView :shortcuts="teacherShortcuts" />
+  <div class="rounded border border-gray-300 p-2 w-full">
+    <div class="flex-1 flex flex-col md:flex-row gap-4">
+      <div class="w-full md:w-2/3">
+        <LeftSingleView
+          :heading="`Teacher's Schedule`"
+          :infoCards="teacherInfoCards"
+          :profileImage="'https://images.pexels.com/photos/2888150/pexels-photo-2888150.jpeg?auto=compress&cs=tinysrgb&w=1200'"
+          :name="'Didi Gobbler'"
+          :description="'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam, accusantium?'"
+          :details="teacherDetails"
+        />
+      </div>
+      <div class="w-full md:w-1/3">
+        <RightSingleView :shortcuts="teacherShortcuts" />
+      </div>
     </div>
   </div>
 </template>
