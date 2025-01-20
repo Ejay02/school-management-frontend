@@ -1,5 +1,6 @@
 <template>
-  <div class="bg-[#F7F8FA] h-20">
+  <!-- <div class="bg-[#F7F8FA] h-20"> -->
+  <div class="bg-gray-200 h-20">
     <div class="flex justify-between items-center p-4 cursor-pointer">
       <!-- left section-->
       <div

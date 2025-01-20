@@ -101,7 +101,7 @@
     <!-- Right Section -->
     <div class="right hidden lg:block lg:w-1/2 h-screen">
       <img
-        src="/public/kimberly-farmer-lUaaKCUANVI-unsplash.jpg"
+        src="/kimberly-farmer-lUaaKCUANVI-unsplash.jpg"
         alt="Background Image"
         class="h-full w-full object-cover"
       />
