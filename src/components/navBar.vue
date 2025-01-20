@@ -1,10 +1,9 @@
 <template>
-  <!-- <div class="bg-[#F7F8FA] h-20"> -->
-  <div class="bg-gray-200 h-20">
-    <div class="flex justify-between items-center p-4 cursor-pointer">
+  <div class="bg-[#F7F8FA] h-20 rounded border border-gray-300 m-4">
+    <div class="flex justify-between items-center p-2 cursor-pointer">
       <!-- left section-->
       <div
-        class="hidden md:flex justify-center rounded-full text-xs gap-2 bg-white cursor-pointer items-center ring-[1.5px] ring-gray-300 px-2"
+        class="ml-2 hidden md:flex justify-center rounded-full text-xs gap-2 bg-white cursor-pointer items-center ring-[1.5px] ring-gray-300 px-2"
       >
         <img
           src="/search.png"

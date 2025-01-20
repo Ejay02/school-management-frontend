@@ -23,7 +23,7 @@
       /> -->
       <span class="hidden lg:block text-sm font-bold">EduHub Portal</span>
     </router-link>
-    <menu class="m-4 text-sm">
+    <menu class="m-2 text-sm">
       <ul v-for="menuItem in filteredMenuItems" :key="menuItem?.title" class="">
         <li v-for="item in menuItem?.items" :key="item?.label" class="mb-2">
           <router-link

@@ -20,11 +20,6 @@
           />
         </svg>
 
-        <!-- <img
-          class="mx-auto h-10 w-auto"
-          src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
-          alt="Your Company"
-        /> -->
         <h2
           class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900"
         >
@@ -75,13 +70,6 @@
                 class="block text-sm/6 font-medium text-gray-900"
                 >Password</label
               >
-              <div class="text-sm">
-                <a
-                  href="#"
-                  class="font-semibold text-indigo-600 hover:text-indigo-500"
-                  >Forgot password?</a
-                >
-              </div>
             </div>
             <div class="mt-2">
               <input
@@ -106,11 +94,11 @@
         </form>
 
         <p class="mt-10 text-center text-sm/6 text-gray-500">
-          Already a member?
+          Already have an account?
           <router-link
             to="/login"
             class="font-semibold text-indigo-600 hover:text-indigo-500"
-            >Sign in</router-link
+            >Log in</router-link
           >
         </p>
       </div>

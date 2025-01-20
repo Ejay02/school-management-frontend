@@ -4,6 +4,7 @@
     <LeftNav />
 
     <!-- right -->
+     <!-- border border-gray-300 -->
     <div class="w-full">
       <RightNav />
     </div>
