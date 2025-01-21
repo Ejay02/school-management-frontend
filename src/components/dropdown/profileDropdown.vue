@@ -1,3 +1,4 @@
+import { useRoute } from 'vue-router';
 <template>
   <div
     class="absolute top-20 right-4 bg-white shadow-md rounded-md w-56 p-3 z-50"
@@ -81,7 +82,11 @@
 </template>
 
 <script setup>
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 const logout = () => {
+  router.push("/");
   console.log("Logged out");
 };
 </script>

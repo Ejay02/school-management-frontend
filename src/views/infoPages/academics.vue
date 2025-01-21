@@ -401,6 +401,4 @@
   </div>
 </template>
 
-<script setup>
-// You can add any required functionality here
-</script>
+<script setup></script>

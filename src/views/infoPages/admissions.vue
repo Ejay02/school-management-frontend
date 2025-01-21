@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-eduSky">
+  <div class="min-h-screen bg-eduSkyLight">
     <!-- Hero Section -->
     <div class="relative bg-eduPurpleLight py-16">
       <div class="absolute inset-0">
@@ -42,7 +42,7 @@
         <h2 class="text-3xl font-bold text-gray-600 mb-8 text-center">
           Admissions Process
         </h2>
-        <div class="relative">
+        <div class="relative flex flex-col items-center">
           <!-- Timeline Line -->
           <div
             class="hidden md:block absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-eduPurple"
@@ -200,21 +200,21 @@
     </section>
 
     <!-- Requirements -->
-    <section class="py-16 bg-gray-100">
+    <section class="py-16 bg-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-gray-900 mb-8">
+        <h2 class="text-3xl font-bold text-gray-600 mb-8 text-center">
           Application Requirements
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <!-- Primary School -->
-          <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-900 mb-4">
-              Primary School (Grades 1-6)
+          <div class="bg-eduYellowLight p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold text-gray-600 mb-4">
+              Primary School (Primary 1-6)
             </h3>
             <ul class="space-y-3">
               <li class="flex items-start">
                 <svg
-                  class="h-5 w-5 text-blue-600 mt-1 mr-2"
+                  class="h-5 w-5 text-eduPurple mt-1 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -226,11 +226,11 @@
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span class="text-gray-600">Previous school records</span>
+                <span class="text-gray-500">Previous school records</span>
               </li>
               <li class="flex items-start">
                 <svg
-                  class="h-5 w-5 text-blue-600 mt-1 mr-2"
+                  class="h-5 w-5 text-eduPurple mt-1 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -242,11 +242,11 @@
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span class="text-gray-600">Teacher recommendation</span>
+                <span class="text-gray-500">Teacher recommendation</span>
               </li>
               <li class="flex items-start">
                 <svg
-                  class="h-5 w-5 text-blue-600 mt-1 mr-2"
+                  class="h-5 w-5 text-eduPurple mt-1 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -258,11 +258,11 @@
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span class="text-gray-600">Birth certificate</span>
+                <span class="text-gray-500">Birth certificate</span>
               </li>
               <li class="flex items-start">
                 <svg
-                  class="h-5 w-5 text-blue-600 mt-1 mr-2"
+                  class="h-5 w-5 text-eduPurple mt-1 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -274,20 +274,20 @@
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span class="text-gray-600">Health records</span>
+                <span class="text-gray-500">Health records</span>
               </li>
             </ul>
           </div>
 
           <!-- Secondary School -->
-          <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-900 mb-4">
-              Secondary School (Grades 7-12)
+          <div class="bg-eduYellowLight p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold text-gray-600 mb-4">
+              Secondary School (JSS 1-SSS 3)
             </h3>
             <ul class="space-y-3">
               <li class="flex items-start">
                 <svg
-                  class="h-5 w-5 text-blue-600 mt-1 mr-2"
+                  class="h-5 w-5 text-eduPurple mt-1 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -299,13 +299,13 @@
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span class="text-gray-600"
+                <span class="text-gray-500"
                   >Last 2 years of academic records</span
                 >
               </li>
               <li class="flex items-start">
                 <svg
-                  class="h-5 w-5 text-blue-600 mt-1 mr-2"
+                  class="h-5 w-5 text-eduPurple mt-1 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -317,11 +317,11 @@
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span class="text-gray-600">Two teacher recommendations</span>
+                <span class="text-gray-500">Two teacher recommendations</span>
               </li>
               <li class="flex items-start">
                 <svg
-                  class="h-5 w-5 text-blue-600 mt-1 mr-2"
+                  class="h-5 w-5 text-eduPurple mt-1 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -333,11 +333,11 @@
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span class="text-gray-600">Student essay</span>
+                <span class="text-gray-500">Student essay</span>
               </li>
               <li class="flex items-start">
                 <svg
-                  class="h-5 w-5 text-blue-600 mt-1 mr-2"
+                  class="h-5 w-5 text-eduPurple mt-1 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -349,7 +349,7 @@
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span class="text-gray-600"
+                <span class="text-gray-500"
                   >Standardized test scores (if available)</span
                 >
               </li>
@@ -357,14 +357,14 @@
           </div>
 
           <!-- Additional Documents -->
-          <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-900 mb-4">
+          <div class="bg-eduYellowLight p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold text-gray-600 mb-4">
               Additional Documents
             </h3>
             <ul class="space-y-3">
               <li class="flex items-start">
                 <svg
-                  class="h-5 w-5 text-blue-600 mt-1 mr-2"
+                  class="h-5 w-5 text-eduPurple mt-1 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -376,11 +376,11 @@
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span class="text-gray-600">Passport/ID copy</span>
+                <span class="text-gray-500">Passport/ID copy</span>
               </li>
               <li class="flex items-start">
                 <svg
-                  class="h-5 w-5 text-blue-600 mt-1 mr-2"
+                  class="h-5 w-5 text-eduPurple mt-1 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -392,11 +392,11 @@
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span class="text-gray-600">Recent photograph</span>
+                <span class="text-gray-500">Recent photograph</span>
               </li>
               <li class="flex items-start">
                 <svg
-                  class="h-5 w-5 text-blue-600 mt-1 mr-2"
+                  class="h-5 w-5 text-eduPurple mt-1 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -408,11 +408,11 @@
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span class="text-gray-600">Immunization records</span>
+                <span class="text-gray-500">Immunization records</span>
               </li>
               <li class="flex items-start">
                 <svg
-                  class="h-5 w-5 text-blue-600 mt-1 mr-2"
+                  class="h-5 w-5 text-eduPurple mt-1 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -424,7 +424,7 @@
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span class="text-gray-600"
+                <span class="text-gray-500"
                   >Special needs documentation (if applicable)</span
                 >
               </li>
@@ -437,57 +437,61 @@
     <!-- Application Form Section -->
     <section class="py-16">
       <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+        <h2 class="text-3xl font-bold text-gray-600 mb-8 text-center">
           Start Your Application
         </h2>
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="bg-eduPurpleLight rounded-lg shadow-lg p-6">
           <form @submit.prevent="handleSubmit" class="space-y-6">
             <!-- Student Information -->
             <div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-4">
+              <h3 class="text-xl font-semibold text-gray-600 mb-4 text-center">
                 Student Information
               </h3>
+
+              <!-- name -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700"
+                  <label
+                    for="firstname"
+                    class="block text-sm font-medium text-gray-500"
                     >First Name</label
                   >
                   <input
                     type="text"
                     v-model="form.firstName"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700"
+                  <label class="block text-sm font-medium text-gray-500"
                     >Last Name</label
                   >
                   <input
                     type="text"
                     v-model="form.lastName"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700"
+                  <label class="block text-sm font-medium text-gray-500"
                     >Date of Birth</label
                   >
                   <input
                     type="date"
                     v-model="form.dateOfBirth"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700"
-                    >Grade Applying For</label
+                  <label class="block text-sm font-medium text-gray-500"
+                    >Class Applying For</label
                   >
                   <select
                     v-model="form.gradeApplying"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
                   >
                     <option value="">Select Grade</option>
                     <option v-for="grade in 12" :key="grade" :value="grade">
@@ -500,52 +504,52 @@
 
             <!-- Parent/Guardian Information -->
             <div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-4">
+              <h3 class="text-xl font-semibold text-gray-600 mb-4">
                 Parent/Guardian Information
               </h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700"
+                  <label class="block text-sm font-medium text-gray-500"
                     >Parent/Guardian Name</label
                   >
                   <input
                     type="text"
                     v-model="form.parentName"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700"
+                  <label class="block text-sm font-medium text-gray-500"
                     >Relationship to Student</label
                   >
                   <input
                     type="text"
                     v-model="form.relationship"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700"
+                  <label class="block text-sm font-medium text-gray-500"
                     >Email</label
                   >
                   <input
                     type="email"
                     v-model="form.email"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700"
+                  <label class="block text-sm font-medium text-gray-500"
                     >Phone Number</label
                   >
                   <input
                     type="tel"
                     v-model="form.phone"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                   />
                 </div>
               </div>
@@ -553,40 +557,40 @@
 
             <!-- Current School Information -->
             <div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-4">
+              <h3 class="text-xl font-semibold text-gray-600 mb-4">
                 Current School Information
               </h3>
               <div class="grid grid-cols-1 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700"
+                  <label class="block text-sm font-medium text-gray-500"
                     >Current School Name</label
                   >
                   <input
                     type="text"
                     v-model="form.currentSchool"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700"
+                  <label class="block text-sm font-medium text-gray-500"
                     >Current Grade</label
                   >
                   <input
                     type="text"
                     v-model="form.currentGrade"
                     required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700"
+                  <label class="block text-sm font-medium text-gray-500"
                     >School Address</label
                   >
                   <textarea
                     v-model="form.schoolAddress"
                     rows="3"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                   ></textarea>
                 </div>
               </div>
@@ -594,17 +598,17 @@
 
             <!-- Additional Information -->
             <div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-4">
+              <h3 class="text-xl font-semibold text-gray-600 mb-4">
                 Additional Information
               </h3>
               <div class="space-y-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700"
+                  <label class="block text-sm font-medium text-gray-500"
                     >How did you hear about us?</label
                   >
                   <select
                     v-model="form.referralSource"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
                   >
                     <option value="">Select an option</option>
                     <option value="website">School Website</option>
@@ -614,13 +618,13 @@
                   </select>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700"
+                  <label class="block text-sm font-medium text-gray-500"
                     >Any special needs or requirements?</label
                   >
                   <textarea
                     v-model="form.specialNeeds"
                     rows="3"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                   ></textarea>
                 </div>
               </div>
@@ -630,7 +634,7 @@
             <div class="flex justify-center">
               <button
                 type="submit"
-                class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                class="inline-block bg-indigo-600 text-eduSky px-8 py-3 rounded-md font-semibold hover:bg-indigo-500 hover:shadow-lg"
               >
                 Submit Application
               </button>
