@@ -381,7 +381,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-300 py-12">
+    <footer class="bg-gray-600 text-gray-300 py-12">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
@@ -403,10 +403,26 @@
           <div>
             <h3 class="text-white font-semibold mb-4">Quick Links</h3>
             <ul class="space-y-2">
-              <li><a href="#" class="hover:text-eduSky">About Us</a></li>
-              <li><a href="#" class="hover:text-eduSky">Academics</a></li>
-              <li><a href="#" class="hover:text-eduSky">Admissions</a></li>
-              <li><a href="#" class="hover:text-eduSky">Calendar</a></li>
+              <li>
+                <router-link to="/about" class="hover:text-eduSky"
+                  >About Us</router-link
+                >
+              </li>
+              <li>
+                <router-link to="/academics" class="hover:text-eduSky"
+                  >Academics</router-link
+                >
+              </li>
+              <li>
+                <router-link to="/admissions" class="hover:text-eduSky"
+                  >Admissions</router-link
+                >
+              </li>
+              <li>
+                <router-link to="/calender" class="hover:text-eduSky"
+                  >Calendar</router-link
+                >
+              </li>
             </ul>
           </div>
           <div>

@@ -26,6 +26,10 @@ import StudentView from "../components/students/studentView.vue";
 import Assignments from "../components/assignments/assignments.vue";
 import Announcements from "../components/announcements/announcements.vue";
 import Messages from "../components/messages/messages.vue";
+import Admissions from "../views/infoPages/admissions.vue";
+import Calender from "../views/infoPages/calender.vue";
+import Academics from "../views/infoPages/academics.vue";
+import About from "../views/infoPages/about.vue";
 
 // Define public routes that don't require authentication
 const publicRoutes = ["Home", "Login", "Signup"];
@@ -45,6 +49,26 @@ const routes = [
     path: "/signup",
     name: "Signup",
     component: Signup,
+  },
+  {
+    path: "/about",
+    name: "About",
+    component: About,
+  },
+  {
+    path: "/academics",
+    name: "Academics",
+    component: Academics,
+  },
+  {
+    path: "/admissions",
+    name: "Admissions",
+    component: Admissions,
+  },
+  {
+    path: "/calender",
+    name: "Calender",
+    component: Calender,
   },
   {
     path: "/dashboard",

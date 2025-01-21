@@ -18,6 +18,13 @@ export default {
       },
       animation: {
         "bounce-once": "bounce 0.5s ease-in-out 2",
+        bounce: "bounce 0.5s ease infinite",
+      },
+      keyframes: {
+        bounce: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
       },
     },
   },
