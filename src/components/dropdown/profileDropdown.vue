@@ -5,7 +5,7 @@
   >
     <!-- Profile -->
     <div
-      class="flex items-center gap-3 p-2 border-b border-gray-300 hover:bg-eduSky rounded-md group"
+      class="flex items-center gap-3 p-2 border-b border-gray-300 hover:bg-eduSkyLight rounded-md group"
     >
       <div
         class="flex items-center justify-center rounded-full border bg-indigo-300 w-10 h-10"
@@ -28,7 +28,7 @@
     <!-- Settings -->
     <router-link
       to="/settings"
-      class="flex items-center gap-3 p-2 border-b border-gray-300 hover:bg-eduSky rounded-md group"
+      class="flex items-center gap-3 p-2 border-b border-gray-300 hover:bg-eduSkyLight rounded-md group"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -56,7 +56,7 @@
 
     <!-- Logout -->
     <div
-      class="flex items-center gap-3 p-2 hover:bg-eduSky rounded-md cursor-pointer group"
+      class="flex items-center gap-3 p-2 hover:bg-eduSkyLight rounded-md cursor-pointer group"
       @click="logout"
     >
       <svg

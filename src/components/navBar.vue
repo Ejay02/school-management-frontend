@@ -23,7 +23,7 @@
         <!-- msg -->
         <router-link
           to="/list/messages"
-          class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer hover:bg-eduSky"
+          class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer hover:bg-eduSkyLight"
         >
           <div class="">
             <svg
@@ -46,7 +46,7 @@
         <!-- announcement -->
         <router-link
           to="/list/announcements"
-          class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer relative hover:bg-eduSky"
+          class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer relative hover:bg-eduSkyLight"
         >
           <img
             src="/announcement.png"

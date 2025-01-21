@@ -15,7 +15,7 @@
       <tr
         v-for="item in data"
         :key="item?.id"
-        class="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-eduPurpleLight"
+        class="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-eduSkyLight"
       >
         <td class="flex items-center gap-4 p-2">
           <img
