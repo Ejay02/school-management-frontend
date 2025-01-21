@@ -32,7 +32,7 @@ const publicRoutes = ["Home", "Login", "Signup"];
 
 const routes = [
   {
-    path: "/home",
+    path: "/",
     name: "Home",
     component: Home,
   },
@@ -47,7 +47,7 @@ const routes = [
     component: Signup,
   },
   {
-    path: "/",
+    path: "/dashboard",
     name: "Dashboard",
     component: Dashboard,
     meta: { requiresAuth: true },
@@ -178,17 +178,17 @@ router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
 
   // Handle root path and authentication
-  if (to.path === "/") {
-    if (isAuthenticated || !isAuthenticated) {
-      // If authenticated, redirect to role-specific dashboard
-      const userRole = userStore.currentRole.toLowerCase();
-      next(`/dashboard/${userRole}`);
-      return;
-    }
-    // If not authenticated, proceed to home or login
-    next();
-    return;
-  }
+  // if (to.path === "/") {
+  //   if (isAuthenticated || !isAuthenticated) {
+  //     // If authenticated, redirect to role-specific dashboard
+  //     const userRole = userStore.currentRole.toLowerCase();
+  //     next(`/dashboard/${userRole}`);
+  //     return;
+  //   }
+  //   // If not authenticated, proceed to home or login
+  //   next();
+  //   return;
+  // }
 
   // Allow access to public routes
   if (publicRoutes.includes(to.name)) {
