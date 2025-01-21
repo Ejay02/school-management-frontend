@@ -1,7 +1,146 @@
 <template>
   <div class="min-h-screen bg-gray-50">
+    <!-- Navigation Header -->
+    <nav class="bg-eduYellowLight shadow-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+          <!-- Logo and main nav -->
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <router-link to="/">
+                <router-link to="/">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="h-8 w-auto text-indigo-500"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"
+                    />
+                  </svg>
+                </router-link>
+              </router-link>
+            </div>
+            <div class="hidden md:block ml-10">
+              <div class="flex space-x-4">
+                <router-link
+                  to="/"
+                  class="text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-sm font-medium"
+                  >Home</router-link
+                >
+                <router-link
+                  to="/about"
+                  class="text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-sm font-medium"
+                  >About</router-link
+                >
+                <router-link
+                  to="/academics"
+                  class="text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-sm font-medium"
+                  >Academics</router-link
+                >
+                <router-link
+                  to="/admissions"
+                  class="text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-sm font-medium"
+                  >Admissions</router-link
+                >
+                <router-link
+                  to="/contact"
+                  class="text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-sm font-medium"
+                  >Contact</router-link
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Login and Mobile menu -->
+          <div class="flex items-center">
+            <!-- Login button -->
+            <div class="hidden md:flex items-center">
+              <router-link
+                to="/login"
+                class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-500 focus-visible:outline-indigo-600 transition-colors"
+              >
+                Login
+              </router-link>
+            </div>
+
+            <!-- Mobile menu button -->
+            <div class="md:hidden ml-4">
+              <button
+                @click="isMobileMenuOpen = !isMobileMenuOpen"
+                class="text-gray-900 hover:text-blue-600"
+              >
+                <svg
+                  class="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    v-if="!isMobileMenuOpen"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                  <path
+                    v-else
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div v-if="isMobileMenuOpen" class="md:hidden">
+          <div class="px-2 pt-2 pb-3 space-y-1">
+            <router-link
+              to="/"
+              class="block text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-base font-medium"
+              >Home</router-link
+            >
+            <router-link
+              to="/about"
+              class="block text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-base font-medium"
+              >About</router-link
+            >
+            <router-link
+              to="/academics"
+              class="block text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-base font-medium"
+              >Academics</router-link
+            >
+            <router-link
+              to="/admissions"
+              class="block text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-base font-medium"
+              >Admissions</router-link
+            >
+            <router-link
+              to="/contact"
+              class="block text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-base font-medium"
+              >Contact</router-link
+            >
+            <router-link
+              to="/login"
+              class="block text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-base font-medium"
+              >Login</router-link
+            >
+          </div>
+        </div>
+      </div>
+    </nav>
+
     <!-- Hero Section with Sign Up -->
-    <header class="relative bg-eduPurple overflow-hidden">
+    <header class="relative bg-eduPurpleLight overflow-hidden">
       <div class="absolute inset-0">
         <img
           src="/bg_1.jpg"
@@ -14,10 +153,10 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <!-- Left side content -->
           <div>
-            <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-600 mb-6">
               Nurturing Minds, Building Futures
             </h1>
-            <p class="text-xl text-blue-100 mb-8">
+            <p class="text-xl text-gray-500 mb-8">
               Join our vibrant learning community where every child's potential
               is unleashed through innovative education and personalized
               attention.
@@ -25,7 +164,7 @@
 
             <!-- Sign Up Form -->
             <div class="bg-white p-6 rounded-lg shadow-lg max-w-md">
-              <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <h3 class="text-lg font-semibold text-gray-600 mb-4">
                 Request Information
               </h3>
               <form @submit.prevent="handleSubmit" class="space-y-4">
@@ -33,14 +172,14 @@
                   <input
                     type="text"
                     placeholder="Parent's Name"
-                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                   />
                 </div>
                 <div>
                   <input
                     type="email"
                     placeholder="Email Address"
-                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                    class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                   />
                 </div>
                 <button
@@ -66,9 +205,9 @@
     </header>
 
     <!-- Features Section -->
-    <section class="py-20 bg-white">
+    <section class="py-20 bg-eduSkyLight">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">
+        <h2 class="text-3xl font-bold text-center text-gray-600 mb-12">
           Why Choose Our School?
         </h2>
 
@@ -91,7 +230,9 @@
                 />
               </svg>
             </div>
-            <h3 class="text-xl font-semibold mb-2">Excellence in Education</h3>
+            <h3 class="text-xl font-semibold mb-2 text-gray-600">
+              Excellence in Education
+            </h3>
             <p class="text-gray-600">
               Comprehensive curriculum designed to inspire and challenge
               students at every level.
@@ -116,7 +257,9 @@
                 />
               </svg>
             </div>
-            <h3 class="text-xl font-semibold mb-2">Dedicated Teachers</h3>
+            <h3 class="text-xl font-semibold mb-2 text-gray-600">
+              Dedicated Teachers
+            </h3>
             <p class="text-gray-600">
               Experienced educators committed to nurturing each student's unique
               potential.
@@ -141,7 +284,9 @@
                 />
               </svg>
             </div>
-            <h3 class="text-xl font-semibold mb-2">Safe Environment</h3>
+            <h3 class="text-xl font-semibold mb-2 text-gray-600">
+              Safe Environment
+            </h3>
             <p class="text-gray-600">
               Creating a secure and welcoming space where students thrive.
             </p>
@@ -153,7 +298,7 @@
     <!-- Testimonials Section -->
     <section class="py-20 bg-eduYellowLight">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">
+        <h2 class="text-3xl font-bold text-center text-gray-600 mb-12">
           What Parents Say
         </h2>
 
@@ -166,11 +311,11 @@
                 class="w-10 h-10 rounded-full"
               />
               <div class="ml-4">
-                <h4 class="font-semibold">Sarah Johnson</h4>
-                <p class="text-gray-600 text-sm">Parent of Tom, Grade 5</p>
+                <h4 class="font-semibold text-gray-600">Sarah Johnson</h4>
+                <p class="text-gray-500 text-sm">Parent of Tom, Grade 5</p>
               </div>
             </div>
-            <p class="text-gray-600">
+            <p class="text-gray-500">
               "The teachers here go above and beyond. My son has grown so much
               academically and personally since joining."
             </p>
@@ -184,11 +329,11 @@
                 class="w-10 h-10 rounded-full"
               />
               <div class="ml-4">
-                <h4 class="font-semibold">Michael Chen</h4>
-                <p class="text-gray-600 text-sm">Parent of Amy, Grade 3</p>
+                <h4 class="font-semibold text-gray-600">Michael Chen</h4>
+                <p class="text-gray-500 text-sm">Parent of Amy, Grade 3</p>
               </div>
             </div>
-            <p class="text-gray-600">
+            <p class="text-gray-500">
               "The individualized attention and caring environment have made
               such a difference in my daughter's education."
             </p>
@@ -202,11 +347,11 @@
                 class="w-10 h-10 rounded-full"
               />
               <div class="ml-4">
-                <h4 class="font-semibold">Emily Rodriguez</h4>
-                <p class="text-gray-600 text-sm">Parent of Sofia, Grade 6</p>
+                <h4 class="font-semibold text-gray-600">Emily Rodriguez</h4>
+                <p class="text-gray-500 text-sm">Parent of Sofia, Grade 6</p>
               </div>
             </div>
-            <p class="text-gray-600">
+            <p class="text-gray-500">
               "We couldn't be happier with the quality of education and the
               supportive community at this school."
             </p>
@@ -216,16 +361,19 @@
     </section>
 
     <!-- Call to Action -->
-    <section class="py-20 bg-eduSkyLight">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl font-bold text-white mb-8">
+    <section class="py-20 bg-eduPurpleLight">
+      <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center justify-center"
+      >
+        <h2 class="text-3xl font-bold text-gray-600 mb-2">
           Ready to Join Our School Family?
         </h2>
-        <p class="text-xl text-eduSky font-medium mb-8">
+        <p class="text-sm text-gray-500 font-medium mb-8">
           Schedule a tour or request more information today.
         </p>
+
         <button
-          class="bg-white text-blue-600 px-8 py-3 rounded-md font-semibold hover:bg-blue-50 transition-colors"
+          class="text-white px-8 py-3 rounded-md font-semibold bg-indigo-600 hover:bg-indigo-500 hover:scale-105 hover:shadow-lg transition-transform duration-300 ease-in-out"
         >
           Schedule a Tour
         </button>
@@ -238,47 +386,60 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 class="text-white font-semibold mb-4">Contact Us</h3>
-            <p>123 School Street</p>
-            <p>City, State 12345</p>
-            <p>Phone: (555) 123-4567</p>
-            <p>Email: info@school.com</p>
+            <p class="hover:text-eduSky cursor-pointer">
+              <i class="fa-solid fa-map-location-dot"></i> 123 School Street,
+            </p>
+            <p class="hover:text-eduSky cursor-pointer">
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;City, State 12345
+            </p>
+            <!-- &emsp; -->
+            <p class="hover:text-eduSky cursor-pointer">
+              <i class="fa-solid fa-phone"></i>&nbsp; (555) 123-4567
+            </p>
+            <p class="hover:text-eduSky cursor-pointer">
+              <i class="fa-regular fa-envelope"></i>&nbsp; info@school.com
+            </p>
           </div>
           <div>
             <h3 class="text-white font-semibold mb-4">Quick Links</h3>
             <ul class="space-y-2">
-              <li><a href="#" class="hover:text-white">About Us</a></li>
-              <li><a href="#" class="hover:text-white">Academics</a></li>
-              <li><a href="#" class="hover:text-white">Admissions</a></li>
-              <li><a href="#" class="hover:text-white">Calendar</a></li>
+              <li><a href="#" class="hover:text-eduSky">About Us</a></li>
+              <li><a href="#" class="hover:text-eduSky">Academics</a></li>
+              <li><a href="#" class="hover:text-eduSky">Admissions</a></li>
+              <li><a href="#" class="hover:text-eduSky">Calendar</a></li>
             </ul>
           </div>
           <div>
             <h3 class="text-white font-semibold mb-4">Programs</h3>
             <ul class="space-y-2">
-              <li><a href="#" class="hover:text-white">Primary School</a></li>
+              <li><a href="#" class="hover:text-eduSky">Primary School</a></li>
               <li>
-                <a href="#" class="hover:text-white">Secondary School</a>
+                <a href="#" class="hover:text-eduSky">Secondary School</a>
               </li>
-              <li><a href="#" class="hover:text-white">After School</a></li>
+              <li><a href="#" class="hover:text-eduSky">After School</a></li>
               <li>
-                <a href="#" class="hover:text-white">Summer Programs</a>
+                <a href="#" class="hover:text-eduSky">Summer Programs</a>
               </li>
             </ul>
           </div>
           <div>
             <h3 class="text-white font-semibold mb-4">Follow Us</h3>
             <div class="flex space-x-4">
-              <a href="#" class="hover:text-white">
+              <a href="#" class="hover:text-eduSky">
                 <span class="sr-only">Facebook</span>
                 <i class="fa-brands fa-square-facebook"></i>
               </a>
-              <a href="#" class="hover:text-white">
+              <a href="#" class="hover:text-eduSky">
                 <span class="sr-only">Twitter</span>
                 <i class="fa-brands fa-square-x-twitter"></i>
               </a>
-              <a href="#" class="hover:text-white">
+              <a href="#" class="hover:text-eduSky">
                 <span class="sr-only">Instagram</span>
                 <i class="fa-brands fa-instagram"></i>
+              </a>
+              <a href="#" class="hover:text-eduSky">
+                <span class="sr-only">Tiktok</span>
+                <i class="fa-brands fa-tiktok"></i>
               </a>
             </div>
           </div>
@@ -292,6 +453,10 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
+
+const isMobileMenuOpen = ref(false);
+
 const handleSubmit = () => {
   // Handle form submission logic here
   console.log("Form submitted");
