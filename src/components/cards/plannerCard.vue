@@ -208,8 +208,8 @@ function handleEvents(events) {
   --fc-button-active-border-color: none !important;
   --fc-today-bg-color: #ffeef3;
   --fc-border-color: #e5e7eb;
+  --fc-list-event-hover-bg-color: transparent;
 }
-
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -264,8 +264,6 @@ function handleEvents(events) {
   }
 }
 
-
-
 /* Target all buttons including the top navigation */
 .fc-custom-theme .fc-button,
 .fc-custom-theme .fc-button-primary {
@@ -276,14 +274,34 @@ function handleEvents(events) {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   font-size: 0.875rem;
   font-weight: 500;
+  outline: none !important;
 }
 
-/* Target active state */
+/* Remove hover effects */
 .fc-custom-theme .fc-button:hover,
 .fc-custom-theme .fc-button-primary:hover,
+.fc-custom-theme .fc-button:focus,
+.fc-custom-theme .fc-button-primary:focus,
+.fc-custom-theme .fc-button:active,
+.fc-custom-theme .fc-button-primary:active,
+.fc-custom-theme .fc-button:focus-visible,
+.fc-custom-theme .fc-button-primary:focus-visible {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove list hover background */
+.fc-custom-theme .fc-list-event:hover td {
+  background-color: transparent !important;
+}
+
+/* Active button state */
 .fc-custom-theme .fc-button-active,
 .fc-custom-theme .fc-button-primary.fc-button-active {
+  background-color: #cfceff !important;
   border: none !important;
+  outline: none !important;
   box-shadow: none !important;
 }
 
