@@ -282,16 +282,25 @@ const eventTypes = {
   },
 };
 
-const holidays = ref([]);
+const fetchCountry = async () => {
+  try {
+    const response = await fetch("http://ip-api.com/json");
+    const data = await response.json();
+    const country = data.countryCode;
+    return country;
+  } catch (error) {
+    console.error("Error fetching country:", error);
+  }
+};
 
 // Fetch holidays dynamically
-const fetchHolidays = async () => {
+const fetchHolidays = async (countryCode) => {
   try {
     // Initialize the Holidays instance
     const hd = new Holidays();
 
     // Add a specific country (e.g., United States)
-    hd.init("US");
+    hd.init(countryCode);
 
     // Get holidays for the current year
     const currentYear = new Date().getFullYear();
@@ -313,6 +322,17 @@ const fetchHolidays = async () => {
     console.error("Error fetching holidays:", error);
   }
 };
+
+const initCalendar = async () => {
+  try {
+    const countryCode = await fetchCountry();
+    await fetchHolidays(countryCode);
+  } catch (error) {
+    console.error("Error initializing calendar:", error);
+  }
+};
+
+initCalendar();
 
 // Sample public events
 const events = ref([
@@ -505,6 +525,7 @@ const getEventsForDate = (date) => {
     );
   });
 };
+
 onMounted(() => {
   fetchHolidays();
 });
