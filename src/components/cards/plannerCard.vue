@@ -1,6 +1,6 @@
 <template>
   <div v-if="holidaysFetched" class="fc-custom-theme w-full">
-    <div class="w-full overflow-x-auto">
+    <div class="w-full">
       <div class="calendar-container">
         <FullCalendar
           ref="calendarRef"
@@ -42,27 +42,41 @@ const calendarOptions = ref({
   selectMirror: true,
   dayMaxEventRows: 3,
   moreLinkClick: "popover",
+  height: "auto",
+  // views: {
+  //   dayGrid: {
+  //     dayMaxEventRows: 3,
+  //   },
+  //   // Add responsive views for smaller screens
+  //   timeGridWeek: {
+  //     type: "timeGrid",
+  //     duration: { days: 7 },
+  //     buttonText: "week",
+  //   },
+  //   timeGridDay: {
+  //     type: "timeGrid",
+  //     duration: { days: 1 },
+  //     buttonText: "day",
+  //   },
+  //   listWeek: {
+  //     type: "list",
+  //     duration: { days: 7 },
+  //     buttonText: "list",
+  //   },
+  // },
   views: {
     dayGrid: {
       dayMaxEventRows: 3,
     },
-    // Add responsive views for smaller screens
-    timeGridWeek: {
-      type: "timeGrid",
-      duration: { days: 7 },
-      buttonText: "week",
+    timeGrid: {
+      height: "auto", // Allow time grid views to expand fully
     },
-    timeGridDay: {
-      type: "timeGrid",
-      duration: { days: 1 },
-      buttonText: "day",
-    },
-    listWeek: {
-      type: "list",
-      duration: { days: 7 },
-      buttonText: "list",
+    dayGridMonth: {
+      height: "auto", // Allow month view to expand fully
     },
   },
+
+  //
 
   weekends: true,
   dateClick: function (info) {
@@ -194,9 +208,7 @@ function handleEvents(events) {
 <style>
 .calendar-container {
   width: 100%;
-  min-height: 600px;
-  height: calc(100vh - 200px);
-  max-height: 800px;
+  height: auto;
 }
 
 .fc-custom-theme {
