@@ -28,6 +28,7 @@ import Announcements from "../components/announcements/announcements.vue";
 import Messages from "../components/messages/messages.vue";
 import Admissions from "../views/infoPages/admissions.vue";
 import Calender from "../views/infoPages/calender.vue";
+import Contact from "../views/infoPages/contact.vue";
 import Academics from "../views/infoPages/academics.vue";
 import About from "../views/infoPages/about.vue";
 
@@ -66,10 +67,16 @@ const routes = [
     component: Admissions,
   },
   {
+    path: "/contact",
+    name: "Contact",
+    component: Contact,
+  },
+  {
     path: "/calender",
     name: "Calender",
     component: Calender,
   },
+
   {
     path: "/dashboard",
     name: "Dashboard",

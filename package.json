@@ -18,6 +18,7 @@
     "@popperjs/core": "^2.11.8",
     "autoprefixer": "^10.4.20",
     "chart.js": "^4.4.6",
+    "date-holidays": "^3.23.18",
     "pinia": "^2.2.6",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
