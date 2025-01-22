@@ -66,11 +66,13 @@
   </div>
 </template>
 <script setup>
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
+import { fetchCountry, fetchHolidays } from "../../utils/date.holidays";
 
 // const isDark = ref(false);
 
 const selectedColor = ref("purple");
+const holidays = ref([]);
 
 const todos = ref([
   {
@@ -90,7 +92,7 @@ const todos = ref([
     status: "cancelled",
     dates: Date.now(), //Should be selected date so a vmodel
     // dates: { repeat: { weekdays: 1 } },
-    color: "green",
+    color: "pink",
     startTime: "16:00PM",
     endTime: "20:00PM",
   },
@@ -107,6 +109,13 @@ const todos = ref([
   },
 ]);
 
+onMounted(async () => {
+  const countryCode = await fetchCountry();
+  const fetchedHolidays = await fetchHolidays(countryCode);
+  holidays.value = fetchedHolidays; // Update holidays ref
+});
+
+// CalendarComponent.vue
 const attrs = computed(() => [
   // Attributes for todos
   ...todos.value.map((todo) => ({
@@ -119,17 +128,30 @@ const attrs = computed(() => [
       label: todo.description,
     },
   })),
+  // Attributes for holidays
+  ...holidays.value.map((holiday) => ({
+    dates: holiday.date,
+    dot: {
+      color: "green", // or any other color you prefer
+    },
+    popover: {
+      label: holiday.title,
+    },
+  })),
 ]);
 
-// const attrs = ref([
-//   {
-//     key: "today",
-//     // highlight: true,
-//     dot: true,
-//     dates: new Date(),
-//     // dates: { start: startDate, end: new Date(2024, 10, 24) },
-//     // dates: { start: new Date(2019, 3, 15), end: new Date(2019, 3, 19) },
-//   },
+// const attrs = computed(() => [
+//   // Attributes for todos
+//   ...todos.value.map((todo) => ({
+//     dates: todo.dates,
+//     dot: {
+//       color: todo.color,
+//       ...(todo.isComplete && { class: "opacity-50" }),
+//     },
+//     popover: {
+//       label: todo.description,
+//     },
+//   })),
 // ]);
 </script>
 

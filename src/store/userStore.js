@@ -4,9 +4,9 @@ import { menuItems } from "../utils";
 
 export const useUserStore = defineStore("user", () => {
   // const currentRole = ref("student"); // Default role
-  const currentRole = ref("admin");
+  // const currentRole = ref("admin");
   // const currentRole = ref("parent");
-  // const currentRole = ref("teacher");
+  const currentRole = ref("teacher");
   const userInfo = ref({
     id: null,
     name: "",

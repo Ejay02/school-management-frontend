@@ -245,8 +245,8 @@
 </template>
 
 <script setup>
-import Holidays from "date-holidays";
 import { ref, computed, onMounted } from "vue";
+import { fetchCountry, fetchHolidays } from "../../utils/date.holidays";
 
 // State
 const currentDate = ref(new Date());
@@ -280,47 +280,6 @@ const eventTypes = {
     dot: "bg-green-500",
     ring: "ring-green-600/20",
   },
-};
-
-const fetchCountry = async () => {
-  try {
-    const response = await fetch("http://ip-api.com/json");
-    const data = await response.json();
-    const country = data.countryCode;
-    return country;
-  } catch (error) {
-    console.error("Error fetching country:", error);
-  }
-};
-
-// Fetch holidays dynamically
-const fetchHolidays = async (countryCode) => {
-  try {
-    // Initialize the Holidays instance
-    const hd = new Holidays();
-
-    // Add a specific country (e.g., United States)
-    hd.init(countryCode);
-
-    // Get holidays for the current year
-    const currentYear = new Date().getFullYear();
-    const holidayList = hd.getHolidays(currentYear);
-
-    // Map the holidays to match the structure of existing events
-    const mappedHolidays = holidayList.map((holiday) => ({
-      id: holiday.id, // Unique ID
-      title: holiday.name, // Holiday name
-      date: holiday.date.split(" ")[0], // Date of the holiday
-      endDate: holiday.date.split(" ")[0], // Date of the holiday
-      type: "Holidays", // Event type
-      description: holiday.description || "Public Holiday", // Holiday description
-    }));
-
-    // Merge fetched holidays with existing events
-    events.value = [...events.value, ...mappedHolidays];
-  } catch (error) {
-    console.error("Error fetching holidays:", error);
-  }
 };
 
 const initCalendar = async () => {
@@ -526,7 +485,13 @@ const getEventsForDate = (date) => {
   });
 };
 
-onMounted(() => {
-  fetchHolidays();
+onMounted(async () => {
+  try {
+    const countryCode = await fetchCountry();
+    const fetchedHolidays = await fetchHolidays(countryCode);
+    events.value.push(...fetchedHolidays); // Update events ref with fetched holidays
+  } catch (error) {
+    console.error("Error fetching holidays:", error);
+  }
 });
 </script>

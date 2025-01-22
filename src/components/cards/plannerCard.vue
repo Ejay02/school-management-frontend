@@ -1,5 +1,5 @@
 <template>
-  <div class="fc-custom-theme w-full cursor-pointer">
+  <div v-if="holidaysFetched" class="fc-custom-theme w-full cursor-pointer">
     <!-- <div class="w-full "> -->
     <div
       class="w-full min-w-[768px] lg:min-w-0 overflow-x-auto min-h-screen h-[700px]"
@@ -15,16 +15,19 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import listPlugin from "@fullcalendar/list";
 import FullCalendar from "@fullcalendar/vue3";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+
+import { fetchCountry, fetchHolidays } from "../../utils/date.holidays.js";
 import { INITIAL_EVENTS, createEventId } from "../../utils/event-utils.js";
 
 const currentEvents = ref([]);
 const calendarRef = ref(null);
+const holidaysFetched = ref(false);
 
 const calendarOptions = ref({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
@@ -57,6 +60,7 @@ const calendarOptions = ref({
   select: handleDateSelect,
   eventClick: handleEventClick,
   eventsSet: handleEvents,
+
   events: [
     {
       title: "Study",
@@ -127,6 +131,20 @@ const calendarOptions = ref({
   },
 });
 
+onMounted(async () => {
+  try {
+    const countryCode = await fetchCountry();
+    const holidays = await fetchHolidays(countryCode);
+    holidays.forEach((holiday) => {
+      holiday.classNames = ["bg-green-300", "ring-green-600/20"]; // Add holiday styles
+    });
+    calendarOptions.value.events = [...INITIAL_EVENTS, ...holidays];
+    holidaysFetched.value = true;
+  } catch (error) {
+    console.error("Error fetching holidays:", error);
+  }
+});
+
 // #TODO move to modal
 function handleDateSelect(selectInfo) {
   let title = prompt("Please enter a new title for your event");
@@ -169,7 +187,7 @@ function handleEvents(events) {
   --fc-button-hover-border-color: none !important;
   --fc-button-active-bg-color: #cfceff;
   --fc-button-active-border-color: none !important;
-  --fc-today-bg-color: #eef2ff;
+  --fc-today-bg-color: #ffeef3;
   --fc-border-color: #e5e7eb;
 }
 
@@ -260,7 +278,15 @@ function handleEvents(events) {
 }
 
 .fc-event {
-  border-radius: 4px;
+  /* border-radius: 4px; */
   border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.6rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 </style>
