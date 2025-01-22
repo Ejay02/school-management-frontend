@@ -1,16 +1,14 @@
 <template>
-  <div v-if="holidaysFetched" class="fc-custom-theme w-full cursor-pointer">
-    <!-- <div class="w-full "> -->
-    <div
-      class="w-full min-w-[768px] lg:min-w-0 overflow-x-auto min-h-screen h-[700px]"
-    >
-      <FullCalendar
-        ref="calendarRef"
-        :options="calendarOptions"
-        class="w-full"
-      />
+  <div v-if="holidaysFetched" class="fc-custom-theme w-full">
+    <div class="w-full overflow-x-auto">
+      <div class="calendar-container">
+        <FullCalendar
+          ref="calendarRef"
+          :options="calendarOptions"
+          class="w-full"
+        />
+      </div>
     </div>
-    <!-- </div> -->
   </div>
 </template>
 
@@ -42,17 +40,31 @@ const calendarOptions = ref({
   editable: true,
   selectable: true,
   selectMirror: true,
-  // dayMaxEvents: true,
-  dayMaxEventRows: 3, // Only show 1 event initially
-  moreLinkClick: "popover", // Show popover when clicking "+more"
+  dayMaxEventRows: 3,
+  moreLinkClick: "popover",
   views: {
     dayGrid: {
-      dayMaxEventRows: 3, // Ensure consistency across views
+      dayMaxEventRows: 3,
+    },
+    // Add responsive views for smaller screens
+    timeGridWeek: {
+      type: "timeGrid",
+      duration: { days: 7 },
+      buttonText: "week",
+    },
+    timeGridDay: {
+      type: "timeGrid",
+      duration: { days: 1 },
+      buttonText: "day",
+    },
+    listWeek: {
+      type: "list",
+      duration: { days: 7 },
+      buttonText: "list",
     },
   },
 
   weekends: true,
-  // handle date click so to add here or in daily planner??
   dateClick: function (info) {
     const calendarApi = info.view.calendar;
     calendarApi.changeView("timeGridDay", info.dateStr);
@@ -180,6 +192,13 @@ function handleEvents(events) {
 </script>
 
 <style>
+.calendar-container {
+  width: 100%;
+  min-height: 600px;
+  height: calc(100vh - 200px);
+  max-height: 800px;
+}
+
 .fc-custom-theme {
   --fc-button-bg-color: #c3ebfa;
   --fc-button-border-color: none !important;
@@ -190,6 +209,62 @@ function handleEvents(events) {
   --fc-today-bg-color: #ffeef3;
   --fc-border-color: #e5e7eb;
 }
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .fc-header-toolbar {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .fc-button-group {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .fc-toolbar-title {
+    font-size: 1rem !important;
+    text-align: center;
+  }
+
+  .fc-view {
+    padding: 0.5rem;
+  }
+
+  .fc-daygrid-day-number {
+    padding: 0.25rem !important;
+  }
+}
+
+/* Small screen optimizations */
+@media (max-width: 640px) {
+  .fc-header-toolbar {
+    padding: 0.5rem;
+  }
+
+  .fc-button {
+    padding: 0.3rem 0.6rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .fc-daygrid-day-events {
+    margin: 0 !important;
+  }
+
+  .fc-event {
+    margin: 1px 0 !important;
+    padding: 2px 4px !important;
+  }
+}
+
+
 
 /* Target all buttons including the top navigation */
 .fc-custom-theme .fc-button,
