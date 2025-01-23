@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:w-1/3 cursor-pointer">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:w-1/2 cursor-pointer">
     <div
       v-for="(card, index) in infoCards"
       :key="index"
