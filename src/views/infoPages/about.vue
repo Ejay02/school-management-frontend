@@ -1,6 +1,7 @@
 <template>
   <div>
-hi
+Add CAMPUS TOUR 
+watch video under  with a play icon that pulse
   </div>
 </template>
 

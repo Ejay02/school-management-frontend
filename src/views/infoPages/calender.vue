@@ -429,13 +429,6 @@ const addToCalendar = (event) => {
   console.log("Adding to personal calendar:", event);
 };
 
-const getDurationDays = (event) => {
-  if (!event.endDate) return 1;
-  const start = new Date(event.date);
-  const end = new Date(event.endDate);
-  return Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-};
-
 const exportCalendar = () => {
   const calendar = events.value.map((event) => {
     const startDate = new Date(event.date);
