@@ -3,6 +3,9 @@
     <!-- Navigation Header -->
     <HomeNav />
 
+    <!-- banner -->
+    <Banner />
+    
     <!-- Hero Section with Sign Up -->
     <HomeHero />
 
@@ -27,6 +30,7 @@ import HomeFeatures from "../components/homeComponents/homeFeatures.vue";
 import HomeTestimonials from "../components/homeComponents/homeTestimonials.vue";
 import HomeCallToAction from "../components/homeComponents/homeCallToAction.vue";
 import Footer from "../components/homeComponents/footer.vue";
+import Banner from "../components/banner.vue";
 </script>
 
 <style scoped></style>
