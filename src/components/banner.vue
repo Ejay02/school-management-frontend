@@ -3,22 +3,26 @@
     v-if="isVisible"
     class="relative isolate flex items-center gap-x-6 overflow-hidden bg-gray-50 px-6 py-2.5 sm:px-3.5 sm:before:flex-1"
   >
-    <div class="marquee">
-      <p class="text-sm/6 text-gray-500 inline-block">
-        We collect and use your
-        <strong class="font-semibold text-gray-600"> IP address </strong> to
-        determine your approximate location. This information helps us provide
-        location-specific services, such as region-based features or localized
-        content. Your data is handled securely and is not shared with third
-        parties without your consent.
-      </p>
+    <div class="marquee-container w-full overflow-hidden">
+      <div
+        class="marquee-content inline-block whitespace-nowrap animate-marquee"
+      >
+        <p class="text-sm/6 text-gray-500 inline-block">
+          We collect and use your
+          <strong class="font-semibold text-gray-600">IP address</strong>
+          to determine your approximate location. This information helps us
+          provide location-specific services, such as region-based features or
+          localized content. Your data is handled securely and is not shared
+          with third parties without your consent.
+        </p>
+      </div>
     </div>
 
     <div class="flex flex-1 justify-end">
       <button
         type="button"
         class="-m-3 p-3 focus-visible:outline-offset-[-4px]"
-        @click="isVisible = false"
+        @click="dismissBanner"
       >
         <span class="sr-only">Dismiss</span>
         <svg
@@ -41,15 +45,25 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
-// State to manage banner visibility
 const isVisible = ref(true);
+
+onMounted(() => {
+  const dismissed = localStorage.getItem("bannerDismissed");
+  if (dismissed) {
+    isVisible.value = false;
+  }
+});
+
+const dismissBanner = () => {
+  isVisible.value = false;
+  localStorage.setItem("bannerDismissed", "true");
+};
 </script>
 
 <style scoped>
-/* Animation for the marquee effect */
-@keyframes scroll {
+@keyframes marquee {
   0% {
     transform: translateX(100%);
   }
@@ -58,14 +72,7 @@ const isVisible = ref(true);
   }
 }
 
-.marquee {
-  white-space: nowrap;
-  overflow: hidden;
-  width: 100%;
-}
-
-.marquee p {
-  display: inline-block;
-  animation: scroll 40s linear infinite;
+.marquee-content {
+  animation: marquee 40s linear infinite;
 }
 </style>

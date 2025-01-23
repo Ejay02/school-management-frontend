@@ -28,7 +28,7 @@ export const fetchHolidays = async (countryCode) => {
       id: holiday.id, // Unique ID
       title: holiday.name, // Holiday name
       date: holiday.date.split(" ")[0], // Date of the holiday
-      endDate: holiday.date.split(" ")[0], // Date of the holiday
+      endDate: holiday.date.split(" ")[0] || null, // Date of the holiday
       type: "Holidays", // Event type
       description: holiday.description || "Public Holiday", // Holiday description
     }));

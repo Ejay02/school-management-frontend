@@ -170,9 +170,9 @@
                         @click="selectedEvent = event"
                       >
                         {{ event.title }}
-                        <span v-if="event.endDate" class="text-xs opacity-75">
+                        <!-- <span v-if="event.endDate" class="text-xs opacity-75">
                           ({{ getDurationDays(event) }} days)
-                        </span>
+                        </span> -->
                       </div>
                     </template>
                   </div>
@@ -471,18 +471,13 @@ const exportCalendar = () => {
 };
 
 const getEventsForDate = (date) => {
-  const day = date.getDate();
-  const month = date.getMonth();
-  const year = date.getFullYear();
-
-  return events.value.filter((event) => {
-    const eventDate = new Date(event.date);
-    return (
-      eventDate.getFullYear() === year &&
-      eventDate.getMonth() === month &&
-      eventDate.getDate() === day
-    );
-  });
+  return events.value.filter(
+    (event) =>
+      new Date(event.date).toDateString() === date.toDateString() ||
+      (event.endDate &&
+        date >= new Date(event.date) &&
+        date <= new Date(event.endDate))
+  );
 };
 
 onMounted(async () => {

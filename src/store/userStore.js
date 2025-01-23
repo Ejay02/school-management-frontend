@@ -34,6 +34,9 @@ export const useUserStore = defineStore("user", () => {
     }));
   });
 
+  // logout function
+  // clear  localStorage.setItem("bannerDismissed", "true"); 
+
   // Method to check if current user has access to a specific route
   const hasAccess = (route) => {
     const allMenuItems = menuItems.flatMap((section) => section.items);
