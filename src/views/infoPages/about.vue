@@ -147,7 +147,7 @@
 
 <script setup>
 import { ref } from "vue";
-import VideoModal from "@/components/aboutComponents/VideoModal.vue";
+import VideoModal from "../../components/aboutComponents/videoModal.vue";
 
 const videoModalVisible = ref(false);
 
