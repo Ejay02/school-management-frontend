@@ -88,17 +88,15 @@ A comprehensive school management system built with Vue 3 that helps educational
 
 - **Vue 3**: Frontend framework using Composition API
 - **Vite**: Build tool for faster development
-- **TypeScript**: For type-safe code
 - **Pinia**: State management solution
 - **Vue Router**: For application routing
 
 ### UI/UX
 
 - **Tailwind CSS**: Utility-first styling
-- **Headless UI**: Accessible core components
 - **Chart.js**: Data visualization
 - **VCalendar**: Calendar and date picking
-- **Lucide Icons**: Modern icon system
+
 
 ### Development Tools
 
@@ -122,7 +120,7 @@ npm >= 7.0.0
 # Clone the repository
 git clone https://github.com/Ejay02/school-management-frontend.git
 
-# Navigate to project directory
+# Navigate to the project directory
 cd school-management-frontend
 
 # Install dependencies
@@ -131,7 +129,7 @@ npm install
 # Create environment file
 cp .env.example .env
 
-# Start development server
+# Start the development server
 npm run dev
 ```
 
@@ -184,10 +182,7 @@ npm run test:coverage
 ### Code Style
 
 - Follow Vue 3 Composition API patterns
-- Use TypeScript for all new code
-- Maintain component documentation
-- Write unit tests for critical functions
-- Follow atomic design principles for components
+
 
 ### State Management
 
@@ -205,7 +200,7 @@ npm run test:coverage
 
 ## Support
 
-For support, please email e.jae02@gmail.com .
+For support, please email e.jae02@gmail.com.
 
 ## License
 
