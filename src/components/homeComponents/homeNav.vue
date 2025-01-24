@@ -28,27 +28,27 @@
             <div class="flex space-x-4">
               <router-link
                 to="/"
-                class="text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-sm font-medium"
+                class="text-gray-600 hover:text-eduPurple px-3 py-2 rounded-md text-sm font-medium"
                 >Home</router-link
               >
               <router-link
                 to="/about"
-                class="text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-sm font-medium"
+                class="text-gray-600 hover:text-eduPurple px-3 py-2 rounded-md text-sm font-medium"
                 >About</router-link
               >
               <router-link
                 to="/academics"
-                class="text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-sm font-medium"
+                class="text-gray-600 hover:text-eduPurple px-3 py-2 rounded-md text-sm font-medium"
                 >Academics</router-link
               >
               <router-link
                 to="/admissions"
-                class="text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-sm font-medium"
+                class="text-gray-600 hover:text-eduPurple px-3 py-2 rounded-md text-sm font-medium"
                 >Admissions</router-link
               >
               <router-link
                 to="/contact"
-                class="text-gray-600 hover:text-eduSky px-3 py-2 rounded-md text-sm font-medium"
+                class="text-gray-600 hover:text-eduPurple px-3 py-2 rounded-md text-sm font-medium"
                 >Contact</router-link
               >
             </div>
