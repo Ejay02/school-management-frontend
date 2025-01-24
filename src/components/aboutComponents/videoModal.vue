@@ -6,14 +6,14 @@
   >
     <div class="bg-white p-4 rounded-lg max-w-4xl w-full">
       <div class="aspect-video">
-        <video
+        
+        <!-- -->
+        <iframe
           src="/campus_tour.mp4"
-          autoplay
-          loop
-          playsinline
-          controls
+          frameborder="0"
+          allowfullscreen
           class="w-full h-full"
-        ></video>
+        ></iframe>
       </div>
     </div>
   </div>
