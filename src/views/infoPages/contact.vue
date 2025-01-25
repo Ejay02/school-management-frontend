@@ -53,7 +53,7 @@
           <label class="block text-gray-600 mb-2">Purpose of Inquiry</label>
           <select
             v-model="inquiryType"
-            class="cursor-pointer w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-eduPurpleLight focus:ring-2 transition"
+            class="text-gray-600 cursor-pointer w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-eduPurpleLight focus:ring-2 transition"
           >
             <option value="" disabled selected class="text-gray-600">
               Select Inquiry Type

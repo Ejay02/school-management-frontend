@@ -46,7 +46,7 @@
                   type="date"
                   v-model="form.dateOfBirth"
                   required
-                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                 />
               </div>
               <div>
@@ -55,18 +55,16 @@
                 >
                 <select
                   v-model="form.gradeApplying"
-                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
                 >
-                  <option class="text-gray-500" value="" selected disabled>
-                    Select Class
-                  </option>
+                  <option value="" selected disabled>Select Class</option>
                   <option
                     v-for="grade in 12"
                     :key="grade"
                     :value="grade"
                     class="text-gray-500"
                   >
-                  Primary {{ grade }}
+                    Primary {{ grade }}
                   </option>
                 </select>
               </div>
@@ -169,7 +167,7 @@
 
           <!-- Additional Information -->
           <div>
-            <h3 class="text-xl font-semibold text-gray-600 mb-4">
+            <h3 class="text-xl font-semibold text-gray-500 mb-4">
               Additional Information
             </h3>
             <div class="space-y-4">
