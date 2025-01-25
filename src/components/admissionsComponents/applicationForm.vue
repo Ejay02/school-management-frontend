@@ -46,7 +46,7 @@
                   type="date"
                   v-model="form.dateOfBirth"
                   required
-                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                 />
               </div>
               <div>
@@ -55,11 +55,18 @@
                 >
                 <select
                   v-model="form.gradeApplying"
-                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
                 >
-                  <option value="">Select Grade</option>
-                  <option v-for="grade in 12" :key="grade" :value="grade">
-                    Grade {{ grade }}
+                  <option class="text-gray-500" value="" selected disabled>
+                    Select Class
+                  </option>
+                  <option
+                    v-for="grade in 12"
+                    :key="grade"
+                    :value="grade"
+                    class="text-gray-500"
+                  >
+                  Primary {{ grade }}
                   </option>
                 </select>
               </div>
@@ -172,13 +179,21 @@
                 >
                 <select
                   v-model="form.referralSource"
-                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
                 >
-                  <option value="">Select an option</option>
-                  <option value="website">School Website</option>
-                  <option value="social">Social Media</option>
-                  <option value="friend">Friend/Family</option>
-                  <option value="other">Other</option>
+                  <option class="text-gray-500" value="" disabled>
+                    Select an option
+                  </option>
+                  <option class="text-gray-500" value="website">
+                    School Website
+                  </option>
+                  <option class="text-gray-500" value="social">
+                    Social Media
+                  </option>
+                  <option class="text-gray-500" value="friend">
+                    Friend/Family
+                  </option>
+                  <option class="text-gray-500" value="other">Other</option>
                 </select>
               </div>
               <div>

@@ -48,16 +48,23 @@
             placeholder="you@example.com"
           />
         </div>
+
         <div>
           <label class="block text-gray-600 mb-2">Purpose of Inquiry</label>
           <select
             v-model="inquiryType"
             class="cursor-pointer w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-eduPurpleLight focus:ring-2 transition"
           >
-            <option value="" disabled selected> Select Inquiry Type</option>
-            <option value="admissions">Admissions</option>
-            <option value="academics">Academic Programs</option>
-            <option value="support">General Support</option>
+            <option value="" disabled selected class="text-gray-600">
+              Select Inquiry Type
+            </option>
+            <option class="text-gray-600" value="admissions">Admissions</option>
+            <option class="text-gray-600" value="academics">
+              Academic Programs
+            </option>
+            <option class="text-gray-600" value="support">
+              General Support
+            </option>
           </select>
         </div>
         <div>
@@ -106,6 +113,7 @@ import { ref } from "vue";
 const name = ref("");
 const email = ref("");
 const message = ref("");
+const inquiryType = ref("");
 
 function submitForm() {
   console.log("Form Submitted", {
