@@ -5,7 +5,7 @@
 
     <!-- banner -->
     <Banner />
-    
+
     <!-- Hero Section with Sign Up -->
     <HomeHero />
 

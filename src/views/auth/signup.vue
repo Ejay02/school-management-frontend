@@ -38,8 +38,8 @@
             >
             <div class="mt-2">
               <input
-                type="email"
-                name="email"
+                type="text"
+                name="username"
                 id="email"
                 autocomplete="email"
                 placeholder="janebond007"

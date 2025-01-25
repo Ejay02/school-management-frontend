@@ -1,97 +1,101 @@
 <template>
-  <div
-    class="min-h-screen bg-gradient-to-br from-indigo-900 to-purple-800 flex items-center justify-center p-8"
-  >
-    <div
-      class="w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden grid md:grid-cols-2"
-    >
-      <!-- Left Side: Decorative Image -->
-      <div
-        class="hidden md:block bg-cover bg-center"
-        style="background-image: url('/contact-bg.jpg')"
-      >
-        <div
-          class="w-full h-full bg-indigo-900 bg-opacity-60 flex items-center justify-center"
+  <header class="relative bg-gray-200 shadow-md">
+    <div class="container mx-auto py-6 flex justify-between items-center">
+      <router-link to="/" class="group">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="text-gray-600 h-6 w-6 cursor-pointer group-hover:animate-bounce"
         >
-          <div class="text-center text-white p-8">
-            <h2 class="text-4xl font-bold mb-4">Let's Connect</h2>
-            <p class="text-xl opacity-80">
-              We're here to answer your questions and help you take the next
-              step in your educational journey.
-            </p>
-          </div>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18"
+          />
+        </svg>
+      </router-link>
+    </div>
+  </header>
+
+  <div class="min-h-screen bg-gray-200 flex items-center justify-center p-4">
+    <div class="bg-eduYellowLight shadow-xl rounded-lg w-full max-w-md p-8">
+      <h2 class="text-2xl font-bold text-center text-gray-600 mb-6">
+        Contact Us
+      </h2>
+
+      <form @submit.prevent="submitForm" class="space-y-4">
+        <div>
+          <label class="block text-gray-600 mb-2">Name</label>
+          <input
+            v-model="name"
+            type="text"
+            required
+            class="cursor-pointer w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-eduPurpleLight"
+            placeholder="Your Name"
+          />
         </div>
-      </div>
 
-      <!-- Right Side: Contact Form -->
-      <div class="p-12">
-        <form @submit.prevent="submitForm" class="space-y-6">
-          <h3 class="text-3xl font-bold text-gray-800 mb-6 text-center">
-            Contact EduHub
-          </h3>
-
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-gray-700 mb-2">First Name</label>
-              <input
-                v-model="firstName"
-                type="text"
-                required
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500 transition"
-              />
-            </div>
-            <div>
-              <label class="block text-gray-700 mb-2">Last Name</label>
-              <input
-                v-model="lastName"
-                type="text"
-                required
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500 transition"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-gray-700 mb-2">Email Address</label>
-            <input
-              v-model="email"
-              type="email"
-              required
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500 transition"
-            />
-          </div>
-
-          <div>
-            <label class="block text-gray-700 mb-2">Purpose of Inquiry</label>
-            <select
-              v-model="inquiryType"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500 transition"
-            >
-              <option value="">Select Inquiry Type</option>
-              <option value="admissions">Admissions</option>
-              <option value="academics">Academic Programs</option>
-              <option value="support">General Support</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-gray-700 mb-2">Your Message</label>
-            <textarea
-              v-model="message"
-              required
-              rows="4"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-indigo-500 transition"
-            ></textarea>
-          </div>
-
-          <button
-            type="submit"
-            class="w-full bg-indigo-600 text-white py-4 rounded-lg hover:bg-indigo-700 transition transform hover:scale-105 duration-300 ease-in-out"
+        <div>
+          <label class="block text-gray-600 mb-2">Email</label>
+          <input
+            v-model="email"
+            type="email"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-eduPurpleLight cursor-pointer"
+            placeholder="you@example.com"
+          />
+        </div>
+        <div>
+          <label class="block text-gray-600 mb-2">Purpose of Inquiry</label>
+          <select
+            v-model="inquiryType"
+            class="cursor-pointer w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-eduPurpleLight focus:ring-2 transition"
           >
-            Send Message
-          </button>
-        </form>
-      </div>
+            <option value="" disabled selected> Select Inquiry Type</option>
+            <option value="admissions">Admissions</option>
+            <option value="academics">Academic Programs</option>
+            <option value="support">General Support</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-gray-600 mb-2">Message</label>
+          <textarea
+            v-model="message"
+            required
+            rows="4"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-eduPurpleLight cursor-pointer"
+            placeholder="✨ Your message..."
+          ></textarea>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-500 transition duration-300 animate-bounce-once"
+        >
+          Send Message
+        </button>
+
+        <div class="flex justify-center space-x-4 mt-4 border-t pt-2">
+          <a
+            href="https://github.com/Ejay02"
+            target="_blank"
+            class="text-eduPurple hover:text-eduPurpleLight transition duration-300"
+          >
+            <i class="fa-brands fa-github text-2xl"></i>
+          </a>
+
+          <a
+            href="https://www.linkedin.com/in/ejakpovi"
+            target="_blank"
+            class="text-eduPurple hover:text-eduPurpleLight transition duration-300"
+          >
+            <i class="fa-brands fa-linkedin text-2xl"></i>
+          </a>
+        </div>
+      </form>
     </div>
   </div>
 </template>
@@ -99,30 +103,19 @@
 <script setup>
 import { ref } from "vue";
 
-const firstName = ref("");
-const lastName = ref("");
+const name = ref("");
 const email = ref("");
-const inquiryType = ref("");
 const message = ref("");
 
-const submitForm = () => {
-  // Placeholder submission logic
-  console.log({
-    firstName: firstName.value,
-    lastName: lastName.value,
+function submitForm() {
+  console.log("Form Submitted", {
+    name: name.value,
     email: email.value,
-    inquiryType: inquiryType.value,
     message: message.value,
   });
 
-  // Reset form
-  firstName.value = "";
-  lastName.value = "";
+  name.value = "";
   email.value = "";
-  inquiryType.value = "";
   message.value = "";
-
-  // Show success message
-  alert("Message sent successfully!");
-};
+}
 </script>

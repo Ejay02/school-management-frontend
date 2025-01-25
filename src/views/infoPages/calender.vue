@@ -297,6 +297,15 @@ initCalendar();
 const events = ref([
   // Multi-day events
   {
+    id: 3,
+    title: "Valentine's Day 💖",
+    date: "2025-02-14",
+    endDate: "2025-02-14",
+    type: "Events",
+    description: "Valentine's Day celebration for all students and staff",
+    location: "All Classrooms",
+  },
+  {
     id: 4,
     title: "Mid-Term Exams",
     date: "2025-01-28",
