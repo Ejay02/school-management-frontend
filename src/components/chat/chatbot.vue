@@ -1,6 +1,5 @@
 <template>
-  <div class="fixed bottom-6 right-6 z-50">
-    <!-- Chatbot Icon/Trigger -->
+  <div class="fixed bottom-6 right-6 z-50 cursor-pointer">
     <div
       @click="toggleChat"
       class="bg-eduPurple text-gray-600 rounded-full w-16 h-16 flex items-center justify-center shadow-lg cursor-pointer hover:bg-eduPurpleLight transition-colors"
@@ -8,19 +7,16 @@
       <i class="fa-solid fa-headset"></i>
     </div>
 
-    <!-- Chatbot Modal -->
     <div
       v-if="isChatOpen"
       class="fixed bottom-24 right-6 w-96 bg-eduYellowLight rounded-lg shadow-xl border border-gray-200 flex flex-col max-h-[500px]"
     >
-      <!-- Chat Header -->
       <div
         class="bg-eduPurple text-white p-4 rounded-t-lg flex justify-between items-center"
       >
-        <h3 class="text-lg font-semibold">School Assistant</h3>
+        <h3 class="text-lg font-semibold">Eduhub Assistant</h3>
       </div>
 
-      <!-- Chat Messages -->
       <div
         ref="chatContainer"
         class="flex-grow overflow-y-auto p-4 space-y-3"
@@ -31,20 +27,23 @@
           :key="index"
           :message="message"
         />
+        <div v-if="isLoading" class="text-center text-gray-500 font-serif">
+          Thinking...
+        </div>
       </div>
 
-      <!-- Chat Input -->
       <div class="p-4 border-t">
         <div class="flex space-x-2">
           <input
             v-model="newMessage"
             @keyup.enter="sendMessage"
             placeholder="Type your message..."
-            class="flex-grow p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            class="cursor-pointer flex-grow p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-gray-500"
           />
           <button
             @click="sendMessage"
             class="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-300 transition-colors"
+            :disabled="isLoading"
           >
             Send
           </button>
@@ -56,37 +55,68 @@
 
 <script setup>
 import { ref, nextTick } from "vue";
+import axios from "axios";
 import ChatMessage from "./ChatMessage.vue";
 
 const isChatOpen = ref(false);
-const messages = ref([{ type: "bot", text: "Hi! How can I help you today?" }]);
+const messages = ref([
+  { type: "bot", text: "Hi! I'm your school app assistant. How can I help?" },
+]);
 const newMessage = ref("");
 const chatContainer = ref(null);
+const isLoading = ref(false);
+
+const sendMessage = async () => {
+  if (newMessage.value.trim() === "" || isLoading.value) return;
+
+  const userMessage = newMessage.value;
+  messages.value.push({ type: "user", text: userMessage });
+  newMessage.value = "";
+  isLoading.value = true;
+
+  try {
+    const response = await axios.post(
+      "https://api-inference.huggingface.co/models/google/gemma-2-2b-it",
+      {
+        inputs: `<start_of_turn>user\n${userMessage}<end_of_turn>\n<start_of_turn>model\n`,
+        parameters: {
+          max_new_tokens: 250,
+          temperature: 0.7,
+          top_p: 0.95,
+        },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_HUGGINGFACE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // Extract the generated text and remove the input prompt
+    const fullResponse = response.data[0].generated_text;
+    const botResponse = fullResponse
+      .replace(
+        `<start_of_turn>user\n${userMessage}<end_of_turn>\n<start_of_turn>model\n`,
+        ""
+      )
+      .trim();
+
+    messages.value.push({ type: "bot", text: botResponse });
+  } catch (error) {
+    messages.value.push({
+      type: "bot",
+      text: "Sorry, I encountered an error.",
+    });
+  } finally {
+    isLoading.value = false;
+    await nextTick();
+    scrollToBottom();
+  }
+};
 
 const toggleChat = () => {
   isChatOpen.value = !isChatOpen.value;
-};
-
-const sendMessage = async () => {
-  if (newMessage.value.trim() === "") return;
-
-  // Add user message
-  messages.value.push({ type: "user", text: newMessage.value });
-
-  // Simulate bot response (replace with actual AI/backend logic)
-  const userMessage = newMessage.value;
-  newMessage.value = "";
-
-  // Simulated bot response
-  setTimeout(async () => {
-    messages.value.push({
-      type: "bot",
-      text: `You said: "${userMessage}". I'm a school assistant bot!`,
-    });
-
-    await nextTick();
-    scrollToBottom();
-  }, 1000);
 };
 
 const scrollToBottom = () => {

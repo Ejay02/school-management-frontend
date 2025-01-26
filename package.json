@@ -17,6 +17,7 @@
     "@fullcalendar/vue3": "^6.1.15",
     "@popperjs/core": "^2.11.8",
     "autoprefixer": "^10.4.20",
+    "axios": "^1.7.9",
     "chart.js": "^4.4.6",
     "date-holidays": "^3.23.18",
     "pinia": "^2.2.6",
