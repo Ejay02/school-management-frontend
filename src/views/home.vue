@@ -20,6 +20,9 @@
 
     <!-- Footer -->
     <Footer />
+
+    <!-- Chatbot Component -->
+    <Chatbot />
   </div>
 </template>
 
@@ -31,6 +34,7 @@ import HomeTestimonials from "../components/homeComponents/homeTestimonials.vue"
 import HomeCallToAction from "../components/homeComponents/homeCallToAction.vue";
 import Footer from "../components/homeComponents/footer.vue";
 import Banner from "../components/banner.vue";
+import Chatbot from "../components/chat/chatbot.vue";
 </script>
 
 <style scoped></style>
