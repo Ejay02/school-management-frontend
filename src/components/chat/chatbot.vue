@@ -57,14 +57,51 @@
 import { ref, nextTick } from "vue";
 import axios from "axios";
 import ChatMessage from "./ChatMessage.vue";
+import { schoolProfile, generateSchoolPrompt } from "../../utils/aiResponse";
 
 const isChatOpen = ref(false);
 const messages = ref([
-  { type: "bot", text: "Hi! I'm your school app assistant. How can I help?" },
+  { type: "bot", text: "Hi! I'm your Eduhub assistant. How can I help?" },
 ]);
 const newMessage = ref("");
 const chatContainer = ref(null);
 const isLoading = ref(false);
+
+const checkLocalData = (userMessage) => {
+  // Convert user message to lowercase for better matching
+  const lowercaseMessage = userMessage.toLowerCase();
+
+  // Check for school name mentions
+  if (lowercaseMessage.includes(schoolProfile.name.toLowerCase())) {
+    return `${schoolProfile.name} is a ${schoolProfile.about.type} school located in ${schoolProfile.about.location}, founded in ${schoolProfile.about.founded}.`;
+  }
+
+  // Check for about/general info queries
+  if (
+    lowercaseMessage.includes("about") ||
+    lowercaseMessage.includes("tell me more")
+  ) {
+    return `We are a ${schoolProfile.about.type} school with ${schoolProfile.about.totalStudents} students and a student-teacher ratio of ${schoolProfile.about.studentTeacherRatio}.`;
+  }
+
+  // Check for academic/curriculum queries
+  if (
+    lowercaseMessage.includes("academic") ||
+    lowercaseMessage.includes("study")
+  ) {
+    return `We offer classes from ${
+      schoolProfile.academicDetails.classRange
+    } with a focus on ${schoolProfile.academicDetails.curriculum.join(", ")}.`;
+  }
+
+  // Check common queries using the existing findResponse method
+  const matchedQuery = schoolProfile.commonQueries.find((item) =>
+    item.keywords.some((keyword) => lowercaseMessage.includes(keyword))
+  );
+
+  // Only return if we have a specific match
+  return matchedQuery ? matchedQuery.response : null;
+};
 
 const sendMessage = async () => {
   if (newMessage.value.trim() === "" || isLoading.value) return;
@@ -75,34 +112,46 @@ const sendMessage = async () => {
   isLoading.value = true;
 
   try {
-    const response = await axios.post(
-      "https://api-inference.huggingface.co/models/google/gemma-2-2b-it",
-      {
-        inputs: `<start_of_turn>user\n${userMessage}<end_of_turn>\n<start_of_turn>model\n`,
-        parameters: {
-          max_new_tokens: 250,
-          temperature: 0.7,
-          top_p: 0.95,
-        },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_HUGGINGFACE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    // First check if we have a local response
+    const localResponse = checkLocalData(userMessage);
 
-    // Extract the generated text and remove the input prompt
-    const fullResponse = response.data[0].generated_text;
-    const botResponse = fullResponse
-      .replace(
-        `<start_of_turn>user\n${userMessage}<end_of_turn>\n<start_of_turn>model\n`,
-        ""
-      )
-      .trim();
+    if (localResponse) {
+      // If we have a local response, use it
+      messages.value.push({ type: "bot", text: localResponse });
+    } else {
+      // If no local response, make API call
+      const response = await axios.post(
+        "https://api-inference.huggingface.co/models/google/gemma-2-2b-it",
+        {
+          inputs: `<start_of_turn>user\n${generateSchoolPrompt(
+            userMessage
+          )}<end_of_turn>\n<start_of_turn>model\n`,
+          parameters: {
+            max_new_tokens: 250,
+            temperature: 0.7,
+            top_p: 0.95,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_HUGGINGFACE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-    messages.value.push({ type: "bot", text: botResponse });
+      const fullResponse = response.data[0].generated_text;
+      const botResponse = fullResponse
+        .replace(
+          `<start_of_turn>user\n${generateSchoolPrompt(
+            userMessage
+          )}<end_of_turn>\n<start_of_turn>model\n`,
+          ""
+        )
+        .trim();
+
+      messages.value.push({ type: "bot", text: botResponse });
+    }
   } catch (error) {
     messages.value.push({
       type: "bot",

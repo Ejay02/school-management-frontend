@@ -3,7 +3,7 @@ export const schoolProfile = {
   name: "Eduhub Portal",
   about: {
     founded: 2025,
-    type: "Public",
+    type: "Private",
     location: "Springfield, Illinois",
     totalStudents: 360,
     studentTeacherRatio: "10:1",
