@@ -18,9 +18,9 @@
 </template>
 
 <script setup>
-import AcademicsCallToAction from "../../components/academicsComponents/academicsCallToAction.vue";
-import AcademicsCurriculum from "../../components/academicsComponents/academicsCurriculum.vue";
 import AcademicsHero from "../../components/academicsComponents/academicsHero.vue";
-import AcademicsPrograms from "../../components/academicsComponents/academicsPrograms.vue";
 import AcademicsSupport from "../../components/academicsComponents/academicsSupport.vue";
+import AcademicsPrograms from "../../components/academicsComponents/academicsPrograms.vue";
+import AcademicsCurriculum from "../../components/academicsComponents/academicsCurriculum.vue";
+import AcademicsCallToAction from "../../components/academicsComponents/academicsCallToAction.vue";
 </script>

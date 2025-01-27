@@ -56,12 +56,12 @@
 <script setup>
 import { ref, nextTick } from "vue";
 import axios from "axios";
-import ChatMessage from "./ChatMessage.vue";
+import ChatMessage from "../../components/chat/chatMessage.vue";
 import { schoolProfile, generateSchoolPrompt } from "../../utils/aiResponse";
 
 const isChatOpen = ref(false);
 const messages = ref([
-  { type: "bot", text: "Hi! I'm your Eduhub assistant. How can I help?" },
+  { type: "bot", text: "Hi! I'm your Eduhub assistant. \n How can I help?" },
 ]);
 const newMessage = ref("");
 const chatContainer = ref(null);

@@ -15,8 +15,8 @@
 </template>
 
 <script setup>
-import AboutHeader from "../../components/aboutComponents/aboutHeader.vue";
 import AboutHero from "../../components/aboutComponents/aboutHero.vue";
-import AboutLeadership from "../../components/aboutComponents/aboutLeadership.vue";
 import AboutVideo from "../../components/aboutComponents/aboutVideo.vue";
+import AboutHeader from "../../components/aboutComponents/aboutHeader.vue";
+import AboutLeadership from "../../components/aboutComponents/aboutLeadership.vue";
 </script>
