@@ -57,6 +57,15 @@
 
         <!-- Login and Mobile menu -->
         <div class="flex items-center">
+          <!-- sign up -->
+          <div class="hidden md:flex items-center mr-2">
+            <router-link
+              to="/signup"
+              class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-500 focus-visible:outline-indigo-600 transition-colors"
+            >
+              Sign up
+            </router-link>
+          </div>
           <!-- Login button -->
           <div class="hidden md:flex items-center">
             <router-link
