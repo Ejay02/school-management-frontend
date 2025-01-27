@@ -97,7 +97,6 @@ A comprehensive school management system built with Vue 3 that helps educational
 - **Chart.js**: Data visualization
 - **VCalendar**: Calendar and date picking
 
-
 ### Development Tools
 
 - **ESLint**: Code quality
@@ -183,7 +182,6 @@ npm run test:coverage
 
 - Follow Vue 3 Composition API patterns
 
-
 ### State Management
 
 - Use Pinia for global state
@@ -201,6 +199,14 @@ npm run test:coverage
 ## Support
 
 For support, please email e.jae02@gmail.com.
+
+## Acknowledgements
+
+This project utilizes the following open-source libraries:
+
+- Unsplash: For high-quality placeholder images. [Explore here](https://unsplash.com/)
+- Hugging Face Gemma-2B Model: For any NLP capabilities integrated into the platform. [Explore the Gemma-2B model](https://huggingface.co/google/gemma-2-2b-it).
+- Pexels: For high quality videos. [Explore Pexels](https://www.pexels.com/)
 
 ## License
 
