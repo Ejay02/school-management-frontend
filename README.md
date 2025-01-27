@@ -136,8 +136,7 @@ npm run dev
 
 ```env
 VITE_API_URL=your_backend_url
-VITE_APP_TITLE=School Management System
-VITE_DEFAULT_LOCALE=en
+VITE_HUGGINGFACE_API_KEY=your hugging face api key
 ```
 
 ## Development
