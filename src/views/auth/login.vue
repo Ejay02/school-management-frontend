@@ -137,10 +137,16 @@
 
 <script setup>
 import { useRouter } from "vue-router";
+import { useUserStore } from "../../store/userStore";
 
 const router = useRouter();
+const userStore = useUserStore();
+
+const role = useUserStore.currentRole;
+console.log("role:", role);
+
 const login = () => {
-  router.push("/dashboard");
+  router.push(`/dashboard/teacher`);
 };
 </script>
 

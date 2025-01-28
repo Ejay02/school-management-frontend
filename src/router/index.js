@@ -31,6 +31,11 @@ import Calender from "../views/infoPages/calender.vue";
 import Contact from "../views/infoPages/contact.vue";
 import Academics from "../views/infoPages/academics.vue";
 import About from "../views/infoPages/about.vue";
+import ProfileSetting from "../components/settingsComponents/profileSetting.vue";
+import NotificationSetting from "../components/settingsComponents/notificationSetting.vue";
+import BillingSetting from "../components/settingsComponents/billingSetting.vue";
+import TeamSetting from "../components/settingsComponents/teamSetting.vue";
+import IntegrationSetting from "../components/settingsComponents/integrationSetting.vue";
 
 // Define public routes that don't require authentication
 const publicRoutes = ["Home", "Login", "Signup"];
@@ -181,6 +186,37 @@ const routes = [
         path: "/settings",
         name: "Settings",
         component: Settings,
+        children: [
+          {
+            path: "profile",
+            name: "profile",
+            component: ProfileSetting,
+          },
+          {
+            path: "notifications",
+            name: "notifications",
+            component: NotificationSetting,
+          },
+          {
+            path: "billing",
+            name: "billing",
+            component: BillingSetting,
+          },
+          {
+            path: "team",
+            name: "team",
+            component: TeamSetting,
+          },
+          {
+            path: "integrations",
+            name: "integrations",
+            component: IntegrationSetting,
+          },
+          {
+            path: "",
+            redirect: { name: "profile" },
+          },
+        ],
       },
     ],
   },
