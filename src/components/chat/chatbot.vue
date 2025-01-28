@@ -81,7 +81,7 @@ const checkLocalData = (userMessage) => {
     lowercaseMessage.includes("about") ||
     lowercaseMessage.includes("tell me more")
   ) {
-    return `We are a ${schoolProfile.about.type} school with ${schoolProfile.about.totalStudents} students and a student-teacher ratio of ${schoolProfile.about.studentTeacherRatio}.`;
+    return `We are a ${schoolProfile.about.type} school with ${schoolProfile.about.totalStudents} student capacity and a student-teacher ratio of ${schoolProfile.about.studentTeacherRatio}.`;
   }
 
   // Check for academic/curriculum queries
