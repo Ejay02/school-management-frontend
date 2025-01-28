@@ -39,7 +39,7 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2">
               <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ring-1 ring-inset"
                 :class="getStatusColor(integration.status)"
               >
                 {{ integration.status.replace("_", " ") }}
@@ -170,16 +170,16 @@ const refreshIntegration = async (id) => {
 const getStatusColor = (status) => {
   switch (status) {
     case "connected":
-      return "bg-green-100 text-green-800";
+      return "bg-green-50 text-green-700 ring-green-600/20";
     case "not_connected":
-      return "bg-gray-100 text-gray-800";
+      return "bg-gray-50 text-gray-600 ring-gray-500/10";
     case "connecting":
     case "syncing":
-      return "bg-blue-100 text-blue-800";
+      return "bg-blue-50 text-blue-700 ring-blue-700/10";
     case "disconnecting":
-      return "bg-yellow-100 text-yellow-800";
+      return "bg-yellow-100 text-yellow-800 ring-yellow-600/20";
     default:
-      return "bg-gray-100 text-gray-800";
+      return "bg-gray-50 text-gray-600 ring-gray-500/10";
   }
 };
 

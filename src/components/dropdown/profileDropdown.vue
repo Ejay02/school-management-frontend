@@ -28,7 +28,7 @@ import { useRoute } from 'vue-router';
 
     <!-- Settings -->
     <router-link
-      to="/settings"
+      to="/settings/profile"
       class="flex items-center gap-3 p-2 border-b border-gray-300 hover:bg-eduSkyLight rounded-md group"
     >
       <svg
