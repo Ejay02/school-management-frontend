@@ -212,10 +212,6 @@ const routes = [
             name: "integrations",
             component: IntegrationSetting,
           },
-          {
-            path: "",
-            redirect: { name: "profile" },
-          },
         ],
       },
     ],

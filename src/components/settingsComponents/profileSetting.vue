@@ -3,92 +3,111 @@
     <form @submit.prevent="saveSettings" class="p-6">
       <!-- Profile Section -->
       <div
-        class="flex justify-between flex-auto space-x-6 border-b border-gray-100 p-2 mb-4"
+        class="flex flex-col md:flex-row justify-between space-y-6 md:space-y-0 md:space-x-6 p-2"
       >
-        <div class="">
-          <h2 class="text-lg font-medium text-gray-600">
-            Personal Information
-          </h2>
-          <h6 class="text-gray-500">
-            Use a permanent address where you can receive mail.
-          </h6>
-        </div>
-        <div class="">
-          <!-- img -->
-          <div class="flex flex-col items-center mb-8">
-            <div class="relative">
-              <img
-                :src="profilePreview || user.profileImage"
-                class="h-32 w-32 rounded-full object-cover border-4 border-white shadow-lg"
-                alt="Profile image"
-              />
-              <button
-                type="button"
-                @click="$refs.fileInput.click()"
-                class="absolute bottom-0 right-0 h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-white hover:bg-blue-600 transition-colors"
-              >
-                <i class="fas fa-camera"></i>
-              </button>
-              <input
-                type="file"
-                ref="fileInput"
-                @change="handleImageChange"
-                accept="image/*"
-                class="hidden"
-              />
-            </div>
+        <!-- Profile Image Section -->
+        <div
+          class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6"
+        >
+          <div class="relative">
+            <img
+              :src="profilePreview || user.profileImage"
+              class="h-32 w-32 rounded-full object-cover border-2 border-white shadow-lg"
+              alt="Profile image"
+            />
+            <button
+              type="button"
+              @click="$refs.fileInput.click()"
+              class="absolute bottom-0 right-0 h-8 w-8 bg-eduSky rounded-full flex items-center justify-center text-white hover:bg-eduPurple transition-colors"
+            >
+              <i class="fas fa-camera"></i>
+            </button>
+            <input
+              type="file"
+              ref="fileInput"
+              @change="handleImageChange"
+              accept="image/*"
+              class="hidden"
+            />
           </div>
+          <!-- File type text moved to center vertically -->
+          <div
+            class="text-center font-semibold text-gray-600 text-xs flex items-center"
+          >
+            <span>JPG, GIF or PNG. 1MB max.</span>
+          </div>
+        </div>
 
-          <!-- Personal Information -->
-          <div class="space-y-6 mb-8">
-            <div class="grid gap-4">
-              <div class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700"
-                  >Full Name</label
+        <!-- Form Fields Section -->
+        <div class="flex-1 max-w-2xl">
+          <div class="space-y-6">
+            <!-- Name Fields -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label
+                  for="firstname"
+                  class="block text-sm font-medium text-gray-500"
+                  >First Name</label
                 >
                 <input
-                  v-model="formData.name"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  placeholder="Enter your full name"
+                  v-model="formData.firstName"
+                  required
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                 />
               </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500"
+                  >Last Name</label
+                >
+                <input
+                  type="text"
+                  v-model="formData.lastName"
+                  required
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+                />
+              </div>
+            </div>
 
-              <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-2">
-                  <label class="block text-sm font-medium text-gray-700"
-                    >Username</label
-                  >
-                  <input
-                    v-model="formData.username"
-                    type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="Choose a username"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="block text-sm font-medium text-gray-700"
-                    >Date of Birth</label
-                  >
-                  <input
-                    v-model="formData.dob"
-                    type="date"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  />
-                </div>
+            <!-- Username and DOB Fields -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="">
+                <label class="block text-sm font-medium text-gray-500"
+                  >Username</label
+                >
+                <input
+                  v-model="formData.username"
+                  type="text"
+                  required
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+                  placeholder="Choose a username"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500"
+                  >Date of Birth</label
+                >
+                <input
+                  v-model="formData.dob"
+                  type="date"
+                  required
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Save Button -->
-      <button
-        type="submit"
-        class="text-end px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-      >
-        Save Changes
-      </button>
+      <!-- Save Button  -->
+      <div class="flex justify-end mt-4 border-t border-gray-200">
+        <button
+          type="submit"
+          class="mt-4 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+        >
+          Save Changes
+        </button>
+      </div>
     </form>
   </div>
 </template>
