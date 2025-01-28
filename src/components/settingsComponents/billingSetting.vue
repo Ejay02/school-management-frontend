@@ -1,34 +1,51 @@
 <template>
-  <div class="bg-white rounded-lg p-6 w-full">
-    <!-- Current Subscription -->
+  <div class="bg-eduYellowLight rounded-lg p-6 w-full">
+    <!-- Current Term Fees -->
+    <h2 class="text-2xl font-bold text-gray-600 text-center mb-4">
+      School Fees Management
+    </h2>
     <div class="mb-8">
-      <h2 class="text-2xl font-bold text-gray-800 text-center mb-4">Subscription</h2>
-      <div class="bg-eduYellowLight rounded-lg shadow p-6">
+      <div class="bg-eduSkyLight rounded-lg shadow p-6">
         <div class="flex justify-between items-center">
           <div>
-            <h3 class="text-lg font-semibold text-gray-900">
-              {{ subscription.plan }} Plan
+            <h3 class="text-lg font-semibold text-gray-600">
+              {{ studentFees.ward }} -
+              <span class="text-gray-500">
+                {{ studentFees.plan }}
+              </span>
             </h3>
             <p class="text-gray-600">
-              Next billing date: {{ subscription.nextBilling }}
+              Class :
+              <span class="text-gray-500"> {{ studentFees.class }}</span>
+            </p>
+            <p class="text-gray-500">
+              Next payment due :
+
+              <span
+                class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset"
+                >{{ studentFees.nextPayment }}</span
+              >
             </p>
           </div>
           <div class="text-right">
-            <p class="text-2xl font-bold text-gray-900">
-              ${{ subscription.amount }}/mo
+            <p class="text-2xl font-bold text-gray-600">
+              ${{ studentFees.termFee }}
             </p>
+
             <span
-              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+              class="inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset"
               :class="{
-                'bg-green-100 text-green-800': subscription.status === 'active',
-                'bg-yellow-100 text-yellow-800':
-                  subscription.status === 'pending',
-                'bg-red-100 text-red-800': subscription.status === 'cancelled',
+                'bg-green-50 text-green-700 ring-green-600/20 ':
+                  studentFees.status === 'current',
+                'bg-yellow-50 text-yellow-800 ring-yellow-600/20':
+                  studentFees.status === 'pending',
+                'bg-red-50 text-red-700 ring-red-600/10':
+                  studentFees.status === 'overdue',
               }"
             >
               {{
-                subscription.status.charAt(0).toUpperCase() +
-                subscription.status.slice(1)
+                studentFees.status.charAt(0).toUpperCase() +
+                studentFees.status.slice(1)
               }}
             </span>
           </div>
@@ -39,10 +56,10 @@
     <!-- Payment Methods -->
     <div class="mb-8">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold text-gray-900">Payment Methods</h2>
+        <h2 class="text-2xl font-bold text-gray-600">Payment Methods</h2>
         <button
           @click="showAddCard = true"
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          class="mt-4 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-500 focus:outline-none focus:ring-indigo-500 transition-colors"
         >
           <i class="fa-solid fa-plus"></i>
           Add Payment Method
@@ -50,18 +67,23 @@
       </div>
 
       <!-- Payment Methods List -->
-      <div class="bg-white rounded-lg shadow">
+      <div class="bg-eduSkyLight rounded-lg shadow">
         <ul class="divide-y divide-gray-200">
           <li v-for="method in paymentMethods" :key="method.id" class="p-6">
             <div class="flex items-center justify-between">
               <div class="flex items-center">
                 <i class="fa-regular fa-credit-card"></i>
                 <div class="ml-4">
-                  <p class="text-sm font-medium text-gray-900">
+                  <p class="text-sm font-medium text-gray-600">
                     {{ method.brand }} ending in {{ method.last4 }}
                   </p>
                   <p class="text-sm text-gray-500">
-                    Expires {{ method.expiryMonth }}/{{ method.expiryYear }}
+                    Expires
+                    <span
+                      class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset"
+                    >
+                      {{ method.expiryMonth }}/{{ method.expiryYear }}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -90,9 +112,9 @@
       </div>
     </div>
 
-    <!-- Billing History -->
+    <!-- Fee Payment History -->
     <div>
-      <h2 class="text-2xl font-bold text-gray-900 mb-4">Billing History</h2>
+      <h2 class="text-2xl font-bold text-gray-600 mb-4">Payment History</h2>
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
@@ -100,12 +122,17 @@
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Invoice
+                Invoice #
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
                 Date
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Description
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -124,32 +151,35 @@
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="invoice in billingHistory" :key="invoice.id">
+          <tbody class="bg-eduSkyLight divide-y divide-gray-200">
+            <tr v-for="payment in feeHistory" :key="payment.id">
               <td
-                class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-600"
               >
-                {{ invoice.id }}
+                {{ payment.id }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ invoice.date }}
+                {{ payment.date }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${{ invoice.amount }}
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ payment.description }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                ${{ payment.amount }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
                   class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                   :class="{
-                    'bg-green-100 text-green-800': invoice.status === 'paid',
+                    'bg-green-100 text-green-800': payment.status === 'paid',
                     'bg-yellow-100 text-yellow-800':
-                      invoice.status === 'pending',
-                    'bg-red-100 text-red-800': invoice.status === 'failed',
+                      payment.status === 'pending',
+                    'bg-red-100 text-red-800': payment.status === 'overdue',
                   }"
                 >
                   {{
-                    invoice.status.charAt(0).toUpperCase() +
-                    invoice.status.slice(1)
+                    payment.status.charAt(0).toUpperCase() +
+                    payment.status.slice(1)
                   }}
                 </span>
               </td>
@@ -157,8 +187,8 @@
                 class="px-14 py-4 whitespace-nowrap text-right text-sm font-medium"
               >
                 <a
-                  :href="invoice.downloadUrl"
-                  class="text-indigo-600 hover:text-eduPurple"
+                  :href="payment.downloadUrl"
+                  class="text-indigo-600 hover:text-blue-800"
                 >
                   <i class="fa-solid fa-download"></i>
                 </a>
@@ -166,6 +196,7 @@
             </tr>
           </tbody>
         </table>
+        <Pagination />
       </div>
     </div>
 
@@ -175,54 +206,62 @@
       class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center"
     >
       <div class="bg-white rounded-lg p-6 max-w-md w-full">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">
+        <h3 class="text-lg font-medium text-gray-600 mb-4 text-center">
           Add Payment Method
         </h3>
         <form @submit.prevent="addNewCard">
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700"
+              <label
+                for="cardNumber"
+                class="block text-sm font-medium text-gray-500"
                 >Card Number</label
               >
               <input
                 v-model="newCard.number"
                 type="text"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                required
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                 placeholder="1234 5678 9012 3456"
               />
             </div>
+            <!--  -->
+
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700"
+                <label class="block text-sm font-medium text-gray-500"
                   >Expiry Date</label
                 >
                 <input
                   v-model="newCard.expiry"
                   type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                   placeholder="MM/YY"
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700"
+                <label class="block text-sm font-medium text-gray-500"
                   >CVC</label
                 >
                 <input
                   v-model="newCard.cvc"
                   type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                   placeholder="123"
                 />
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700"
+              <label class="block text-sm font-medium text-gray-500"
                 >Name on Card</label
               >
               <input
                 v-model="newCard.name"
                 type="text"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                required
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                 placeholder="John Doe"
               />
             </div>
@@ -231,17 +270,16 @@
             <button
               type="button"
               @click="showAddCard = false"
-              class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              class="px-4 py-2 mt-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none"
             >
               Cancel
             </button>
             <button
               type="submit"
               :disabled="isProcessing"
-              class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              class="mt-4 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
             >
-              <span v-if="isProcessing">Processing...</span>
-              <span v-else>Add Card</span>
+              {{ isProcessing ? "Processing..." : "Add Card" }}
             </button>
           </div>
         </form>
@@ -251,14 +289,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-// import { CreditCard, Plus, AlertCircle } from "lucide-react";
+import { ref } from "vue";
+import Pagination from "../pagination.vue";
 
-const subscription = ref({
-  plan: "Professional",
-  status: "active",
-  nextBilling: "2024-02-28",
-  amount: 29.99,
+const studentFees = ref({
+  plan: "Primary 6",
+  status: "current",
+  nextPayment: "2024-02-28",
+  termFee: 2999.99,
+  ward: "John Smith",
+  class: "6A",
 });
 
 const paymentMethods = ref([
@@ -272,33 +312,35 @@ const paymentMethods = ref([
   },
 ]);
 
-const billingHistory = ref([
+const feeHistory = ref([
   {
-    id: "INV-001",
+    id: "FEE-001",
     date: "2024-01-28",
-    amount: 29.99,
+    description: "Term 2 School Fees",
+    amount: 2999.99,
     status: "paid",
     downloadUrl: "#",
   },
   {
-    id: "INV-002",
+    id: "FEE-002",
     date: "2023-12-28",
-    amount: 29.99,
+    description: "Term 1 School Fees",
+    amount: 2999.99,
     status: "pending",
     downloadUrl: "#",
   },
   {
-    id: "INV-003",
-    date: "2023-12-28",
-    amount: 29.99,
-    status: "failed",
+    id: "FEE-003",
+    date: "2023-09-15",
+    description: "Term 3 School Fees",
+    amount: 2999.99,
+    status: "overdue",
     downloadUrl: "#",
   },
 ]);
 
 const showAddCard = ref(false);
 const isProcessing = ref(false);
-
 const newCard = ref({
   number: "",
   expiry: "",
