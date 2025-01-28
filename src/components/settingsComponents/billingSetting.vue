@@ -5,7 +5,7 @@
       School Fees Management
     </h2>
     <div class="mb-8">
-      <div class="bg-eduSkyLight rounded-lg shadow p-6">
+      <div class="bg-gray-100 rounded-lg shadow p-6">
         <div class="flex justify-between items-center">
           <div>
             <h3 class="text-lg font-semibold text-gray-600">
@@ -67,7 +67,7 @@
       </div>
 
       <!-- Payment Methods List -->
-      <div class="bg-eduSkyLight rounded-lg shadow">
+      <div class="bg-gray-100 rounded-lg shadow">
         <ul class="divide-y divide-gray-200">
           <li v-for="method in paymentMethods" :key="method.id" class="p-6">
             <div class="flex items-center justify-between">
@@ -151,7 +151,7 @@
               </th>
             </tr>
           </thead>
-          <tbody class="bg-eduSkyLight divide-y divide-gray-200">
+          <tbody class="bg-gray-100 divide-y divide-gray-200">
             <tr v-for="payment in feeHistory" :key="payment.id">
               <td
                 class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-600"
