@@ -16,11 +16,11 @@
 
         <!-- Navigation -->
         <div
-          class="flex bg-eduSkyLight justify-between text-gray-600 text-md font-semibold p-2  border-b border-gray-200"
+          class="flex bg-eduSkyLight justify-between text-gray-600 text-md font-semibold p-2 border-b border-gray-200"
         >
           <router-link
             to="/settings/profile"
-            class="hover:text-eduPurple"
+            class="hover:text-eduPurple pl-4"
             :class="{ 'text-eduPurple': $route.name === 'profile' }"
           >
             Account
@@ -39,6 +39,7 @@
           >
             Billing
           </router-link>
+          <!-- v-if="role === 'superadmin'" -->
           <router-link
             to="/settings/team"
             class="hover:text-eduPurple"
@@ -48,7 +49,7 @@
           </router-link>
           <router-link
             to="/settings/integrations"
-            class="hover:text-eduPurple"
+            class="hover:text-eduPurple pr-4"
             :class="{ 'text-eduPurple': $route.name === 'integrations' }"
           >
             Integrations
@@ -61,4 +62,9 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { useUserStore } from "../store/userStore";
+
+const userStore = useUserStore();
+const role = userStore.currentRole;
+</script>

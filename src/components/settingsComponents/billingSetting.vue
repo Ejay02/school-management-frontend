@@ -168,13 +168,16 @@
                 ${{ payment.amount }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
+                <!--   px-2 py-1 text-xs font-medium text-gray-600 " -->
                 <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset"
                   :class="{
-                    'bg-green-100 text-green-800': payment.status === 'paid',
-                    'bg-yellow-100 text-yellow-800':
+                    'bg-green-50 text-green-700 ring-green-600/20':
+                      payment.status === 'paid',
+                    'bg-yellow-50 text-yellow-800 ring-yellow-600/20':
                       payment.status === 'pending',
-                    'bg-red-100 text-red-800': payment.status === 'overdue',
+                    'bg-red-50 text-red-700 ring-red-600/10':
+                      payment.status === 'overdue',
                   }"
                 >
                   {{
@@ -188,7 +191,7 @@
               >
                 <a
                   :href="payment.downloadUrl"
-                  class="text-indigo-600 hover:text-blue-800"
+                  class="text-indigo-500 hover:text-eduPurple"
                 >
                   <i class="fa-solid fa-download"></i>
                 </a>
