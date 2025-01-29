@@ -1,59 +1,166 @@
 <template>
   <div class="bg-eduYellowLight rounded-lg p-6 w-full">
-    <!-- Current Term Fees -->
-    <h2 class="text-2xl font-bold text-gray-600 text-center mb-4">
-      School Fees Management
-    </h2>
-    <div class="mb-8">
-      <div class="bg-gray-100 rounded-lg shadow p-6">
-        <div class="flex justify-between items-center">
-          <div>
-            <h3 class="text-lg font-semibold text-gray-600">
-              {{ studentFees.ward }} -
-              <span class="text-gray-500">
-                {{ studentFees.plan }}
-              </span>
-            </h3>
-            <p class="text-gray-600">
-              Class :
-              <span class="text-gray-500"> {{ studentFees.class }}</span>
-            </p>
-            <p class="text-gray-500">
-              Next payment due :
-
-              <span
-                class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset"
-                >{{ studentFees.nextPayment }}</span
-              >
-            </p>
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <i class="fa-solid fa-dollar-sign text-2xl text-green-600"></i>
+          <div class="ml-4">
+            <p class="text-sm text-gray-600">Total Outstanding</p>
+            <p class="text-2xl font-bold text-gray-500">$5,799.98</p>
           </div>
-          <div class="text-right">
-            <p class="text-2xl font-bold text-gray-600">
-              ${{ studentFees.termFee }}
+        </div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <i class="fa-solid fa-receipt text-2xl text-blue-600"></i>
+          <div class="ml-4">
+            <p class="text-sm text-gray-600">Last Payment</p>
+            <p class="text-2xl font-bold text-gray-500">$2,999.99</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <i class="fa-solid fa-credit-card text-2xl text-purple-600"></i>
+          <div class="ml-4">
+            <p class="text-sm text-gray-600">Payment Methods</p>
+            <p class="text-2xl font-bold text-gray-500">
+              {{ paymentMethods.length }} Active
             </p>
-
-            <span
-              class="inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset"
-              :class="{
-                'bg-green-50 text-green-700 ring-green-600/20 ':
-                  studentFees.status === 'current',
-                'bg-yellow-50 text-yellow-800 ring-yellow-600/20':
-                  studentFees.status === 'pending',
-                'bg-red-50 text-red-700 ring-red-600/10':
-                  studentFees.status === 'overdue',
-              }"
-            >
-              {{
-                studentFees.status.charAt(0).toUpperCase() +
-                studentFees.status.slice(1)
-              }}
-            </span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Payment Methods -->
+    <!-- Outstanding Fees Per Child -->
+    <div v-for="child in children" :key="child.id" class="mb-8">
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h3 class="text-xl font-bold text-gray-600">{{ child.name }}</h3>
+            <p class="text-sm text-gray-500">
+              {{ child.class }} - {{ child.plan }}
+            </p>
+          </div>
+          <button
+            class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-400 transition-colors"
+          >
+            Pay Full Year (${{ child.yearlyFee }})
+          </button>
+        </div>
+
+        <!-- Term Selection Tabs -->
+        <div class="mb-6">
+          <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8">
+              <button
+                v-for="tab in ['Current Term', 'Upcoming Terms']"
+                :key="tab"
+                @click="selectedTab = tab"
+                :class="[
+                  selectedTab === tab
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-600',
+                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
+                ]"
+              >
+                {{ tab }}
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        <!-- Current Term Content -->
+        <div
+          v-if="selectedTab === 'Current Term'"
+          v-for="fee in child.currentTermFees"
+          :key="fee.term"
+        >
+          <div class="bg-gray-50 rounded-lg p-6 mb-6">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <h4 class="text-lg font-semibold text-gray-600">
+                  {{ fee.term }}
+                </h4>
+                <p class="text-sm text-gray-500">Due: {{ fee.dueDate }}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-2xl font-bold text-gray-600">
+                  ${{ fee.amount }}
+                </p>
+                <p v-if="fee.progress > 0" class="text-sm text-gray-600">
+                  ${{ ((fee.amount * fee.progress) / 100).toFixed(2) }} paid
+                </p>
+              </div>
+            </div>
+
+            <!-- Payment Progress -->
+            <div class="mb-4">
+              <p class="text-sm font-medium mb-2 text-gray-600">
+                Payment Progress
+              </p>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  class="bg-indigo-600 h-2 rounded-full"
+                  :style="{ width: fee.progress + '%' }"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Fee Breakdown -->
+            <div class="bg-white p-4 rounded-lg mb-4">
+              <h5 class="font-medium mb-2 text-gray-600">Fee Breakdown</h5>
+              <div class="space-y-2 text-gray-500">
+                <div
+                  v-for="(amount, type) in fee.breakdown"
+                  :key="type"
+                  class="flex justify-between"
+                >
+                  <span class="text-gray-500">{{
+                    type.charAt(0).toUpperCase() + type.slice(1)
+                  }}</span>
+                  <span>${{ amount }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Actions -->
+            <div class="flex space-x-4">
+              <button
+                class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                Pay Full Term
+              </button>
+              <button
+                class="flex-1 px-4 py-2 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors"
+              >
+                Setup Payment Plan
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming Terms Content -->
+        <div
+          v-if="selectedTab === 'Upcoming Terms'"
+          v-for="fee in child.upcomingTermFees"
+          :key="fee.term"
+        >
+          <div class="bg-gray-50 rounded-lg p-4 mb-4 text-gray-600">
+            <div class="flex justify-between items-center">
+              <div>
+                <h4 class="text-lg font-semibold">{{ fee.term }}</h4>
+                <p class="text-sm text-gray-500">Due: {{ fee.dueDate }}</p>
+              </div>
+              <p class="text-2xl font-bold">${{ fee.amount }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Methods Section-->
     <div class="mb-8">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-2xl font-bold text-gray-600">Payment Methods</h2>
@@ -65,7 +172,6 @@
           Add Payment Method
         </button>
       </div>
-
       <!-- Payment Methods List -->
       <div class="bg-gray-100 rounded-lg shadow">
         <ul class="divide-y divide-gray-200">
@@ -112,7 +218,7 @@
       </div>
     </div>
 
-    <!-- Fee Payment History -->
+    <!-- Payment History -->
     <div>
       <h2 class="text-2xl font-bold text-gray-600 mb-4">Payment History</h2>
       <div class="bg-white rounded-lg shadow overflow-hidden">
@@ -295,23 +401,56 @@
 import { ref } from "vue";
 import Pagination from "../pagination.vue";
 
-const studentFees = ref({
-  plan: "Primary 6",
-  status: "current",
-  nextPayment: "2024-02-28",
-  termFee: 2999.99,
-  ward: "John Smith",
-  class: "6A",
-});
+const selectedTab = ref("Current Term");
 
-const paymentMethods = ref([
+const children = ref([
   {
     id: 1,
-    last4: "4242",
-    brand: "Visa",
-    expiryMonth: "12",
-    expiryYear: "2025",
-    isDefault: true,
+    name: "John Smith",
+    class: "6A",
+    plan: "Primary 6",
+    yearlyFee: 8999.97,
+    currentTermFees: [
+      {
+        term: "Term 2",
+        amount: 2999.99,
+        dueDate: "2024-02-28",
+        breakdown: {
+          tuition: 2500,
+          activities: 299.99,
+          materials: 200,
+        },
+        progress: 0,
+      },
+    ],
+    upcomingTermFees: [
+      {
+        term: "Term 3",
+        amount: 2999.99,
+        dueDate: "2024-05-15",
+      },
+    ],
+  },
+  {
+    id: 2,
+    name: "Sarah Smith",
+    class: "4B",
+    plan: "Primary 4",
+    yearlyFee: 8399.97,
+    currentTermFees: [
+      {
+        term: "Term 2",
+        amount: 2799.99,
+        dueDate: "2024-02-28",
+        breakdown: {
+          tuition: 2300,
+          activities: 299.99,
+          materials: 200,
+        },
+        progress: 50,
+      },
+    ],
+    upcomingTermFees: [],
   },
 ]);
 
@@ -344,6 +483,17 @@ const feeHistory = ref([
 
 const showAddCard = ref(false);
 const isProcessing = ref(false);
+const paymentMethods = ref([
+  {
+    id: 1,
+    last4: "4242",
+    brand: "Visa",
+    expiryMonth: "12",
+    expiryYear: "2025",
+    isDefault: true,
+  },
+]);
+
 const newCard = ref({
   number: "",
   expiry: "",
