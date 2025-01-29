@@ -142,23 +142,43 @@
         </div>
 
         <!-- Upcoming Terms Content -->
-        <div
-          v-if="selectedTab === 'Upcoming Terms'"
-          v-for="fee in child.upcomingTermFees"
-          :key="fee.term"
-        >
-          <div class="bg-gray-50 rounded-lg p-4 mb-4 text-gray-600">
-            <div class="flex justify-between items-center">
-              <div>
-                <h4 class="text-lg font-semibold">{{ fee.term }}</h4>
-                <p class="text-sm text-gray-500">Due: {{ fee.dueDate }}</p>
+        <div v-if="selectedTab === 'Upcoming Terms'">
+          <div v-if="child.upcomingTermFees.length > 0">
+            <div
+              v-for="fee in child.upcomingTermFees"
+              :key="fee.term"
+              class="bg-gray-50 rounded-lg p-4 mb-4 text-gray-600"
+            >
+              <div class="flex justify-between items-center">
+                <div>
+                  <h4 class="text-lg font-semibold">{{ fee.term }}</h4>
+                  <p class="text-sm text-gray-500">Due: {{ fee.dueDate }}</p>
+                </div>
+                <p class="text-2xl font-bold">${{ fee.amount }}</p>
               </div>
-              <p class="text-2xl font-bold">${{ fee.amount }}</p>
+            </div>
+          </div>
+          <div
+            v-else
+            class="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-4"
+          >
+            <div class="text-center">
+              <i
+                class="fa-regular fa-calendar-check text-gray-400 text-4xl mb-3"
+              ></i>
+              <h4 class="text-lg font-semibold text-gray-600 mb-2">
+                You're All Set!
+              </h4>
+              <p class="text-sm text-gray-500">
+                No more upcoming fees for this academic year
+              </p>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!--  -->
 
     <!-- Payment Methods Section-->
     <div class="mb-8">
