@@ -7,7 +7,7 @@
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="mt-2 w-10 h-10 rounded-md animate-bounce-once duration-200 items-center justify-center text-purple-500"
+        class="w-8 h-8 rounded-md animate-bounce-once duration-200 items-center justify-center text-purple-500"
       >
         <!-- class="mx-auto h-10 w-auto text-purple-500" -->
         <path

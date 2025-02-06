@@ -4,7 +4,7 @@
     <LeftNav />
 
     <!-- right -->
-     <!-- border border-gray-300 -->
+    <!-- border border-gray-300 -->
     <div class="w-full">
       <RightNav />
     </div>
@@ -16,4 +16,4 @@ import LeftNav from "../../components/leftNav.vue";
 import RightNav from "../../components/rightNav.vue";
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped></style>
