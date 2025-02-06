@@ -2,7 +2,7 @@
   <div class="bg-eduYellowLight rounded-lg p-6 w-full">
     <!-- Quick Stats -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-      <div class="bg-white rounded-lg shadow p-4">
+      <div class="bg-gray-200 rounded-lg shadow p-4">
         <div class="flex items-center">
           <i class="fa-solid fa-dollar-sign text-2xl text-green-600"></i>
           <div class="ml-4">
@@ -11,7 +11,7 @@
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-lg shadow p-4">
+      <div class="bg-gray-200 rounded-lg shadow p-4">
         <div class="flex items-center">
           <i class="fa-solid fa-receipt text-2xl text-blue-600"></i>
           <div class="ml-4">
@@ -20,7 +20,7 @@
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-lg shadow p-4">
+      <div class="bg-gray-200 rounded-lg shadow p-4">
         <div class="flex items-center">
           <i class="fa-solid fa-credit-card text-2xl text-purple-600"></i>
           <div class="ml-4">
@@ -35,8 +35,10 @@
 
     <!-- Outstanding Fees Per Child -->
     <div v-for="child in children" :key="child.id" class="mb-8">
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex justify-between items-center mb-6">
+      <div class="bg-gray-200 rounded-lg shadow p-6">
+        <div
+          class="flex justify-between items-center mb-6 border-b border-gray-300 pb-4"
+        >
           <div>
             <h3 class="text-xl font-bold text-gray-600">{{ child.name }}</h3>
             <p class="text-sm text-gray-500">
@@ -44,6 +46,7 @@
             </p>
           </div>
           <button
+            @click="handleRedirectToStripe"
             class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-400 transition-colors"
           >
             Pay Full Year (${{ child.yearlyFee }})
@@ -158,22 +161,14 @@
               </div>
             </div>
           </div>
-          <div
+
+          <!-- empty state -->
+          <EmptyState
             v-else
-            class="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-4"
-          >
-            <div class="text-center">
-              <i
-                class="fa-regular fa-calendar-check text-gray-400 text-4xl mb-3"
-              ></i>
-              <h4 class="text-lg font-semibold text-gray-600 mb-2">
-                You're All Set!
-              </h4>
-              <p class="text-sm text-gray-500">
-                No more upcoming fees for this academic year
-              </p>
-            </div>
-          </div>
+            icon="fa-regular fa-calendar-check"
+            heading="You're All Set!"
+            description="No more upcoming fees for this academic year"
+          />
         </div>
       </div>
     </div>
@@ -419,7 +414,11 @@
 
 <script setup>
 import { ref } from "vue";
+import { loadStripe } from "@stripe/stripe-js";
 import Pagination from "../pagination.vue";
+import EmptyState from "../emptyState.vue";
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 const selectedTab = ref("Current Term");
 
@@ -456,7 +455,7 @@ const children = ref([
     name: "Sarah Smith",
     class: "4B",
     plan: "Primary 4",
-    yearlyFee: 8399.97,
+    yearlyFee: 6399.97,
     currentTermFees: [
       {
         term: "Term 2",
@@ -557,6 +556,12 @@ const removePaymentMethod = (id) => {
   paymentMethods.value = paymentMethods.value.filter(
     (method) => method.id !== id
   );
+};
+
+const handleRedirectToStripe = () => {
+  const stripeCheckoutUrl =
+    "https://checkout.stripe.com/c/pay/cs_test_a1ZMXJcXU4VYu4UTh8ZXoIh7BOb7hoXiSlpvn4Ugb9YTl7o6z1PW4jip6U#fidkdWxOYHwnPyd1blpxYHZxWjA0TWFyNkJGMT0yb3ZSMGdgd2lzNl9gTX9Nb0dfSEpWSEJIfUJuMU0yV0l8XVxzN3Zdb2pOdVM1Z2BgPWlVYDJGTWByf3ZhdkNxa1dMXG1RZHNQT2t3N1FVNTV3a3xfZn1tSicpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl";
+  window.location.href = stripeCheckoutUrl;
 };
 </script>
 

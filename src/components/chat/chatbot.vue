@@ -28,7 +28,7 @@
           :message="message"
         />
         <div v-if="isLoading" class="text-center text-gray-500 font-serif">
-          Thinking...
+          Thinking deeply 🤔...
         </div>
       </div>
 
