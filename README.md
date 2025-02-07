@@ -137,6 +137,8 @@ npm run dev
 ```env
 VITE_API_URL=your_backend_url
 VITE_HUGGINGFACE_API_KEY=your hugging face api key
+VITE_STRIPE_PUBLIC_KEY=your stripe public key
+VITE_STRIPE_WEBHOOK_SECRET=your stripe webhook secret
 ```
 
 ## Development
