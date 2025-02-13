@@ -1,4 +1,3 @@
-
 export const schoolProfile = {
   name: "Eduhub Portal",
   about: {
@@ -25,7 +24,7 @@ export const schoolProfile = {
     {
       keywords: ["classes", "courses", "curriculum"],
       response:
-        "We offer core subjects, AP courses in Math, Science, and English, plus electives in Computer Science, Arts, and Foreign Languages.",
+        "We offer core subjects, courses in Math, Science, and English, plus electives in Computer Science, Arts, and Foreign Languages.",
     },
     {
       keywords: ["class capacity", "class size", "students per class"],
@@ -60,12 +59,19 @@ export function generateSchoolPrompt(userMessage) {
     Provide accurate, concise information based on the school's profile.
     If the query is not clearly answerable, suggest contacting the school office.
     
-    School Context:
+    **Formatting Instructions:**
+    - Use Markdown formatting.
+    - Ensure each bullet point starts on a new line.
+    - Separate paragraphs with an empty newline.
+    - Use **bold** for emphasis.
+    
+    **School Context:**
     - Name: Eduhub Portal
-    - Location: 123 school Street
-    - Grades: Primary 1-6, JSS 1 - SSS 3
+    - Location: 123 School Street
+    - Grades: Primary 1-6, Junior Secondary 1 to Senior Secondary 3
     - Total Students: 360
     
-    User Query: ${userMessage}
+    **User Query:**
+    ${userMessage}
   `;
 }
