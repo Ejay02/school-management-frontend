@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@apollo/client": "^3.12.11",
     "@fullcalendar/core": "^6.1.15",
     "@fullcalendar/daygrid": "^6.1.15",
     "@fullcalendar/interaction": "^6.1.15",
@@ -17,10 +18,15 @@
     "@fullcalendar/vue3": "^6.1.15",
     "@popperjs/core": "^2.11.8",
     "@stripe/stripe-js": "^5.6.0",
+    "@vue/apollo-components": "^4.0.0",
+    "@vue/apollo-composable": "^4.2.1",
+    "@vue/apollo-option": "^4.2.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.9",
     "chart.js": "^4.4.6",
     "date-holidays": "^3.23.18",
+    "graphql": "^16.10.0",
+    "graphql-tag": "^2.12.6",
     "markdown-it": "^14.1.0",
     "pinia": "^2.2.6",
     "postcss": "^8.4.49",

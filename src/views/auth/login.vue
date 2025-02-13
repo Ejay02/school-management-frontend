@@ -55,7 +55,7 @@
       </div>
 
       <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form class="space-y-6">
+        <form class="space-y-6" @submit.prevent="login">
           <div>
             <label for="email" class="block text-sm/6 font-medium text-gray-800"
               >Username</label
@@ -66,6 +66,7 @@
                 name="username"
                 id="username"
                 autofocus
+                v-model="username"
                 autocomplete="username"
                 placeholder="janebond007"
                 required
@@ -91,6 +92,7 @@
             </div>
             <div class="mt-2">
               <input
+                v-model="password"
                 type="password"
                 name="password"
                 id="password"
@@ -138,15 +140,42 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { useUserStore } from "../../store/userStore";
+import { useMutation } from "@vue/apollo-composable";
+import { loginMutation } from "../../graphql/mutations";
+import { ref } from "vue";
 
 const router = useRouter();
 const userStore = useUserStore();
 
-const role = useUserStore.currentRole;
-console.log("role:", role);
+const username = ref("");
+const password = ref("");
 
-const login = () => {
-  router.push(`/dashboard/teacher`);
+const { mutate: loginMutate } = useMutation(loginMutation);
+
+const login = async () => {
+  try {
+    const res = await loginMutate({
+      input: {
+        username: username.value,
+        password: password.value,
+      },
+    });
+
+    if (res && res.data && res.data.login) {
+      const userData = res.data.login;
+
+      userStore.setUser(userData);
+
+      localStorage.setItem("token", userData.accessToken);
+
+      const role = userData.role.toLowerCase();
+      router.push(
+        role === "super_admin" ? "/dashboard/admin" : `/dashboard/${role}`
+      );
+    }
+  } catch (e) {
+    console.log("e:", e);
+  }
 };
 </script>
 

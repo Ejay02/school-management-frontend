@@ -54,8 +54,8 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from "vue";
 import axios from "axios";
+import { ref, nextTick } from "vue";
 import ChatMessage from "../../components/chat/chatMessage.vue";
 import { schoolProfile, generateSchoolPrompt } from "../../utils/aiResponse";
 

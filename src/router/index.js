@@ -92,7 +92,7 @@ const routes = [
         path: "/dashboard/admin",
         name: "AdminLayout",
         component: AdminLayout,
-        meta: { role: "admin" },
+        meta: { roles: ["admin", "super_admin"] },
       },
       {
         path: "/dashboard/parent",

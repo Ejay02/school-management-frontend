@@ -27,14 +27,14 @@
 </template>
 
 <script setup>
+import Banner from "../components/banner.vue";
+import Chatbot from "../components/chat/chatbot.vue";
+import Footer from "../components/homeComponents/footer.vue";
 import HomeNav from "../components/homeComponents/homeNav.vue";
 import HomeHero from "../components/homeComponents/homeHero.vue";
 import HomeFeatures from "../components/homeComponents/homeFeatures.vue";
 import HomeTestimonials from "../components/homeComponents/homeTestimonials.vue";
 import HomeCallToAction from "../components/homeComponents/homeCallToAction.vue";
-import Footer from "../components/homeComponents/footer.vue";
-import Banner from "../components/banner.vue";
-import Chatbot from "../components/chat/chatbot.vue";
 </script>
 
 <style scoped></style>

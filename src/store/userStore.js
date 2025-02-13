@@ -2,19 +2,49 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { menuItems } from "../utils";
 
+// export const useUserStore = defineStore("user", () => {
+//   // const currentRole = ref("student"); // Default role
+//   // const currentRole = ref("admin");
+//   // const currentRole = ref("parent");
+//   const currentRole = ref("teacher");
+//   const userInfo = ref({
+//     id: null,
+//     name: "",
+//     email: "",
+//     role: currentRole.value,
+//   });
+
 export const useUserStore = defineStore("user", () => {
-  // const currentRole = ref("student"); // Default role
-  // const currentRole = ref("admin");
-  // const currentRole = ref("parent");
   const currentRole = ref("teacher");
   const userInfo = ref({
     id: null,
     name: "",
     email: "",
     role: currentRole.value,
+    address: "",
+    bloodType: "",
+    surname: "",
+    sex: "",
+    phone: "",
+    token: "",
   });
 
-  // Method to set user role
+  const setUser = (user) => {
+    userInfo.value = {
+      id: user.userId,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      address: user.address,
+      bloodType: user.bloodType,
+      surname: user.surname,
+      sex: user.sex,
+      phone: user.phone,
+      token: user.token,
+    };
+    currentRole.value = user.role;
+  };
+
   const setRole = (role) => {
     if (["admin", "teacher", "student", "parent"].includes(role)) {
       currentRole.value = role;
@@ -35,7 +65,7 @@ export const useUserStore = defineStore("user", () => {
   });
 
   // logout function
-  // clear  localStorage.setItem("bannerDismissed", "true"); 
+  // clear  localStorage.setItem("bannerDismissed", "true");
 
   // Method to check if current user has access to a specific route
   const hasAccess = (route) => {
@@ -45,10 +75,11 @@ export const useUserStore = defineStore("user", () => {
   };
 
   return {
-    currentRole,
-    userInfo,
+    setUser,
     setRole,
-    filteredMenuItems,
+    userInfo,
     hasAccess,
+    currentRole,
+    filteredMenuItems,
   };
 });
