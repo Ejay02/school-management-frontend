@@ -83,10 +83,46 @@ import { useRoute } from 'vue-router';
 
 <script setup>
 import { useRouter } from "vue-router";
+import { useUserStore } from "../../store/userStore";
+import { useNotificationStore } from "../../store/notification";
+import { useMutation } from "@vue/apollo-composable";
+import { logoutMutation } from "../../graphql/mutations";
 
 const router = useRouter();
-const logout = () => {
-  router.push("/");
-  console.log("Logged out");
+const userStore = useUserStore();
+const notificationStore = useNotificationStore();
+
+const { mutate: logoutMutate } = useMutation(logoutMutation);
+
+const logout = async () => {
+  try {
+    const refreshToken =
+      localStorage.getItem("refreshToken") || userStore.userInfo.refreshToken;
+
+    if (refreshToken) {
+      await logoutMutate({
+        refreshToken: refreshToken,
+      });
+
+      userStore.clearUser();
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      router.push("/");
+      notificationStore.addNotification({
+        type: "success",
+        message: "Logged out successfully",
+      });
+    }
+  } catch (e) {
+    // Still clear everything even if the mutation fails
+    userStore.clearUser();
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    router.push("/");
+    notificationStore.addNotification({
+      type: "error",
+      message: `Logout error: ${e.message}`,
+    });
+  }
 };
 </script>

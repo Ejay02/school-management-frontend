@@ -2,35 +2,33 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { menuItems } from "../utils";
 
-// export const useUserStore = defineStore("user", () => {
-//   // const currentRole = ref("student"); // Default role
-//   // const currentRole = ref("admin");
-//   // const currentRole = ref("parent");
-//   const currentRole = ref("teacher");
-//   const userInfo = ref({
-//     id: null,
-//     name: "",
-//     email: "",
-//     role: currentRole.value,
-//   });
-
 export const useUserStore = defineStore("user", () => {
-  const currentRole = ref("teacher");
-  const userInfo = ref({
-    id: null,
-    name: "",
-    email: "",
-    role: currentRole.value,
-    address: "",
-    bloodType: "",
-    surname: "",
-    sex: "",
-    phone: "",
-    token: "",
-  });
+  // Initialize state from localStorage if available
+  const getInitialUserState = () => {
+    const savedUser = localStorage.getItem("userInfo");
+    return savedUser
+      ? JSON.parse(savedUser)
+      : {
+          id: null,
+          name: "",
+          email: "",
+          role: "",
+          address: "",
+          bloodType: "",
+          surname: "",
+          sex: "",
+          phone: "",
+          token: "",
+          refreshToken: "",
+        };
+  };
 
+  const userInfo = ref(getInitialUserState());
+  const currentRole = ref(userInfo.value.role || "");
+
+  // Updated setUser to handle persistence and refresh token
   const setUser = (user) => {
-    userInfo.value = {
+    const userData = {
       id: user.userId,
       name: user.name,
       email: user.email,
@@ -41,42 +39,67 @@ export const useUserStore = defineStore("user", () => {
       sex: user.sex,
       phone: user.phone,
       token: user.token,
+      refreshToken: user.refreshToken,
     };
+
+    userInfo.value = userData;
     currentRole.value = user.role;
+
+    // Persist to localStorage
+    localStorage.setItem("userInfo", JSON.stringify(userData));
   };
 
   const setRole = (role) => {
-    if (["admin", "teacher", "student", "parent"].includes(role)) {
+    if (
+      ["super_admin", "admin", "teacher", "student", "parent"].includes(role)
+    ) {
       currentRole.value = role;
       userInfo.value.role = role;
+      // Update persisted data
+      localStorage.setItem("userInfo", JSON.stringify(userInfo.value));
     } else {
       console.error("Invalid role specified");
     }
   };
 
-  // Computed property to filter menu items based on current role
+  // Clear all user data on logout
+  const clearUser = () => {
+    userInfo.value = getInitialUserState();
+    currentRole.value = "";
+    localStorage.removeItem("userInfo");
+    localStorage.removeItem("token");
+    localStorage.removeItem("bannerDismissed");
+  };
+
+  // Updated to handle super_admin same as admin
   const filteredMenuItems = computed(() => {
     return menuItems.map((section) => ({
       ...section,
-      items: section.items.filter((item) =>
-        item.visible.includes(currentRole.value)
-      ),
+      items: section.items.filter((item) => {
+        const role = currentRole.value;
+
+        if (role === "super_admin") {
+          return item.visible.includes("admin");
+        }
+        return item.visible.includes(role);
+      }),
     }));
   });
 
-  // logout function
-  // clear  localStorage.setItem("bannerDismissed", "true");
-
-  // Method to check if current user has access to a specific route
   const hasAccess = (route) => {
     const allMenuItems = menuItems.flatMap((section) => section.items);
     const menuItem = allMenuItems.find((item) => item.href === route);
+
+    if (currentRole.value === "super_admin") {
+      return menuItem ? menuItem.visible.includes("admin") : false;
+    }
     return menuItem ? menuItem.visible.includes(currentRole.value) : false;
   };
 
   return {
     setUser,
     setRole,
+    clearUser,
     userInfo,
     hasAccess,
     currentRole,

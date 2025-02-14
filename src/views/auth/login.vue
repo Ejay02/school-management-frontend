@@ -49,7 +49,7 @@
         >
           Welcome back!
         </h2>
-        <h6 class="text-sm text-center text-gray-400">
+        <h6 class="text-sm text-center text-indigo-400">
           Log in to your account
         </h6>
       </div>
@@ -57,7 +57,9 @@
       <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <form class="space-y-6" @submit.prevent="login">
           <div>
-            <label for="email" class="block text-sm/6 font-medium text-gray-800"
+            <label
+              for="email"
+              class="block text-sm/6 font-medium text-indigo-600"
               >Username</label
             >
             <div class="mt-2">
@@ -79,13 +81,13 @@
             <div class="flex items-center justify-between">
               <label
                 for="password"
-                class="block text-sm/6 font-medium text-gray-800"
+                class="block text-sm/6 font-medium text-indigo-600"
                 >Password</label
               >
-              <div class="text-sm">
+              <div class="text-xs">
                 <a
                   href="#"
-                  class="font-semibold text-indigo-600 hover:text-indigo-500"
+                  class="font-semibold text-indigo-500 hover:text-indigo-500"
                   >Forgot password?</a
                 >
               </div>
@@ -107,7 +109,6 @@
           <div>
             <button
               type="submit"
-              @click="login"
               class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
               Log in
@@ -138,14 +139,16 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "../../store/userStore";
 import { useMutation } from "@vue/apollo-composable";
 import { loginMutation } from "../../graphql/mutations";
-import { ref } from "vue";
+import { useNotificationStore } from "../../store/notification";
 
 const router = useRouter();
 const userStore = useUserStore();
+const notificationStore = useNotificationStore();
 
 const username = ref("");
 const password = ref("");
@@ -161,20 +164,29 @@ const login = async () => {
       },
     });
 
-    if (res && res.data && res.data.login) {
+    if (res?.data?.login) {
       const userData = res.data.login;
 
       userStore.setUser(userData);
 
-      localStorage.setItem("token", userData.accessToken);
+      localStorage.setItem("token", userData.token);
+      localStorage.setItem("refreshToken", userData.refreshToken);
 
       const role = userData.role.toLowerCase();
       router.push(
         role === "super_admin" ? "/dashboard/admin" : `/dashboard/${role}`
       );
+
+      notificationStore.addNotification({
+        type: "success",
+        message: `Login Successful!`,
+      });
     }
   } catch (e) {
-    console.log("e:", e);
+    notificationStore.addNotification({
+      type: "error",
+      message: `Login unsuccessful: ${e.message}`,
+    });
   }
 };
 </script>

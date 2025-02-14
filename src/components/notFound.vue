@@ -30,11 +30,16 @@
   </div>
 </template>
 <script setup>
+import { computed } from "vue";
 import { useUserStore } from "../store/userStore";
 
 const userStore = useUserStore();
 
-const role = userStore.currentRole;
+const role = computed(() => {
+  const role = userStore.currentRole.toLowerCase();
+
+  return role === "super_admin" ? "admin" : role;
+});
 </script>
 
 <style scoped>
