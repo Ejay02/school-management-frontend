@@ -1,11 +1,11 @@
 <template>
-  <div class="flex h-screen">
+  <div class="flex min-h-screen">
     <!-- Left Section -->
     <div
       class="left w-full lg:w-1/2 flex flex-col justify-center px-6 py-12 lg:px-8 bg-gray-50"
     >
       <!-- back arrow -->
-      <div class="pl-4 mt-4">
+      <div class="pl-4 mt-0">
         <router-link to="/" class="group">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -24,48 +24,49 @@
         </router-link>
       </div>
 
-      <!-- icon -->
       <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-        <!-- <router-link to="/">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="mx-auto h-10 w-auto text-indigo-500"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"
-            />
-          </svg>
-        </router-link> -->
-
         <h2
-          class="mb-10 text-center text-2xl/9 font-bold tracking-tight text-gray-800"
+          class="mb-5 text-center text-2xl/9 font-bold tracking-tight text-gray-800"
         >
           Create your account 🚀
         </h2>
       </div>
 
       <div class="mt-0 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form class="space-y-6" action="#" method="POST">
-          <div class="flex justify-between">
-            <div class="">
+        <form class="space-y-6" @submit.prevent="handleSubmit">
+          <!-- Role Selection -->
+          <div>
+            <label
+              for="role"
+              class="block text-sm/6 font-medium text-indigo-600 mb-1"
+              >Select Role</label
+            >
+            <select
+              v-model="selectedRole"
+              id="role"
+              class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:outline-eduPurpleLight sm:text-sm"
+            >
+              <option value="" disabled>Select your role</option>
+              <option value="student">Student</option>
+              <option value="parent">Parent</option>
+              <option value="teacher">Teacher</option>
+              <option value="admin">Administrator</option>
+            </select>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="flex-1">
               <label
-                for="email"
+                for="firstName"
                 class="text-indigo-600 block text-sm/6 font-medium"
                 >Name</label
               >
-              <div class="mt-2">
+              <div class="mt-1">
                 <input
                   type="text"
-                  name="username"
-                  id="email"
+                  v-model="formData.firstName"
+                  id="firstName"
                   autofocus
-                  autocomplete="email"
                   placeholder="Jane"
                   required
                   class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurpleLight sm:text-sm/6"
@@ -73,20 +74,17 @@
               </div>
             </div>
 
-            <!-- surname -->
-            <div class="">
+            <div class="flex-1">
               <label
-                for="email"
+                for="lastName"
                 class="block text-sm/6 font-medium text-indigo-600"
                 >Surname</label
               >
-              <div class="mt-2">
+              <div class="mt-1">
                 <input
                   type="text"
-                  name="surname"
-                  id="email"
-                  autofocus
-                  autocomplete="email"
+                  v-model="formData.lastName"
+                  id="lastName"
                   placeholder="Bond"
                   required
                   class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurpleLight sm:text-sm/6"
@@ -94,47 +92,96 @@
               </div>
             </div>
           </div>
-          <!-- Username -->
-          <div>
-            <label
-              for="email"
-              class="block text-sm/6 font-medium text-indigo-600"
-              >Username</label
-            >
-            <div class="mt-2">
-              <input
-                type="text"
-                name="username"
-                id="email"
-                autofocus
-                autocomplete="email"
-                placeholder="janebond007"
-                required
-                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurpleLight sm:text-sm/6"
-              />
+
+          <!-- Role-specific fields -->
+          <div class="flex gap-4" v-if="selectedRole === 'student'">
+            <div class="flex-1">
+              <label
+                for="parentId"
+                class="block text-sm font-medium text-indigo-600"
+              >
+                Parent ID
+              </label>
+              <div class="mt-1">
+                <input
+                  type="text"
+                  v-model="formData.parentId"
+                  id="parentId"
+                  placeholder="Enter parent ID"
+                  required
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:outline-eduPurpleLight sm:text-sm"
+                />
+              </div>
             </div>
-          </div>
-          <!-- Email -->
-          <div>
-            <label
-              for="email"
-              class="block text-sm/6 font-medium text-indigo-600"
-              >Email address</label
-            >
-            <div class="mt-2">
-              <input
-                type="email"
-                name="email"
-                id="email"
-                autocomplete="email"
-                required
-                placeholder="janebond@007.com"
-                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurpleLight sm:text-sm/6"
-              />
+
+            <div class="flex-1">
+              <label
+                for="class"
+                class="block text-sm font-medium text-indigo-600"
+              >
+                Class
+              </label>
+              <div class="mt-1">
+                <select
+                  v-model="formData.selectedClass"
+                  id="class"
+                  required
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:outline-eduPurpleLight sm:text-sm"
+                >
+                  <option value="" disabled>Select class</option>
+                  <option
+                    v-for="(value, key) in defaultClasses"
+                    :key="key"
+                    :value="key"
+                  >
+                    {{ value }}
+                  </option>
+                </select>
+              </div>
             </div>
           </div>
 
-          <!-- pass -->
+          <!-- Username -->
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <label
+                for="username"
+                class="block text-sm/6 font-medium text-indigo-600"
+                >Username</label
+              >
+              <div class="mt-1">
+                <input
+                  type="text"
+                  v-model="formData.username"
+                  id="username"
+                  placeholder="janebond007"
+                  required
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurpleLight sm:text-sm/6"
+                />
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="flex-1">
+              <label
+                for="email"
+                class="block text-sm/6 font-medium text-indigo-600"
+                >Email address</label
+              >
+              <div class="mt-1">
+                <input
+                  type="email"
+                  v-model="formData.email"
+                  id="email"
+                  placeholder="janebond@007.com"
+                  required
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurpleLight sm:text-sm/6"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Password -->
           <div>
             <div class="flex items-center justify-between">
               <label
@@ -143,16 +190,25 @@
                 >Password</label
               >
             </div>
-            <div class="mt-2">
+            <div class="mt-1 relative">
               <input
-                type="password"
-                name="password"
+                v-model="formData.password"
+                :type="showPassword ? 'text' : 'password'"
                 id="password"
-                autocomplete="current-password"
                 placeholder="my-super-secret-password"
                 required
                 class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurpleLight sm:text-sm/6"
               />
+              <button
+                type="button"
+                class="cursor-pointer absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                @click="showPassword = !showPassword"
+              >
+                <i
+                  class="fa-regular"
+                  :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"
+                ></i>
+              </button>
             </div>
           </div>
 
@@ -161,7 +217,7 @@
               type="submit"
               class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
-              Sign in
+              Sign up
             </button>
           </div>
         </form>
@@ -178,7 +234,7 @@
     </div>
 
     <!-- Right Section -->
-    <div class="right hidden lg:block lg:w-1/2 h-screen">
+    <div class="right hidden lg:block lg:w-1/2">
       <img
         src="/kimberly-farmer-lUaaKCUANVI-unsplash.jpg"
         alt="Background Image"
@@ -188,6 +244,48 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref, reactive } from "vue";
+
+const showPassword = ref(false);
+const selectedRole = ref("");
+
+const defaultClasses = {
+  PRIMARY_1: "Primary 1",
+  PRIMARY_2: "Primary 2",
+  PRIMARY_3: "Primary 3",
+  PRIMARY_4: "Primary 4",
+  PRIMARY_5: "Primary 5",
+  PRIMARY_6: "Primary 6",
+  JSS_1: "JSS 1",
+  JSS_2: "JSS 2",
+  JSS_3: "JSS 3",
+  SS_1: "SS 1",
+  SS_2: "SS 2",
+  SS_3: "SS 3",
+};
+
+const formData = reactive({
+  firstName: "",
+  lastName: "",
+  username: "",
+  email: "",
+  password: "",
+  // Role-specific fields
+  parentId: "",
+  selectedClass: "",
+  // childName: "",
+  // subject: "",
+  // department: "",
+});
+
+const handleSubmit = () => {
+  // Here you can handle the form submission with the role and related data
+  console.log("Form submitted:", {
+    ...formData,
+    role: selectedRole.value,
+  });
+};
+</script>
 
 <style scoped></style>
