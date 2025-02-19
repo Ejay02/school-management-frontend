@@ -214,10 +214,34 @@
 
           <div>
             <button
+              :disabled="!isFormValid || isLoading"
               type="submit"
               class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
-              Sign up
+              <span v-if="isLoading" class="flex items-center gap-2">
+                <svg
+                  class="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Signing up...
+              </span>
+              <span v-else>Sign up</span>
             </button>
           </div>
         </form>
@@ -245,10 +269,24 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import {
+  adminSignupMutation,
+  teacherSignupMutation,
+  studentSignupMutation,
+  parentSignupMutation,
+} from "../../graphql/mutations";
+import { useRouter } from "vue-router";
+import { useUserStore } from "../../store/userStore";
+import { ref, reactive, watch, computed } from "vue";
+import { useNotificationStore } from "../../store/notification";
+import { useMutation } from "@vue/apollo-composable";
 
+const router = useRouter();
 const showPassword = ref(false);
 const selectedRole = ref("");
+const isLoading = ref(false);
+const userStore = useUserStore();
+const notificationStore = useNotificationStore();
 
 const defaultClasses = {
   PRIMARY_1: "Primary 1",
@@ -271,20 +309,140 @@ const formData = reactive({
   username: "",
   email: "",
   password: "",
-  // Role-specific fields
   parentId: "",
   selectedClass: "",
-  // childName: "",
-  // subject: "",
-  // department: "",
 });
 
-const handleSubmit = () => {
-  // Here you can handle the form submission with the role and related data
-  console.log("Form submitted:", {
-    ...formData,
-    role: selectedRole.value,
-  });
+const Roles = {
+  ADMIN: "ADMIN",
+  SUPER_ADMIN: "SUPER_ADMIN",
+  TEACHER: "TEACHER",
+  STUDENT: "STUDENT",
+  PARENT: "PARENT",
+};
+
+const isFormValid = computed(() => {
+  const baseValidation =
+    formData.firstName.trim() !== "" &&
+    formData.lastName.trim() !== "" &&
+    formData.username.trim() !== "" &&
+    formData.email.trim() !== "" &&
+    formData.password.trim().length >= 8 &&
+    selectedRole.value !== "";
+
+  if (selectedRole.value === "student") {
+    return (
+      baseValidation &&
+      formData.parentId.trim() !== "" &&
+      formData.selectedClass !== ""
+    );
+  }
+
+  return baseValidation;
+});
+
+const { mutate: adminSignup, loading: adminLoading } =
+  useMutation(adminSignupMutation);
+const { mutate: teacherSignup, loading: teacherLoading } = useMutation(
+  teacherSignupMutation
+);
+const { mutate: studentSignup, loading: studentLoading } = useMutation(
+  studentSignupMutation
+);
+const { mutate: parentSignup, loading: parentLoading } =
+  useMutation(parentSignupMutation);
+
+watch(
+  [adminLoading, teacherLoading, studentLoading, parentLoading],
+  ([admin, teacher, student, parent]) => {
+    isLoading.value = admin || teacher || student || parent;
+  }
+);
+
+const handleSubmit = async () => {
+  if (!isFormValid.value || isLoading.value) return;
+
+  try {
+    // Prepare base input
+    const baseInput = {
+      username: formData.username,
+      name: formData.firstName,
+      surname: formData.lastName,
+      password: formData.password,
+      email: formData.email,
+    };
+
+    let result;
+
+    switch (selectedRole.value) {
+      case "admin":
+        result = await adminSignup({
+          input: {
+            ...baseInput,
+            role: Roles.ADMIN,
+          },
+        });
+        break;
+
+      case "teacher":
+        result = await teacherSignup({
+          input: {
+            ...baseInput,
+            role: Roles.TEACHER,
+          },
+        });
+        break;
+
+      case "student":
+        result = await studentSignup({
+          input: {
+            ...baseInput,
+            role: Roles.STUDENT,
+            parentId: formData.parentId,
+            classId: formData.selectedClass,
+          },
+        });
+        break;
+
+      case "parent":
+        result = await parentSignup({
+          input: {
+            ...baseInput,
+            role: Roles.PARENT,
+          },
+        });
+        break;
+
+      default:
+        throw new Error("Invalid role selected");
+    }
+
+    // Handles role-based signup: calls the appropriate mutation, destructures {token, refreshToken, userId} from the response, updates state, and redirects.
+
+    const userData = result.data[`${selectedRole.value}Signup`];
+    const { token } = userData;
+
+    // Update the state
+    userStore.setUser(userData);
+    localStorage.setItem("token", token);
+    localStorage.setItem("refreshToken", userData.refreshToken);
+
+    // Redirect to dashboard
+    const role = userData.role.toLowerCase();
+    router.push(
+      role === "super_admin" ? "/dashboard/admin" : `/dashboard/${role}`
+    );
+
+    notificationStore.addNotification({
+      type: "success",
+      message: `Welcome ${userData?.name}.toUpperCase()!`,
+    });
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: `An error occurred during signup: ${error.message}`,
+    });
+  }
 };
 </script>
 

@@ -3,13 +3,14 @@ import gql from "graphql-tag";
 export const adminSignupMutation = gql`
   mutation AdminSignup($input: AdminSignupInput!) {
     adminSignup(input: $input) {
-      accessToken
+      token
       refreshToken
-      user {
-        id
-        username
-        email
-      }
+      userId
+      role
+      email
+      username
+      name
+      surname
     }
   }
 `;
@@ -17,13 +18,14 @@ export const adminSignupMutation = gql`
 export const teacherSignupMutation = gql`
   mutation TeacherSignup($input: TeacherSignupInput!) {
     teacherSignup(input: $input) {
-      accessToken
+      token
       refreshToken
-      user {
-        id
-        username
-        email
-      }
+      userId
+      role
+      email
+      username
+      name
+      surname
     }
   }
 `;
@@ -31,13 +33,14 @@ export const teacherSignupMutation = gql`
 export const studentSignupMutation = gql`
   mutation StudentSignup($input: StudentSignupInput!) {
     studentSignup(input: $input) {
-      accessToken
+      token
       refreshToken
-      user {
-        id
-        username
-        email
-      }
+      userId
+      role
+      email
+      username
+      name
+      surname
     }
   }
 `;
@@ -45,13 +48,14 @@ export const studentSignupMutation = gql`
 export const parentSignupMutation = gql`
   mutation ParentSignup($input: ParentSignupInput!) {
     parentSignup(input: $input) {
-      accessToken
+      token
       refreshToken
-      user {
-        id
-        username
-        email
-      }
+      userId
+      role
+      email
+      username
+      name
+      surname
     }
   }
 `;
@@ -65,6 +69,8 @@ export const loginMutation = gql`
       role
       email
       username
+      name
+      surname
     }
   }
 `;
