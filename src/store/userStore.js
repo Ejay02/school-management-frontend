@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { menuItems } from "../utils";
+import { useNotificationStore } from "./notification";
 
 export const useUserStore = defineStore("user", () => {
   // Initialize state from localStorage if available
@@ -20,11 +21,14 @@ export const useUserStore = defineStore("user", () => {
           phone: "",
           token: "",
           refreshToken: "",
+          img: "",
         };
   };
 
   const userInfo = ref(getInitialUserState());
+
   const currentRole = ref(userInfo.value.role || "");
+  const notificationStore = useNotificationStore();
 
   // Updated setUser to handle persistence and refresh token
   const setUser = (user) => {
@@ -40,6 +44,7 @@ export const useUserStore = defineStore("user", () => {
       phone: user.phone,
       token: user.token,
       refreshToken: user.refreshToken,
+      img: user.img,
     };
 
     userInfo.value = userData;
@@ -58,7 +63,11 @@ export const useUserStore = defineStore("user", () => {
       // Update persisted data
       localStorage.setItem("userInfo", JSON.stringify(userInfo.value));
     } else {
-      console.error("Invalid role specified");
+      notificationStore.addNotification({
+        type: "warning",
+        message: `Invalid role specified: ${role}`,
+      });
+      // console.error("Invalid role specified");
     }
   };
 
@@ -76,9 +85,9 @@ export const useUserStore = defineStore("user", () => {
     return menuItems.map((section) => ({
       ...section,
       items: section.items.filter((item) => {
-        const role = currentRole.value;
+        const role = currentRole.value.toLowerCase();
 
-        if (role === "super_admin") {
+        if (role.toLowerCase() === "super_admin") {
           return item.visible.includes("admin");
         }
         return item.visible.includes(role);

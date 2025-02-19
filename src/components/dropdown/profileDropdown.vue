@@ -1,4 +1,3 @@
-import { useRoute } from 'vue-router';
 <template>
   <div
     class="absolute top-20 right-4 bg-white shadow-md rounded-md w-56 p-3 z-50"
@@ -6,23 +5,25 @@ import { useRoute } from 'vue-router';
   >
     <!-- Profile -->
     <div
-      class="flex items-center gap-3 p-2 border-b border-gray-300 hover:bg-eduSkyLight rounded-md group"
+      class="flex items-center gap-2 p-2 border-b border-gray-300 hover:bg-eduSkyLight rounded-md group"
     >
       <div
         class="flex items-center justify-center rounded-full border bg-indigo-300 w-10 h-10"
       >
-        <span class="text-sm font-medium text-white">JS</span>
+        <span class="text-sm font-medium text-white">
+          {{ capitalizedName[0] }}{{ capitalizedSurname[0] }}</span
+        >
       </div>
       <div>
         <span
-          class="text-xs font-medium text-gray-800 group-hover:text-indigo-500 mb-0"
+          class="text-xs font-medium text-gray-800 group-hover:text-indigo-500"
         >
-          James Smith
+          {{ capitalizedName }} {{ capitalizedSurname }}
         </span>
         <br />
-        <span class="text-xs text-gray-400 group-hover:text-indigo-500"
-          >Admin@hello.com</span
-        >
+        <span class="text-xs text-gray-400 group-hover:text-indigo-500">{{
+          userStore.userInfo.email
+        }}</span>
       </div>
     </div>
 
@@ -82,15 +83,26 @@ import { useRoute } from 'vue-router';
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
-import { useUserStore } from "../../store/userStore";
-import { useNotificationStore } from "../../store/notification";
+import { computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { useMutation } from "@vue/apollo-composable";
+import { useUserStore } from "../../store/userStore";
 import { logoutMutation } from "../../graphql/mutations";
+import { useNotificationStore } from "../../store/notification";
 
 const router = useRouter();
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
+
+const capitalize = (str) => {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+const capitalizedName = computed(() => capitalize(userStore.userInfo.name));
+const capitalizedSurname = computed(() =>
+  capitalize(userStore.userInfo.surname)
+);
 
 const { mutate: logoutMutate } = useMutation(logoutMutation);
 

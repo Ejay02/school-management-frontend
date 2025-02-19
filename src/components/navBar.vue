@@ -63,7 +63,9 @@
 
         <!-- user -->
         <div class="flex flex-col">
-          <span class="text-sm leading-3 font-medium">Mandy Max</span>
+          <span class="text-sm leading-3 font-medium">
+            {{ capitalizedName }} {{ capitalizedSurname }}</span
+          >
           <span class="text-[10px] text-gray-400 text-right capitalize">{{
             role
           }}</span>
@@ -74,7 +76,7 @@
           <div
             class="h-14 w-14 rounded-full bg-eduPurple flex items-center justify-center text-white font-medium"
           >
-            JS
+            {{ capitalizedName[0] }}{{ capitalizedSurname[0] }}
           </div>
           <ProfileDropdown v-if="showDropdown" />
         </div>
@@ -84,13 +86,27 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useUserStore } from "../store/userStore";
 import ProfileDropdown from "./dropdown/profileDropdown.vue";
 
 const userStore = useUserStore();
+
 const role = userStore.currentRole;
+
+// Helper function to capitalize first letter
+const capitalize = (str) => {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+const capitalizedName = computed(() => capitalize(userStore.userInfo.name));
+const capitalizedSurname = computed(() =>
+  capitalize(userStore.userInfo.surname)
+);
+
 const showDropdown = ref(false);
+
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value;
 };

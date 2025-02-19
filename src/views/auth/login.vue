@@ -107,7 +107,7 @@
               :disabled="loading || !username || !password"
               class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-            <span v-if="loading" class="flex items-center gap-2">
+              <span v-if="loading" class="flex items-center gap-2">
                 <svg
                   class="animate-spin h-5 w-5 text-white"
                   xmlns="http://www.w3.org/2000/svg"
@@ -131,7 +131,6 @@
                 Logging in...
               </span>
               <span v-else>Log in</span>
-              
             </button>
           </div>
         </form>
@@ -169,6 +168,7 @@ import { useNotificationStore } from "../../store/notification";
 
 const router = useRouter();
 const userStore = useUserStore();
+
 const notificationStore = useNotificationStore();
 
 const username = ref("");
@@ -188,19 +188,19 @@ const login = async () => {
 
     if (res?.data?.login) {
       const userData = res.data.login;
+      const role = userData.role.toLowerCase();
 
       userStore.setUser(userData);
       localStorage.setItem("token", userData.token);
       localStorage.setItem("refreshToken", userData.refreshToken);
 
-      const role = userData.role.toLowerCase();
-      router.push(
-        role === "super_admin" ? "/dashboard/admin" : `/dashboard/${role}`
-      );
+      const dashboardPath =
+        role === "super_admin" ? "/dashboard/admin" : `/dashboard/${role}`;
+      await router.push(dashboardPath);
 
       notificationStore.addNotification({
         type: "success",
-        message: `Login Successful!`,
+        message: `Welcome back ${userStore.userInfo.name}!`,
       });
     }
   } catch (e) {

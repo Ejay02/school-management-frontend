@@ -322,23 +322,24 @@ const Roles = {
 };
 
 const isFormValid = computed(() => {
-  const baseValidation =
-    formData.firstName.trim() !== "" &&
-    formData.lastName.trim() !== "" &&
-    formData.username.trim() !== "" &&
-    formData.email.trim() !== "" &&
-    formData.password.trim().length >= 8 &&
-    selectedRole.value !== "";
+  if (!selectedRole.value) return false;
+
+  const commonFieldsFilled =
+    formData.value.firstName &&
+    formData.value.lastName &&
+    formData.value.username &&
+    formData.value.email &&
+    formData.value.password;
 
   if (selectedRole.value === "student") {
     return (
-      baseValidation &&
-      formData.parentId.trim() !== "" &&
-      formData.selectedClass !== ""
+      commonFieldsFilled &&
+      formData.value.parentId &&
+      formData.value.selectedClass
     );
   }
 
-  return baseValidation;
+  return commonFieldsFilled;
 });
 
 const { mutate: adminSignup, loading: adminLoading } =
@@ -429,6 +430,7 @@ const handleSubmit = async () => {
 
     // Redirect to dashboard
     const role = userData.role.toLowerCase();
+
     router.push(
       role === "super_admin" ? "/dashboard/admin" : `/dashboard/${role}`
     );
