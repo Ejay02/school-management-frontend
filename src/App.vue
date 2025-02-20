@@ -1,11 +1,9 @@
 <template>
-  <div class="min-h-screen w-full overflow-x-hidden">
-    <RouterView />
-    <EditModal v-if="modalStore.editModal" />
-    <DeleteModal v-if="modalStore.deleteModal" />
-    <AddModal v-if="modalStore.addModal" />
-    <NotificationContainer />
-  </div>
+  <RouterView />
+  <EditModal v-if="modalStore.editModal" />
+  <DeleteModal v-if="modalStore.deleteModal" />
+  <AddModal v-if="modalStore.addModal" />
+  <NotificationContainer />
 </template>
 
 <script setup>

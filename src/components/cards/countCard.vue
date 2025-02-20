@@ -35,58 +35,71 @@
     <div class="flex justify-center gap-16 mb-4 p-2">
       <div class="flex flex-col gap-1">
         <div class="w-5 h-5 bg-eduSky rounded-full"></div>
-        <h1 class="font-bold">1,234</h1>
-        <h2 class="text-sm text-gray-300">Boys (43%)</h2>
+        <h1 class="font-bold">{{ genderStats.maleCount }}</h1>
+        <h2 class="text-sm text-gray-300">
+          Boys ({{ genderStats.malePercentage }}%)
+        </h2>
       </div>
       <div class="flex flex-col gap-1">
         <div class="w-5 h-5 bg-eduYellow rounded-full"></div>
-        <h1 class="font-bold">1,234</h1>
-        <h2 class="text-sm text-gray-300">Girls (57%)</h2>
+        <h1 class="font-bold">{{ genderStats.femaleCount }}</h1>
+        <h2 class="text-sm text-gray-300">
+          Girls ({{ genderStats.femalePercentage }}%)
+        </h2>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { Chart, registerables } from "chart.js";
+import { useStudentStore } from "../../store/studentStore";
 
 // Register all Chart.js components
 Chart.register(...registerables);
 
 const radialChartCanvas = ref(null);
+const studentStore = useStudentStore();
+const genderStats = computed(() => studentStore.genderStats);
 
-onMounted(() => {
+onMounted(async () => {
+  // Fetch the gender stats from the API via the store
+  await studentStore.fetchGenderStats();
+  // Create the chart once the data is loaded
   if (radialChartCanvas.value) {
     createCircularChart();
   }
 });
 
 const createCircularChart = () => {
-  // Custom circular chart configuration
+  // Use the fetched gender statistics
+  const malePercentage = genderStats.value.malePercentage || 0;
+  const femalePercentage = genderStats.value.femalePercentage || 0;
+
+  // Custom circular chart configuration using actual data
   const config = {
     type: "doughnut",
     data: {
-      labels: ["Boys", "c", "Girls"],
+      labels: ["Boys", "Girls"],
       datasets: [
         {
-          // Top circle
-          data: [43, 57],
+          // Top circle using the computed percentages
+          data: [malePercentage, femalePercentage],
           backgroundColor: ["#C3EBFA", "#D3D3D3"],
           borderWidth: 0,
         },
         {
-          // Top circle
+          // Second dataset remains unchanged
           data: [],
           backgroundColor: ["#fff", "#fff"],
           borderColor: "white",
           spacing: 0,
           hoverBackgroundColor: "white",
-          borderColor: "white",
         },
         {
-          // Bottom circle
-          data: [57, 43],
+          // Bottom circle with reversed order for a stylistic effect
+          data: [femalePercentage, malePercentage],
           backgroundColor: ["#FAE27C", "#D3D3D3"],
           borderWidth: 0,
           borderColor: "white",
@@ -98,7 +111,6 @@ const createCircularChart = () => {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-
       plugins: {
         legend: {
           display: false,
@@ -114,4 +126,5 @@ const createCircularChart = () => {
   new Chart(radialChartCanvas.value, config);
 };
 </script>
+
 <style scoped></style>
