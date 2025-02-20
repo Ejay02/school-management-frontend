@@ -39,8 +39,8 @@
           >
             Billing
           </router-link>
-          <!-- v-if="role === 'superadmin'" -->
           <router-link
+            v-if="role === 'super_admin' || role === 'admin'"
             to="/settings/team"
             class="hover:text-eduPurple"
             :class="{ 'text-eduPurple': $route.name === 'team' }"
@@ -66,5 +66,5 @@
 import { useUserStore } from "../store/userStore";
 
 const userStore = useUserStore();
-const role = userStore.currentRole;
+const role = userStore.currentRole.toLowerCase();
 </script>

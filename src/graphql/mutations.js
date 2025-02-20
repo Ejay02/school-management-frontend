@@ -3,6 +3,7 @@ import gql from "graphql-tag";
 export const adminSignupMutation = gql`
   mutation AdminSignup($input: AdminSignupInput!) {
     adminSignup(input: $input) {
+      id
       token
       refreshToken
       userId
@@ -18,6 +19,7 @@ export const adminSignupMutation = gql`
 export const teacherSignupMutation = gql`
   mutation TeacherSignup($input: TeacherSignupInput!) {
     teacherSignup(input: $input) {
+      id
       token
       refreshToken
       userId
@@ -33,6 +35,7 @@ export const teacherSignupMutation = gql`
 export const studentSignupMutation = gql`
   mutation StudentSignup($input: StudentSignupInput!) {
     studentSignup(input: $input) {
+      id
       token
       refreshToken
       userId
@@ -48,6 +51,7 @@ export const studentSignupMutation = gql`
 export const parentSignupMutation = gql`
   mutation ParentSignup($input: ParentSignupInput!) {
     parentSignup(input: $input) {
+      id
       token
       refreshToken
       userId

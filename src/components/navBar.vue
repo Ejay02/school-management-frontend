@@ -63,9 +63,17 @@
 
         <!-- user -->
         <div class="flex flex-col">
-          <span class="text-sm leading-3 font-medium">
-            {{ capitalizedName }} {{ capitalizedSurname }}</span
-          >
+          <div class="relative inline-block">
+            <span class="text-sm leading-3 font-medium pr-1">
+              {{ capitalizedName }} {{ capitalizedSurname }}
+            </span>
+            <i
+              class="fa-regular fa-copy text-xs absolute top-0"
+              v-if="role === 'PARENT'"
+              @click="copyParentId"
+            ></i>
+          </div>
+
           <span class="text-[10px] text-gray-400 text-right capitalize">{{
             role
           }}</span>
@@ -89,10 +97,14 @@
 import { ref, computed } from "vue";
 import { useUserStore } from "../store/userStore";
 import ProfileDropdown from "./dropdown/profileDropdown.vue";
+import { useNotificationStore } from "../store/notification";
 
 const userStore = useUserStore();
+const notificationStore = useNotificationStore();
 
 const role = userStore.currentRole;
+
+const parentId = userStore?.userInfo.id;
 
 // Helper function to capitalize first letter
 const capitalize = (str) => {
@@ -109,5 +121,22 @@ const showDropdown = ref(false);
 
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value;
+};
+
+const copyParentId = async () => {
+  if (!parentId) return;
+  try {
+    await navigator.clipboard.writeText(parentId);
+
+    notificationStore.addNotification({
+      type: "info",
+      message: `Parent Id copied to clipboard!`,
+    });
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: `Failed to copy Parent Id: ${error.message}`,
+    });
+  }
 };
 </script>

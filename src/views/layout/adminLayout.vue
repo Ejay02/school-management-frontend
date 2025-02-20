@@ -3,10 +3,11 @@
     <div class="mt-1">
       <!-- user cards -->
       <div class="flex gap-4 justify-between flex-wrap mb-4 md:flex-row">
+        <UserCard v-for="role in roles" :key="role" :role="role" />
+        <!-- :academicYear="currentAcademicYear"  -->
+        <!-- <UserCard />
         <UserCard />
-        <UserCard />
-        <UserCard />
-        <UserCard />
+        <UserCard /> -->
       </div>
 
       <!-- middle charts -->
@@ -31,10 +32,13 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
 import UserCard from "../../components/cards/userCard.vue";
 import CountCard from "../../components/cards/countCard.vue";
 import FinanceCard from "../../components/cards/financeCard.vue";
 import AttendanceCard from "../../components/cards/attendanceCard.vue";
+
+const roles = ref(["Teacher", "Student", "Admin", "Parent"]);
 </script>
 
 <style scoped></style>
