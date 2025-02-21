@@ -31,6 +31,7 @@ export const getAllTeachers = gql`
       surname
       email
       role
+      address
       img
       phone
       subjects {

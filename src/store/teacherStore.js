@@ -7,19 +7,45 @@ export const useTeacherStore = defineStore("teacherStore", {
     teachers: [],
     loading: false,
     error: null,
+    hasMore: true, // indicates if there might be a next page
   }),
   actions: {
-    async fetchTeachers(pagination = {}) {
+    async fetchTeachers({
+      page = 1,
+      limit = 10,
+      search = "",
+      sortBy = "",
+      sortOrder = "",
+    } = {}) {
       this.loading = true;
       try {
         const client = useApolloClient().client;
+        // Build pagination parameters conditionally
+        const paginationParams = { page, limit };
+        if (search) paginationParams.search = search;
+        if (sortBy) paginationParams.sortBy = sortBy;
+        if (sortOrder) paginationParams.sortOrder = sortOrder;
+
         const { data } = await client.query({
           query: getAllTeachers,
-          variables: { pagination },
+          variables: { pagination: paginationParams },
         });
-        this.teachers = data.getAllTeachers;
+
+        console.log("GraphQL data:", data); // Debug log
+
+        // Adjust the following line if your data structure is different.
+        const fetchedTeachers = data.getAllTeachers.map((teacher) => ({
+          ...teacher,
+          teacherId: teacher.id,
+          photo: teacher.img,
+          subjects: teacher.subjects.map((subject) => subject.name),
+          classes: teacher.classes || [],
+        }));
+        this.teachers = fetchedTeachers;
+        this.hasMore = fetchedTeachers.length === limit;
       } catch (error) {
         this.error = error;
+        console.error("Error fetching teachers:", error);
       } finally {
         this.loading = false;
       }

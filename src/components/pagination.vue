@@ -1,19 +1,16 @@
 <template>
   <div class="p-4 flex items-center justify-between text-gray-500">
     <button
-      disabled
+      :disabled="currentPage === 1"
+      @click="changePage(currentPage - 1)"
       class="py-2 px-4 rounded-md bg-slate-200 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
     >
       Prev
     </button>
-    <div class="flex items-center gap-2 text-sm">
-      <button class="px-2 rounded-md bg-eduSky">1</button>
-      <button class="px-2 rounded-md">2</button>
-      <button class="px-2 rounded-md">3</button>
-      <button class="px-2 rounded-md">...</button>
-      <button class="px-2 rounded-md">10</button>
-    </div>
+    <span class="text-sm">Page {{ currentPage }}</span>
     <button
+      :disabled="!hasMore"
+      @click="changePage(currentPage + 1)"
       class="py-2 px-4 rounded-md bg-slate-200 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
     >
       Next
@@ -21,6 +18,26 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { defineProps, defineEmits } from "vue";
+
+const props = defineProps({
+  currentPage: {
+    type: Number,
+    default: 1,
+  },
+  hasMore: {
+    type: Boolean,
+    default: true,
+  },
+});
+
+const emit = defineEmits(["update:page"]);
+
+function changePage(page) {
+  if (page < 1) return;
+  emit("update:page", page);
+}
+</script>
 
 <style scoped></style>

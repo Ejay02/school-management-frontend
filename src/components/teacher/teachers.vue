@@ -2,19 +2,30 @@
   <div class="rounded border border-gray-300 p-2 w-full">
     <div class="bg-white p-4 rounded-md flex-1 m-1 mt-0 shadow-xl">
       <!-- top -->
-       <div class="border-b p-4">
+      <div class="border-b p-4">
+        <TopList :txt="'All Teachers '" />
+      </div>
 
-         <TopList :txt="'All Teachers'" />
-        </div>
+      <LoadingScreen v-if="loading" message="Loading Teachers..." />
 
+      <EmptyState
+        v-if="!teacherStore.teachers.length && !loading"
+        icon="fa-regular fa-hourglass"
+        heading="Nothing here yet!"
+        description="Invite a teacher to get started."
+      />
       <!-- list -->
-      <div class="">
-        <TeacherTable :columns="columns" :data="teachersData" />
+      <div class="" v-else>
+        <TeacherTable :columns="columns" :data="teacherStore.teachers" />
       </div>
 
       <!-- pagination -->
 
-      <Pagination />
+      <Pagination
+        :currentPage="currentPage"
+        :hasMore="teacherStore.hasMore"
+        @update:page="handlePageChange"
+      />
     </div>
   </div>
 </template>
@@ -22,8 +33,28 @@
 <script setup>
 import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
-import { teachersData } from "../../utils/data";
+
 import TeacherTable from "./teacherTable.vue";
+import { useTeacherStore } from "../../store/teacherStore";
+import EmptyState from "../emptyState.vue";
+import LoadingScreen from "../loadingScreen.vue";
+import { onMounted, ref, watch } from "vue";
+
+const teacherStore = useTeacherStore();
+const currentPage = ref(1);
+const limit = 10;
+
+watch(currentPage, (newPage) => {
+  teacherStore.fetchTeachers({ page: newPage, limit });
+});
+
+function handlePageChange(newPage) {
+  currentPage.value = newPage;
+}
+
+onMounted(() => {
+  teacherStore.fetchTeachers();
+});
 
 const columns = [
   { header: "Info", accessor: "info" },

@@ -18,22 +18,38 @@
         class="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-eduSkyLight"
       >
         <td class="flex items-center gap-4 p-2">
-          <img
-            :src="item?.photo"
-            alt="user"
-            class="w-10 h-10 rounded-full mr-3 xl:block object-cover"
-          />
+          <div class="">
+            <img
+              v-if="item?.photo"
+              :src="item?.photo"
+              alt="user"
+              class="w-10 h-10 rounded-full mr-3 xl:block object-cover"
+            />
+            <div
+              v-else
+              class="w-10 h-10 rounded-full mr-3 bg-eduPurple flex items-center justify-center font-bold"
+            >
+              {{ item?.name[0].toUpperCase()
+              }}{{ item.surname[0].toUpperCase() }}
+            </div>
+          </div>
 
           <div class="flex flex-col">
-            <div class="font-semibold">{{ item?.name }}</div>
+            <div class="font-semibold capitalize">
+              {{ item?.name }} {{ item?.surname }}
+            </div>
             <div class="text-xs text-gray-400">{{ item?.email }}</div>
           </div>
         </td>
         <td class="hidden md:table-cell">{{ item?.teacherId }}</td>
-        <td class="hidden md:table-cell">{{ item?.subjects.join(", ") }}</td>
-        <td class="hidden md:table-cell">{{ item?.classes.join(", ") }}</td>
-        <td class="hidden md:table-cell">{{ item?.phone }}</td>
-        <td class="hidden md:table-cell">{{ item?.address }}</td>
+        <td class="hidden md:table-cell">
+          {{ item?.subjects.join(", ") || "N/A" }}
+        </td>
+        <td class="hidden md:table-cell">
+          {{ item?.classes.join(", ") || "N/A" }}
+        </td>
+        <td class="hidden md:table-cell">{{ item?.phone || "N/A" }}</td>
+        <td class="hidden md:table-cell">{{ item?.address || "N/A" }}</td>
         <td>
           <div class="flex items-center gap-2 relative">
             <router-link
