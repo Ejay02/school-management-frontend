@@ -1,5 +1,5 @@
 <template>
-  <div class="w-[14%] md:w-[8%] lg:w-[16%] xl:w-[14%] bg-gray-200">
+  <div class="w-[14%] md:w-[8%] lg:w-[14%] xl:w-[14%] bg-gray-200">
     <router-link to="/" class="flex items-center lg:justify-start gap-2 p-2">
       <svg
         xmlns="http://www.w3.org/2000/svg"
