@@ -107,3 +107,11 @@ export const getDashboardUserCardSummary = gql`
     }
   }
 `;
+
+export const getIncomeGraphData = gql`
+  query getIncomeGraphData {
+    getIncomeGraphData {
+      revenue
+    }
+  }
+`;

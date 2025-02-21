@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import {
   Chart,
   LineController,
@@ -80,6 +80,8 @@ import {
   CategoryScale,
   Tooltip,
 } from "chart.js";
+import { useQuery } from "@vue/apollo-composable";
+import { getIncomeGraphData } from "../../graphql/queries";
 
 Chart.register(
   LineController,
@@ -92,6 +94,8 @@ Chart.register(
 );
 
 const chartRef = ref(null);
+
+const { result, loading, error } = useQuery(getIncomeGraphData);
 
 const chartData = {
   labels: [
@@ -108,21 +112,26 @@ const chartData = {
     "Nov",
     "Dec",
   ],
+
   datasets: [
     {
       label: "Revenue",
-      data: [24, 58, 92, 11, 74, 88, 65, 46, 23, 79, 59, 31],
+      data: [],
       borderColor: "#C3EBFA",
       tension: 0,
+      // pointRadius: 5,
+      // pointBackgroundColor: "#",
     },
     {
       label: "Expenses",
-      data: [45, 55, 35, 60, 48, 72, 85, 76, 91, 68, 57, 32],
+      data: [45, 0, 35, 60, 48, 72, 85, 76, 91, 68, 57, 32],
       borderColor: "#CFCEFF",
       tension: 0.1,
     },
   ],
 };
+
+let chartInstance = null;
 
 onMounted(() => {
   if (chartRef.value) {
@@ -159,6 +168,22 @@ onMounted(() => {
         },
       },
     });
+  }
+});
+
+// Watch the query result and update the revenue data once available
+
+watch(result, (newVal) => {
+  if (
+    newVal &&
+    newVal.getIncomeGraphData &&
+    newVal.getIncomeGraphData.revenue
+  ) {
+    // Update the revenue dataset with the fetched data
+    chartData.datasets[0].data = newVal.getIncomeGraphData.revenue;
+    if (chartInstance) {
+      chartInstance.update();
+    }
   }
 });
 </script>
