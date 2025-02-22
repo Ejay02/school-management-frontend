@@ -1,10 +1,12 @@
+// teacherStore.js
 import { defineStore } from "pinia";
 import { useApolloClient } from "@vue/apollo-composable";
-import { getAllTeachers } from "@/graphql/queries";
+import { getAllTeachers, getTeacherById } from "@/graphql/queries";
 
 export const useTeacherStore = defineStore("teacherStore", {
   state: () => ({
     teachers: [],
+    selectedTeacher: null,
     loading: false,
     error: null,
     hasMore: true, // indicates if there might be a next page
@@ -20,7 +22,6 @@ export const useTeacherStore = defineStore("teacherStore", {
       this.loading = true;
       try {
         const client = useApolloClient().client;
-        // Build pagination parameters conditionally
         const paginationParams = { page, limit };
         if (search) paginationParams.search = search;
         if (sortBy) paginationParams.sortBy = sortBy;
@@ -31,7 +32,6 @@ export const useTeacherStore = defineStore("teacherStore", {
           variables: { pagination: paginationParams },
         });
 
-        // Adjust the following line if your data structure is different.
         const fetchedTeachers = data.getAllTeachers.map((teacher) => ({
           ...teacher,
           teacherId: teacher.id,
@@ -41,6 +41,23 @@ export const useTeacherStore = defineStore("teacherStore", {
         }));
         this.teachers = fetchedTeachers;
         this.hasMore = fetchedTeachers.length === limit;
+      } catch (error) {
+        this.error = error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchTeacherById(teacherId) {
+      this.loading = true;
+      try {
+        const client = useApolloClient().client;
+        const { data } = await client.query({
+          query: getTeacherById,
+          variables: { teacherId },
+        });
+
+        this.selectedTeacher = data.getTeacherById;
       } catch (error) {
         this.error = error;
       } finally {

@@ -1,13 +1,21 @@
 <template>
   <div class="rounded border border-gray-300 p-2 w-full">
-    <div class="flex-1 flex flex-col md:flex-row gap-4">
+    <!-- loading -->
+    <LoadingScreen v-if="loading" message="Loading Teacher deets..." />
+
+    <ErrorScreen v-else-if="error" />
+    <div
+      v-else-if="!error && !loading"
+      class="flex-1 flex flex-col md:flex-row gap-4"
+    >
       <div class="w-full md:w-2/3">
         <LeftSingleView
-          :heading="`Teacher's Schedule`"
+          :heading="`${teacherName}'s Schedule`"
           :infoCards="teacherInfoCards"
-          :profileImage="'https://images.pexels.com/photos/2888150/pexels-photo-2888150.jpeg?auto=compress&cs=tinysrgb&w=1200'"
-          :name="'Didi Gobbler'"
-          :description="'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam, accusantium?'"
+          :profileImage="teacher?.img || ''"
+          :name="teacherName"
+          :surname="teacher?.surname || ''"
+          :description="teacher?.description || 'No description available.'"
           :details="teacherDetails"
         />
       </div>
@@ -19,8 +27,13 @@
 </template>
 
 <script setup>
+import { useRoute } from "vue-router";
+import ErrorScreen from "../../components/errorScreen.vue";
+import LoadingScreen from "../../components/loadingScreen.vue";
 import LeftSingleView from "../../views/singleView/leftSingleView.vue";
 import RightSingleView from "../../views/singleView/rightSingleView.vue";
+import { useTeacherStore } from "../../store/teacherStore";
+import { computed, onMounted } from "vue";
 
 const teacherShortcuts = [
   {
@@ -50,35 +63,85 @@ const teacherShortcuts = [
   },
 ];
 
-const teacherInfoCards = [
-  {
-    icon: `/singleAttendance.png`,
-    value: "90%",
-    title: "Attendance",
-  },
-  {
-    icon: "/singleBranch.png",
-    value: "9",
-    title: "Branches",
-  },
-  {
-    icon: "/singleLesson.png",
-    value: "5",
-    title: "Lessons",
-  },
-  {
-    icon: "/singleClass.png",
-    value: "6",
-    title: "Classes",
-  },
-];
+const route = useRoute();
+const teacherId = route.params.id;
 
-const teacherDetails = [
-  { icon: "/blood.png", label: "Blood Group", value: "A+" },
-  { icon: "/date.png", label: "Date", value: "January 2025" },
-  { icon: "/mail.png", label: "Email", value: "dgobbler@test.com" },
-  { icon: "/phone.png", label: "Phone", value: "1234560" },
-];
+const teacherStore = useTeacherStore();
+
+onMounted(() => {
+  teacherStore.fetchTeacherById(teacherId);
+});
+
+const teacher = computed(() => teacherStore.selectedTeacher);
+
+const loading = computed(() => teacherStore.loading);
+const error = computed(() => teacherStore.error);
+
+const teacherInfoCards = computed(() => {
+  if (!teacher.value) return [];
+  return [
+    {
+      icon: `/singleAttendance.png`,
+      value: teacher?.value.attendance || "90%",
+      title: "Attendance",
+    },
+    {
+      icon: "/singleBranch.png",
+      value: teacher?.value.branches || "9",
+      title: "Branches",
+    },
+    {
+      icon: "/singleLesson.png",
+      value: teacher?.value.lessons ? teacher?.value.lessons.length : "5",
+      title: "Lessons",
+    },
+    {
+      icon: "/singleClass.png",
+      value: teacher?.value.classes ? teacher.value.classes.length : "6",
+      title: "Classes",
+    },
+  ];
+});
+
+// Map teacher data to details (adjust labels as needed)
+const teacherDetails = computed(() => {
+  if (!teacher.value) return [];
+
+  let formattedDate = "N/A";
+  if (teacher.value?.createdAt) {
+    const dateObj = new Date(teacher.value.createdAt);
+    const day = dateObj.getDate().toString().padStart(2, "0");
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+    const year = dateObj.getFullYear();
+    formattedDate = `${day}-${month}-${year}`;
+  }
+
+  return [
+    {
+      icon: "/blood.png",
+      label: "Blood Group",
+      value: teacher?.value.bloodType || "A+",
+    },
+    {
+      icon: "/date.png",
+      label: "Joined",
+      value: formattedDate,
+    },
+    { icon: "/mail.png", label: "Email", value: teacher?.value.email },
+    { icon: "/phone.png", label: "Phone", value: teacher?.value.phone },
+    {
+      icon: '<i class="fa-solid fa-map-pin"></i>',
+      label: "Address",
+      value: teacher?.value.address,
+    },
+  ];
+});
+
+const teacherName = computed(() => {
+  const name = teacher.value?.name;
+  if (!name) return "";
+  return name.charAt(0).toUpperCase() + name.slice(1);
+});
 </script>
 
 <style scoped></style>

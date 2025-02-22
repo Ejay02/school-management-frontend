@@ -3,16 +3,25 @@
     <div class="flex">
       <div class="">
         <img
+          v-if="profileImage"
           :src="profileImage"
           :alt="`${name} image`"
           class="w-24 h-24 rounded-full object-cover"
         />
+
+        <div
+          v-else
+          class="w-20 h-20 rounded-full bg-eduPurple flex items-center justify-center font-bold text-white"
+        >
+          {{ name?.[0] || "" }}{{ surname?.[0] || "" }}
+        </div>
       </div>
 
       <!--  -->
       <div class="w-2/3 flex-col justify-between p-2">
         <div class="flex gap-2">
           <div class="text-xl font-semibold">{{ name || "NA" }}</div>
+          <div class="text-xl font-semibold">{{ surname || "NA" }}</div>
           <div
             class=""
             @click="showEditModal(id, name, details, 'teacherCard')"
@@ -43,7 +52,19 @@
         :key="index"
         class="w-full md:w-1/3 lg:w-1/3 flex items-center"
       >
-        <img :src="detail.icon" :alt="`${detail.label} icon`" class="h-3 w-3" />
+        <div class="h-3 w-3">
+          <template v-if="isHtml(detail.icon)">
+            <span v-html="detail.icon"></span>
+          </template>
+          <template v-else>
+            <img
+              :src="detail.icon"
+              :alt="`${detail.label} icon`"
+              class="h-3 w-3"
+            />
+          </template>
+        </div>
+        <!-- <img :src="detail.icon" :alt="`${detail.label} icon`" class="h-3 w-3" /> -->
         <span class="flex text-xs ml-2"> {{ detail.value || "NA" }}</span>
       </div>
     </div>
@@ -60,6 +81,10 @@ const props = defineProps({
     required: true,
   },
   name: {
+    type: String,
+    required: true,
+  },
+  surname: {
     type: String,
     required: true,
   },
@@ -84,6 +109,10 @@ const showEditModal = (id, name, data, type) => {
   modalStore.modalTitle = name;
   modalStore.data = data;
   modalStore.source = type;
+};
+
+const isHtml = (icon) => {
+  return typeof icon === "string" && icon.trim().startsWith("<");
 };
 </script>
 

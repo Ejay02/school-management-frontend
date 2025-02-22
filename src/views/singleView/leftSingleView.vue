@@ -7,6 +7,7 @@
       <InfoCard
         :profileImage="profileImage"
         :name="name"
+        :surname="surname"
         :description="description"
         :details="details"
       />
@@ -17,8 +18,8 @@
     </div>
 
     <!-- bottom Section -->
-    <div class="mt-4 mb-4 bg-white rounded-md p-2 h-[730px] cursor-pointer">
-      <h1 class="mt-4 mb-4 text-xl font-semibold">{{ heading }}</h1>
+    <div class="mt-4 mb-4 bg-white rounded-md p-2 h-[820px] cursor-pointer">
+      <h1 class="mt-4 mb-8 text-xl font-semibold">{{ heading }}</h1>
 
       <PlannerCard />
     </div>
@@ -44,6 +45,10 @@ const props = defineProps({
     required: true,
   },
   name: {
+    type: String,
+    required: true,
+  },
+  surname: {
     type: String,
     required: true,
   },

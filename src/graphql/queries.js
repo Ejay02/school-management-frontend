@@ -116,3 +116,34 @@ export const getIncomeGraphData = gql`
     }
   }
 `;
+
+export const getTeacherById = gql`
+  query getTeacherById($teacherId: String!) {
+    getTeacherById(teacherId: $teacherId) {
+      id
+      username
+      role
+      name
+      surname
+      email
+      phone
+      address
+      img
+      bloodType
+      sex
+      createdAt
+      subjects {
+        id
+        name
+      }
+      lessons {
+        id
+        name
+      }
+      classes {
+        id
+        name
+      }
+    }
+  }
+`;
