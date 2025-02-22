@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full xl:w-1/3 flex flex-col gap-4 cursor-pointer">
+  <div class=" flex flex-col gap-4 cursor-pointer">
     <ShortcutsCard :shortcuts="shortcuts" />
     <PerformanceChartCard />
     <AnnouncementCard />

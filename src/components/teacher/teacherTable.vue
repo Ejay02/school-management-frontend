@@ -41,7 +41,23 @@
             <div class="text-xs text-gray-400">{{ item?.email }}</div>
           </div>
         </td>
-        <td class="hidden md:table-cell">{{ item?.teacherId }}</td>
+        <!-- <td class="hidden md:table-cell">
+          {{ item?.teacherId?.slice(0, 8) }} ...
+        </td> -->
+        <td class="hidden md:table-cell">
+          <span
+            class="copy-id relative cursor-pointer"
+            @click="copyId(item.teacherId)"
+          >
+            {{ item?.teacherId?.slice(0, 8) }}...
+            <span
+              class="tooltip absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity duration-300 pointer-events-none"
+            >
+              Copy to clipboard
+            </span>
+          </span>
+        </td>
+
         <td class="hidden md:table-cell">
           {{ item?.subjects.join(", ") || "N/A" }}
         </td>
@@ -106,6 +122,7 @@
 <script setup>
 import { useUserStore } from "../../store/userStore";
 import { useModalStore } from "../../store/useModalStore";
+import { useNotificationStore } from "../../store/notification";
 
 const props = defineProps({
   columns: {
@@ -120,6 +137,7 @@ const props = defineProps({
 
 const userStore = useUserStore();
 const modalStore = useModalStore();
+const notificationStore = useNotificationStore();
 
 const role = userStore.currentRole;
 
@@ -138,6 +156,22 @@ const showEditModal = (id, title, data, type) => {
   modalStore.source = type;
 };
 
+const copyId = (id) => {
+  if (!id) return;
+  navigator.clipboard
+    .writeText(id)
+    .then(() => {
+      console.log("Copied to clipboard!");
+      notificationStore.addNotification({
+        type: "success",
+        message: `Teacher Id copied to clipboard!`,
+      });
+    })
+    .catch((err) => {
+      console.error("Error copying to clipboard:", err);
+    });
+};
+
 // const showAddModal = (id, title, type) => {
 //   modalStore.addModal = true;
 //   modalStore.modalId = id;
@@ -146,4 +180,9 @@ const showEditModal = (id, title, data, type) => {
 // };
 </script>
 
-<style scoped></style>
+<style scoped>
+.copy-id:hover .tooltip {
+  opacity: 1;
+}
+</style>
+a0ce2c24-fd42-4372-a4c7-d6cb563eed70
