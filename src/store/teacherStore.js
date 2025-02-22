@@ -31,8 +31,6 @@ export const useTeacherStore = defineStore("teacherStore", {
           variables: { pagination: paginationParams },
         });
 
-        console.log("GraphQL data:", data); // Debug log
-
         // Adjust the following line if your data structure is different.
         const fetchedTeachers = data.getAllTeachers.map((teacher) => ({
           ...teacher,
@@ -45,7 +43,6 @@ export const useTeacherStore = defineStore("teacherStore", {
         this.hasMore = fetchedTeachers.length === limit;
       } catch (error) {
         this.error = error;
-        console.error("Error fetching teachers:", error);
       } finally {
         this.loading = false;
       }

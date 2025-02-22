@@ -38,7 +38,16 @@ import TeamSetting from "../components/settingsComponents/teamSetting.vue";
 import IntegrationSetting from "../components/settingsComponents/integrationSetting.vue";
 
 // Define public routes that don't require authentication
-const publicRoutes = ["Home", "Login", "Signup"];
+const publicRoutes = [
+  "Home",
+  "Login",
+  "Signup",
+  "About",
+  "Academics",
+  "Admissions",
+  "Contact",
+  "Calender",
+];
 
 const routes = [
   {
@@ -92,7 +101,7 @@ const routes = [
         path: "/dashboard/admin",
         name: "AdminLayout",
         component: AdminLayout,
-        meta: { roles: ["admin", "super_admin"] },
+        meta: { role: ["admin", "super_admin"] },
       },
       {
         path: "/dashboard/parent",
@@ -239,21 +248,41 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore();
+  const userRole = userStore.currentRole?.toLowerCase();
+
   const token = userStore.userInfo.token;
 
   const isAuthenticated = !!token;
 
-  // If the user is not authenticated, allow navigation to login or register.
-  if (
-    !isAuthenticated &&
-    to.path !== "/login" &&
-    to.path !== "/register" &&
-    to.path !== "/"
-  ) {
-    return next("/home");
+  // Check if route requires authentication
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+
+  // If route is public, allow access
+  if (publicRoutes.includes(to.name)) {
+    return next();
   }
 
-  // Otherwise, continue as normal.
+  // If requires auth and not authenticated
+  if (requiresAuth && !isAuthenticated) {
+    return next("/login");
+  }
+
+  // If authenticated and trying to access login/signup
+  if (isAuthenticated && ["Login", "Signup"].includes(to.name)) {
+    return next("/dashboard");
+  }
+
+  // Check role requirements for all matched route segments
+  const hasValidRole = to.matched.every((record) => {
+    if (!record.meta.role) return true;
+    return record.meta.role.includes(userRole);
+  });
+
+  if (!hasValidRole) {
+    return next("/dashboard");
+  }
+
+  // If no other conditions matched, allow navigation
   next();
 });
 
