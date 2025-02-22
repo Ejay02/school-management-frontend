@@ -26,6 +26,7 @@ export const useStudentStore = defineStore("studentStore", {
           query: getAllStudents,
           variables: { pagination },
         });
+
         this.students = data.getAllStudents;
       } catch (error) {
         this.error = error;

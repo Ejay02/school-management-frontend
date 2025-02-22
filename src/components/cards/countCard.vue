@@ -76,6 +76,7 @@ const createCircularChart = () => {
   // Use the fetched gender statistics
   const malePercentage = genderStats.value.malePercentage || 0;
   const femalePercentage = genderStats.value.femalePercentage || 0;
+  const total = genderStats.value.totalCapacity / 2;
 
   // Custom circular chart configuration using actual data
   const config = {
@@ -85,7 +86,7 @@ const createCircularChart = () => {
       datasets: [
         {
           // Top circle using the computed percentages
-          data: [malePercentage, femalePercentage],
+          data: [malePercentage, total],
           backgroundColor: ["#C3EBFA", "#D3D3D3"],
           borderWidth: 0,
         },
@@ -99,7 +100,7 @@ const createCircularChart = () => {
         },
         {
           // Bottom circle with reversed order for a stylistic effect
-          data: [femalePercentage, malePercentage],
+          data: [femalePercentage, total],
           backgroundColor: ["#FAE27C", "#D3D3D3"],
           borderWidth: 0,
           borderColor: "white",
