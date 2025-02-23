@@ -6,34 +6,72 @@
         <TopList :txt="'All Students'" />
       </div>
 
+      <LoadingScreen v-if="loading" message="Loading Students..." />
+
+      <EmptyState
+        v-if="!studentStore?.students.length && !loading"
+        icon="fa-regular fa-hourglass"
+        heading="Nothing here yet!"
+        description="Invite a student to get started."
+      />
+
+      <ErrorScreen v-else-if="error" />
+
       <!-- list -->
-      <div class="">
-        <StudentTable :columns="columns" :data="studentsData" />
+      <div class="" v-else>
+        <StudentTable :columns="columns" :data="studentStore?.students" />
       </div>
 
       <!-- pagination -->
 
-      <Pagination />
+      <Pagination
+        :currentPage="currentPage"
+        :hasMore="studentStore.hasMore"
+        @update:page="handlePageChange"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
+import { computed, onMounted, ref, watch } from "vue";
+import { useStudentStore } from "../../store/studentStore";
 import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
-import { studentsData } from "../../utils/data";
+// import { studentsData } from "../../utils/data";
 import StudentTable from "./studentTable.vue";
+import LoadingScreen from "../loadingScreen.vue";
+import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
+
+const limit = 10;
+const currentPage = ref(1);
+const studentStore = useStudentStore();
+const loading = computed(() => studentStore.loading);
+const error = computed(() => studentStore.error);
+
+watch(currentPage, (newPage) => {
+  studentStore.fetchStudents({ page: newPage, limit });
+});
+
+function handlePageChange(newPage) {
+  currentPage.value = newPage;
+}
+
+onMounted(() => {
+  studentStore.fetchStudents();
+});
 
 const columns = [
   { header: "Info", accessor: "info" },
   {
-    header: "Student ID",
+    header: "Student Id",
     accessor: "studentId",
     class: "hidden md:table-cell",
   },
   {
-    header: "Grade",
-    accessor: "grade",
+    header: "Class",
+    accessor: "class",
     class: "hidden md:table-cell",
   },
 

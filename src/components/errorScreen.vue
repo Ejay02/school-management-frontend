@@ -16,12 +16,12 @@ const props = defineProps({
   },
   buttonText: {
     type: String,
-    default: "Go Back",
+    default: "Reload",
   },
 });
 
-const handleGoBack = () => {
-  window.history.back();
+const handleReload = () => {
+  location.reload();
 };
 
 // Compute background pattern color based on status code
@@ -65,7 +65,7 @@ const patternColor = computed(() => {
         <!-- Action Button -->
         <div class="mt-10 flex items-center justify-center gap-x-6">
           <button
-            @click="handleGoBack"
+            @click="handleReload"
             class="rounded-md bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 transition-all duration-300"
           >
             {{ buttonText }}

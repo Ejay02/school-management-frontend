@@ -8,6 +8,7 @@ import { createPinia } from "pinia";
 import router from "./router/index.js";
 import { setupCalendar, Calendar, DatePicker } from "v-calendar";
 import "v-calendar/style.css";
+import draggable from "vuedraggable";
 
 // const app = createApp(App);
 
@@ -27,6 +28,7 @@ app.use(VueApolloComponents);
 app.use(setupCalendar, {});
 
 app.component("VCalendar", Calendar);
+app.component("draggable", draggable);
 app.component("VDatePicker", DatePicker);
 
 app.mount("#app");

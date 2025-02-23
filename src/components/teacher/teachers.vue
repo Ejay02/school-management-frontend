@@ -16,7 +16,7 @@
       />
       <!-- list -->
       <div class="" v-else>
-        <TeacherTable :columns="columns" :data="teacherStore.teachers" />
+        <TeacherTable :columns="columns" :data="teacherStore?.teachers" />
       </div>
 
       <!-- pagination -->
@@ -38,11 +38,12 @@ import TeacherTable from "./teacherTable.vue";
 import { useTeacherStore } from "../../store/teacherStore";
 import EmptyState from "../emptyState.vue";
 import LoadingScreen from "../loadingScreen.vue";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
-const teacherStore = useTeacherStore();
-const currentPage = ref(1);
 const limit = 10;
+const currentPage = ref(1);
+const teacherStore = useTeacherStore();
+const loading = computed(() => teacherStore.loading);
 
 watch(currentPage, (newPage) => {
   teacherStore.fetchTeachers({ page: newPage, limit });
@@ -59,7 +60,7 @@ onMounted(() => {
 const columns = [
   { header: "Info", accessor: "info" },
   {
-    header: "Teacher ID",
+    header: "Teacher Id",
     accessor: "teacherId",
     class: "hidden md:table-cell",
   },

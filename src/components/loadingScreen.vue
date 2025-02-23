@@ -22,16 +22,12 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { defineProps, withDefaults } from "vue";
-
-// Define props with default value
-interface Props {
-  message?: string;
-}
-
-withDefaults(defineProps<Props>(), {
-  message: "Loading...",
+<script setup>
+defineProps({
+  message: {
+    type: String,
+    default: "Loading...",
+  },
 });
 </script>
 

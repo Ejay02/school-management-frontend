@@ -47,18 +47,24 @@ export const getAllStudents = gql`
     getAllStudents(params: $pagination) {
       id
       username
+      role
       name
       surname
       email
-      role
+      phone
+      address
       img
       sex
-      # address
-      phone
-      class {
+      parent {
+        name
+        surname
+      }
+      class{
         id
         name
       }
+   
+      createdAt
     }
   }
 `;
@@ -144,6 +150,28 @@ export const getTeacherById = gql`
         id
         name
       }
+    }
+  }
+`;
+
+export const getStudentById = gql`
+  query getStudentById($studentId: String!) {
+    getStudentById(studentId: $studentId) {
+      id
+      username
+      role
+      name
+      surname
+      email
+      phone
+      address
+      img
+      bloodType
+      sex
+      createdAt
+      # classId
+      # parentId
+   
     }
   }
 `;

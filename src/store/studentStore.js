@@ -1,10 +1,14 @@
 import { defineStore } from "pinia";
 import { useApolloClient } from "@vue/apollo-composable";
 import { getAllStudents, getStudentGenderStats } from "@/graphql/queries";
+import { getStudentById } from "../graphql/queries";
 
 export const useStudentStore = defineStore("studentStore", {
   state: () => ({
     students: [],
+    selectedStudent: null,
+
+    hasMore: true,
     genderStats: {
       totalStudents: 0,
       maleCount: 0,
@@ -18,16 +22,38 @@ export const useStudentStore = defineStore("studentStore", {
   }),
 
   actions: {
-    async fetchStudents(pagination = {}) {
+    async fetchStudents({
+      page = 1,
+      limit = 10,
+      search = "",
+      sortBy = "",
+      sortOrder = "",
+    } = {}) {
       this.loading = true;
       try {
         const client = useApolloClient().client;
+        const paginationParams = { page, limit };
+        if (search) paginationParams.search = search;
+        if (sortBy) paginationParams.sortBy = sortBy;
+        if (sortOrder) paginationParams.sortOrder = sortOrder;
+
         const { data } = await client.query({
           query: getAllStudents,
-          variables: { pagination },
+          variables: { pagination: paginationParams },
         });
 
-        this.students = data.getAllStudents;
+        const fetchedStudents = data.getAllStudents.map((student) => ({
+          ...student,
+          studentId: student.id,
+          photo: student.img,
+          parent: student.parent
+            ? `${student.parent.name} ${student.parent.surname}`
+            : "",
+          class: student.class ? student.class.name : "",
+        }));
+
+        this.students = fetchedStudents;
+        this.hasMore = fetchedStudents?.length === limit;
       } catch (error) {
         this.error = error;
       } finally {
@@ -44,6 +70,23 @@ export const useStudentStore = defineStore("studentStore", {
           variables: { classId },
         });
         this.genderStats = data.getStudentsByGender;
+      } catch (error) {
+        this.error = error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchStudentById(studentId) {
+      this.loading = true;
+      try {
+        const client = useApolloClient().client;
+        const { data } = await client.query({
+          query: getStudentById,
+          variables: { studentId },
+        });
+
+        this.selectedStudent = data.getStudentById;
       } catch (error) {
         this.error = error;
       } finally {

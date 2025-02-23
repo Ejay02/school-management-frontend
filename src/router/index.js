@@ -127,7 +127,7 @@ const routes = [
         component: Teachers,
       },
       {
-        path: "/list/teachers/:id",
+        path: "/list/teacher/:id",
         name: "TeacherView",
         component: TeacherView,
       },
@@ -137,7 +137,7 @@ const routes = [
         component: Students,
       },
       {
-        path: "/list/students/:id",
+        path: "/list/student/:id",
         name: "StudentView",
         component: StudentView,
       },

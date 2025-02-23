@@ -28,12 +28,12 @@
 
 <script setup>
 import { useRoute } from "vue-router";
+import { computed, onMounted } from "vue";
 import ErrorScreen from "../../components/errorScreen.vue";
+import { useTeacherStore } from "../../store/teacherStore";
 import LoadingScreen from "../../components/loadingScreen.vue";
 import LeftSingleView from "../../views/singleView/leftSingleView.vue";
 import RightSingleView from "../../views/singleView/rightSingleView.vue";
-import { useTeacherStore } from "../../store/teacherStore";
-import { computed, onMounted } from "vue";
 
 const teacherShortcuts = [
   {
@@ -82,13 +82,13 @@ const teacherInfoCards = computed(() => {
   return [
     {
       icon: `/singleAttendance.png`,
-      value: teacher?.value.attendance || "90%",
+      value: teacher?.value.attendance || "0%",
       title: "Attendance",
     },
     {
       icon: "/singleBranch.png",
-      value: teacher?.value.branches || "9",
-      title: "Branches",
+      value: teacher?.value.events || "9",
+      title: "Events",
     },
     {
       icon: "/singleLesson.png",

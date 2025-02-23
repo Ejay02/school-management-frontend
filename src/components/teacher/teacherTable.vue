@@ -30,7 +30,7 @@
               class="w-10 h-10 rounded-full mr-3 bg-eduPurple flex items-center justify-center font-bold"
             >
               {{ item?.name[0].toUpperCase()
-              }}{{ item.surname[0].toUpperCase() }}
+              }}{{ item?.surname[0].toUpperCase() }}
             </div>
           </div>
 
@@ -65,11 +65,13 @@
           {{ item?.classes.join(", ") || "N/A" }}
         </td>
         <td class="hidden md:table-cell">{{ item?.phone || "N/A" }}</td>
-        <td class="hidden md:table-cell">{{ item?.address || "N/A" }}</td>
+        <td class="hidden md:table-cell capitalize">
+          {{ item?.address || "N/A" }}
+        </td>
         <td>
           <div class="flex items-center gap-2 relative">
             <router-link
-              :to="`/list/teachers/${item?.id}`"
+              :to="`/list/teacher/${item?.id}`"
               class="group relative"
             >
               <button
@@ -185,4 +187,3 @@ const copyId = (id) => {
   opacity: 1;
 }
 </style>
-a0ce2c24-fd42-4372-a4c7-d6cb563eed70

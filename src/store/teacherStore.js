@@ -1,4 +1,4 @@
-// teacherStore.js
+
 import { defineStore } from "pinia";
 import { useApolloClient } from "@vue/apollo-composable";
 import { getAllTeachers, getTeacherById } from "@/graphql/queries";
