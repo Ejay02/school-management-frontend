@@ -18,13 +18,43 @@
         class="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-eduSkyLight"
       >
         <td class="flex items-center gap-4 p-2">
+          <div class="">
+            <img
+              v-if="item?.photo"
+              :src="item?.photo"
+              alt="user"
+              class="w-10 h-10 rounded-full mr-3 xl:block object-cover"
+            />
+            <div
+              v-else
+              class="w-10 h-10 rounded-full mr-3 bg-eduPurple flex items-center justify-center font-bold"
+            >
+              {{ item?.name[0].toUpperCase()
+              }}{{ item?.surname[0].toUpperCase() }}
+            </div>
+          </div>
+
           <div class="flex flex-col">
-            <div class="font-semibold">{{ item?.name }}</div>
+            <div class="font-semibold capitalize">
+              {{ item?.name }} {{ item?.surname }}
+            </div>
             <div class="text-xs text-gray-400">{{ item?.email }}</div>
           </div>
         </td>
 
-        <td class="hidden md:table-cell">{{ item?.students.join(", ") }}</td>
+        <td class="hidden md:table-cell capitalize">
+          <div class="flex flex-wrap gap-2">
+            <span
+              v-for="(student, index) in item?.students"
+              :key="index"
+              class="px-2 py-1 bg-gray-200 rounded text-xs"
+            >
+              {{ student }}
+            </span>
+          </div>
+        </td>
+
+        <!-- <td class="hidden md:table-cell capitalize">{{ item?.students.join(", ") }}</td> -->
 
         <td class="hidden md:table-cell">{{ item?.phone }}</td>
         <td class="hidden md:table-cell">{{ item?.address }}</td>

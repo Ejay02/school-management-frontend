@@ -20,7 +20,7 @@
         />
       </div>
       <div class="w-full md:w-1/3">
-        <RightSingleView :shortcuts="studentShortcuts" />
+        <RightSingleView :shortcuts="studentShortcuts" :name="studentName" />
       </div>
     </div>
   </div>
@@ -34,39 +34,6 @@ import LoadingScreen from "../loadingScreen.vue";
 import { useStudentStore } from "../../store/studentStore";
 import LeftSingleView from "../../views/singleView/leftSingleView.vue";
 import RightSingleView from "../../views/singleView/rightSingleView.vue";
-
-const studentShortcuts = [
-  {
-    text: "Student's Lessons",
-    link: "/list/lessons",
-    color: "bg-eduSkyLight",
-  },
-  {
-    text: "Student's Teachers",
-    link: "/list/teachers",
-    color: "bg-eduPurpleLight",
-  },
-  {
-    text: "Student's Lessons",
-    link: "/list/lessons",
-    color: "bg-eduYellowLight",
-  },
-  {
-    text: "Student's Exams",
-    link: "/list/exams",
-    color: "bg-pink-50",
-  },
-  {
-    text: "Student's Assignments",
-    link: "/list/assignments",
-    color: "bg-eduSky",
-  },
-  {
-    text: "Student's Results",
-    link: "/list/results",
-    color: "bg-eduSkyLight",
-  },
-];
 
 const route = useRoute();
 const studentId = route.params.id;
@@ -92,24 +59,24 @@ const studentInfoCards = computed(() => {
   if (!student.value) return [];
   return [
     {
-      icon: `/singleAttendance.png`,
-      value: "95%",
-      title: "Attendance",
+      icon: "/singleClass.png",
+      value: student?.value.class?.name,
+      title: "Class Name",
     },
     {
-      icon: "/singleBranch.png",
-      value: "6",
-      title: "Grade",
+      icon: `/singleAttendance.png`,
+      value: "5",
+      title: "Assignment(s)",
     },
     {
       icon: "/singleLesson.png",
       value: "15",
-      title: "Lessons",
+      title: "Lesson(s)",
     },
     {
-      icon: "/singleClass.png",
-      value: "6A",
-      title: "Class Name",
+      icon: "/singleBranch.png",
+      value: "6",
+      title: "Event(s)",
     },
   ];
 });
@@ -143,6 +110,38 @@ const studentDetails = computed(() => {
       icon: '<i class="fa-solid fa-map-pin"></i>',
       label: "Address",
       value: student?.value.address,
+    },
+  ];
+});
+
+const studentShortcuts = computed(() => {
+  if (!student.value) return [];
+  return [
+    {
+      text: `${studentName.value}'s Lessons`,
+      link: "/list/lessons",
+      color: "bg-eduSkyLight",
+    },
+    {
+      text: `${studentName.value}'s Teachers`,
+      link: "/list/teachers",
+      color: "bg-eduPurpleLight",
+    },
+
+    {
+      text: `${studentName.value}'s Exams`,
+      link: "/list/exams",
+      color: "bg-pink-50",
+    },
+    {
+      text: `${studentName.value}'s Assignments`,
+      link: "/list/assignments",
+      color: "bg-eduSky",
+    },
+    {
+      text: ` ${studentName.value}'s Results`,
+      link: "/list/results",
+      color: "bg-eduYellowLight",
     },
   ];
 });

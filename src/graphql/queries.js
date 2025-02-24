@@ -59,11 +59,11 @@ export const getAllStudents = gql`
         name
         surname
       }
-      class{
+      class {
         id
         name
       }
-   
+
       createdAt
     }
   }
@@ -80,6 +80,14 @@ export const getAllParents = gql`
       role
       address
       phone
+      img
+      students {
+        id
+        username
+        name
+        surname
+        img
+      }
     }
   }
 `;
@@ -169,9 +177,14 @@ export const getStudentById = gql`
       bloodType
       sex
       createdAt
-      # classId
-      # parentId
-   
+      class {
+        id
+        name
+      }
+      parent {
+        name
+        surname
+      }
     }
   }
 `;

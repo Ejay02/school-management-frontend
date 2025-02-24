@@ -77,7 +77,7 @@
               <button
                 class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
               >
-                <img src="/view.png" alt="view" class="h-3 w-3" />
+                <i class="fa-regular fa-eye text-xs text-gray-500"></i>
               </button>
               <span
                 class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex"
@@ -93,7 +93,7 @@
               <button
                 class="w-6 h-6 flex items-center justify-center rounded-full bg-eduYellow"
               >
-                <img src="/edit.png" alt="view" class="h-3 w-3" />
+                <i class="fa-solid fa-pen-to-square text-xs text-gray-500"></i>
               </button>
               <span
                 class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"

@@ -30,6 +30,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  name: {
+    type: String,
+    required: true,
+  },
 });
 
 // Use a unique key for localStorage; if teacher-specific, include teacher id

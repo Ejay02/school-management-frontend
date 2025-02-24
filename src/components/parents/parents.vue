@@ -6,14 +6,27 @@
         <TopList :txt="'All Parents'" />
       </div>
 
+      <LoadingScreen v-if="loading" message="Loading Parents..." />
+
+      <EmptyState
+        v-if="!parentStore.parents.length && !loading"
+        icon="fa-regular fa-hourglass"
+        heading="Nothing here yet!"
+        description="Invite a parent to get started."
+      />
+
       <!-- list -->
       <div class="">
-        <ParentsTable :columns="columns" :data="parentsData" />
+        <ParentsTable :columns="columns" :data="parentStore?.parents" />
       </div>
 
       <!-- pagination -->
 
-      <Pagination />
+      <Pagination
+        :currentPage="currentPage"
+        :hasMore="parentStore.hasMore"
+        @update:page="handlePageChange"
+      />
     </div>
   </div>
 </template>
@@ -21,8 +34,28 @@
 <script setup>
 import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
-import { parentsData } from "../../utils/data";
 import ParentsTable from "./parentsTable.vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { useParentStore } from "../../store/parentStore";
+import LoadingScreen from "../loadingScreen.vue";
+import EmptyState from "../emptyState.vue";
+
+const limit = 10;
+const currentPage = ref(1);
+const parentStore = useParentStore();
+const loading = computed(() => parentStore.loading);
+
+watch(currentPage, (newPage) => {
+  parentStore.fetchParents({ page: newPage, limit });
+});
+
+function handlePageChange(newPage) {
+  currentPage.value = newPage;
+}
+
+onMounted(() => {
+  parentStore.fetchParents();
+});
 
 const columns = [
   { header: "Info", accessor: "info" },

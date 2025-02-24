@@ -1,6 +1,6 @@
 <template>
-  <div class=" flex flex-col gap-4 cursor-pointer">
-    <ShortcutsCard :shortcuts="shortcuts" />
+  <div class="flex flex-col gap-4 cursor-pointer">
+    <ShortcutsCard :shortcuts="shortcuts" :name="name" />
     <PerformanceChartCard />
     <AnnouncementCard />
   </div>
@@ -14,6 +14,10 @@ import PerformanceChartCard from "../../components/cards/singleViewCards/perform
 const props = defineProps({
   shortcuts: {
     type: Array,
+    required: true,
+  },
+  name: {
+    type: String,
     required: true,
   },
 });

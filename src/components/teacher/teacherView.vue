@@ -20,7 +20,7 @@
         />
       </div>
       <div class="w-full md:w-1/3">
-        <RightSingleView :shortcuts="teacherShortcuts" />
+        <RightSingleView :shortcuts="teacherShortcuts" :name="teacherName" />
       </div>
     </div>
   </div>
@@ -34,34 +34,6 @@ import { useTeacherStore } from "../../store/teacherStore";
 import LoadingScreen from "../../components/loadingScreen.vue";
 import LeftSingleView from "../../views/singleView/leftSingleView.vue";
 import RightSingleView from "../../views/singleView/rightSingleView.vue";
-
-const teacherShortcuts = [
-  {
-    text: "Teacher's Classes",
-    link: "/list/classes",
-    color: "bg-eduSkyLight",
-  },
-  {
-    text: "Teacher's Students",
-    link: "/list/students",
-    color: "bg-eduPurpleLight",
-  },
-  {
-    text: "Teacher's Lessons",
-    link: "/list/lessons",
-    color: "bg-eduYellowLight",
-  },
-  {
-    text: "Teacher's Exams",
-    link: "/list/exams",
-    color: "bg-pink-50",
-  },
-  {
-    text: "Teacher's Assignments",
-    link: "/list/assignments",
-    color: "bg-eduSky",
-  },
-];
 
 const route = useRoute();
 const teacherId = route.params.id;
@@ -77,13 +49,19 @@ const teacher = computed(() => teacherStore.selectedTeacher);
 const loading = computed(() => teacherStore.loading);
 const error = computed(() => teacherStore.error);
 
+const teacherName = computed(() => {
+  const name = teacher.value?.name;
+  if (!name) return "";
+  return name.charAt(0).toUpperCase() + name.slice(1);
+});
+
 const teacherInfoCards = computed(() => {
   if (!teacher.value) return [];
   return [
     {
       icon: `/singleAttendance.png`,
       value: teacher?.value.attendance || "0%",
-      title: "Attendance",
+      title: "Assignments",
     },
     {
       icon: "/singleBranch.png",
@@ -137,10 +115,35 @@ const teacherDetails = computed(() => {
   ];
 });
 
-const teacherName = computed(() => {
-  const name = teacher.value?.name;
-  if (!name) return "";
-  return name.charAt(0).toUpperCase() + name.slice(1);
+const teacherShortcuts = computed(() => {
+  if (!teacher.value) return [];
+  return [
+    {
+      text: `${teacherName.value}'s Classes`,
+      link: "/list/classes",
+      color: "bg-eduSkyLight",
+    },
+    {
+      text: `${teacherName.value}'s Students`,
+      link: "/list/students",
+      color: "bg-eduPurpleLight",
+    },
+    {
+      text: `${teacherName.value}'s Lessons`,
+      link: "/list/lessons",
+      color: "bg-eduYellowLight",
+    },
+    {
+      text: `${teacherName.value}'s Exams`,
+      link: "/list/exams",
+      color: "bg-pink-50",
+    },
+    {
+      text: `${teacherName.value}'s Assignments`,
+      link: "/list/assignments",
+      color: "bg-eduSky",
+    },
+  ];
 });
 </script>
 

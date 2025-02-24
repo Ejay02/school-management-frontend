@@ -6,10 +6,10 @@ import { getAllTeachers, getTeacherById } from "@/graphql/queries";
 export const useTeacherStore = defineStore("teacherStore", {
   state: () => ({
     teachers: [],
-    selectedTeacher: null,
     loading: false,
     error: null,
     hasMore: true, // indicates if there might be a next page
+    selectedTeacher: null,
   }),
   actions: {
     async fetchTeachers({
