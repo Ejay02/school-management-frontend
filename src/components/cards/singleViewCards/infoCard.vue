@@ -23,6 +23,7 @@
           <div class="text-xl font-semibold">{{ name || "NA" }}</div>
           <div class="text-xl font-semibold">{{ surname || "NA" }}</div>
           <div
+            v-if="id === user"
             class=""
             @click="showEditModal(id, name, details, 'teacherCard')"
           >
@@ -74,6 +75,8 @@
 <script setup>
 import { useRoute } from "vue-router";
 import { useModalStore } from "../../../store/useModalStore";
+import { useUserStore } from "../../../store/userStore";
+import { computed } from "vue";
 
 const props = defineProps({
   profileImage: {
@@ -102,6 +105,9 @@ const route = useRoute();
 const id = route.params.id;
 
 const modalStore = useModalStore();
+const userStore = useUserStore();
+
+const user = computed(() => userStore.userInfo.id);
 
 const showEditModal = (id, name, data, type) => {
   modalStore.editModal = true;

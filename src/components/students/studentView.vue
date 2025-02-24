@@ -28,12 +28,12 @@
 
 <script setup>
 import { useRoute } from "vue-router";
+import { computed, onMounted } from "vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
 import { useStudentStore } from "../../store/studentStore";
 import LeftSingleView from "../../views/singleView/leftSingleView.vue";
 import RightSingleView from "../../views/singleView/rightSingleView.vue";
-import { computed, onMounted } from 'vue';
 
 const studentShortcuts = [
   {
@@ -133,7 +133,11 @@ const studentDetails = computed(() => {
       value: student?.value.bloodType || "A+",
     },
     { icon: "/date.png", label: "Date", value: formattedDate },
-    { icon: "/mail.png", label: "Email", value: student?.value.email },
+    {
+      icon: '<i class="fa-solid fa-envelope"></i>',
+      label: "Email",
+      value: student?.value.email,
+    },
     { icon: "/phone.png", label: "Phone", value: student?.value.phone },
     {
       icon: '<i class="fa-solid fa-map-pin"></i>',
@@ -141,7 +145,6 @@ const studentDetails = computed(() => {
       value: student?.value.address,
     },
   ];
-
 });
 </script>
 

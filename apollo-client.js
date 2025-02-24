@@ -6,6 +6,7 @@ import {
 } from "@apollo/client/core";
 import { onError } from "@apollo/client/link/error";
 
+import { setContext } from "@apollo/client/link/context";
 import { useUserStore } from "./src/store/userStore";
 import { useNotificationStore } from "./src/store/notification";
 import router from "./src/router";
@@ -39,21 +40,42 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   }
 });
 
-// HTTP connection to the API
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem("token");
+  return {
+    headers: {
+      ...headers,
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+  };
+});
+
 const httpLink = createHttpLink({
   uri: `${import.meta.env.VITE_API_URL}/graphql`,
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  },
 });
 
-// Cache implementation
 const cache = new InMemoryCache();
 
-// Create the apollo client
 const apolloClient = new ApolloClient({
-  link: from([errorLink, httpLink]),
+  link: from([errorLink, authLink.concat(httpLink)]),
   cache,
 });
+
+// HTTP connection to the API
+// const httpLink = createHttpLink({
+//   uri: `${import.meta.env.VITE_API_URL}/graphql`,
+//   headers: {
+//     Authorization: `Bearer ${localStorage.getItem("token")}`,
+//   },
+// });
+
+// // Cache implementation
+// const cache = new InMemoryCache();
+
+// // Create the apollo client
+// const apolloClient = new ApolloClient({
+//   link: from([errorLink, httpLink]),
+//   cache,
+// });
 
 export { apolloClient };
