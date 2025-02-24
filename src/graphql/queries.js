@@ -207,3 +207,32 @@ export const getAllSubjects = gql`
     }
   }
 `;
+
+export const getAllClasses = gql`
+  query geAllClasses($pagination: PaginationInput) {
+    getAllClasses(params: $pagination) {
+      id
+      name
+      capacity
+      students {
+      id
+      name
+      surname
+    }
+      supervisor {
+        id
+        name
+        surname
+      }
+      subjects {
+        id
+        name
+      }
+      feeStructure{
+     
+     academicYear
+     totalAmount
+   }
+    }
+  }
+`;

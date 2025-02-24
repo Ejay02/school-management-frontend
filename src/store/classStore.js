@@ -1,17 +1,17 @@
 import { defineStore } from "pinia";
-import { getAllSubjects } from "../graphql/queries";
+import { getAllClasses } from "../graphql/queries";
 import { useApolloClient } from "@vue/apollo-composable";
 
-export const useSubjectStore = defineStore("subjectStore", {
+export const useClassStore = defineStore("classStore", {
   state: () => ({
-    subjects: [],
+    classes: [],
     loading: false,
     error: null,
     hasMore: true,
   }),
 
   actions: {
-    async fetchSubjects({
+    async fetchClasses({
       page = 1,
       limit = 10,
       search = "",
@@ -28,12 +28,12 @@ export const useSubjectStore = defineStore("subjectStore", {
         if (sortOrder) paginationParams.sortOrder = sortOrder;
 
         const { data } = await client.query({
-          query: getAllSubjects,
+          query: getAllClasses,
           variables: { pagination: paginationParams },
         });
 
-        this.subjects = data.getAllSubjects;
-        this.hasMore = data.getAllSubjects.length === limit;
+        this.classes = data.getAllClasses;
+        this.hasMore = data.getAllClasses.length === limit;
       } catch (err) {
         this.error = err;
       } finally {

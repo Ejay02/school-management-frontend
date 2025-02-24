@@ -46,6 +46,8 @@ import { useSubjectStore } from "../../store/subjectStore";
 const limit = 10;
 const currentPage = ref(1);
 const subjectStore = useSubjectStore();
+const error = computed(() => subjectStore.error);
+
 const loading = computed(() => subjectStore.loading);
 
 watch(currentPage, (newPage) => {

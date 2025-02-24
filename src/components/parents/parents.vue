@@ -46,6 +46,7 @@ import { useParentStore } from "../../store/parentStore";
 const limit = 10;
 const currentPage = ref(1);
 const parentStore = useParentStore();
+const error = computed(() => parentStore.error);
 const loading = computed(() => parentStore.loading);
 
 watch(currentPage, (newPage) => {

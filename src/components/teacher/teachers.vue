@@ -46,6 +46,7 @@ import { useTeacherStore } from "../../store/teacherStore";
 const limit = 10;
 const currentPage = ref(1);
 const teacherStore = useTeacherStore();
+const error = computed(() => teacherStore.error);
 const loading = computed(() => teacherStore.loading);
 
 watch(currentPage, (newPage) => {
