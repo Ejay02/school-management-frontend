@@ -6,13 +6,28 @@
         <TopList :txt="'All Subjects'" />
       </div>
 
+      <LoadingScreen v-if="loading" message="Loading Subjects..." />
+
+      <ErrorScreen v-else-if="error" />
+
+      <EmptyState
+        v-else-if="!subjectStore.subjects.length && !loading"
+        icon="fa-regular fa-hourglass"
+        heading="Nothing here yet!"
+        description="Add subject to get started."
+      />
+
       <!-- list -->
-      <div class="">
-        <SubjectTable :columns="columns" :data="subjectsData" />
+      <div class="" v-else>
+        <SubjectTable :columns="columns" :data="subjectStore.subjects" />
       </div>
 
       <!-- pagination -->
-      <Pagination />
+      <Pagination
+        :currentPage="currentPage"
+        :hasMore="subjectStore.hasMore"
+        @update:page="handlePageChange"
+      />
     </div>
   </div>
 </template>
@@ -20,19 +35,42 @@
 <script setup>
 import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
-import { subjectsData } from "../../utils/data";
+
+import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
 import SubjectTable from "./subjectTable.vue";
+import LoadingScreen from "../loadingScreen.vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { useSubjectStore } from "../../store/subjectStore";
+
+const limit = 10;
+const currentPage = ref(1);
+const subjectStore = useSubjectStore();
+const loading = computed(() => subjectStore.loading);
+
+watch(currentPage, (newPage) => {
+  subjectStore.fetchSubjects({ page: newPage, limit });
+});
+
+function handlePageChange(newPage) {
+  currentPage.value = newPage;
+}
+
+onMounted(() => {
+  subjectStore.fetchSubjects({ page: currentPage.value, limit });
+});
 
 const columns = [
   {
     header: "Subject Name",
-    accessor: "subject",
+    accessor: "name",
   },
   {
     header: "Teachers",
     accessor: "teachers",
     class: "hidden md:table-cell",
   },
+
   {
     header: "Actions",
     accessor: "action",

@@ -8,14 +8,14 @@
 
       <LoadingScreen v-if="loading" message="Loading Students..." />
 
+      <ErrorScreen v-else-if="error" />
+
       <EmptyState
-        v-if="!studentStore?.students.length && !loading"
+        v-else-if="!studentStore?.students.length && !loading"
         icon="fa-regular fa-hourglass"
         heading="Nothing here yet!"
         description="Invite a student to get started."
       />
-
-      <ErrorScreen v-else-if="error" />
 
       <!-- list -->
       <div class="" v-else>
@@ -34,15 +34,15 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
-import { useStudentStore } from "../../store/studentStore";
 import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
-// import { studentsData } from "../../utils/data";
-import StudentTable from "./studentTable.vue";
-import LoadingScreen from "../loadingScreen.vue";
+
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
+import StudentTable from "./studentTable.vue";
+import LoadingScreen from "../loadingScreen.vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { useStudentStore } from "../../store/studentStore";
 
 const limit = 10;
 const currentPage = ref(1);

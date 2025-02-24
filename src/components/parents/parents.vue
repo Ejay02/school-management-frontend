@@ -8,15 +8,17 @@
 
       <LoadingScreen v-if="loading" message="Loading Parents..." />
 
+      <ErrorScreen v-else-if="error" />
+
       <EmptyState
-        v-if="!parentStore.parents.length && !loading"
+        v-else-if="!parentStore.parents.length && !loading"
         icon="fa-regular fa-hourglass"
         heading="Nothing here yet!"
         description="Invite a parent to get started."
       />
 
       <!-- list -->
-      <div class="">
+      <div class="" v-else>
         <ParentsTable :columns="columns" :data="parentStore?.parents" />
       </div>
 
@@ -34,11 +36,12 @@
 <script setup>
 import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
+import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
 import ParentsTable from "./parentsTable.vue";
+import LoadingScreen from "../loadingScreen.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useParentStore } from "../../store/parentStore";
-import LoadingScreen from "../loadingScreen.vue";
-import EmptyState from "../emptyState.vue";
 
 const limit = 10;
 const currentPage = ref(1);

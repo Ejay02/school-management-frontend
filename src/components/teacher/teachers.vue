@@ -8,8 +8,10 @@
 
       <LoadingScreen v-if="loading" message="Loading Teachers..." />
 
+      <ErrorScreen v-else-if="error" />
+
       <EmptyState
-        v-if="!teacherStore.teachers.length && !loading"
+        v-else-if="!teacherStore.teachers.length && !loading"
         icon="fa-regular fa-hourglass"
         heading="Nothing here yet!"
         description="Invite a teacher to get started."
@@ -34,11 +36,12 @@
 import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
 
-import TeacherTable from "./teacherTable.vue";
-import { useTeacherStore } from "../../store/teacherStore";
 import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
+import TeacherTable from "./teacherTable.vue";
 import LoadingScreen from "../loadingScreen.vue";
 import { computed, onMounted, ref, watch } from "vue";
+import { useTeacherStore } from "../../store/teacherStore";
 
 const limit = 10;
 const currentPage = ref(1);

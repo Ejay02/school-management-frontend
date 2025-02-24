@@ -12,7 +12,7 @@
       <div class="mt-2">
         <p class="text-gray-600 text-sm">
           Are you sure you want to delete
-          <b>{{ title }}</b> ?
+          <b class="capitalize">{{ title }}</b> ?
         </p>
       </div>
       <div class="mt-6 flex justify-end gap-2">

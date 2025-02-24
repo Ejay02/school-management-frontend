@@ -5,7 +5,7 @@ export const menuItems = [
       {
         icon: "/home.png",
         label: "Home",
-        href: "/dashboard/admin",
+        href: "/dashboard",
         visible: ["super_admin", "admin", "teacher", "student", "parent"],
       },
       {

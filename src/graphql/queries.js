@@ -188,3 +188,22 @@ export const getStudentById = gql`
     }
   }
 `;
+
+export const getAllSubjects = gql`
+  query geAllStudents($pagination: PaginationInput) {
+    getAllSubjects(params: $pagination) {
+      id
+      name
+      teachers {
+        id
+        name
+        surname
+        username
+      }
+      lessons {
+        id
+        name
+      }
+    }
+  }
+`;
