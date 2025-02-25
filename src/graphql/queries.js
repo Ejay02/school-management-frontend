@@ -259,3 +259,29 @@ export const getAllLessons = gql`
     }
   }
 `;
+
+export const getAllExams = gql`
+  query getAllExams($pagination: PaginationInput) {
+    getAllExams(params: $pagination) {
+      id
+      title
+      startTime
+      endTime
+      createdAt
+      lesson {
+        name
+      }
+      teacher {
+        name
+        surname
+      }
+      class {
+        name
+      }
+
+      subject {
+        name
+      }
+    }
+  }
+`;

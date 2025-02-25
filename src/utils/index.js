@@ -15,15 +15,21 @@ export const menuItems = [
         visible: ["super_admin", "admin", "teacher"],
       },
       {
+        icon: "/parent.png",
+        label: "Parents",
+        href: "/list/parents",
+        visible: ["super_admin", "admin", "teacher"],
+      },
+      {
         icon: "/student.png",
         label: "Students",
         href: "/list/students",
         visible: ["super_admin", "admin", "teacher"],
       },
       {
-        icon: "/parent.png",
-        label: "Parents",
-        href: "/list/parents",
+        icon: "/class.png",
+        label: "Classes",
+        href: "/list/classes",
         visible: ["super_admin", "admin", "teacher"],
       },
       {
@@ -31,12 +37,6 @@ export const menuItems = [
         label: "Subjects",
         href: "/list/subjects",
         visible: ["super_admin", "admin"],
-      },
-      {
-        icon: "/class.png",
-        label: "Classes",
-        href: "/list/classes",
-        visible: ["super_admin", "admin", "teacher"],
       },
       {
         icon: "/lesson.png",

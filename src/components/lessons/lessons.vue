@@ -11,7 +11,7 @@
       <ErrorScreen v-else-if="error" />
 
       <EmptyState
-        v-else-if="!lessonStore.lessons.length && !loading"
+        v-else-if="!lessonStore?.lessons?.length && !loading"
         icon="fa-regular fa-hourglass"
         heading="Nothing here yet!"
         description="Add a lesson to get started."
@@ -19,7 +19,7 @@
 
       <!-- list -->
       <div class="" v-else>
-        <LessonsTable :columns="columns" :data="lessonStore.lessons" />
+        <LessonsTable :columns="columns" :data="lessonStore?.lessons" />
       </div>
 
       <!-- pagination -->
