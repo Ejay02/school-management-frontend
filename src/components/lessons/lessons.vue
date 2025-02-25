@@ -6,13 +6,28 @@
         <TopList :txt="'All Lessons'" />
       </div>
 
+      <LoadingScreen v-if="loading" message="Loading Lessons..." />
+
+      <ErrorScreen v-else-if="error" />
+
+      <EmptyState
+        v-else-if="!lessonStore.lessons.length && !loading"
+        icon="fa-regular fa-hourglass"
+        heading="Nothing here yet!"
+        description="Add a lesson to get started."
+      />
+
       <!-- list -->
-      <div class="">
-        <LessonsTable :columns="columns" :data="lessonsData" />
+      <div class="" v-else>
+        <LessonsTable :columns="columns" :data="lessonStore.lessons" />
       </div>
 
       <!-- pagination -->
-      <Pagination />
+      <Pagination
+        :currentPage="currentPage"
+        :hasMore="lessonStore.hasMore"
+        @update:page="handlePageChange"
+      />
     </div>
   </div>
 </template>
@@ -20,13 +35,43 @@
 <script setup>
 import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
-import { lessonsData } from "../../utils/data";
+
 import LessonsTable from "./lessonsTable.vue";
+import LoadingScreen from "../loadingScreen.vue";
+import ErrorScreen from "../errorScreen.vue";
+import EmptyState from "../emptyState.vue";
+import { onMounted, ref } from "vue";
+import { computed } from "vue";
+import { watch } from "vue";
+import { useLessonStore } from "../../store/lessonStore";
+
+const limit = 10;
+const currentPage = ref(1);
+const lessonStore = useLessonStore();
+const loading = computed(() => lessonStore.loading);
+const error = computed(() => lessonStore.error);
+
+watch(currentPage, (newPage) => {
+  lessonStore.fetchLessons({ page: newPage, limit });
+});
+
+function handlePageChange(newPage) {
+  currentPage.value = newPage;
+}
+
+onMounted(() => {
+  lessonStore.fetchLessons({ page: currentPage.value, limit });
+});
 
 const columns = [
   {
+    header: "Lesson Name",
+    accessor: "lesson",
+  },
+  {
     header: "Subject Name",
     accessor: "subject",
+    class: "hidden md:table-cell",
   },
   {
     header: "Class",

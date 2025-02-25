@@ -352,10 +352,21 @@
         <template v-else-if="source === 'lessonList'">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Lesson</label
+            >
+
+            <input
+              v-model="data.name"
+              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
               >Subject</label
             >
+
             <input
-              v-model="data.subject"
+              v-model="data.subject.name"
               class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
           </div>
@@ -364,7 +375,7 @@
               >Class</label
             >
             <input
-              v-model="data.class"
+              v-model="data.class.name"
               class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
           </div>
@@ -373,9 +384,10 @@
             <label class="block text-sm font-medium text-gray-700 mb-1"
               >Teacher</label
             >
+
             <input
-              v-model="data.teacher"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              v-model="fullTeacherName"
+              class="capitalize w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
           </div>
         </template>
@@ -647,7 +659,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useModalStore } from "@/store/useModalStore";
 
 const modalStore = useModalStore();
@@ -658,6 +670,19 @@ const source = ref(modalStore.source);
 const data = ref(modalStore.data);
 
 const transformedData = ref({});
+
+const fullTeacherName = computed({
+  get() {
+    // Returns both name and surname concatenated
+    return `${data?.value?.teacher?.name} ${data?.value?.teacher?.surname}`.trim();
+  },
+  set(newValue) {
+    // Split the input value into parts
+    const parts = newValue.split(" ");
+    data.value.teacher.name = parts.shift() || "";
+    data.value.teacher.surname = parts.join(" ");
+  },
+});
 
 // watch(
 //   data,

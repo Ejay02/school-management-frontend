@@ -182,6 +182,7 @@ export const getStudentById = gql`
         name
       }
       parent {
+        id
         name
         surname
       }
@@ -215,10 +216,10 @@ export const getAllClasses = gql`
       name
       capacity
       students {
-      id
-      name
-      surname
-    }
+        id
+        name
+        surname
+      }
       supervisor {
         id
         name
@@ -228,11 +229,33 @@ export const getAllClasses = gql`
         id
         name
       }
-      feeStructure{
-     
-     academicYear
-     totalAmount
-   }
+      feeStructure {
+        academicYear
+        totalAmount
+      }
+    }
+  }
+`;
+
+export const getAllLessons = gql`
+  query geAllLessons($pagination: PaginationInput) {
+    getAllLessons(params: $pagination) {
+      id
+      name
+      teacher {
+        id
+        name
+        surname
+      }
+      class {
+        id
+        name
+      }
+
+      subject {
+        id
+        name
+      }
     }
   }
 `;

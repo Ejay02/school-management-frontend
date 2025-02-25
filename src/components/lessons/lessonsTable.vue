@@ -19,12 +19,18 @@
       >
         <td class="flex items-center gap-4 p-2">
           <div class="flex flex-col">
-            <div class="font-semibold">{{ item?.subject }}</div>
+            <div class="font-semibold">{{ item?.name }}</div>
+            <!-- <div class="font-semibold">{{ item?.subject }}</div> -->
           </div>
         </td>
 
-        <td class="hidden md:table-cell">{{ item?.class }}</td>
-        <td class="hidden md:table-cell">{{ item?.teacher }}</td>
+        <td class="hidden md:table-cell">{{ item?.subject?.name }}</td>
+        <td class="hidden md:table-cell">{{ item?.class.name }}</td>
+        <td class="hidden md:table-cell capitalize">
+          {{ item?.teacher?.name || "NA" }} {{ item?.teacher?.surname }}
+        </td>
+
+        <!--  -->
 
         <td>
           <div class="flex items-center gap-2">
@@ -35,7 +41,7 @@
               <button
                 class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
               >
-                <img src="/edit.png" alt="view" class="h-3 w-3" />
+                <i class="fa-solid fa-pen-to-square text-xs text-gray-500"></i>
                 <span
                   class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                 >
@@ -45,11 +51,11 @@
             </div>
 
             <button
-              v-if="role == 'admin'"
-              @click="showDelModal(item.id, item.subject, 'lessonList')"
+              v-if="role.toLowerCase() === 'super_admin'"
+              @click="showDelModal(item.id, item.name, 'lessonList')"
               class="group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
             >
-              <img src="/delete.png" alt="delete" class="h-3 w-3" />
+              <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
               <span
                 class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
               >
@@ -73,7 +79,7 @@ const props = defineProps({
     required: true,
   },
   data: {
-    type: Array,
+    type: Object,
     required: true,
   },
 });

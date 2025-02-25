@@ -1,36 +1,58 @@
 <template>
-  <div
-    v-if="isModalVisible"
-    class="fixed top-0 left-0 w-full h-full bg-gray-900/80 flex justify-center items-center z-50"
-    @click.self="handleCancel"
-    :key="isModalVisible"
-  >
-    <div class="bg-white p-4 rounded-md w-96 h-40 mt-4 shadow-md">
-      <div class="flex justify-between items-center mb-2 mt-4">
-        <h3 class="text-gray-600 text-lg font-medium">Delete Confirmation</h3>
-      </div>
-      <div class="mt-2">
-        <p class="text-gray-600 text-sm">
-          Are you sure you want to delete
-          <b class="capitalize">{{ title }}</b> ?
-        </p>
-      </div>
-      <div class="mt-6 flex justify-end gap-2">
-        <button
-          class="bg-white border border-gray-300 text-gray-600 py-1 px-4 rounded-md cursor-pointer"
-          @click="handleCancel"
-        >
-          Cancel
-        </button>
-        <button
-          class="bg-red-500 text-white py-1 px-4 rounded-md cursor-pointer"
-          @click="handleDelete"
-        >
-          OK
-        </button>
+  <transition name="fade">
+    <div
+      v-if="isModalVisible"
+      class="fixed top-0 left-0 w-full h-full bg-gray-900/80 flex justify-center items-center z-50"
+      @click.self="handleCancel"
+      :key="isModalVisible"
+    >
+      <div class="bg-white p-4 rounded-md w-96 h-40 mt-4 shadow-md">
+        <!--  -->
+        <!-- <div class="p-6"> -->
+        <div class="flex items-center">
+          <!-- Icon (using an inline SVG for the exclamation triangle) -->
+          <svg
+            class="w-6 h-6 text-red-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4m0 4h.01m-6.938 4h13.856c1.054 0 1.918-.816 1.995-1.855L21 4.145A1.993 1.993 0 0019.057 3H4.943A1.993 1.993 0 003 4.145l-.005 13.999C2.075 19.184 2.94 20 3.994 20z"
+            />
+          </svg>
+          <h3 class="ml-2 text-lg font-medium text-gray-900">
+            Delete Confirmation
+          </h3>
+        </div>
+
+        <div class="mt-2">
+          <p class="text-gray-600 text-sm">
+            Are you sure you want to delete
+            <b class="capitalize">{{ title }}</b> ? This action cannot be
+            undone.
+          </p>
+        </div>
+        <div class="mt-6 flex justify-end gap-2">
+          <button
+            class="bg-white border border-gray-300 text-gray-600 py-1 px-4 rounded-md cursor-pointer"
+            @click="handleCancel"
+          >
+            Cancel
+          </button>
+          <button
+            class="bg-red-500 text-white py-1 px-4 rounded-md cursor-pointer"
+            @click="handleDelete"
+          >
+            OK
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script setup>
@@ -103,3 +125,14 @@ const handleDelete = async () => {
   }
 };
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
