@@ -285,3 +285,54 @@ export const getAllExams = gql`
     }
   }
 `;
+
+export const getAllAssignments = gql`
+  query getAllAssignments($pagination: PaginationInput) {
+    getAllAssignments(params: $pagination) {
+      id
+      title
+      createdAt
+      lesson {
+        name
+      }
+      teacher {
+        name
+        surname
+      }
+      class {
+        name
+      }
+
+      subject {
+        name
+      }
+    }
+  }
+`;
+
+export const getResultStatistics = gql`
+  query getResultStatistics($className: String!) {
+    getResultStatistics(className: $className) {
+      average
+      highest
+      lowest
+      totalStudents
+      distribution {
+        above90
+        above80
+        above70
+        below50
+      }
+    }
+  }
+`;
+
+export const getSchoolAttendanceStats = gql`
+  query getSchoolAttendanceStats($startDate: DateTime!, $endDate: DateTime!) {
+    getSchoolAttendanceStats(startDate: $startDate, endDate: $endDate) {
+      labels
+      present
+      absent
+    }
+  }
+`;

@@ -6,6 +6,7 @@
       <i :class="[icon, 'text-gray-400 text-4xl mb-3']"></i>
       <h4 class="text-lg font-semibold text-gray-600 mb-2">{{ heading }}</h4>
       <p class="text-sm text-gray-500">{{ description }}</p>
+      <slot></slot>
     </div>
   </div>
 </template>

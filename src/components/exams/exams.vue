@@ -25,7 +25,7 @@
       <!-- pagination -->
       <Pagination
         :currentPage="currentPage"
-        :hasMore="examStore.hasMore"
+        :hasMore="examStore?.hasMore"
         @update:page="handlePageChange"
       />
     </div>

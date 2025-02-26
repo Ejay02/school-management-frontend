@@ -46,7 +46,11 @@
             </div>
 
             <button
-              v-if="role == 'admin'"
+              v-if="
+                role.toLowerCase() === 'super_admin' ||
+                role.toLowerCase() === 'admin' ||
+                role.toLowerCase() === 'teacher'
+              "
               @click="showDelModal(item.id, item.subject, 'examList')"
               class="group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
             >

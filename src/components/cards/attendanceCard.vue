@@ -2,7 +2,7 @@
   <div class="bg-white rounded-lg p-4 h-full cursor-pointer">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-lg font-semibold">Attendance</h1>
-      <div class="">
+      <div>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -20,20 +20,24 @@
       </div>
     </div>
 
-    <!-- chart -->
-    <div class="flex gap-6 justify-start mb-7">
+    <!-- Chart Legend -->
+    <div class="flex gap-6 justify-start mb-0">
       <div class="flex gap-1">
         <div class="w-5 h-5 bg-eduSky rounded-full"></div>
         <h2 class="text-sm text-eduSky">Present</h2>
       </div>
-      <!-- 2 -->
       <div class="flex gap-1">
         <div class="w-5 h-5 bg-eduYellow rounded-full"></div>
         <h2 class="text-sm text-eduYellow">Absent</h2>
       </div>
     </div>
-    <div class="w-full h-4/5">
+
+    <!-- Chart Container -->
+    <div class="w-full">
       <canvas ref="chartCanvas"></canvas>
+      <div v-if="noDataToShow" class="text-center text-gray-500 mt-4 text-sm">
+        *No attendance data for this week
+      </div>
     </div>
   </div>
 </template>
@@ -41,40 +45,81 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { Chart, registerables } from "chart.js";
-
-const chartCanvas = ref(null);
+import { useAttendanceStore } from "../../store/attendanceStore";
 
 // Register Chart.js modules
 Chart.register(...registerables);
 
-onMounted(() => {
-  // Sample data for male and female across months
+// Reference to the canvas
+const chartCanvas = ref(null);
+
+const attendanceStore = useAttendanceStore();
+// Track if there's no meaningful data
+const noDataToShow = ref(false);
+
+// Helper: Compute current week's Monday and Friday dates
+function getCurrentWeekRange() {
+  const currentDate = new Date();
+  const dayOfWeek = currentDate.getDay(); // Sunday = 0, Monday = 1, etc.
+  // If it's Sunday, consider it the last day of the previous week; otherwise, calculate Monday.
+  const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  const monday = new Date(currentDate);
+  monday.setDate(currentDate.getDate() + diffToMonday);
+  // Friday is 4 days after Monday.
+  const friday = new Date(monday);
+  friday.setDate(monday.getDate() + 4);
+  return { monday, friday };
+}
+
+onMounted(async () => {
+  // Get the current week's Monday and Friday
+  const { monday, friday } = getCurrentWeekRange();
+  // Pass ISO strings to match the DateTime scalar
+  await attendanceStore.fetchSchoolAttendanceStats(monday, friday);
+
+  // Prepare chart data with defaults if needed
+  const defaultLabels = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+  const labels =
+    attendanceStore.stats.labels && attendanceStore.stats.labels.length
+      ? attendanceStore.stats.labels
+      : defaultLabels;
+  const presentData =
+    attendanceStore.stats.present && attendanceStore.stats.present.length
+      ? attendanceStore.stats.present
+      : [0, 0, 0, 0, 0];
+
+  const absentData =
+    attendanceStore.stats.absent && attendanceStore.stats.absent.length
+      ? attendanceStore.stats.absent
+      : [0, 0, 0, 0, 0];
+
+  // Check if we have any non-zero data
+  const hasData = [...presentData, ...absentData].some((value) => value > 0);
+  noDataToShow.value = !hasData;
+
+  // Chart data and configuration
   const data = {
-    labels: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    labels: labels,
     datasets: [
       {
-        // label: "Present",
-        data: [65, 59, 80, 81, 56],
+        data: presentData.map((value) => Math.max(value, 0.5)), // Ensure minimum visible height
         backgroundColor: "#C3EBFA",
         borderWidth: 0,
         barThickness: 15,
         borderRadius: 10,
-        borderColor: "transparent", // Transparent border color
+        borderColor: "transparent",
       },
-
       {
-        // label: "Absent",
-        data: [28, 48, 40, 19, 96],
-        backgroundColor: "#FAE27C ",
+        data: absentData.map((value) => Math.max(value, 0.5)), // Ensure minimum visible height
+        backgroundColor: "#FAE27C",
         barThickness: 20,
         borderRadius: 10,
-        borderColor: "transparent", // Transparent border color
-        borderWidth: 2, // Add spacing effect
+        borderColor: "transparent",
+        borderWidth: 2,
       },
     ],
   };
 
-  // Chart configuration
   const config = {
     type: "bar",
     data: data,
@@ -84,19 +129,30 @@ onMounted(() => {
         legend: {
           display: false,
         },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              // Show the actual value in the tooltip, not the adjusted one
+              const datasetIndex = context.datasetIndex;
+              const index = context.dataIndex;
+              const actualValue =
+                datasetIndex === 0 ? presentData[index] : absentData[index];
+              const label = datasetIndex === 0 ? "Present: " : "Absent: ";
+              return label + actualValue;
+            },
+          },
+        },
       },
-    },
-    layout: {
       scales: {
         x: {
           grid: {
-            display: false, // Remove vertical grid lines
+            display: false,
             drawBorder: false,
           },
           ticks: {
-            color: "#d1d5db", // Color for the x-axis labels (Mon, Tue, etc.)
+            color: "#d1d5db",
           },
-          barPercentage: 0.8, // Adjust spacing between bars in the same group
+          barPercentage: 0.8,
           categoryPercentage: 0.5,
         },
         y: {
@@ -105,10 +161,16 @@ onMounted(() => {
             drawBorder: false,
           },
           ticks: {
-            stepSize: 20, // This ensures ticks at 0, 20, 40, etc.
+            stepSize: 20,
             beginAtZero: true,
-            color: "#d1d5db", // Color for the y-axis labels (0, 10, etc.)
+            color: "#d1d5db",
+            callback: function (value) {
+              // Only show actual values in the axis labels
+              return value > 0.5 ? value : 0;
+            },
           },
+          min: 0, // Start at zero
+          suggestedMax: 100, // Set a minimum suggested height
         },
       },
     },
