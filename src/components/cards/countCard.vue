@@ -3,7 +3,9 @@
     <!-- title -->
     <div class="flex justify-between items-center">
       <h1 class="text-lg font-semibold">Students</h1>
-      <div class="">
+      <div
+        class="text-gray-600 hover:text-gray-800 p-1 rounded-full hover:bg-gray-100"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -34,18 +36,36 @@
     <!-- bottom -->
     <div class="flex justify-center gap-16 mb-4 p-2">
       <div class="flex flex-col gap-1">
-        <div class="w-5 h-5 bg-eduSky rounded-full"></div>
-        <h1 class="font-bold">{{ genderStats.maleCount }}</h1>
-        <h2 class="text-sm text-gray-300">
-          Boys ({{ genderStats.malePercentage }}%)
-        </h2>
+        <div class="flex items-center gap-1">
+          <div class="bg-eduSky rounded-lg p-3 border border-blue-300 text-xs">
+            <span class="font-bold text-center text-xs">
+              {{ genderStats.maleCount }}
+            </span>
+          </div>
+          <div class="">
+            <div class="text-xs text-gray-600 font-semibold">Male</div>
+            <div class="text-xs text-gray-400">
+              ({{ genderStats.malePercentage }}%)
+            </div>
+          </div>
+        </div>
       </div>
       <div class="flex flex-col gap-1">
-        <div class="w-5 h-5 bg-eduYellow rounded-full"></div>
-        <h1 class="font-bold">{{ genderStats.femaleCount }}</h1>
-        <h2 class="text-sm text-gray-300">
-          Girls ({{ genderStats.femalePercentage }}%)
-        </h2>
+        <div class="flex items-center gap-1">
+          <div
+            class="bg-eduYellow rounded-lg p-3 border border-yellow-300 text-xs"
+          >
+            <span class="font-bold text-center text-xs">
+              {{ genderStats.femaleCount }}
+            </span>
+          </div>
+          <div class="">
+            <div class="text-xs text-gray-600 font-semibold">Female</div>
+            <div class="text-xs text-gray-400">
+              ({{ genderStats.femalePercentage }}%)
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

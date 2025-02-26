@@ -23,16 +23,27 @@ const props = defineProps({
 const handleReload = () => {
   location.reload();
 };
+//  class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"
 
 // Compute background pattern color based on status code
 const patternColor = computed(() => {
   switch (props.statusCode) {
     case 404:
-      return "bg-indigo-50";
+      return "bg-indigo-200";
     case 403:
-      return "bg-orange-50";
+      return "bg-orange-200";
     default:
-      return "bg-red-50";
+      return "bg-red-200";
+  }
+});
+const textColor = computed(() => {
+  switch (props.statusCode) {
+    case 404:
+      return "text-indigo-700";
+    case 403:
+      return "text-orange-700";
+    default:
+      return "text-red-700";
   }
 });
 </script>
@@ -47,7 +58,7 @@ const patternColor = computed(() => {
       <div class="text-center">
         <!-- Status Code -->
         <p class="text-6xl md:text-9xl font-bold text-gray-900 animate-bounce">
-          {{ statusCode }}
+          <span :class="textColor">{{ statusCode }}</span>
         </p>
 
         <!-- Error Message -->
@@ -58,8 +69,10 @@ const patternColor = computed(() => {
         </h1>
 
         <!-- Description -->
-        <p class="mt-6 text-base leading-7 text-gray-600">
-          {{ description }}
+        <p class="mt-6 text-base leading-7">
+          <span :class="textColor">
+            {{ description }}
+          </span>
         </p>
 
         <!-- Action Button -->

@@ -3,7 +3,8 @@
     <!-- title -->
     <div class="flex justify-between items-center">
       <h1 class="text-lg font-semibold">Performance</h1>
-      <img src="/moreDark.png" alt="more icon" class="h-5 w-5" />
+      <!--  class="text-gray-600 hover:text-gray-800 p-1 rounded-full hover:bg-gray-100" -->
+      <!-- <img src="/moreDark.png" alt="more icon" class="h-5 w-5" /> -->
     </div>
 
     <!-- one -->

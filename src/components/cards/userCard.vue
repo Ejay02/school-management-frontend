@@ -7,7 +7,9 @@
         >{{ academicYear }}/{{ nextYear }}</span
       >
 
-      <div class="">
+      <div
+        class="text-gray-600 hover:text-gray-800 p-1 rounded-full hover:bg-gray-100"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

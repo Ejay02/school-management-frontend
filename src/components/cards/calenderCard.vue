@@ -10,7 +10,9 @@
 
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-lg font-semibold">Events</h1>
-      <div class="">
+      <div
+        class="text-gray-600 hover:text-gray-800 p-1 rounded-full hover:bg-gray-100"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

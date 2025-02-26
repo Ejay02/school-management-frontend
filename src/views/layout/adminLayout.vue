@@ -22,7 +22,7 @@
 
         <!-- attendance -->
         <div class="w-full lg:w-2/3 h-[450px]">
-          <AttendanceCard />
+          <AttendanceCard label="Attendance Overview"/>
         </div>
       </div>
 

@@ -27,7 +27,8 @@ export const useUserStore = defineStore("user", () => {
 
   const userInfo = ref(getInitialUserState());
 
-  const currentRole = ref(userInfo.value.role || "");
+  const currentRole = ref(userInfo.value.role.toLowerCase() || "");
+
   const notificationStore = useNotificationStore();
 
   // Updated setUser to handle persistence and refresh token

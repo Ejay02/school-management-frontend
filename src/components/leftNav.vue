@@ -22,8 +22,15 @@
     <menu class="m-2 text-sm">
       <ul v-for="menuItem in filteredMenuItems" :key="menuItem?.title" class="">
         <li v-for="item in menuItem?.items" :key="item?.label" class="mb-2">
+          <!-- :to="item?.href || '/'" -->
           <router-link
-            :to="item?.href || '/'"
+            :to="
+              item?.label === 'Home'
+                ? `/dashboard/${
+                    currentRole === 'super_admin' ? 'admin' : currentRole
+                  }`
+                : item?.href || '/'
+            "
             activeClass="bg-eduPurpleLight text-purple-600"
             class="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-eduSkyLight text-sm"
           >
@@ -43,7 +50,8 @@ import { storeToRefs } from "pinia";
 
 const userStore = useUserStore();
 
-const { filteredMenuItems } = storeToRefs(userStore);
+const { filteredMenuItems, currentRole } = storeToRefs(userStore);
+console.log("currentRole:", currentRole.value);
 </script>
 
 <style scoped></style>
