@@ -36,6 +36,7 @@ import NotificationSetting from "../components/settingsComponents/notificationSe
 import BillingSetting from "../components/settingsComponents/billingSetting.vue";
 import TeamSetting from "../components/settingsComponents/teamSetting.vue";
 import IntegrationSetting from "../components/settingsComponents/integrationSetting.vue";
+import Attendance from "../components/attendance/attendance.vue";
 
 // Define public routes that don't require authentication
 const publicRoutes = [
@@ -122,74 +123,80 @@ const routes = [
         meta: { role: "teacher" },
       },
       {
-        path: "/list/teachers",
+        path: "/teachers",
         name: "Teachers",
         component: Teachers,
       },
       {
-        path: "/list/teacher/:id",
+        path: "/teacher/:id",
         name: "TeacherView",
         component: TeacherView,
       },
       {
-        path: "/list/students",
+        path: "/students",
         name: "Students",
         component: Students,
       },
       {
-        path: "/list/student/:id",
+        path: "/student/:id",
         name: "StudentView",
         component: StudentView,
       },
       {
-        path: "/list/parents",
+        path: "/parents",
         name: "Parents",
         component: Parents,
       },
       {
-        path: "/list/subjects",
+        path: "/subjects",
         name: "Subjects",
         component: Subjects,
       },
       {
-        path: "/list/classes",
+        path: "/classes",
         name: "Classes",
         component: Classes,
       },
       {
-        path: "/list/lessons",
+        path: "/lessons",
         name: "Lessons",
         component: Lessons,
       },
       {
-        path: "/list/exams",
+        path: "/exams",
         name: "Exams",
         component: Exams,
       },
       {
-        path: "/list/assignments",
+        path: "/assignments",
         name: "Assignments",
         component: Assignments,
       },
       {
-        path: "/list/results",
+        path: "/results",
         name: "Results",
         component: Results,
       },
+
       {
-        path: "/list/events",
+        path: "/events",
         name: "Events",
         component: Events,
       },
       {
-        path: "/list/messages",
+        path: "/messages",
         name: "Messages",
         component: Messages,
       },
       {
-        path: "/list/announcements",
+        path: "/announcements",
         name: "Announcements",
         component: Announcements,
+      },
+      {
+        path: "/attendance",
+        name: "Attendance",
+        component: Attendance,
       },
       {
         path: "/settings",

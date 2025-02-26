@@ -22,7 +22,7 @@
       <div class="flex items-center gap-6 justify-end w-full text-center">
         <!-- msg -->
         <router-link
-          to="/list/messages"
+          to="/messages"
           class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer hover:bg-eduSkyLight"
         >
           <div class="">
@@ -45,7 +45,7 @@
 
         <!-- announcement -->
         <router-link
-          to="/list/announcements"
+          to="/announcements"
           class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer relative hover:bg-eduSkyLight"
         >
           <img

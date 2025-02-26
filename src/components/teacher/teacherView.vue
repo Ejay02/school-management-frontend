@@ -120,27 +120,27 @@ const teacherShortcuts = computed(() => {
   return [
     {
       text: `${teacherName.value}'s Classes`,
-      link: "/list/classes",
+      link: "/classes",
       color: "bg-eduSkyLight",
     },
     {
       text: `${teacherName.value}'s Students`,
-      link: "/list/students",
+      link: "/students",
       color: "bg-eduPurpleLight",
     },
     {
       text: `${teacherName.value}'s Lessons`,
-      link: "/list/lessons",
+      link: "/lessons",
       color: "bg-eduYellowLight",
     },
     {
       text: `${teacherName.value}'s Exams`,
-      link: "/list/exams",
+      link: "/exams",
       color: "bg-pink-50",
     },
     {
       text: `${teacherName.value}'s Assignments`,
-      link: "/list/assignments",
+      link: "/assignments",
       color: "bg-eduSky",
     },
   ];

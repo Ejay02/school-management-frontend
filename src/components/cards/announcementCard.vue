@@ -2,7 +2,7 @@
   <div class="p-4 bg-white rounded-lg shadow-lg cursor-pointer">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-lg font-semibold">Announcements</h1>
-      <router-link to="/list/announcements" class="text-gray-400 text-xs"
+      <router-link to="/announcements" class="text-gray-400 text-xs"
         >View All</router-link
       >
     </div>

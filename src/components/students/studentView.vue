@@ -119,28 +119,28 @@ const studentShortcuts = computed(() => {
   return [
     {
       text: `${studentName.value}'s Lessons`,
-      link: "/list/lessons",
+      link: "/lessons",
       color: "bg-eduSkyLight",
     },
     {
       text: `${studentName.value}'s Teachers`,
-      link: "/list/teachers",
+      link: "/teachers",
       color: "bg-eduPurpleLight",
     },
 
     {
       text: `${studentName.value}'s Exams`,
-      link: "/list/exams",
+      link: "/exams",
       color: "bg-pink-50",
     },
     {
       text: `${studentName.value}'s Assignments`,
-      link: "/list/assignments",
+      link: "/assignments",
       color: "bg-eduSky",
     },
     {
       text: ` ${studentName.value}'s Results`,
-      link: "/list/results",
+      link: "/results",
       color: "bg-eduYellowLight",
     },
   ];

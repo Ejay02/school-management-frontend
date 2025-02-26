@@ -71,7 +71,7 @@
         <td>
           <div class="flex items-center gap-2 relative">
             <router-link
-              :to="`/list/teacher/${item?.id}`"
+              :to="`/teacher/${item?.id}`"
               class="group relative"
             >
               <button
