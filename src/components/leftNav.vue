@@ -27,7 +27,7 @@
             :to="
               item?.label === 'Home'
                 ? `/dashboard/${
-                    currentRole === 'SUPER_ADMIN' ? 'admin' : currentRole
+                    currentRole.toLowerCase() === 'super_admin' ? 'admin' : currentRole
                   }`
                 : item?.href || '/'
             "

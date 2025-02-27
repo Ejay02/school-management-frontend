@@ -105,13 +105,6 @@ const pageSize = ref(10);
 
 const stats = computed(() => attendanceStore.stats);
 
-// const stats = ref({
-//   totalClasses: 0,
-//   presentClasses: 0,
-//   absentClasses: 0,
-//   attendanceRate: 0,
-// });
-
 // Filter records based on search and status
 // const filteredAttendanceRecords = computed(() => {
 //   let filtered = attendanceRecords.value;
