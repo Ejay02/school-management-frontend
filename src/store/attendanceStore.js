@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { getSchoolAttendanceStats } from "../graphql/queries";
+import { getAttendances, getSchoolAttendanceStats } from "../graphql/queries";
 import { apolloClient } from "../../apollo-client";
 
 export const useAttendanceStore = defineStore("attendanceStore", {
@@ -34,11 +34,29 @@ export const useAttendanceStore = defineStore("attendanceStore", {
           this.stats = res.data.getSchoolAttendanceStats;
         }
       } catch (error) {
-        console.error("Error fetching results:", error);
         this.error = error.message || "Error fetching attendance stats";
       } finally {
         this.loading = false;
       }
     },
+    //
+    async fetchAttendance() {
+      this.loading = true;
+      this.error = null;
+      try {
+        const res = await apolloClient.query({
+          query: getAttendances,
+          fetchPolicy: "no-cache",
+        });
+
+        return res.data.getAttendances;
+      } catch (error) {
+        this.error = error.message || "Error fetching attendance stats";
+      } finally {
+        this.loading;
+      }
+    },
+
+    //
   },
 });

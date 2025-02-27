@@ -41,32 +41,7 @@
       <!-- Main content - Cards and charts -->
       <div v-else>
         <!-- Stats overview cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div class="bg-blue-50 p-4 rounded-lg shadow border border-blue-100">
-            <div class="text-blue-500 text-xl mb-1">Total Classes</div>
-            <div class="text-3xl font-bold">{{ stats.totalClasses || 0 }}</div>
-          </div>
-          <div
-            class="bg-green-50 p-4 rounded-lg shadow border border-green-100"
-          >
-            <div class="text-green-500 text-xl mb-1">Present</div>
-            <div class="text-3xl font-bold">
-              {{ stats.presentClasses || 0 }}
-            </div>
-          </div>
-          <div class="bg-red-50 p-4 rounded-lg shadow border border-red-100">
-            <div class="text-red-500 text-xl mb-1">Absent</div>
-            <div class="text-3xl font-bold">{{ stats.absentClasses || 0 }}</div>
-          </div>
-          <div
-            class="bg-purple-50 p-4 rounded-lg shadow border border-purple-100"
-          >
-            <div class="text-purple-500 text-xl mb-1">Attendance Rate</div>
-            <div class="text-3xl font-bold">
-              {{ stats.attendanceRate || 0 }}%
-            </div>
-          </div>
-        </div>
+        <AttendanceStatsOverviewCard :stats="stats" />
 
         <!-- Weekly attendance chart -->
         <div class="bg-white rounded-lg shadow border border-gray-200 mb-6">
@@ -77,162 +52,20 @@
         </div>
 
         <!-- Attendance table -->
-        <div class="bg-white rounded-lg shadow border border-gray-200 p-4">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-semibold">Attendance Records</h2>
-            <div
-              v-if="
-                userRole === 'teacher' ||
-                userRole === 'admin' ||
-                userRole === 'super_admin'
-              "
-              class="flex gap-2"
-            >
-              <button
-                @click="markAttendanceMode = true"
-                class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
-              >
-                Mark Attendance
-              </button>
-              <button
-                v-if="markAttendanceMode"
-                @click="saveAttendance"
-                class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
-              >
-                Save
-              </button>
-              <button
-                v-if="markAttendanceMode"
-                @click="markAttendanceMode = false"
-                class="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-            <div v-else class="text-sm text-gray-500">View-only access</div>
-          </div>
+        <!-- v-if="" -->
+        <AttendanceTable
+          :records="attendanceRecords"
+          :searchQuery="searchQuery"
+          :filterStatus="filterStatus"
+          :currentPage="currentPage"
+          :pageSize="pageSize"
+          :markAttendanceMode="markAttendanceMode"
+          @update:currentPage="updatePage"
+          @toggleMarkAttendanceMode="toggleMarkAttendanceMode"
+          @saveAttendance="saveAttendance"
+        />
 
-          <!-- Search and filter -->
-          <div class="mb-4 flex gap-3">
-            <input
-              v-model="searchQuery"
-              placeholder="Search by name or subject..."
-              class="border rounded p-2 flex-grow"
-            />
-            <select v-model="filterStatus" class="border rounded p-2">
-              <option value="all">All Status</option>
-              <option value="present">Present</option>
-              <option value="absent">Absent</option>
-            </select>
-          </div>
-
-          <!-- Table -->
-          <div class="overflow-x-auto">
-            <table class="min-w-full bg-white">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th
-                    class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Date
-                  </th>
-                  <th
-                    class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Student
-                  </th>
-                  <th
-                    class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Subject
-                  </th>
-                  <th
-                    class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Class
-                  </th>
-                  <th
-                    class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
-                <tr
-                  v-for="(record, index) in filteredAttendanceRecords"
-                  :key="index"
-                  class="hover:bg-gray-50"
-                >
-                  <td class="py-2 px-3 text-sm text-gray-500">
-                    {{ formatDate(record.date) }}
-                  </td>
-                  <td class="py-2 px-3 text-sm">{{ record.student.name }}</td>
-                  <td class="py-2 px-3 text-sm">
-                    {{ record.lesson.subject.name }}
-                  </td>
-                  <td class="py-2 px-3 text-sm">
-                    {{ record.lesson.class.name }}
-                  </td>
-                  <td class="py-2 px-3 text-sm">
-                    <span
-                      v-if="!markAttendanceMode"
-                      :class="`px-2 py-1 rounded-full text-xs ${
-                        record.present
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`"
-                    >
-                      {{ record.present ? "Present" : "Absent" }}
-                    </span>
-                    <select
-                      v-else
-                      v-model="record.present"
-                      class="border rounded p-1 text-sm"
-                      :class="
-                        record.present ? 'border-green-500' : 'border-red-500'
-                      "
-                    >
-                      <option :value="true">Present</option>
-                      <option :value="false">Absent</option>
-                    </select>
-                  </td>
-                </tr>
-                <tr v-if="filteredAttendanceRecords.length === 0">
-                  <td colspan="5" class="py-4 text-center text-gray-500">
-                    No attendance records found
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Pagination -->
-          <div class="flex justify-between items-center mt-4">
-            <div class="text-sm text-gray-500">
-              Showing {{ filteredAttendanceRecords.length }} of
-              {{ attendanceRecords.length }} records
-            </div>
-            <div class="flex gap-2">
-              <button
-                @click="currentPage--"
-                :disabled="currentPage === 1"
-                class="px-3 py-1 border rounded text-sm disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <button
-                @click="currentPage++"
-                :disabled="
-                  currentPage * pageSize >= filteredAttendanceRecords.length
-                "
-                class="px-3 py-1 border rounded text-sm disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        </div>
+        <!--  -->
       </div>
     </div>
   </div>
@@ -241,18 +74,18 @@
 <script setup>
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
-import { ref, computed, onMounted, watch } from "vue";
 import { useUserStore } from "../../store/userStore";
+import AttendanceTable from "./attendanceTable.vue";
+import { ref, computed, onMounted, watch } from "vue";
 import AttendanceCard from "../cards/attendanceCard.vue";
 import { useAttendanceStore } from "../../store/attendanceStore";
+import AttendanceStatsOverviewCard from "./attendanceStatsOverviewCard.vue";
 
-// Store
 const attendanceStore = useAttendanceStore();
 const userStore = useUserStore();
 
 const userRole = computed(() => userStore.currentRole);
 
-// Component state
 const loading = computed(() => attendanceStore.loading);
 const error = computed(() => attendanceStore.error);
 
@@ -325,8 +158,8 @@ function formatDateForInput(date) {
 
 // Fetch attendance data based on role
 async function fetchAttendanceData() {
-  loading.value = true;
-  error.value = null;
+  attendanceStore.loading = true;
+  attendanceStore.error = null;
 
   try {
     // Fetch weekly stats for chart
@@ -356,9 +189,10 @@ async function fetchAttendanceData() {
     };
   } catch (err) {
     console.error("Error fetching attendance data:", err);
-    error.value = "Failed to fetch attendance data. Please try again.";
+    attendanceStore.error =
+      "Failed to fetch attendance data. Please try again.";
   } finally {
-    loading.value = false;
+    attendanceStore.loading = false;
   }
 }
 
@@ -421,18 +255,26 @@ async function saveAttendance() {
       present: record.present,
     }));
 
-    // This would be a call to your backend service
+    // This would be a call  backend service
     // await saveAttendanceChanges(attendanceData);
 
     markAttendanceMode = false;
     // Optionally refresh data
     await fetchAttendanceData();
   } catch (err) {
-    error.value = "Failed to save attendance changes";
+    attendanceStore.error = "Failed to save attendance changes";
     console.error(err);
   } finally {
-    loading.value = false;
+    attendanceStore.loading = false;
   }
+}
+
+function toggleMarkAttendanceMode() {
+  markAttendanceMode.value = !markAttendanceMode.value;
+}
+
+function updatePage(newPage) {
+  currentPage.value = newPage;
 }
 
 // Initialize data on component mount
@@ -441,6 +283,4 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

@@ -336,3 +336,24 @@ export const getSchoolAttendanceStats = gql`
     }
   }
 `;
+
+export const getAttendances = gql`
+  query getAttendances {
+    getAttendances {
+      id
+      date
+      present
+      studentId
+      createdAt
+      updatedAt
+      student {
+        name
+        surname
+      }
+      lesson {
+        id
+        name
+      }
+    }
+  }
+`;

@@ -51,7 +51,6 @@ import { storeToRefs } from "pinia";
 const userStore = useUserStore();
 
 const { filteredMenuItems, currentRole } = storeToRefs(userStore);
-console.log("currentRole:", currentRole.value);
 </script>
 
 <style scoped></style>
