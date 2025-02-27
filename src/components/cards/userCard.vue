@@ -1,6 +1,6 @@
 <template>
   <div
-    class="cursor-pointer rounded-2xl odd:bg-eduPurple even:bg-eduYellow p-4 flex-1"
+    class="cursor-pointer rounded-2xl odd:bg-eduPurple even:bg-eduYellow p-4 flex-1 transition-transform duration-300 hover:scale-105 hover:shadow-lg"
   >
     <div class="flex justify-between items-center text-xs">
       <span class="text-[10px] bg-white px-2 py-1 rounded-full text-green-600"

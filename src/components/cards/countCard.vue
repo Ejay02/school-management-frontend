@@ -37,7 +37,9 @@
     <div class="flex justify-center gap-16 mb-4 p-2">
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-1">
-          <div class="bg-eduSky rounded-lg p-3 border border-blue-300 text-xs">
+          <div
+            class="bg-eduSky rounded-lg p-3 border border-blue-300 text-xs transition-transform duration-300 hover:scale-105 hover:shadow-lg"
+          >
             <span class="font-bold text-center text-xs">
               {{ genderStats.maleCount }}
             </span>
@@ -53,7 +55,7 @@
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-1">
           <div
-            class="bg-eduYellow rounded-lg p-3 border border-yellow-300 text-xs"
+            class="bg-eduYellow rounded-lg p-3 border border-yellow-300 text-xs transition-transform duration-300 hover:scale-105 hover:shadow-lg"
           >
             <span class="font-bold text-center text-xs">
               {{ genderStats.femaleCount }}

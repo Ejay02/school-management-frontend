@@ -29,7 +29,9 @@
     <!-- Chart Legend - More compact -->
     <div class="flex gap-4 justify-start mb-6">
       <div class="flex items-center gap-1">
-        <div class="bg-eduSky rounded-lg p-2 border border-blue-300 text-xs">
+        <div
+          class="bg-eduSky rounded-lg p-2 border border-blue-300 text-xs transition-transform duration-300 hover:scale-105 hover:shadow-lg"
+        >
           <span class="font-bold text-center text-xs">
             {{ getTotalPresent() }}
           </span>
@@ -38,7 +40,7 @@
       </div>
       <div class="flex items-center gap-1">
         <div
-          class="bg-eduYellow p-2 rounded-lg border border-yellow-300 text-xs"
+          class="bg-eduYellow p-2 rounded-lg border border-yellow-300 text-xs transition-transform duration-300 hover:scale-105 hover:shadow-lg"
         >
           <span class="font-bold text-center text-xs">
             {{ getTotalAbsent() }}
