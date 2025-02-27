@@ -82,6 +82,7 @@ import { useAttendanceStore } from "../../store/attendanceStore";
 import AttendanceStatsOverviewCard from "./attendanceStatsOverviewCard.vue";
 
 const attendanceStore = useAttendanceStore();
+
 const userStore = useUserStore();
 
 const userRole = computed(() => userStore.currentRole);
@@ -101,40 +102,43 @@ const searchQuery = ref("");
 const filterStatus = ref("all");
 const currentPage = ref(1);
 const pageSize = ref(10);
-const stats = ref({
-  totalClasses: 0,
-  presentClasses: 0,
-  absentClasses: 0,
-  attendanceRate: 0,
-});
+
+const stats = computed(() => attendanceStore.stats);
+
+// const stats = ref({
+//   totalClasses: 0,
+//   presentClasses: 0,
+//   absentClasses: 0,
+//   attendanceRate: 0,
+// });
 
 // Filter records based on search and status
-const filteredAttendanceRecords = computed(() => {
-  let filtered = attendanceRecords.value;
+// const filteredAttendanceRecords = computed(() => {
+//   let filtered = attendanceRecords.value;
 
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    filtered = filtered.filter(
-      (record) =>
-        record.student.name.toLowerCase().includes(query) ||
-        record.lesson.subject.name.toLowerCase().includes(query)
-    );
-  }
+//   if (searchQuery.value) {
+//     const query = searchQuery.value.toLowerCase();
+//     filtered = filtered.filter(
+//       (record) =>
+//         record.student.name.toLowerCase().includes(query) ||
+//         record.lesson.subject.name.toLowerCase().includes(query)
+//     );
+//   }
 
-  if (filterStatus.value !== "all") {
-    filtered = filtered.filter(
-      (record) =>
-        (filterStatus.value === "present" && record.present) ||
-        (filterStatus.value === "absent" && !record.present)
-    );
-  }
+//   if (filterStatus.value !== "all") {
+//     filtered = filtered.filter(
+//       (record) =>
+//         (filterStatus.value === "present" && record.present) ||
+//         (filterStatus.value === "absent" && !record.present)
+//     );
+//   }
 
-  // Apply pagination
-  const start = (currentPage.value - 1) * pageSize.value;
-  const end = start + pageSize.value;
+//   // Apply pagination
+//   const start = (currentPage.value - 1) * pageSize.value;
+//   const end = start + pageSize.value;
 
-  return filtered.slice(start, end);
-});
+//   return filtered.slice(start, end);
+// });
 
 // Watch for filter changes to reset pagination
 watch([searchQuery, filterStatus], () => {
@@ -142,14 +146,14 @@ watch([searchQuery, filterStatus], () => {
 });
 
 // Format date for display
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(date);
-}
+// function formatDate(dateString) {
+//   const date = new Date(dateString);
+//   return new Intl.DateTimeFormat("en-US", {
+//     year: "numeric",
+//     month: "short",
+//     day: "numeric",
+//   }).format(date);
+// }
 
 // Format date for input fields
 function formatDateForInput(date) {

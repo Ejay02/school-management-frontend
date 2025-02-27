@@ -8,6 +8,7 @@ export const useAttendanceStore = defineStore("attendanceStore", {
       labels: [],
       present: [],
       absent: [],
+      classCount: 0,
     },
     loading: false,
     error: null,
@@ -29,6 +30,7 @@ export const useAttendanceStore = defineStore("attendanceStore", {
             labels: ["Mon", "Tue", "Wed", "Thu", "Fri"],
             present: [0, 0, 0, 0, 0],
             absent: [0, 0, 0, 0, 0],
+            classCount: 0,
           };
         } else {
           this.stats = res.data.getSchoolAttendanceStats;

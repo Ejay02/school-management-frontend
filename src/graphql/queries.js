@@ -333,6 +333,7 @@ export const getSchoolAttendanceStats = gql`
       labels
       present
       absent
+      classCount
     }
   }
 `;
