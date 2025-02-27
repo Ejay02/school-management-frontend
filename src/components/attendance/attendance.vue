@@ -45,7 +45,6 @@
 
         <!-- Weekly attendance chart -->
         <div class="bg-white rounded-lg shadow border border-gray-200 mb-6">
-          <!-- <h2 class="text-lg font-semibold mb-4">Weekly Attendance Overview</h2> -->
           <div class="h-96">
             <AttendanceCard label="Weekly Attendance Overview" />
           </div>
@@ -167,8 +166,8 @@ async function fetchAttendanceData() {
 
     // Fetch attendance records based on user role
 
-    const response = await fetchAttendancesByRole(userRole.value);
-    attendanceRecords.value = response.data;
+    // const response = await fetchAttendancesByRole(userRole.value);
+    // attendanceRecords.value = response.data;
 
     // Calculate stats
     const totalClasses = attendanceRecords.value.length;
@@ -194,51 +193,51 @@ async function fetchAttendanceData() {
 }
 
 // Mock function to simulate API call
-async function fetchAttendancesByRole(role) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Sample data structure matching your backend
-      resolve({
-        data: [
-          {
-            id: "1",
-            date: "2025-02-20",
-            present: true,
-            student: { id: "s1", name: "John Doe" },
-            lesson: {
-              id: "l1",
-              subject: { id: "sub1", name: "Mathematics" },
-              class: { id: "c1", name: "Grade 10-A" },
-            },
-          },
-          {
-            id: "2",
-            date: "2025-02-20",
-            present: false,
-            student: { id: "s2", name: "Jane Smith" },
-            lesson: {
-              id: "l1",
-              subject: { id: "sub1", name: "Mathematics" },
-              class: { id: "c1", name: "Grade 10-A" },
-            },
-          },
-          {
-            id: "3",
-            date: "2025-02-21",
-            present: true,
-            student: { id: "s1", name: "John Doe" },
-            lesson: {
-              id: "l2",
-              subject: { id: "sub2", name: "Science" },
-              class: { id: "c1", name: "Grade 10-A" },
-            },
-          },
-          // Add more mock records here for testing
-        ],
-      });
-    }, 500);
-  });
-}
+// async function fetchAttendancesByRole(role) {
+//   return new Promise((resolve) => {
+//     setTimeout(() => {
+//       // Sample data structure matching your backend
+//       resolve({
+//         data: [
+//           {
+//             id: "1",
+//             date: "2025-02-20",
+//             present: true,
+//             student: { id: "s1", name: "John Doe" },
+//             lesson: {
+//               id: "l1",
+//               subject: { id: "sub1", name: "Mathematics" },
+//               class: { id: "c1", name: "Grade 10-A" },
+//             },
+//           },
+//           {
+//             id: "2",
+//             date: "2025-02-20",
+//             present: false,
+//             student: { id: "s2", name: "Jane Smith" },
+//             lesson: {
+//               id: "l1",
+//               subject: { id: "sub1", name: "Mathematics" },
+//               class: { id: "c1", name: "Grade 10-A" },
+//             },
+//           },
+//           {
+//             id: "3",
+//             date: "2025-02-21",
+//             present: true,
+//             student: { id: "s1", name: "John Doe" },
+//             lesson: {
+//               id: "l2",
+//               subject: { id: "sub2", name: "Science" },
+//               class: { id: "c1", name: "Grade 10-A" },
+//             },
+//           },
+//           // Add more mock records here for testing
+//         ],
+//       });
+//     }, 500);
+//   });
+// }
 
 // Save attendance changes
 async function saveAttendance() {

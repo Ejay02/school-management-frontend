@@ -62,6 +62,17 @@ export const getAllStudents = gql`
       class {
         id
         name
+        lessons {
+          name
+          attendances {
+            date
+            present
+          }
+        }
+      }
+      attendances {
+        date
+        present
       }
 
       createdAt
@@ -180,6 +191,17 @@ export const getStudentById = gql`
       class {
         id
         name
+        lessons {
+          name
+          attendances {
+            date
+            present
+          }
+        }
+      }
+      attendances {
+        date
+        present
       }
       parent {
         id
@@ -352,6 +374,10 @@ export const getAttendances = gql`
         surname
       }
       lesson {
+        id
+        name
+      }
+      class{
         id
         name
       }

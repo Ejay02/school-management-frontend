@@ -10,6 +10,7 @@ export const useAttendanceStore = defineStore("attendanceStore", {
       absent: [],
       classCount: 0,
     },
+    attendanceRecords: [],
     loading: false,
     error: null,
   }),
@@ -51,11 +52,13 @@ export const useAttendanceStore = defineStore("attendanceStore", {
           fetchPolicy: "no-cache",
         });
 
-        return res.data.getAttendances;
+        this.attendanceRecords = res.data.getAttendances;
+
+        // return res.data.getAttendances;
       } catch (error) {
         this.error = error.message || "Error fetching attendance stats";
       } finally {
-        this.loading;
+        this.loading = false;
       }
     },
 

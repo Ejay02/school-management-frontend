@@ -107,3 +107,28 @@ export const resetPasswordMutation = gql`
     }
   }
 `;
+
+export const markAttendance = gql`
+  mutation MarkAttendance(
+    $lessonId: String!
+    $attendanceData: MarkAttendanceInput!
+  ) {
+    markAttendance(lessonId: $lessonId, attendanceData: $attendanceData) {
+      id
+      date
+      present
+      studentId
+      lessonId
+      student {
+        name
+        surname
+      }
+      class {
+        name
+      }
+      lesson {
+        name
+      }
+    }
+  }
+`;

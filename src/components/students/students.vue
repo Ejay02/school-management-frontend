@@ -47,6 +47,7 @@ import { useStudentStore } from "../../store/studentStore";
 const limit = 10;
 const currentPage = ref(1);
 const studentStore = useStudentStore();
+
 const loading = computed(() => studentStore.loading);
 const error = computed(() => studentStore.error);
 

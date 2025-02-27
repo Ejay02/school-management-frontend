@@ -5,40 +5,32 @@
 
       <div v-if="userHasAccess" class="flex gap-2">
         <button
-          v-if="userRole === 'teacher'"
+          v-if="['teacher', 'admin', 'super_admin'].includes(userRole)"
           @click="toggleMarkAttendanceMode"
-          class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
+          class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
         >
           Mark Attendance
+        </button>
+
+        <button
+          v-if="markAttendanceMode"
+          @click="toggleMarkAttendanceMode"
+          class="px-3 py-1 bg-gray-50 text-gray-600 text-sm rounded hover:bg-gray-100 transition-colors border border-gray-300"
+        >
+          Cancel
         </button>
         <button
           v-if="markAttendanceMode"
           @click="$emit('saveAttendance')"
-          class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+          class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
         >
           Save
-        </button>
-        <button
-          v-if="markAttendanceMode"
-          @click="toggleMarkAttendanceMode"
-          class="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors"
-        >
-          Cancel
         </button>
       </div>
       <div v-else class="text-sm text-gray-500">View-only access</div>
     </div>
 
-    <LoadingScreen v-if="loading" message="Loading attendance records..." />
-    <EmptyState
-      v-else-if="loading"
-      icon="fa-regular fa-hourglass"
-      heading="Nothing here yet!"
-      description="Add a student to get started"
-    />
-    <ErrorScreen v-else-if="error" />
-
-    <div class="" v-else>
+    <div class="">
       <!-- Search and filter -->
       <div class="mb-4 flex gap-3">
         <input
@@ -57,88 +49,102 @@
       </div>
 
       <!-- Table -->
-      <div class="overflow-x-auto">
-        <table class="min-w-full bg-white">
-          <thead class="bg-gray-50">
-            <tr>
-              <th
-                class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Date
-              </th>
-              <th
-                class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Student
-              </th>
-              <th
-                class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Lesson
-              </th>
-              <!-- <th
-                class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Class
-              </th> -->
-              <th
-                class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Status
-              </th>
-            </tr>
-          </thead>
+      <div class="">
+        <LoadingScreen v-if="loading" message="Loading attendance records..." />
+        <EmptyState
+          v-else-if="studentStore?.students.length && !loading"
+          icon="fa-regular fa-hourglass"
+          heading="Nothing here yet!"
+          description=""
+        >
+          <!-- v-if="userRole === 'teacher'" -->
+          <button
+            v-if="['teacher', 'admin', 'super_admin'].includes(userRole)"
+            @click="toggleMarkAttendanceMode"
+            class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
+          >
+            Mark Attendance
+          </button></EmptyState
+        >
+        <ErrorScreen v-else-if="error" />
 
-          <!--  -->
-          <tbody class="divide-y divide-gray-200">
-            <tr
-              v-for="(record, index) in paginatedRecords"
-              :key="index"
-              class="hover:bg-gray-50"
-            >
-              <td class="py-2 px-3 text-sm text-gray-500">
-                {{ formatDate(record.date) }}
-              </td>
-              <td class="py-2 px-3 text-sm">{{ record.student.name }}</td>
-              <td class="py-2 px-3 text-sm">
-                {{ record.lesson.subject.name }}
-              </td>
-              <!-- <td class="py-2 px-3 text-sm">{{ record.lesson.class.name }}</td> -->
-              <td class="py-2 px-3 text-sm">
-                <span
-                  v-if="!markAttendanceMode"
-                  :class="
-                    record.present
-                      ? 'px-2 py-1 rounded-full text-xs bg-green-100 text-green-800'
-                      : 'px-2 py-1 rounded-full text-xs bg-red-100 text-red-800'
-                  "
+        <!-- description="Add a class to get started." -->
+
+        <!-- <ErrorScreen v-else-if="error" message="" /> -->
+
+        <!--  -->
+        <div class="overflow-x-auto" v-else>
+          <table class="min-w-full bg-white">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  {{ record.present ? "Present" : "Absent" }}
-                </span>
-                <select
-                  v-else
-                  v-model="record.present"
-                  class="border rounded p-1 text-sm"
-                  :class="
-                    record.present ? 'border-green-500' : 'border-red-500'
-                  "
+                  Date
+                </th>
+                <th
+                  class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  <option :value="true">Present</option>
-                  <option :value="false">Absent</option>
-                </select>
-              </td>
-            </tr>
-            <tr v-if="paginatedRecords.length === 0">
-              <td colspan="5" class="py-4 text-center text-gray-500">
-                No attendance records found
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  Student
+                </th>
+
+                <th
+                  class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Class
+                </th>
+                <th
+                  class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Lesson
+                </th>
+                <th
+                  class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Status
+                </th>
+              </tr>
+            </thead>
+
+            <!--  -->
+            <tbody class="divide-y divide-gray-200">
+              <tr
+                v-for="record in attendanceRecords"
+                :key="record?.id"
+                class="hover:bg-gray-50"
+              >
+                <td class="py-2 px-3 text-sm text-gray-500">
+                  {{ formatDate(record?.date) }}
+                </td>
+                <td class="py-2 px-3 text-sm capitalize">
+                  {{ record?.student?.name }} {{ record?.student?.surname }}
+                </td>
+                <td class="py-2 px-3 text-sm">{{ record?.class?.name }}</td>
+                <td class="py-2 px-3 text-sm">{{ record?.lesson?.name }}</td>
+                <td class="py-2 px-3 text-sm">
+                  <span
+                    :class="{
+                      'px-2 py-1 rounded-full text-xs': true,
+                      'bg-green-100 text-green-800': record?.present,
+                      'bg-red-100 text-red-800': !record?.present,
+                    }"
+                  >
+                    {{ record?.present ? "Present" : "Absent" }}
+                  </span>
+                </td>
+              </tr>
+              <tr v-if="attendanceRecords?.length === 0">
+                <td colspan="4" class="py-4 text-center text-gray-500">
+                  No attendance records found
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
     <!-- Pagination -->
-    <div class="flex justify-between items-center mt-4">
+    <!-- <div class="flex justify-between items-center mt-4">
       <div class="text-sm text-gray-500">
         Showing {{ paginatedRecords.length }} of {{ filteredRecords.length }}
         records
@@ -159,17 +165,18 @@
           Next
         </button>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
-import { useUserStore } from "../../store/userStore";
 import EmptyState from "../emptyState.vue";
-import { useAttendanceStore } from "../../store/attendanceStore";
-import LoadingScreen from "../loadingScreen.vue";
 import ErrorScreen from "../errorScreen.vue";
+import LoadingScreen from "../loadingScreen.vue";
+import { useUserStore } from "../../store/userStore";
+import { ref, computed, watch, onMounted } from "vue";
+import { useStudentStore } from "../../store/studentStore";
+import { useAttendanceStore } from "../../store/attendanceStore";
 
 const props = defineProps({
   records: {
@@ -206,6 +213,8 @@ const emit = defineEmits([
 
 const userStore = useUserStore();
 
+const studentStore = useStudentStore();
+
 const userRole = computed(() => userStore.currentRole);
 
 // For local two-way binding in search/filter inputs
@@ -213,6 +222,8 @@ const localSearchQuery = ref(props.searchQuery);
 const localFilterStatus = ref(props.filterStatus);
 
 const attendanceStore = useAttendanceStore();
+const attendanceRecords = computed(() => attendanceStore.attendanceRecords);
+
 const loading = computed(() => attendanceStore.loading);
 const error = computed(() => attendanceStore.error);
 
@@ -284,4 +295,8 @@ function toggleMarkAttendanceMode() {
 
 // Assume that access rights are determined elsewhere. For demonstration:
 const userHasAccess = true;
+
+onMounted(() => {
+  attendanceStore.fetchAttendance();
+});
 </script>

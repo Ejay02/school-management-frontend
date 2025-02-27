@@ -36,11 +36,11 @@ export const useUserStore = defineStore("user", () => {
     const userData = {
       id: user.userId,
       name: user.name,
+      surname: user.surname,
       email: user.email,
       role: user.role,
       address: user.address,
       bloodType: user.bloodType,
-      surname: user.surname,
       sex: user.sex,
       phone: user.phone,
       token: user.token,

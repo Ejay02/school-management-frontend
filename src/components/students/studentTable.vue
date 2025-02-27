@@ -45,7 +45,7 @@
           {{ item?.studentId?.slice(0, 8) }} ...
         </td>
 
-        <td class="hidden md:table-cell">{{ item?.class }}</td>
+        <td class="hidden md:table-cell">{{ item?.class?.name }}</td>
 
         <td class="hidden md:table-cell">{{ item?.phone || "NA" }}</td>
         <td class="hidden md:table-cell capitalize">
@@ -106,9 +106,9 @@
 </template>
 
 <script setup>
+import { RouterLink } from "vue-router";
 import { useUserStore } from "../../store/userStore";
 import { useModalStore } from "../../store/useModalStore";
-import { RouterLink } from "vue-router";
 
 const props = defineProps({
   columns: {

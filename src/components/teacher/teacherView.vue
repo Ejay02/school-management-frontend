@@ -34,6 +34,7 @@ import { useTeacherStore } from "../../store/teacherStore";
 import LoadingScreen from "../../components/loadingScreen.vue";
 import LeftSingleView from "../../views/singleView/leftSingleView.vue";
 import RightSingleView from "../../views/singleView/rightSingleView.vue";
+import { formatDate } from "../../utils/date.holidays";
 
 const route = useRoute();
 const teacherId = route.params.id;
@@ -85,15 +86,6 @@ const teacherInfoCards = computed(() => {
 const teacherDetails = computed(() => {
   if (!teacher.value) return [];
 
-  let formattedDate = "N/A";
-  if (teacher.value?.createdAt) {
-    const dateObj = new Date(teacher.value.createdAt);
-    const day = dateObj.getDate().toString().padStart(2, "0");
-    const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
-    const year = dateObj.getFullYear();
-    formattedDate = `${day}-${month}-${year}`;
-  }
-
   return [
     {
       icon: "/blood.png",
@@ -103,7 +95,7 @@ const teacherDetails = computed(() => {
     {
       icon: "/date.png",
       label: "Joined",
-      value: formattedDate,
+      value: formatDate(teacher?.value?.createdAt),
     },
     { icon: "/mail.png", label: "Email", value: teacher?.value.email },
     { icon: "/phone.png", label: "Phone", value: teacher?.value.phone },

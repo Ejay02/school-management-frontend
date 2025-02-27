@@ -49,7 +49,8 @@ export const useStudentStore = defineStore("studentStore", {
           parent: student.parent
             ? `${student.parent.name} ${student.parent.surname}`
             : "",
-          class: student.class ? student.class.name : "",
+          className: student.class ? student.class.name : "",
+          // class: student.class ? student.class.name : "",
         }));
 
         this.students = fetchedStudents;

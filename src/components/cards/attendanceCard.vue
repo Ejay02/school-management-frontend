@@ -189,10 +189,10 @@ function createChart() {
         {
           data: presentData.map((value) => Math.max(value, 0.5)), // Ensure minimum visible height
           backgroundColor: "#C3EBFA", // eduSky
-          borderWidth: 0,
           barThickness: 15,
           borderRadius: 10,
           borderColor: "transparent",
+          borderWidth: 2,
         },
         {
           data: absentData.map((value) => Math.max(value, 0.5)), // Ensure minimum visible height
@@ -267,13 +267,13 @@ function createChart() {
               font: {
                 size: 10,
               },
-              callback: function (value) {
-                // Only show actual values in the axis labels
-                return value > 0.5 ? value : 0;
-              },
+              // callback: function (value) {
+              //   // Only show actual values in the axis labels
+              //   return value > 0.5 ? value : 0;
+              // },
             },
-            min: 0, // Start at zero
-            suggestedMax: Math.max(...presentData, ...absentData) * 1.2 || 100, // Dynamic height with 20% padding
+            // min: 0, // Start at zero
+            // suggestedMax: Math.max(...presentData, ...absentData) * 1.2 || 100, // Dynamic height with 20% padding
           },
         },
         animation: {

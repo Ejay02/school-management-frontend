@@ -34,6 +34,7 @@ import LoadingScreen from "../loadingScreen.vue";
 import { useStudentStore } from "../../store/studentStore";
 import LeftSingleView from "../../views/singleView/leftSingleView.vue";
 import RightSingleView from "../../views/singleView/rightSingleView.vue";
+import { formatDate } from "../../utils/date.holidays";
 
 const route = useRoute();
 const studentId = route.params.id;
@@ -84,22 +85,17 @@ const studentInfoCards = computed(() => {
 const studentDetails = computed(() => {
   if (!student.value) return [];
 
-  let formattedDate = "N/A";
-  if (student?.value?.createdAt) {
-    const dateObj = new Date(student.value.createdAt);
-    const day = dateObj.getDate().toString().padStart(2, "0");
-    const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
-    const year = dateObj.getFullYear();
-    formattedDate = `${day}-${month}-${year}`;
-  }
-
   return [
     {
       icon: "/blood.png",
       label: "Blood Group",
       value: student?.value.bloodType || "A+",
     },
-    { icon: "/date.png", label: "Date", value: formattedDate },
+    {
+      icon: "/date.png",
+      label: "Date",
+      value: formatDate(student?.value?.createdAt),
+    },
     {
       icon: '<i class="fa-solid fa-envelope"></i>',
       label: "Email",
