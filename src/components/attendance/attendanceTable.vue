@@ -1,11 +1,16 @@
 <template>
   <div class="bg-white rounded-lg shadow border border-gray-200 p-4">
     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">Attendance Records</h2>
+      <h2 class="text-lg font-semibold">
+        {{ markAttendanceMode ? "Mark Attendance" : "Attendance Records" }}
+      </h2>
 
       <div v-if="userHasAccess" class="flex gap-2">
         <button
-          v-if="['teacher', 'admin', 'super_admin'].includes(userRole)"
+          v-if="
+            !markAttendanceMode &&
+            ['teacher', 'admin', 'super_admin'].includes(userRole)
+          "
           @click="toggleMarkAttendanceMode"
           class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
         >
@@ -21,7 +26,7 @@
         </button>
         <button
           v-if="markAttendanceMode"
-          @click="$emit('saveAttendance')"
+          @click="saveAttendance"
           class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
         >
           Save
@@ -30,18 +35,16 @@
       <div v-else class="text-sm text-gray-500">View-only access</div>
     </div>
 
-    <div class="">
+    <!-- Regular Attendance View -->
+    <div v-if="!markAttendanceMode">
       <!-- Search and filter -->
       <div class="mb-4 flex gap-3">
         <input
-          v-model="localSearchQuery"
+          v-model="searchQuery"
           placeholder="Search by name or lesson..."
           class="border rounded p-2 flex-grow"
         />
-        <select
-          v-model="localFilterStatus"
-          class="border rounded p-2 border-eduSky"
-        >
+        <select v-model="filterStatus" class="border rounded p-2 border-eduSky">
           <option value="all">All Status</option>
           <option value="present">Present</option>
           <option value="absent">Absent</option>
@@ -52,27 +55,25 @@
       <div class="">
         <LoadingScreen v-if="loading" message="Loading attendance records..." />
         <EmptyState
-          v-else-if="studentStore?.students.length && !loading"
+          v-else-if="
+            studentStore?.students.length &&
+            !loading &&
+            attendanceRecords.length === 0
+          "
           icon="fa-regular fa-hourglass"
           heading="Nothing here yet!"
           description=""
         >
-          <!-- v-if="userRole === 'teacher'" -->
           <button
             v-if="['teacher', 'admin', 'super_admin'].includes(userRole)"
             @click="toggleMarkAttendanceMode"
             class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
           >
             Mark Attendance
-          </button></EmptyState
-        >
+          </button>
+        </EmptyState>
         <ErrorScreen v-else-if="error" />
 
-        <!-- description="Add a class to get started." -->
-
-        <!-- <ErrorScreen v-else-if="error" message="" /> -->
-
-        <!--  -->
         <div class="overflow-x-auto" v-else>
           <table class="min-w-full bg-white">
             <thead class="bg-gray-50">
@@ -87,7 +88,6 @@
                 >
                   Student
                 </th>
-
                 <th
                   class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
@@ -106,10 +106,9 @@
               </tr>
             </thead>
 
-            <!--  -->
             <tbody class="divide-y divide-gray-200">
               <tr
-                v-for="record in attendanceRecords"
+                v-for="record in paginatedRecords"
                 :key="record?.id"
                 class="hover:bg-gray-50"
               >
@@ -134,7 +133,7 @@
                 </td>
               </tr>
               <tr v-if="attendanceRecords?.length === 0">
-                <td colspan="4" class="py-4 text-center text-gray-500">
+                <td colspan="5" class="py-4 text-center text-gray-500">
                   No attendance records found
                 </td>
               </tr>
@@ -142,30 +141,191 @@
           </table>
         </div>
       </div>
+
+      <!-- Pagination -->
+      <div
+        v-if="filteredAttendanceRecords.length > pageSize"
+        class="flex justify-between items-center mt-4"
+      >
+        <div class="text-sm text-gray-500">
+          Showing {{ paginatedRecords.length }} of
+          {{ filteredAttendanceRecords.length }}
+          records
+        </div>
+        <div class="flex gap-2">
+          <button
+            @click="prevPage"
+            :disabled="currentPage === 1"
+            class="px-3 py-1 border rounded text-sm disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <button
+            @click="nextPage"
+            :disabled="
+              currentPage * pageSize >= filteredAttendanceRecords.length
+            "
+            class="px-3 py-1 border rounded text-sm disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
-    <!-- Pagination -->
-    <!-- <div class="flex justify-between items-center mt-4">
-      <div class="text-sm text-gray-500">
-        Showing {{ paginatedRecords.length }} of {{ filteredRecords.length }}
-        records
+
+    <!-- Mark Attendance Mode -->
+    <div v-else>
+      <!-- Class and date selectors -->
+      <div class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Class</label>
+          <select
+            v-model="selectedClass"
+            class="border rounded p-2 w-full"
+            @change="fetchStudentsForClass"
+          >
+            <option value="">Select a class</option>
+            <option
+              v-for="class_ in classes"
+              :key="class_.id"
+              :value="class_.id"
+            >
+              {{ class_.name }}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Lesson</label>
+          <select
+            v-model="selectedLesson"
+            class="border rounded p-2 w-full"
+            :disabled="!selectedClass"
+          >
+            <option value="">Select a lesson</option>
+            <option
+              v-for="lesson in filteredLessons"
+              :key="lesson.id"
+              :value="lesson.id"
+            >
+              {{ lesson.name }}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Date</label>
+          <input
+            type="date"
+            v-model="selectedDate"
+            class="border rounded p-2 w-full"
+          />
+        </div>
       </div>
-      <div class="flex gap-2">
-        <button
-          @click="prevPage"
-          :disabled="currentPage === 1"
-          class="px-3 py-1 border rounded text-sm disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <button
-          @click="nextPage"
-          :disabled="currentPage * pageSize >= filteredRecords.length"
-          class="px-3 py-1 border rounded text-sm disabled:opacity-50"
-        >
-          Next
-        </button>
+
+      <!-- Student list for marking attendance -->
+      <div v-if="selectedClass && selectedLesson && selectedDate">
+        <div class="mb-4">
+          <input
+            v-model="studentSearchQuery"
+            placeholder="Search students..."
+            class="border rounded p-2 w-full"
+          />
+        </div>
+
+        <div class="overflow-x-auto">
+          <LoadingScreen v-if="loadingStudents" message="Loading students..." />
+          <EmptyState
+            v-else-if="filteredStudents.length === 0"
+            icon="fa-regular fa-user"
+            heading="No students found"
+            description="There are no students in this class or your search returned no results."
+          />
+
+          <table v-else class="min-w-full bg-white">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Student
+                </th>
+                <th
+                  class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Status
+                </th>
+                <th
+                  class="py-2 px-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr
+                v-for="student in filteredStudents"
+                :key="student.id"
+                class="hover:bg-gray-50"
+              >
+                <td class="py-2 px-3 text-sm capitalize">
+                  {{ student.name }} {{ student.surname }}
+                </td>
+                <td class="py-2 px-3 text-sm">
+                  <span
+                    :class="{
+                      'px-2 py-1 rounded-full text-xs': true,
+                      'bg-green-100 text-green-800':
+                        studentAttendance[student.id],
+                      'bg-red-100 text-red-800':
+                        studentAttendance[student.id] === false,
+                      'bg-gray-100 text-gray-800':
+                        studentAttendance[student.id] === undefined,
+                    }"
+                  >
+                    {{
+                      studentAttendance[student.id] === undefined
+                        ? "Not marked"
+                        : studentAttendance[student.id]
+                        ? "Present"
+                        : "Absent"
+                    }}
+                  </span>
+                </td>
+                <td class="py-2 px-3 text-sm text-center">
+                  <div class="flex justify-center gap-2">
+                    <button
+                      @click="markStudentAttendance(student.id, true)"
+                      class="px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors"
+                      :class="{
+                        'ring-2 ring-green-300':
+                          studentAttendance[student.id] === true,
+                      }"
+                    >
+                      Present
+                    </button>
+                    <button
+                      @click="markStudentAttendance(student.id, false)"
+                      class="px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 transition-colors"
+                      :class="{
+                        'ring-2 ring-red-300':
+                          studentAttendance[student.id] === false,
+                      }"
+                    >
+                      Absent
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div> -->
+
+      <div v-else class="text-center py-8 text-gray-500">
+        Please select a class, lesson, and date to mark attendance
+      </div>
+    </div>
   </div>
 </template>
 
@@ -177,98 +337,120 @@ import { useUserStore } from "../../store/userStore";
 import { ref, computed, watch, onMounted } from "vue";
 import { useStudentStore } from "../../store/studentStore";
 import { useAttendanceStore } from "../../store/attendanceStore";
-
-const props = defineProps({
-  records: {
-    type: Array,
-    required: true,
-  },
-  searchQuery: {
-    type: String,
-    required: true,
-  },
-  filterStatus: {
-    type: String,
-    required: true,
-  },
-  currentPage: {
-    type: Number,
-    required: true,
-  },
-  pageSize: {
-    type: Number,
-    required: true,
-  },
-  markAttendanceMode: {
-    type: Boolean,
-    required: true,
-  },
-});
-
-const emit = defineEmits([
-  "update:currentPage",
-  "toggleMarkAttendanceMode",
-  "saveAttendance",
-]);
+import { useClassStore } from "../../store/classStore";
+import { useLessonStore } from "../../store/lessonStore";
 
 const userStore = useUserStore();
-
 const studentStore = useStudentStore();
+const attendanceStore = useAttendanceStore();
+const classStore = useClassStore();
+const lessonStore = useLessonStore();
 
 const userRole = computed(() => userStore.currentRole);
+const userHasAccess = computed(() =>
+  ["teacher", "admin", "super_admin"].includes(userRole.value)
+);
 
-// For local two-way binding in search/filter inputs
-const localSearchQuery = ref(props.searchQuery);
-const localFilterStatus = ref(props.filterStatus);
+// Regular attendance view
+const searchQuery = ref("");
+const filterStatus = ref("all");
+const currentPage = ref(1);
+const pageSize = ref(10);
 
-const attendanceStore = useAttendanceStore();
-const attendanceRecords = computed(() => attendanceStore.attendanceRecords);
+// Mark attendance mode
+const markAttendanceMode = ref(false);
+const selectedClass = ref("");
+const selectedLesson = ref("");
+const selectedDate = ref(new Date().toISOString().split("T")[0]); // Today's date
+const studentSearchQuery = ref("");
+const studentAttendance = ref({});
+const loadingStudents = ref(false);
 
+// Computed properties
 const loading = computed(() => attendanceStore.loading);
 const error = computed(() => attendanceStore.error);
+const attendanceRecords = computed(() => attendanceStore.attendanceRecords);
+const classes = computed(() => classStore.classes);
+const lessons = computed(() => lessonStore.lessons);
+const students = computed(() => studentStore.students);
 
-watch(
-  () => props.searchQuery,
-  (newVal) => {
-    localSearchQuery.value = newVal;
-  }
-);
+// Get lessons for selected class
+const filteredLessons = computed(() => {
+  if (!selectedClass.value) return [];
+  return lessons.value.filter(
+    (lesson) =>
+      lesson.classId === selectedClass.value ||
+      lesson.class?.id === selectedClass.value
+  );
+});
 
-watch(
-  () => props.filterStatus,
-  (newVal) => {
-    localFilterStatus.value = newVal;
-  }
-);
+// Filter students for the selected class with search
+const filteredStudents = computed(() => {
+  if (!selectedClass.value) return [];
 
-// Compute filtered records
-const filteredRecords = computed(() => {
-  let filtered = props.records;
-  if (localSearchQuery.value) {
-    const query = localSearchQuery.value.toLowerCase();
+  const classStudents = students.value.filter(
+    (student) =>
+      student.classId === selectedClass.value ||
+      student.class?.id === selectedClass.value
+  );
+
+  if (!studentSearchQuery.value) return classStudents;
+
+  const query = studentSearchQuery.value.toLowerCase();
+  return classStudents.filter(
+    (student) =>
+      (student.name || "").toLowerCase().includes(query) ||
+      (student.surname || "").toLowerCase().includes(query)
+  );
+});
+
+// Filter attendance records
+const filteredAttendanceRecords = computed(() => {
+  let filtered = attendanceRecords.value;
+
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
     filtered = filtered.filter(
       (record) =>
-        record.student.name.toLowerCase().includes(query) ||
-        record.lesson.subject.name.toLowerCase().includes(query)
+        (record.student?.name || "").toLowerCase().includes(query) ||
+        (record.student?.surname || "").toLowerCase().includes(query) ||
+        (record.lesson?.name || "").toLowerCase().includes(query) ||
+        (record.class?.name || "").toLowerCase().includes(query)
     );
   }
-  if (localFilterStatus.value !== "all") {
+
+  if (filterStatus.value !== "all") {
     filtered = filtered.filter(
       (record) =>
-        (localFilterStatus.value === "present" && record.present) ||
-        (localFilterStatus.value === "absent" && !record.present)
+        (filterStatus.value === "present" && record.present) ||
+        (filterStatus.value === "absent" && !record.present)
     );
   }
+
   return filtered;
 });
 
-// Compute paginated records
+// Paginated records
 const paginatedRecords = computed(() => {
-  const start = (props.currentPage - 1) * props.pageSize;
-  return filteredRecords.value.slice(start, start + props.pageSize);
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredAttendanceRecords.value.slice(start, start + pageSize.value);
 });
 
+// Reset pagination when filters change
+watch([searchQuery, filterStatus], () => {
+  currentPage.value = 1;
+});
+
+// Reset lesson when class changes
+watch(selectedClass, () => {
+  selectedLesson.value = "";
+  studentAttendance.value = {};
+  fetchStudentsForClass();
+});
+
+// Format date for display
 function formatDate(dateString) {
+  if (!dateString) return "";
   const date = new Date(dateString);
   return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
@@ -277,26 +459,128 @@ function formatDate(dateString) {
   }).format(date);
 }
 
+// Pagination functions
 function prevPage() {
-  if (props.currentPage > 1) {
-    emit("update:currentPage", props.currentPage - 1);
+  if (currentPage.value > 1) {
+    currentPage.value--;
   }
 }
 
 function nextPage() {
-  if (props.currentPage * props.pageSize < filteredRecords.value.length) {
-    emit("update:currentPage", props.currentPage + 1);
+  if (
+    currentPage.value * pageSize.value <
+    filteredAttendanceRecords.value.length
+  ) {
+    currentPage.value++;
   }
 }
 
+// Toggle mark attendance mode
 function toggleMarkAttendanceMode() {
-  emit("toggleMarkAttendanceMode");
+  markAttendanceMode.value = !markAttendanceMode.value;
+
+  if (markAttendanceMode.value) {
+    // Reset the form when entering mark attendance mode
+    selectedClass.value = "";
+    selectedLesson.value = "";
+    selectedDate.value = new Date().toISOString().split("T")[0];
+    studentAttendance.value = {};
+
+    // Fetch classes and lessons if not already loaded
+    if (classes.value.length === 0) {
+      classStore.fetchClasses();
+    }
+    if (lessons.value.length === 0) {
+      lessonStore.fetchLessons();
+    }
+  }
 }
 
-// Assume that access rights are determined elsewhere. For demonstration:
-const userHasAccess = true;
+// Fetch students for the selected class
+async function fetchStudentsForClass() {
+  if (!selectedClass.value) return;
 
-onMounted(() => {
+  loadingStudents.value = true;
+  try {
+    await studentStore.fetchStudentsByClass(selectedClass.value);
+
+    // Initialize attendance object for all students
+    studentAttendance.value = {};
+    students.value.forEach((student) => {
+      studentAttendance.value[student.id] = undefined;
+    });
+  } catch (error) {
+    console.error("Error fetching students:", error);
+  } finally {
+    loadingStudents.value = false;
+  }
+}
+
+// Mark a student's attendance
+function markStudentAttendance(studentId, isPresent) {
+  studentAttendance.value[studentId] = isPresent;
+}
+
+// Save attendance changes
+async function saveAttendance() {
+  if (!selectedClass.value || !selectedLesson.value || !selectedDate.value) {
+    alert("Please select a class, lesson, and date");
+    return;
+  }
+
+  // Check if all students have attendance marked
+  const unmarkedStudents = Object.entries(studentAttendance.value).filter(
+    ([_, status]) => status === undefined
+  ).length;
+
+  if (
+    unmarkedStudents > 0 &&
+    !confirm(
+      `${unmarkedStudents} students have not been marked. Continue anyway?`
+    )
+  ) {
+    return;
+  }
+
+  attendanceStore.loading = true;
+
+  try {
+    // Prepare data for backend
+    const attendanceData = Object.entries(studentAttendance.value)
+      .filter(([_, status]) => status !== undefined)
+      .map(([studentId, isPresent]) => ({
+        studentId,
+        lessonId: selectedLesson.value,
+        classId: selectedClass.value,
+        date: selectedDate.value,
+        present: isPresent,
+      }));
+
+    // Call the backend API to save attendance
+    // await attendanceStore.markAttendance(attendanceData);
+    console.log("Attendance data to save:", attendanceData);
+
+    // Reset form and exit mark attendance mode
+    markAttendanceMode.value = false;
+
+    // Refresh the attendance records
+    await attendanceStore.fetchAttendance();
+  } catch (err) {
+    console.error("Error saving attendance:", err);
+    attendanceStore.error = "Failed to save attendance";
+  } finally {
+    attendanceStore.loading = false;
+  }
+}
+
+// Initialize data on component mount
+onMounted(async () => {
   attendanceStore.fetchAttendance();
+
+  // Fetch classes and lessons
+  if (userHasAccess.value) {
+    classStore.fetchClasses();
+    lessonStore.fetchLessons();
+  }
 });
 </script>
