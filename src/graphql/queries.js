@@ -250,6 +250,12 @@ export const getAllClasses = gql`
       subjects {
         id
         name
+        lessons{
+          id
+          name
+          startTime
+          endTime
+        }
       }
       feeStructure {
         academicYear

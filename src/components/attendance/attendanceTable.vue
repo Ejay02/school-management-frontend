@@ -42,9 +42,12 @@
         <input
           v-model="searchQuery"
           placeholder="Search by name or lesson..."
-          class="border rounded p-2 flex-grow"
+          class="border rounded p-2 flex-grow focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
         />
-        <select v-model="filterStatus" class="border rounded p-2 border-eduSky">
+        <select
+          v-model="filterStatus"
+          class="border rounded p-2 border-eduSky focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
+        >
           <option value="all">All Status</option>
           <option value="present">Present</option>
           <option value="absent">Absent</option>
@@ -110,7 +113,7 @@
               <tr
                 v-for="record in paginatedRecords"
                 :key="record?.id"
-                class="hover:bg-gray-50"
+                class="hover:bg-gray-50 cursor-pointer"
               >
                 <td class="py-2 px-3 text-sm text-gray-500">
                   {{ formatDate(record?.date) }}
@@ -179,9 +182,10 @@
       <div class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="block text-sm text-gray-600 mb-1">Class</label>
+
           <select
             v-model="selectedClass"
-            class="border rounded p-2 w-full"
+            class="border rounded p-2 w-full focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
             @change="fetchStudentsForClass"
           >
             <option value="">Select a class</option>
@@ -199,7 +203,7 @@
           <label class="block text-sm text-gray-600 mb-1">Lesson</label>
           <select
             v-model="selectedLesson"
-            class="border rounded p-2 w-full"
+            class="border rounded p-2 w-full focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
             :disabled="!selectedClass"
           >
             <option value="">Select a lesson</option>
@@ -214,7 +218,10 @@
         </div>
 
         <div>
-          <label class="block text-sm text-gray-600 mb-1">Date</label>
+          <label
+            class="block text-sm text-gray-600 mb-1 focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
+            >Date</label
+          >
           <input
             type="date"
             v-model="selectedDate"
@@ -229,7 +236,7 @@
           <input
             v-model="studentSearchQuery"
             placeholder="Search students..."
-            class="border rounded p-2 w-full"
+            class="border rounded p-2 w-full focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
           />
         </div>
 
@@ -371,16 +378,28 @@ const loading = computed(() => attendanceStore.loading);
 const error = computed(() => attendanceStore.error);
 const attendanceRecords = computed(() => attendanceStore.attendanceRecords);
 const classes = computed(() => classStore.classes);
-const lessons = computed(() => lessonStore.lessons);
+// const lessons = computed(() => lessonStore.lessons);
 const students = computed(() => studentStore.students);
 
 // Get lessons for selected class
 const filteredLessons = computed(() => {
   if (!selectedClass.value) return [];
-  return lessons.value.filter(
-    (lesson) =>
-      lesson.classId === selectedClass.value ||
-      lesson.class?.id === selectedClass.value
+
+  // Find the selected class in the classes array
+  const currentClass = classes.value.find(
+    (cls) => cls.id === selectedClass.value
+  );
+
+  if (!currentClass || !currentClass.subjects) return [];
+
+  // Flatten lessons from all subjects in the selected class
+  return currentClass.subjects.flatMap((subject) =>
+    subject.lessons.map((lesson) => ({
+      ...lesson,
+      subjectId: subject.id,
+      subjectName: subject.name,
+      classId: currentClass.id,
+    }))
   );
 });
 
