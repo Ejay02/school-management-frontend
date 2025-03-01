@@ -346,6 +346,7 @@ import { useStudentStore } from "../../store/studentStore";
 import { useAttendanceStore } from "../../store/attendanceStore";
 import { useClassStore } from "../../store/classStore";
 import { useLessonStore } from "../../store/lessonStore";
+import { formatDate } from "../../utils/date.holidays";
 
 const userStore = useUserStore();
 const studentStore = useStudentStore();
@@ -378,7 +379,7 @@ const loading = computed(() => attendanceStore.loading);
 const error = computed(() => attendanceStore.error);
 const attendanceRecords = computed(() => attendanceStore.attendanceRecords);
 const classes = computed(() => classStore.classes);
-// const lessons = computed(() => lessonStore.lessons);
+const lessons = computed(() => lessonStore.lessons);
 const students = computed(() => studentStore.students);
 
 // Get lessons for selected class
@@ -400,26 +401,6 @@ const filteredLessons = computed(() => {
       subjectName: subject.name,
       classId: currentClass.id,
     }))
-  );
-});
-
-// Filter students for the selected class with search
-const filteredStudents = computed(() => {
-  if (!selectedClass.value) return [];
-
-  const classStudents = students.value.filter(
-    (student) =>
-      student.classId === selectedClass.value ||
-      student.class?.id === selectedClass.value
-  );
-
-  if (!studentSearchQuery.value) return classStudents;
-
-  const query = studentSearchQuery.value.toLowerCase();
-  return classStudents.filter(
-    (student) =>
-      (student.name || "").toLowerCase().includes(query) ||
-      (student.surname || "").toLowerCase().includes(query)
   );
 });
 
@@ -455,6 +436,45 @@ const paginatedRecords = computed(() => {
   return filteredAttendanceRecords.value.slice(start, start + pageSize.value);
 });
 
+// Filter students for the mark attendance view
+const filteredStudents = computed(() => {
+  if (!selectedClass.value) return [];
+
+  // Get all students in the class
+  let classStudents = students.value.filter(
+    (student) =>
+      student.classId === selectedClass.value ||
+      student.class?.id === selectedClass.value
+  );
+
+  // If a lesson is selected, filter students who are enrolled in the subject
+  if (selectedLesson.value) {
+    const currentLesson = filteredLessons.value.find(
+      (lesson) => lesson.id === selectedLesson.value
+    );
+
+    if (currentLesson && currentLesson.subjectId) {
+      // If you have subject enrollment data, uncomment and modify this
+      // classStudents = classStudents.filter(student =>
+      //   student.subjects?.includes(currentLesson.subjectId)
+      // );
+      // For now, we'll assume all students in a class take all subjects
+    }
+  }
+
+  // Apply search filter
+  if (studentSearchQuery.value) {
+    const query = studentSearchQuery.value.toLowerCase();
+    classStudents = classStudents.filter(
+      (student) =>
+        (student.name || "").toLowerCase().includes(query) ||
+        (student.surname || "").toLowerCase().includes(query)
+    );
+  }
+
+  return classStudents;
+});
+
 // Reset pagination when filters change
 watch([searchQuery, filterStatus], () => {
   currentPage.value = 1;
@@ -467,16 +487,14 @@ watch(selectedClass, () => {
   fetchStudentsForClass();
 });
 
-// Format date for display
-function formatDate(dateString) {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(date);
-}
+// Update student attendance state when lesson changes
+watch(selectedLesson, () => {
+  if (selectedLesson.value && students.value.length > 0) {
+    initializeStudentAttendance();
+  } else {
+    studentAttendance.value = {};
+  }
+});
 
 // Pagination functions
 function prevPage() {
@@ -522,17 +540,26 @@ async function fetchStudentsForClass() {
   loadingStudents.value = true;
   try {
     await studentStore.fetchStudentsByClass(selectedClass.value);
-
-    // Initialize attendance object for all students
-    studentAttendance.value = {};
-    students.value.forEach((student) => {
-      studentAttendance.value[student.id] = undefined;
-    });
   } catch (error) {
     console.error("Error fetching students:", error);
   } finally {
     loadingStudents.value = false;
   }
+}
+
+// Initialize attendance object for all applicable students
+function initializeStudentAttendance() {
+  if (!selectedLesson.value) return;
+
+  studentAttendance.value = {};
+
+  // Get students who should be marked for this lesson
+  const relevantStudents = filteredStudents.value;
+
+  // Initialize attendance state for each student
+  relevantStudents.forEach((student) => {
+    studentAttendance.value[student.id] = undefined;
+  });
 }
 
 // Mark a student's attendance
@@ -576,7 +603,7 @@ async function saveAttendance() {
       }));
 
     // Call the backend API to save attendance
-    // await attendanceStore.markAttendance(attendanceData);
+    await attendanceStore.markAttendance(attendanceData);
     console.log("Attendance data to save:", attendanceData);
 
     // Reset form and exit mark attendance mode
