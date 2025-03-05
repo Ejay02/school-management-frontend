@@ -43,7 +43,7 @@
       <div class="mb-4 flex gap-3">
         <input
           v-model="searchQuery"
-          placeholder="Search by name or lesson..."
+          placeholder="Search by name, class or lesson..."
           class="border rounded p-2 flex-grow focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
         />
         <select
@@ -148,34 +148,11 @@
       </div>
 
       <!-- Pagination -->
-      <div
-        v-if="filteredAttendanceRecords.length > pageSize"
-        class="flex justify-between items-center mt-4"
-      >
-        <div class="text-sm text-gray-500">
-          Showing {{ paginatedRecords.length }} of
-          {{ filteredAttendanceRecords.length }}
-          records
-        </div>
-        <div class="flex gap-2">
-          <button
-            @click="prevPage"
-            :disabled="currentPage === 1"
-            class="px-3 py-1 border rounded text-sm disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <button
-            @click="nextPage"
-            :disabled="
-              currentPage * pageSize >= filteredAttendanceRecords.length
-            "
-            class="px-3 py-1 border rounded text-sm disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      </div>
+      <Pagination
+        :currentPage="currentPage"
+        :hasMore="attendanceStore.hasMore"
+        @update:page="handlePageChange"
+      />
     </div>
 
     <!-- Mark Attendance Mode -->
@@ -327,6 +304,11 @@
               </tr>
             </tbody>
           </table>
+          <Pagination
+            :currentPage="currentPage"
+            :hasMore="attendanceStore.hasMore"
+            @update:page="handlePageChange"
+          />
         </div>
       </div>
 
@@ -475,22 +457,6 @@ watch(selectedLesson, () => {
     studentAttendance.value = {};
   }
 });
-
-// Pagination functions
-function prevPage() {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
-}
-
-function nextPage() {
-  if (
-    currentPage.value * pageSize.value <
-    filteredAttendanceRecords.value.length
-  ) {
-    currentPage.value++;
-  }
-}
 
 // Toggle mark attendance mode
 function toggleMarkAttendanceMode() {

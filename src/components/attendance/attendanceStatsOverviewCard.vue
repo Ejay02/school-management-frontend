@@ -52,9 +52,12 @@ const totalAbsent = computed(
   () => props.stats.absent?.reduce((sum, num) => sum + num, 0) || 0
 );
 
+const totalStudents = 12 * 30;
+
 const attendanceRate = computed(() => {
-  const total = totalPresent.value + totalAbsent.value;
-  return total > 0 ? ((totalPresent.value / total) * 100).toFixed(2) : 0;
+  return totalStudents > 0
+    ? ((totalPresent.value / totalStudents) * 100).toFixed(2)
+    : "0.00";
 });
 </script>
 

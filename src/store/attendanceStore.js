@@ -14,6 +14,7 @@ export const useAttendanceStore = defineStore("attendanceStore", {
     attendanceRecords: [],
     loading: false,
     error: null,
+    hasMore: true,
   }),
 
   actions: {
