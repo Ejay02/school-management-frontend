@@ -330,7 +330,8 @@
         </div>
       </div>
 
-      <div v-else
+      <div
+        v-else
         class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4"
         role="alert"
       >
@@ -352,6 +353,7 @@ import { useAttendanceStore } from "../../store/attendanceStore";
 import { useClassStore } from "../../store/classStore";
 import { useLessonStore } from "../../store/lessonStore";
 import { formatDate } from "../../utils/date.holidays";
+import Pagination from "../pagination.vue";
 
 const userStore = useUserStore();
 const studentStore = useStudentStore();
@@ -444,9 +446,8 @@ const paginatedRecords = computed(() => {
 // Filter students for the mark attendance view
 const filteredStudents = computed(() => {
   if (!selectedClass.value) return [];
-  console.log("selectedClass:", selectedClass.value);
 
-  // Find the class object in your class store that matches the selected class ID
+  // Find the class object in class store that matches the selected class ID
   const classObj = classStore.classes.find(
     (cls) => cls.id === selectedClass.value
   );
@@ -557,6 +558,7 @@ async function saveAttendance() {
 
   try {
     // Prepare data for backend
+    // Build attendance records array (each record for one student)
     const attendanceData = Object.entries(studentAttendance.value)
       .filter(([_, status]) => status !== undefined)
       .map(([studentId, isPresent]) => ({
@@ -567,9 +569,15 @@ async function saveAttendance() {
         present: isPresent,
       }));
 
-    // Call the backend API to save attendance
-    await attendanceStore.markAttendance(attendanceData);
     console.log("Attendance data to save:", attendanceData);
+
+    for (const record of attendanceData) {
+      await attendanceStore.markAttendance(record.lessonId, {
+        studentId: record.studentId,
+        present: record.present,
+        date: record.date,
+      });
+    }
 
     // Reset form and exit mark attendance mode
     markAttendanceMode.value = false;

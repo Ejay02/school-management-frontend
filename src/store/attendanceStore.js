@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
-import { getAttendances, getSchoolAttendanceStats } from "../graphql/queries";
 import { apolloClient } from "../../apollo-client";
+import { markAttendance } from "../graphql/mutations";
+import { getAttendances, getSchoolAttendanceStats } from "../graphql/queries";
 
 export const useAttendanceStore = defineStore("attendanceStore", {
   state: () => ({
@@ -62,6 +63,30 @@ export const useAttendanceStore = defineStore("attendanceStore", {
       }
     },
 
-    //
+    async markAttendance(lessonId, attendanceData) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const res = await apolloClient.mutate({
+          mutation: markAttendance,
+          variables: {
+            lessonId,
+            attendanceData: [attendanceData],
+          },
+        });
+
+        // Optionally, update  local state with the new record.
+        // push the new record into attendanceRecords:
+        // this.attendanceRecords.push(res.data.markAttendance);
+        await this.fetchAttendance();
+
+        return res.data.markAttendance;
+      } catch (error) {
+        this.error = error.message || "Error marking attendance";
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
   },
 });

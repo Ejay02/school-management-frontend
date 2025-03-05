@@ -111,7 +111,7 @@ export const resetPasswordMutation = gql`
 export const markAttendance = gql`
   mutation MarkAttendance(
     $lessonId: String!
-    $attendanceData: MarkAttendanceInput!
+    $attendanceData: [MarkAttendanceInput!]!
   ) {
     markAttendance(lessonId: $lessonId, attendanceData: $attendanceData) {
       id
