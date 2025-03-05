@@ -188,7 +188,6 @@
           <select
             v-model="selectedClass"
             class="border rounded p-2 w-full focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
-            @change="fetchStudentsForClass"
           >
             <option value="">Select a class</option>
             <option
@@ -284,11 +283,11 @@
                   <span
                     :class="{
                       'px-2 py-1 rounded-full text-xs': true,
-                      'bg-green-100 text-green-800':
+                      'bg-green-100 text-green-700':
                         studentAttendance[student.id],
-                      'bg-red-100 text-red-800':
+                      'bg-red-100 text-red-700':
                         studentAttendance[student.id] === false,
-                      'bg-gray-100 text-gray-800':
+                      'bg-gray-100 text-gray-600':
                         studentAttendance[student.id] === undefined,
                     }"
                   >
@@ -305,9 +304,9 @@
                   <div class="flex justify-center gap-2">
                     <button
                       @click="markStudentAttendance(student.id, true)"
-                      class="px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors"
+                      class="px-2 py-1 bg-green-200 text-green-700 text-xs rounded hover:bg-green-300 transition-colors"
                       :class="{
-                        'ring-2 ring-green-300':
+                        'ring-1 ring-inset ring-green-600/20':
                           studentAttendance[student.id] === true,
                       }"
                     >
@@ -315,9 +314,9 @@
                     </button>
                     <button
                       @click="markStudentAttendance(student.id, false)"
-                      class="px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 transition-colors"
+                      class="px-2 py-1 bg-red-200 text-red-700 text-xs rounded hover:bg-red-300 transition-colors"
                       :class="{
-                        'ring-2 ring-red-300':
+                        'ring-1 ring-inset ring-red-600/10':
                           studentAttendance[student.id] === false,
                       }"
                     >
@@ -331,8 +330,12 @@
         </div>
       </div>
 
-      <div v-else class="text-center py-8 text-gray-500">
-        Please select a class, lesson, and date to mark attendance
+      <div v-else
+        class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4"
+        role="alert"
+      >
+        <p class="font-bold">Warning</p>
+        <p>Please select a class, lesson, and date to mark attendance.</p>
       </div>
     </div>
   </div>
@@ -441,40 +444,15 @@ const paginatedRecords = computed(() => {
 // Filter students for the mark attendance view
 const filteredStudents = computed(() => {
   if (!selectedClass.value) return [];
+  console.log("selectedClass:", selectedClass.value);
 
-  // Get all students in the class
-  let classStudents = students.value.filter(
-    (student) =>
-      student.classId === selectedClass.value ||
-      student.class?.id === selectedClass.value
+  // Find the class object in your class store that matches the selected class ID
+  const classObj = classStore.classes.find(
+    (cls) => cls.id === selectedClass.value
   );
 
-  // If a lesson is selected, filter students who are enrolled in the subject
-  if (selectedLesson.value) {
-    const currentLesson = filteredLessons.value.find(
-      (lesson) => lesson.id === selectedLesson.value
-    );
-
-    if (currentLesson && currentLesson.subjectId) {
-      // If you have subject enrollment data, uncomment and modify this
-      // classStudents = classStudents.filter(student =>
-      //   student.subjects?.includes(currentLesson.subjectId)
-      // );
-      // For now, we'll assume all students in a class take all subjects
-    }
-  }
-
-  // Apply search filter
-  if (studentSearchQuery.value) {
-    const query = studentSearchQuery.value.toLowerCase();
-    classStudents = classStudents.filter(
-      (student) =>
-        (student.name || "").toLowerCase().includes(query) ||
-        (student.surname || "").toLowerCase().includes(query)
-    );
-  }
-
-  return classStudents;
+  // Return the students from that class if available
+  return classObj && classObj.students ? classObj.students : [];
 });
 
 // Reset pagination when filters change
@@ -486,7 +464,6 @@ watch([searchQuery, filterStatus], () => {
 watch(selectedClass, () => {
   selectedLesson.value = "";
   studentAttendance.value = {};
-  fetchStudentsForClass();
 });
 
 // Update student attendance state when lesson changes
@@ -532,20 +509,6 @@ function toggleMarkAttendanceMode() {
     if (lessons.value.length === 0) {
       lessonStore.fetchLessons();
     }
-  }
-}
-
-// Fetch students for the selected class
-async function fetchStudentsForClass() {
-  if (!selectedClass.value) return;
-
-  loadingStudents.value = true;
-  try {
-    await studentStore.fetchStudentsByClass(selectedClass.value);
-  } catch (error) {
-    console.error("Error fetching students:", error);
-  } finally {
-    loadingStudents.value = false;
   }
 }
 
