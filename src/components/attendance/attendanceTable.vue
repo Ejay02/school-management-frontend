@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-white rounded-lg shadow border border-gray-200 p-4">
+  <div
+    class="bg-white rounded-lg shadow border border-gray-200 p-4 cursor-pointer hover:shadow-lg transition-shadow duration-300"
+  >
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-lg font-semibold">
         {{ markAttendanceMode ? "Mark Attendance" : "Attendance Records" }}
