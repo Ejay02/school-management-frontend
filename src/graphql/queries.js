@@ -250,7 +250,7 @@ export const getAllClasses = gql`
       subjects {
         id
         name
-        lessons{
+        lessons {
           id
           name
           startTime
@@ -383,10 +383,37 @@ export const getAttendances = gql`
         id
         name
       }
-      class{
+      class {
         id
         name
       }
     }
   }
 `;
+
+export const getEvents = gql`
+  query getEvents($params: PaginationInput, $filter: EventFilter!) {
+    getEvents(params: $params, filter: $filter) {
+      id
+      title
+      description
+      class{
+        id
+        name
+      }
+      classId
+      creatorId
+      startTime
+      endTime
+      type
+      location
+      status
+      visibility
+      targetRoles
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+

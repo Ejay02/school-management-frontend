@@ -132,3 +132,28 @@ export const markAttendance = gql`
     }
   }
 `;
+
+export const createEvent = gql`
+  mutation CreateEvent($data: CreateEventInput!) {
+    createEvent(data: $data) {
+      id
+      title
+      description
+      class {
+        id
+        name
+      }
+      classId
+      creatorId
+      startTime
+      endTime
+      type
+      location
+      status
+      visibility
+      targetRoles
+      createdAt
+      updatedAt
+    }
+  }
+`;
