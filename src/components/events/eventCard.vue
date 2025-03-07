@@ -51,7 +51,8 @@
               ></path>
             </svg>
 
-            {{ formatDate(event.startTime) }} - {{ formatDate(event.endTime) }}
+            {{ formatEventDate(event.startTime) }} -
+            {{ formatEventDate(event.endTime) }}
           </div>
 
           <div class="">
@@ -121,40 +122,13 @@
 </template>
 
 <script setup>
+import { formatEventDate, formatTime } from "../../utils/date.holidays";
+import { formatEventType, formatTargetRoles } from "../../utils/utility";
+
 defineProps({
   events: {
     type: Array,
     required: true,
   },
 });
-
-// Utility functions
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString("en-US", {
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
-const formatTime = (dateString) => {
-  return new Date(dateString).toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const formatEventType = (type) => {
-  return type
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
-};
-
-const formatTargetRoles = (roles) => {
-  return roles
-    .map((role) => role.charAt(0).toUpperCase() + role.slice(1).toLowerCase())
-    .join(", ");
-};
 </script>
