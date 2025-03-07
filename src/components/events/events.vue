@@ -2,34 +2,34 @@
   <div class="rounded border border-gray-300 p-2 w-full">
     <div class="bg-white p-4 rounded-md flex-1 m-1 mt-0 shadow-xl">
       <!-- top -->
-      <div class="border-b p-4 flex justify-between items-center">
-        <TopList :txt="'All Events'" />
-
+      <div class="border-b p-4 flex items-center justify-between">
         <!-- View toggle buttons -->
-        <div class="inline-flex rounded-md shadow-sm" role="group">
+        <div class="inline-flex rounded-md shadow-sm justify-end" role="group">
           <button
             @click="viewMode = 'cards'"
             :class="[
-              'px-4 py-2 text-sm font-medium rounded-l-lg border border-r-0',
+              'px-2 py-1 text-sm font-medium rounded-l-lg border border-r-0',
               viewMode === 'cards'
                 ? 'bg-eduPurple text-white border-eduPurple'
                 : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300',
             ]"
           >
-            <i class="fas fa-th-large mr-2"></i> Cards
+            <i class="fas fa-th-large mr-1"></i> Cards
           </button>
           <button
             @click="viewMode = 'list'"
             :class="[
-              'px-4 py-2 text-sm font-medium rounded-r-lg border',
+              'px-2 py-1 text-sm font-medium rounded-r-lg border',
               viewMode === 'list'
                 ? 'bg-eduPurple text-white border-eduPurple'
                 : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300',
             ]"
           >
-            <i class="fas fa-list mr-2"></i> List
+            <i class="fas fa-list mr-1"></i> List
           </button>
         </div>
+
+        <TopList />
       </div>
 
       <!-- Loading and error states -->

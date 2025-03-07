@@ -8,7 +8,7 @@
       borderless
     />
 
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center mb-6 mt-10">
       <h1 class="text-lg font-semibold">Events</h1>
       <div
         class="text-gray-600 hover:text-gray-800 p-1 rounded-full hover:bg-gray-100"
@@ -141,20 +141,6 @@ const attrs = computed(() => [
     },
   })),
 ]);
-
-// const attrs = computed(() => [
-//   // Attributes for todos
-//   ...todos.value.map((todo) => ({
-//     dates: todo.dates,
-//     dot: {
-//       color: todo.color,
-//       ...(todo.isComplete && { class: "opacity-50" }),
-//     },
-//     popover: {
-//       label: todo.description,
-//     },
-//   })),
-// ]);
 </script>
 
 <style scoped>
