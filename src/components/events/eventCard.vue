@@ -110,11 +110,15 @@
               formatTargetRoles(event.targetRoles)
             }}</span>
           </div>
-          <button
-            class="bg-eduSky text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
-          >
-            View Details
-          </button>
+
+          <!-- <router-link :to="`/event/${event.id}`"> -->
+          <router-link :to="`/event/${event.id}`">
+            <button
+              class="bg-eduSky text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
+            >
+              View Details
+            </button>
+          </router-link>
         </div>
       </div>
     </div>

@@ -37,8 +37,8 @@ import BillingSetting from "../components/settingsComponents/billingSetting.vue"
 import TeamSetting from "../components/settingsComponents/teamSetting.vue";
 import IntegrationSetting from "../components/settingsComponents/integrationSetting.vue";
 import Attendance from "../components/attendance/attendance.vue";
+import EventView from "../components/events/eventView.vue";
 
-// Define public routes that don't require authentication
 const publicRoutes = [
   "Home",
   "Login",
@@ -182,6 +182,11 @@ const routes = [
         path: "/events",
         name: "Events",
         component: Events,
+      },
+      {
+        path: "/event/:id",
+        name: "EventView",
+        component: EventView,
       },
       {
         path: "/messages",

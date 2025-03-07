@@ -397,7 +397,7 @@ export const getEvents = gql`
       id
       title
       description
-      class{
+      class {
         id
         name
       }
@@ -416,4 +416,79 @@ export const getEvents = gql`
   }
 `;
 
+export const getEventById = gql`
+  query getEventById($id: String!) {
+    getEventById(id: $id) {
+      id
+      title
+      description
+      class {
+        id
+        name
+      }
+      classId
+      creatorId
+      startTime
+      endTime
+      type
+      location
+      status
+      visibility
+      targetRoles
+      createdAt
+      updatedAt
+    }
+  }
+`;
 
+export const getUserById = gql`
+  query getUserById($id: String!) {
+    getUserById(id: $id) {
+      ... on Admin {
+        id
+        username
+        # name
+        # surname
+        email
+        img
+        adminRole: role
+      }
+      ... on Student {
+        id
+        classId
+        username
+        name
+        surname
+        email
+        img
+        studentRole: role
+      }
+      ... on Parent {
+        id
+        username
+        name
+        surname
+        email
+        img
+        parentRole: role
+        students {
+          id
+          name
+          surname
+        }
+      }
+      ... on Teacher {
+        id
+        username
+        name
+        surname
+        email
+        img
+        teacherRole: role
+        subjects {
+          name
+        }
+      }
+    }
+  }
+`;

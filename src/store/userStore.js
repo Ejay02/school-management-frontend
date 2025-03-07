@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { menuItems } from "../utils";
 import { useNotificationStore } from "./notification";
+import { useApolloClient, useQuery } from "@vue/apollo-composable";
+import { getUserById } from "../graphql/queries";
 
 export const useUserStore = defineStore("user", () => {
   // Initialize state from localStorage if available
@@ -30,6 +32,8 @@ export const useUserStore = defineStore("user", () => {
   const currentRole = ref(userInfo.value.role.toLowerCase() || "");
 
   const notificationStore = useNotificationStore();
+
+  const userCache = ref({});
 
   // Updated setUser to handle persistence and refresh token
   const setUser = (user) => {
@@ -106,6 +110,35 @@ export const useUserStore = defineStore("user", () => {
     return menuItem ? menuItem.visible.includes(currentRole.value) : false;
   };
 
+  const findUserById = async (id, apolloClient) => {
+    if (!id) return null;
+
+    // Check cache first
+    if (userCache.value[id]) {
+      return userCache.value[id];
+    }
+
+    try {
+      const { data } = await apolloClient.query({
+        query: getUserById,
+        variables: { id },
+        fetchPolicy: "network-only", // Ensures fresh data
+      });
+
+      if (data?.getUserById) {
+        userCache.value[id] = data.getUserById; // Cache the result
+        return data.getUserById;
+      }
+    } catch (error) {
+      console.log("error:", error);
+      notificationStore.addNotification({
+        type: "error",
+        message: "Failed to fetch user details.",
+      });
+    }
+    return null;
+  };
+
   return {
     setUser,
     setRole,
@@ -113,6 +146,7 @@ export const useUserStore = defineStore("user", () => {
     userInfo,
     hasAccess,
     currentRole,
+    findUserById,
     filteredMenuItems,
   };
 });

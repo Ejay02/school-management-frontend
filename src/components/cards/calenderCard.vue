@@ -44,48 +44,50 @@
       />
 
       <!-- Card View -->
-
+      <!-- <RouterLink :to="`/event/${event.id}"> -->
       <div
         class="cursor-pointer p-5 rounded-md border-2 border-gray-100 border-t-4 odd:border-t-eduSky even:border-t-eduPurple hover:bg-gray-100"
         v-for="event in latestEvents"
         :key="event.id"
       >
-        <!-- {{ event }} -->
-        <div class="flex items-center justify-between mb-2">
-          <h1 class="font-semibold text-gray-600 capitalize">
-            {{ event.title }}
-          </h1>
-          <div class="mb-4">
-            <span class="text-gray-400 text-sm">
-              {{ formatEventDate(event.startTime) }} -
+        <router-link :to="`/event/${event.id}`">
+          <!-- {{ event }} -->
+          <div class="flex items-center justify-between mb-2">
+            <h1 class="font-semibold text-gray-600 capitalize">
+              {{ event.title }}
+            </h1>
+            <div class="mb-4">
+              <!-- <span class="text-gray-400 text-sm ml-4">
+              {{ formatEventDate(event.startTime) }} 
               {{ formatEventDate(event.endTime) }}
-            </span>
-            <div class="text-gray-400 text-xs ml-4">
-              {{ formatTime(event.startTime) }} -
-              {{ formatTime(event.endTime) }}
+            </span> -->
+              <div class="text-gray-400 text-xs ml-4">
+                {{ formatTime(event.startTime) }} -
+                {{ formatTime(event.endTime) }}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="justify-between flex mt-2">
-          <span class="line-clamp-2 text-gray-400 text-sm flex-1">
-            {{ event.description }}
-          </span>
+          <div class="justify-between flex mt-2">
+            <span class="line-clamp-2 text-gray-400 text-sm flex-1">
+              {{ event.description }}
+            </span>
 
-          <span
-            class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset whitespace-nowrap self-start"
-            :class="{
-              'text-green-700 bg-green-50 ring-green-600/20':
-                event.status === 'completed',
-              'bg-yellow-50 text-yellow-800 ring-yellow-600/20':
-                event.status === 'scheduled',
-              'bg-red-50 text-red-700 ring-red-600/10':
-                event.status === 'cancelled',
-            }"
-          >
-            {{ event.status }}</span
-          >
-        </div>
+            <span
+              class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset whitespace-nowrap self-start"
+              :class="{
+                'text-green-700 bg-green-50 ring-green-600/20':
+                  event.status === 'completed',
+                'bg-yellow-50 text-yellow-800 ring-yellow-600/20':
+                  event.status === 'scheduled',
+                'bg-red-50 text-red-700 ring-red-600/10':
+                  event.status === 'cancelled',
+              }"
+            >
+              {{ event.status }}</span
+            >
+          </div>
+        </router-link>
       </div>
     </div>
   </div>

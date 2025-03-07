@@ -10,7 +10,7 @@
             :class="[
               'px-2 py-1 text-sm font-medium rounded-l-lg border border-r-0',
               viewMode === 'cards'
-                ? 'bg-eduPurple text-white border-eduPurple'
+                ? ' bg-gradient-to-r from-indigo-600 to-purple-600  text-white border-eduPurple'
                 : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300',
             ]"
           >
@@ -21,7 +21,7 @@
             :class="[
               'px-2 py-1 text-sm font-medium rounded-r-lg border',
               viewMode === 'list'
-                ? 'bg-eduPurple text-white border-eduPurple'
+                ? ' bg-gradient-to-r from-indigo-600 to-purple-600  text-white border-eduPurple'
                 : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300',
             ]"
           >
