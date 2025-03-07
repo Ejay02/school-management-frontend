@@ -31,22 +31,44 @@
     </div>
 
     <div class="flex flex-col gap-4">
+      <LoadingScreen v-if="eventStore.loading" message="Loading Events..." />
+      <ErrorScreen v-else-if="eventStore.error" />
+
+      <!-- Empty state -->
+      <EmptyState
+        v-else-if="!eventStore.events.length"
+        icon="fa-solid fa-calendar-days"
+        heading="No Events Found"
+        description="There are currently no events scheduled."
+      />
+
+      <!-- Card View -->
+
       <div
-        class="p-5 rounded-md border-2 border-gray-100 border-t-4 odd:border-t-eduSky even:border-t-eduPurple hover:bg-gray-100"
-        v-for="event in todos"
+        class="cursor-pointer p-5 rounded-md border-2 border-gray-100 border-t-4 odd:border-t-eduSky even:border-t-eduPurple hover:bg-gray-100"
+        v-for="event in eventStore.events"
         :key="event.id"
       >
+        <!-- {{ event }} -->
         <div class="flex items-center justify-between mb-2">
           <h1 class="font-semibold text-gray-600 capitalize">
             {{ event.title }}
           </h1>
-          <span class="text-gray-300 xs text-sm"
-            >{{ event.startTime }} - {{ event.endTime }}</span
-          >
+          <div class="">
+            <div class="text-gray-400 xs text-sm">
+              {{ formatTime(event.startTime) }} -
+              {{ formatTime(event.endTime) }}
+            </div>
+            <!--  -->
+            <span class="text-gray-400 xs text-sm">
+              {{ formatEventDate(event.startTime) }} -
+              {{ formatEventDate(event.endTime) }}
+            </span>
+          </div>
         </div>
 
         <div class="justify-between flex mt-2">
-          <span class="truncate text-gray-400 text-sm">{{
+          <span class="line-clamp-3 text-gray-400 text-sm">{{
             event.description
           }}</span>
           <span
@@ -69,78 +91,54 @@
 </template>
 <script setup>
 import { computed, onMounted, ref } from "vue";
-import { fetchCountry, fetchHolidays } from "../../utils/date.holidays";
+import { useEventStore } from "../../store/eventStore";
+import {
+  fetchCountry,
+  fetchHolidays,
+  formatDate,
+  formatEventDate,
+  formatTime,
+} from "../../utils/date.holidays";
+import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
+import LoadingScreen from "../loadingScreen.vue";
 
-// const isDark = ref(false);
+const eventStore = useEventStore();
 
 const selectedColor = ref("purple");
 const holidays = ref([]);
 
-const todos = ref([
-  {
-    id: 1,
-    title: "learn",
-    description: "DSA practice.",
-    status: "completed",
-    startTime: "11:11AM",
-    endTime: "12:12PM",
-    dates: { repeat: { weekdays: 5 } }, // Every Friday
-    color: "red",
-  },
-  {
-    id: 2,
-    title: "cook",
-    description: "Cook friedrice",
-    status: "cancelled",
-    dates: Date.now(), //Should be selected date so a vmodel
-    // dates: { repeat: { weekdays: 1 } },
-    color: "pink",
-    startTime: "16:00PM",
-    endTime: "20:00PM",
-  },
-  {
-    id: 3,
-    title: "school",
-    description: "Submit thesis",
-    status: "scheduled",
-    dates: "2024, 11, 20", //Should be selected date so a vmodel
-    // dates: { repeat: { weekdays: 1 } },
-    color: "blue",
-    startTime: "14:00PM",
-    endTime: "15:00PM",
-  },
-]);
-
 onMounted(async () => {
+  await eventStore.fetchEvents();
+
   const countryCode = await fetchCountry();
   const fetchedHolidays = await fetchHolidays(countryCode);
-  holidays.value = fetchedHolidays; // Update holidays ref
+  holidays.value = fetchedHolidays;
 });
 
-// CalendarComponent.vue
-const attrs = computed(() => [
-  // Attributes for todos
-  ...todos.value.map((todo) => ({
-    dates: todo.dates,
-    dot: {
-      color: todo.color,
-      ...(todo.isComplete && { class: "opacity-50" }),
-    },
-    popover: {
-      label: todo.description,
-    },
-  })),
-  // Attributes for holidays
-  ...holidays.value.map((holiday) => ({
-    dates: holiday.date,
-    dot: {
-      color: "green", // or any other color you prefer
-    },
-    popover: {
-      label: holiday.title,
-    },
-  })),
-]);
+const attrs = computed(() => {
+  const eventAttrs = eventStore.events.map((event) => {
+    const formattedDate = formatEventDate(event.startTime);
+
+    return {
+      dates: [formattedDate],
+      dot: { color: event.color || "blue" },
+      popover: { label: event.title },
+    };
+  });
+
+  const holidayAttrs = holidays.value.map((holiday) => {
+    const formattedHolidayDate = formatEventDate(holiday.date);
+
+    return {
+      dates: [formattedHolidayDate],
+      dot: { color: "green" },
+      popover: { label: holiday.title },
+    };
+  });
+
+  return [...eventAttrs, ...holidayAttrs];
+});
 </script>
 
 <style scoped>

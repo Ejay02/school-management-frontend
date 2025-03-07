@@ -19,12 +19,11 @@ export const useEventStore = defineStore("eventStore", {
         const res = await apolloClient.query({
           query: getEvents,
           variables: {
-            params: {}, // provide valid pagination params if needed
-            filter: {}, // provide an empty object if no filters are applied
+            params: {},
+            filter: {},
           },
           fetchPolicy: "no-cache",
         });
-        console.log("res:", res);
 
         this.events = res.data.getEvents;
         return this.events;

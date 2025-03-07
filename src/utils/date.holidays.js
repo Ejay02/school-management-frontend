@@ -52,13 +52,22 @@ export const formatDate = (dateString) => {
   return `${day}-${month}-${year}`;
 };
 
+// export const formatEventDate = (dateString) => {
+//   return new Date(dateString).toLocaleDateString("en-US", {
+//     weekday: "short",
+//     year: "numeric",
+//     month: "short",
+//     day: "numeric",
+//   });
+// };
+
 export const formatEventDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString("en-US", {
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  if (!dateString) return null;
+
+  const dateObj = new Date(dateString);
+  if (isNaN(dateObj)) return "Invalid Date";
+
+  return dateObj.toISOString().split("T")[0]; // Returns "YYYY-MM-DD"
 };
 
 export const formatTime = (dateString) => {
@@ -67,4 +76,3 @@ export const formatTime = (dateString) => {
     minute: "2-digit",
   });
 };
-

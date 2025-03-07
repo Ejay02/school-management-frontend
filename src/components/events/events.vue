@@ -29,7 +29,7 @@
           </button>
         </div>
 
-        <TopList />
+        <TopList :txt="' '" />
       </div>
 
       <!-- Loading and error states -->

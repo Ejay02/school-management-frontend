@@ -39,7 +39,7 @@ import { useModalStore } from "../../store/useModalStore";
 const props = defineProps({
   txt: {
     type: String,
-    required: true,
+    required: false,
   },
 });
 
