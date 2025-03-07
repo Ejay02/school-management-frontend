@@ -3,6 +3,7 @@
     <VCalendar
       :color="selectedColor"
       :attributes="attrs"
+      :initial-page="currentMonth"
       expanded
       transparent
       borderless
@@ -46,7 +47,7 @@
 
       <div
         class="cursor-pointer p-5 rounded-md border-2 border-gray-100 border-t-4 odd:border-t-eduSky even:border-t-eduPurple hover:bg-gray-100"
-        v-for="event in eventStore.events"
+        v-for="event in latestEvents"
         :key="event.id"
       >
         <!-- {{ event }} -->
@@ -54,25 +55,25 @@
           <h1 class="font-semibold text-gray-600 capitalize">
             {{ event.title }}
           </h1>
-          <div class="">
-            <div class="text-gray-400 xs text-sm">
-              {{ formatTime(event.startTime) }} -
-              {{ formatTime(event.endTime) }}
-            </div>
-            <!--  -->
-            <span class="text-gray-400 xs text-sm">
+          <div class="mb-4">
+            <span class="text-gray-400 text-sm">
               {{ formatEventDate(event.startTime) }} -
               {{ formatEventDate(event.endTime) }}
             </span>
+            <div class="text-gray-400 text-xs ml-4">
+              {{ formatTime(event.startTime) }} -
+              {{ formatTime(event.endTime) }}
+            </div>
           </div>
         </div>
 
         <div class="justify-between flex mt-2">
-          <span class="line-clamp-3 text-gray-400 text-sm">{{
-            event.description
-          }}</span>
+          <span class="line-clamp-2 text-gray-400 text-sm flex-1">
+            {{ event.description }}
+          </span>
+
           <span
-            class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+            class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset whitespace-nowrap self-start"
             :class="{
               'text-green-700 bg-green-50 ring-green-600/20':
                 event.status === 'completed',
@@ -108,6 +109,12 @@ const eventStore = useEventStore();
 const selectedColor = ref("purple");
 const holidays = ref([]);
 
+const currentMonth = ref({
+  start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+});
+
+const latestEvents = computed(() => [...eventStore.events].slice(-3).reverse());
+
 onMounted(async () => {
   await eventStore.fetchEvents();
 
@@ -117,27 +124,30 @@ onMounted(async () => {
 });
 
 const attrs = computed(() => {
-  const eventAttrs = eventStore.events.map((event) => {
-    const formattedDate = formatEventDate(event.startTime);
+  const today = new Date().toISOString().split("T")[0];
 
-    return {
-      dates: [formattedDate],
-      dot: { color: event.color || "blue" },
-      popover: { label: event.title },
-    };
-  });
+  const eventAttrs = eventStore.events.map((event) => ({
+    dates: [event.startTime.split("T")[0]],
+    dot: { color: event.color || "blue" },
+    popover: { label: event.title },
+  }));
 
-  const holidayAttrs = holidays.value.map((holiday) => {
-    const formattedHolidayDate = formatEventDate(holiday.date);
+  const holidayAttrs = holidays.value.map((holiday) => ({
+    dates: [holiday.date],
+    dot: { color: "green" },
+    popover: { label: holiday.title },
+  }));
 
-    return {
-      dates: [formattedHolidayDate],
-      dot: { color: "green" },
-      popover: { label: holiday.title },
-    };
-  });
+  const todayAttr = {
+    dates: [today],
+    highlight: {
+      color: "purple", // Customize the highlight color
+      fillMode: "light", // Options: solid, light, outline, transparent
+    },
+    popover: { label: "Today" },
+  };
 
-  return [...eventAttrs, ...holidayAttrs];
+  return [...eventAttrs, ...holidayAttrs, todayAttr];
 });
 </script>
 
