@@ -82,18 +82,19 @@
                 <p class="flex items-center text-gray-700">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class="h-4 w-4 mr-2 text-indigo-500"
                     fill="none"
                     viewBox="0 0 24 24"
+                    stroke-width="1.5"
                     stroke="currentColor"
+                    class="h-4 w-4 mr-2 text-indigo-500"
                   >
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      d="M6.75 2.994v2.25m10.5-2.25v2.25m-14.252 13.5V7.491a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v11.251m-18 0a2.25 2.25 0 0 0 2.25 2.25h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5m-6.75-6h2.25m-9 2.25h4.5m.002-2.25h.005v.006H12v-.006Zm-.001 4.5h.006v.006h-.006v-.005Zm-2.25.001h.005v.006H9.75v-.006Zm-2.25 0h.005v.005h-.006v-.005Zm6.75-2.247h.005v.005h-.005v-.005Zm0 2.247h.006v.006h-.006v-.006Zm2.25-2.248h.006V15H16.5v-.005Z"
                     />
                   </svg>
+
                   <span class="font-medium">{{
                     formatEventDate(event?.startTime)
                   }}</span>
@@ -448,14 +449,14 @@
 <script setup>
 import { useRoute } from "vue-router";
 import ErrorScreen from "../errorScreen.vue";
-import { ref, computed, onMounted, watch } from "vue";
 import LoadingScreen from "../loadingScreen.vue";
+import { ref, computed, onMounted, watch } from "vue";
 
 import { useUserStore } from "../../store/userStore";
 import { useEventStore } from "../../store/eventStore";
 import { formatTargetRoles } from "../../utils/utility";
-import { formatEventDate, formatTime } from "../../utils/date.holidays";
 import { useApolloClient } from "@vue/apollo-composable";
+import { formatEventDate, formatTime } from "../../utils/date.holidays";
 
 const route = useRoute();
 const eventId = route.params.id;

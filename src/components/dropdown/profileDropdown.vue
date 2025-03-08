@@ -7,13 +7,22 @@
     <div
       class="flex items-center gap-2 p-2 border-b border-gray-300 hover:bg-eduSkyLight rounded-md group"
     >
-      <div
-        class="flex items-center justify-center rounded-full border bg-indigo-300 w-10 h-10"
-      >
-        <span class="text-sm font-medium text-white">
-          {{ capitalizedName[0] }}{{ capitalizedSurname[0] }}</span
+      <div class="relative">
+        <img
+          v-if="userStore?.userInfo?.img"
+          :src="userStore?.userInfo?.img"
+          :alt="`${capitalizedName} image`"
+          class="w-12 h-12 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
+        />
+
+        <div
+          v-else
+          class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200"
         >
+          {{ capitalizedName[0] }}{{ capitalizedSurname[0] }}
+        </div>
       </div>
+
       <div>
         <span
           class="text-xs font-medium text-gray-800 group-hover:text-indigo-500"

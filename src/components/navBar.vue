@@ -81,11 +81,22 @@
 
         <!-- Here's the fixed avatar section -->
         <div class="" @click="toggleDropdown">
-          <div
-            class="h-14 w-14 rounded-full bg-eduPurple flex items-center justify-center text-white font-medium"
-          >
-            {{ capitalizedName[0] }}{{ capitalizedSurname[0] }}
+          <div class="mr-4 relative">
+            <img
+              v-if="userStore?.userInfo?.img"
+              :src="userStore?.userInfo?.img"
+              :alt="`${capitalizedName} image`"
+              class="w-16 h-16 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
+            />
+
+            <div
+              v-else
+              class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200"
+            >
+              {{ capitalizedName[0] }}{{ capitalizedSurname[0] }}
+            </div>
           </div>
+
           <ProfileDropdown v-if="showDropdown" />
         </div>
       </div>

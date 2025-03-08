@@ -44,7 +44,7 @@
       />
 
       <!-- Card View -->
-      <!-- <RouterLink :to="`/event/${event.id}"> -->
+
       <div
         class="cursor-pointer p-5 rounded-md border-2 border-gray-100 border-t-4 odd:border-t-eduSky even:border-t-eduPurple hover:bg-gray-100"
         v-for="event in latestEvents"
