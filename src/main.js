@@ -9,6 +9,7 @@ import router from "./router/index.js";
 import { setupCalendar, Calendar, DatePicker } from "v-calendar";
 import "v-calendar/style.css";
 import draggable from "vuedraggable";
+import socketPlugin from "./socket/socket.plugin.js";
 
 // const app = createApp(App);
 
@@ -26,6 +27,8 @@ app.use(router);
 app.use(VueApolloComponents);
 
 app.use(setupCalendar, {});
+
+app.use(socketPlugin);
 
 app.component("VCalendar", Calendar);
 app.component("draggable", draggable);

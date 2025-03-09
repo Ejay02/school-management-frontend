@@ -64,17 +64,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import EventCard from "./eventCard.vue";
+import socket from "../../socket/socket";
 import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
 import EventsTable from "./eventsTable.vue";
 
-import { useEventStore } from "../../store/eventStore";
-import { useUserStore } from "../../store/userStore";
-import ErrorScreen from "../errorScreen.vue";
 import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import LoadingScreen from "../loadingScreen.vue";
-import EventCard from "./eventCard.vue";
+import { useUserStore } from "../../store/userStore";
+import { useEventStore } from "../../store/eventStore";
 
 const eventStore = useEventStore();
 const userStore = useUserStore();
@@ -128,12 +129,8 @@ const formattedEvents = computed(() => {
     startTime: formatTimeOnly(event.startTime),
     endTime: formatTimeOnly(event.endTime),
     status: event.status,
+    creatorId: event?.creatorId,
   }));
-});
-
-// Fetch events on component mount
-onMounted(async () => {
-  await eventStore.fetchEvents();
 });
 
 // Utility functions for the list view
@@ -151,6 +148,25 @@ const formatTimeOnly = (dateString) => {
     minute: "2-digit",
   });
 };
+
+onMounted(async () => {
+  await eventStore.fetchEvents();
+
+  // Setup socket listener for new events
+  socket.on("eventCreated", (data) => {
+    if (data && data.event && data.event.id) {
+      // Add the new event to the store
+      eventStore.addNewEvent(data.event);
+    }
+  });
+});
+
+onUnmounted(() => {
+  // Cleanup to prevent memory leaks
+  socket.off("eventCreated", handleNewEvent);
+});
+
+/**TEST */
 </script>
 
 <style scoped></style>

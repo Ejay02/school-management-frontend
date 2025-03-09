@@ -485,9 +485,7 @@ export const getUserById = gql`
         email
         img
         teacherRole: role
-        subjects {
-          name
-        }
+     
       }
     }
   }

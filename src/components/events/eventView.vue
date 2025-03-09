@@ -10,7 +10,28 @@
         <div
           class="rounded-md bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 relative"
         >
-          <div class="flex justify-between items-center mb-3">
+          <!-- Back arrow button -->
+          <button
+            @click="goBack"
+            class="absolute top-4 left-4 bg-white/20 backdrop-blur-sm p-2 rounded-full text-white hover:bg-white/30 transition-all animate-bounce-once"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
+          </button>
+
+          <div class="ml-8 flex justify-between items-center mb-3">
             <span
               :class="[
                 'px-3 py-1 rounded-full text-xs font-bold shadow-sm',
@@ -32,11 +53,11 @@
             </span>
           </div>
 
-          <h1 class="text-2xl md:text-3xl font-bold mb-2">
+          <h1 class="ml-8 text-2xl md:text-3xl font-bold mb-2">
             {{ event?.title }}
           </h1>
 
-          <p class="text-indigo-100 flex items-center">
+          <p class="ml-8 text-indigo-100 flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-5 w-5 mr-2"
@@ -351,8 +372,8 @@
                     Open to everyone
                   </p>
 
+                  <!-- v-if="event?.attendees && event?.attendees.length" -->
                   <div
-                    v-if="event?.attendees && event?.attendees.length"
                     class="mt-5"
                   >
                     <p class="text-gray-700 mb-3 flex items-center">
@@ -371,25 +392,32 @@
                         />
                       </svg>
                       <span class="font-medium"
-                        >{{ event?.attendees.length }} attendees</span
+                        >
+                        <!-- {{ event?.attendees.length }}  -->
+                       2 attendees</span
                       >
                     </p>
                     <div class="flex flex-wrap gap-2">
+                      <!-- v-for="(attendee, index) in attendeePreview"
+                      :key="index" -->
                       <div
-                        v-for="(attendee, index) in attendeePreview"
-                        :key="index"
                         class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-full h-10 w-10 flex items-center justify-center border border-indigo-200 shadow-sm"
                       >
-                        <span class="text-sm font-medium text-indigo-700">{{
+                        <span class="text-sm font-medium text-indigo-700">
+                          <!-- {{
                           getInitials(attendee.name)
-                        }}</span>
+                        }} -->
+                          XY
+                        </span>
                       </div>
+                      <!-- v-if="event?.attendees && event?.attendees.length > 5" -->
                       <div
-                        v-if="event?.attendees && event?.attendees.length > 5"
                         class="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full h-10 w-10 flex items-center justify-center shadow-sm"
                       >
                         <span class="text-sm font-medium text-indigo-700"
-                          >+{{ event?.attendees.length - 5 }}</span
+                          >+3
+                          <!-- {{ event?.attendees.length - 5 }} -->
+                          </span
                         >
                       </div>
                     </div>
@@ -402,6 +430,8 @@
           <!-- Action Buttons -->
           <div class="flex flex-wrap gap-3 mt-10">
             <button
+              v-if="isCreator"
+              @click="editEvent"
               class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all font-medium flex items-center justify-center"
             >
               <svg
@@ -415,10 +445,10 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                 />
               </svg>
-              Add to Calendar
+              Edit Event
             </button>
             <button
               class="flex-1 bg-white hover:bg-gray-50 text-indigo-600 py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all font-medium border border-indigo-200 flex items-center justify-center"
@@ -447,7 +477,7 @@
 </template>
 
 <script setup>
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
 import { ref, computed, onMounted, watch } from "vue";
@@ -459,6 +489,7 @@ import { useApolloClient } from "@vue/apollo-composable";
 import { formatEventDate, formatTime } from "../../utils/date.holidays";
 
 const route = useRoute();
+const router = useRouter();
 const eventId = route.params.id;
 
 const eventStore = useEventStore();
@@ -472,6 +503,8 @@ const error = computed(() => eventStore.error);
 
 const event = computed(() => eventStore.selectedEvent);
 const creatorId = computed(() => event.value?.creatorId);
+
+const isCreator = computed(() => creatorId.value === userStore.userInfo.id);
 
 const attendeePreview = computed(() => {
   if (!event.value?.attendees) return [];
@@ -529,6 +562,15 @@ const fetchCreator = async () => {
       console.error("Failed to fetch creator:", error);
     }
   }
+};
+
+// Navigation functions
+const goBack = () => {
+  router.back();
+};
+
+const editEvent = () => {
+  router.push(`/events/edit/${eventId}`);
 };
 
 onMounted(() => {

@@ -353,6 +353,7 @@ const searchQuery = ref("");
 const filterStatus = ref("all");
 const currentPage = ref(1);
 const pageSize = ref(10);
+const limit = 10;
 
 // Mark attendance mode
 const markAttendanceMode = ref(false);
@@ -370,6 +371,14 @@ const attendanceRecords = computed(() => attendanceStore.attendanceRecords);
 const classes = computed(() => classStore.classes);
 const lessons = computed(() => lessonStore.lessons);
 const students = computed(() => studentStore.students);
+
+watch(currentPage, (newPage) => {
+  classStore.fetchClasses({ page: newPage, limit });
+});
+
+function handlePageChange(newPage) {
+  currentPage.value = newPage;
+}
 
 // Get lessons for selected class
 const filteredLessons = computed(() => {
@@ -534,8 +543,6 @@ async function saveAttendance() {
         date: selectedDate.value,
         present: isPresent,
       }));
-
-    console.log("Attendance data to save:", attendanceData);
 
     for (const record of attendanceData) {
       await attendanceStore.markAttendance(record.lessonId, {

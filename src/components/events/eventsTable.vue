@@ -28,30 +28,13 @@
         <td class="hidden md:table-cell">{{ item?.startTime }}</td>
         <td class="hidden md:table-cell">{{ item?.endTime }}</td>
 
-        <td>
-          <div class="flex items-center gap-2">
-            <div
-              @click="showEditModal(item.id, item.title, item, 'eventList')"
-              class="group relative"
-            >
-              <button
-                class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
-              >
-                <img src="/edit.png" alt="view" class="h-3 w-3" />
-              </button>
-              <span
-                class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-              >
-                Edit
-              </span>
-            </div>
-
+        <td class="flex justify-between">
+          <div class="flex items-center gap-2" v-if="isCreator">
             <button
-              v-if="role == 'admin'"
               @click="showDelModal(item.id, item.title, 'eventList')"
-              class="group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
+              class="ml-2 group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
             >
-              <img src="/delete.png" alt="delete" class="h-3 w-3" />
+              <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
 
               <span
                 class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
@@ -60,6 +43,15 @@
               </span>
             </button>
           </div>
+          <div class="">
+            <router-link :to="`/event/${item.id}`">
+              <button
+                class="bg-eduSky text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
+              >
+                View Details
+              </button>
+            </router-link>
+          </div>
         </td>
       </tr>
     </tbody>
@@ -67,6 +59,7 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
 
@@ -83,7 +76,11 @@ const props = defineProps({
 
 const userStore = useUserStore();
 
-const role = userStore.currentRole;
+// const role = userStore.currentRole;
+
+const isCreator = computed(
+  () => props.data[0].creatorId === userStore.userInfo.id
+);
 
 const modalStore = useModalStore();
 

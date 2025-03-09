@@ -23,8 +23,8 @@
           </div>
         </td>
 
-        <td class="hidden md:table-cell">{{ item?.capacity }}</td>
-        <td class="hidden md:table-cell">{{ item?.students?.length }}</td>
+        <td class="hidden md:table-cell ">{{ item?.capacity }}</td>
+        <td class="hidden md:table-cell ">{{ item?.students?.length }}</td>
         <td v-if="item.supervisor" class="hidden md:table-cell capitalize">
           {{ item?.supervisor?.name }} {{ item.supervisor?.surname }}
         </td>

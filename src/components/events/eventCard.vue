@@ -3,24 +3,34 @@
     <div
       v-for="event in events"
       :key="event.id"
-      class="bg-gray-200 cursor-pointer rounded-xl shadow-lg overflow-hidden transform transition-all hover:scale-105 hover:shadow-xl"
+      class="relative bg-gray-200 cursor-pointer rounded-xl shadow-lg overflow-hidden transform transition-all hover:scale-105 hover:shadow-xl"
     >
       <div class="p-6">
         <div class="flex justify-between items-center mb-4">
-          <span
-            :class="[
-              'px-3 py-1 rounded-full text-xs font-semibold',
-              event.status === 'SCHEDULED'
-                ? 'bg-eduSky text-blue-800'
-                : event.status === 'CANCELLED'
-                ? 'bg-red-200 text-red-800'
-                : event.status === 'COMPLETED'
-                ? 'bg-green-200 text-green-800'
-                : '',
-            ]"
-          >
-            {{ event.status }}
-          </span>
+          <div class="flex items-center">
+            <span
+              :class="[
+                'px-3 py-1 rounded-full text-xs font-semibold',
+                event.status === 'SCHEDULED'
+                  ? 'bg-eduSky text-blue-800'
+                  : event.status === 'CANCELLED'
+                  ? 'bg-red-200 text-red-800'
+                  : event.status === 'COMPLETED'
+                  ? 'bg-green-200 text-green-800'
+                  : '',
+              ]"
+            >
+              {{ event.status }}
+            </span>
+
+            <span
+              v-if="eventStore.isNewEvent(event.id)"
+              class="ml-2 px-3 py-1 rounded-full text-xs font-semibold bg-green-400 text-green-800 animate-pulse"
+            >
+              NEW
+            </span>
+          </div>
+
           <span class="text-gray-600 text-xs uppercase font-semibold">{{
             formatEventType(event.type)
           }}</span>
@@ -110,14 +120,32 @@
               formatTargetRoles(event.targetRoles)
             }}</span>
           </div>
+          <!-- {{ event }} -->
 
-          <router-link :to="`/event/${event.id}`">
-            <button
-              class="bg-eduSky text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
-            >
-              View Details
-            </button>
-          </router-link>
+          <div class="flex justify-between">
+            <router-link :to="`/event/${event.id}`">
+              <button
+                class="bg-eduSky text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
+              >
+                View Details
+              </button>
+            </router-link>
+            <!--  -->
+            <div class="flex items-center gap-2" v-if="isCreator">
+              <button
+                @click="showDelModal(event.id, event.title, 'eventList')"
+                class="ml-2 group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
+              >
+                <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
+
+                <span
+                  class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                >
+                  Delete
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -125,13 +153,32 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
+import { useUserStore } from "../../store/userStore";
+import { useEventStore } from "../../store/eventStore";
+import { useModalStore } from "../../store/useModalStore";
 import { formatEventDate, formatTime } from "../../utils/date.holidays";
 import { formatEventType, formatTargetRoles } from "../../utils/utility";
 
-defineProps({
+const props = defineProps({
   events: {
     type: Array,
     required: true,
   },
 });
+
+const userStore = useUserStore();
+const modalStore = useModalStore();
+const eventStore = useEventStore();
+
+const isCreator = computed(
+  () => props.events[0].creatorId === userStore.userInfo.id
+);
+
+const showDelModal = (id, title, type) => {
+  modalStore.deleteModal = true;
+  modalStore.modalId = id;
+  modalStore.modalTitle = title;
+  modalStore.source = type;
+};
 </script>
