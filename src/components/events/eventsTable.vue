@@ -23,7 +23,32 @@
           </div>
         </td>
 
-        <td class="hidden md:table-cell">{{ item?.class }}</td>
+        <td>
+          <span
+            :class="[
+              'px-2 py-1 rounded-full text-xs font-semibold',
+              item.status === 'SCHEDULED'
+                ? 'bg-eduSky text-blue-800'
+                : item.status === 'CANCELLED'
+                ? 'bg-red-200 text-red-800'
+                : item.status === 'COMPLETED'
+                ? 'bg-green-200 text-green-800'
+                : '',
+            ]"
+          >
+            {{ item.status }}
+          </span>
+          <span
+            v-if="eventStore.isNewEvent(item.id)"
+            class="ml-2 inline-block px-2 py-1 text-xs font-semibold text-orange-600 bg-orange-100 border border-orange-600 rounded"
+          >
+            New
+          </span>
+        </td>
+
+        <td class="hidden md:table-cell">
+          {{ item?.class }}
+        </td>
         <td class="hidden md:table-cell">{{ item?.date }}</td>
         <td class="hidden md:table-cell">{{ item?.startTime }}</td>
         <td class="hidden md:table-cell">{{ item?.endTime }}</td>
@@ -48,7 +73,7 @@
               <button
                 class="bg-eduSky text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
               >
-                View Details
+                View
               </button>
             </router-link>
           </div>
@@ -60,8 +85,9 @@
 
 <script setup>
 import { computed } from "vue";
-import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
+import { useEventStore } from "../../store/eventStore";
+import { useModalStore } from "../../store/useModalStore";
 
 const props = defineProps({
   columns: {
@@ -75,6 +101,7 @@ const props = defineProps({
 });
 
 const userStore = useUserStore();
+const eventStore = useEventStore();
 
 // const role = userStore.currentRole;
 

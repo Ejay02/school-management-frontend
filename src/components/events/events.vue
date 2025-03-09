@@ -94,6 +94,10 @@ const columns = [
     accessor: "title",
   },
   {
+    header: "",
+    accessor: "",
+  },
+  {
     header: "Class",
     accessor: "class",
     class: "hidden md:table-cell",
