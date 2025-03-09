@@ -157,3 +157,9 @@ export const createEvent = gql`
     }
   }
 `;
+
+export const markEventAsRead = gql`
+  mutation markEventAsRead($eventId: String!) {
+    markEventAsRead(eventId: $eventId)
+  }
+`;

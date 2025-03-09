@@ -130,7 +130,6 @@ export const useUserStore = defineStore("user", () => {
         return data.getUserById;
       }
     } catch (error) {
-      console.log("error:", error);
       notificationStore.addNotification({
         type: "error",
         message: "Failed to fetch user details.",

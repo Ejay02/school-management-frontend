@@ -70,10 +70,7 @@
         </td>
         <td>
           <div class="flex items-center gap-2 relative">
-            <router-link
-              :to="`/teacher/${item?.id}`"
-              class="group relative"
-            >
+            <router-link :to="`/teacher/${item?.id}`" class="group relative">
               <button
                 class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
               >
@@ -164,14 +161,16 @@ const copyId = (id) => {
   navigator.clipboard
     .writeText(id)
     .then(() => {
-      console.log("Copied to clipboard!");
       notificationStore.addNotification({
         type: "success",
         message: `Teacher Id copied to clipboard!`,
       });
     })
     .catch((err) => {
-      console.error("Error copying to clipboard:", err);
+      notificationStore.addNotification({
+        type: "error",
+        message: `Error copying to clipboard - ${err.message}`,
+      });
     });
 };
 

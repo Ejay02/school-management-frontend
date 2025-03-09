@@ -20,6 +20,10 @@
                   : '',
               ]"
             >
+              <span
+                v-if="!eventStore.isEventRead(event.id)"
+                class="mr-2 inline-block w-2 h-2 bg-red-500 rounded-full"
+              ></span>
               {{ event.status }}
             </span>
 
@@ -31,9 +35,11 @@
             </span>
           </div>
 
-          <span class="text-gray-600 text-xs uppercase font-semibold">{{
-            formatEventType(event.type)
-          }}</span>
+          <div class="flex items-center">
+            <span class="text-gray-600 text-xs uppercase font-semibold">{{
+              formatEventType(event.type)
+            }}</span>
+          </div>
         </div>
 
         <h2 class="text-xl font-bold text-gray-800 mb-2">
@@ -120,14 +126,14 @@
               formatTargetRoles(event.targetRoles)
             }}</span>
           </div>
-          <!-- {{ event }} -->
 
           <div class="flex justify-between">
             <router-link :to="`/event/${event.id}`">
               <button
+                @click="handleMarkEventAsRead(event.id)"
                 class="bg-eduSky text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
               >
-                View Details
+                <i class="fa-solid fa-arrow-right"></i>
               </button>
             </router-link>
             <!--  -->
@@ -180,5 +186,9 @@ const showDelModal = (id, title, type) => {
   modalStore.modalId = id;
   modalStore.modalTitle = title;
   modalStore.source = type;
+};
+
+const handleMarkEventAsRead = async (eventId) => {
+  await eventStore.markEventAsRead(eventId);
 };
 </script>

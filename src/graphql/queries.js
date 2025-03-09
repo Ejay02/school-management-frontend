@@ -400,6 +400,11 @@ export const getEvents = gql`
       class {
         id
         name
+        students{
+          id
+          name
+          surname
+        }
       }
       classId
       creatorId

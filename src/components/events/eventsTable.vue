@@ -36,6 +36,11 @@
                 : '',
             ]"
           >
+            <span
+              v-if="!eventStore.isEventRead(item.id)"
+              class="mr-2 inline-block w-2 h-2 bg-red-500 rounded-full"
+            ></span>
+
             {{ item.status }}
           </span>
           <span
@@ -53,8 +58,19 @@
         <td class="hidden md:table-cell">{{ item?.startTime }}</td>
         <td class="hidden md:table-cell">{{ item?.endTime }}</td>
 
-        <td class="flex justify-between">
-          <div class="flex items-center gap-2" v-if="isCreator">
+        <td class="flex gap-3">
+          <div class="hidden md:table-cell">
+            <router-link :to="`/event/${item.id}`">
+              <button
+                @click="handleMarkEventAsRead(item.id)"
+                class="bg-eduSky text-indigo-600 hover:bg-eduSkyLight px-2 py-1 rounded-md text-sm transition duration-300"
+              >
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </router-link>
+          </div>
+
+          <div class="flex items-center" v-if="isCreator">
             <button
               @click="showDelModal(item.id, item.title, 'eventList')"
               class="ml-2 group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
@@ -67,15 +83,6 @@
                 Delete
               </span>
             </button>
-          </div>
-          <div class="hidden md:table-cell">
-            <router-link :to="`/event/${item.id}`">
-              <button
-                class="bg-eduSky text-indigo-600 hover:bg-eduSkyLight px-2 py-1 rounded-md text-sm transition duration-300"
-              >
-                View
-              </button>
-            </router-link>
           </div>
         </td>
       </tr>
@@ -124,6 +131,10 @@ const showEditModal = (id, title, data, type) => {
   modalStore.modalTitle = title;
   modalStore.data = data;
   modalStore.source = type;
+};
+
+const handleMarkEventAsRead = async (eventId) => {
+  await eventStore.markEventAsRead(eventId);
 };
 </script>
 

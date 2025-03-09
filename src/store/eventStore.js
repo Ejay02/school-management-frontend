@@ -2,8 +2,10 @@ import { defineStore } from "pinia";
 import { apolloClient } from "../../apollo-client";
 import { getEventById, getEvents } from "../graphql/queries";
 import { getData, setData } from "../utils/localStorageHelpers";
+import { markEventAsRead } from "../graphql/mutations";
 
 const STORAGE_KEY = "newEventMarkers";
+const READ_EVENTS_KEY = "readEvents";
 
 export const useEventStore = defineStore("eventStore", {
   state: () => ({
@@ -14,6 +16,7 @@ export const useEventStore = defineStore("eventStore", {
     hasMore: true,
     // Initialize from localStorage or use an empty array
     newEventMarkers: getData(STORAGE_KEY) || [],
+    readEvents: getData(READ_EVENTS_KEY) || [],
   }),
 
   actions: {
@@ -61,6 +64,27 @@ export const useEventStore = defineStore("eventStore", {
       }
     },
 
+    async markEventAsRead(eventId) {
+      if (!this.isEventRead(eventId)) {
+        try {
+          const result = await apolloClient.mutate({
+            mutation: markEventAsRead,
+            variables: { eventId },
+          });
+
+          if (result.data.markEventAsRead) {
+            this.readEvents.push(eventId);
+            setData(READ_EVENTS_KEY, this.readEvents);
+            return true;
+          }
+          return false;
+        } catch (error) {
+          throw error;
+        }
+      }
+      return true;
+    },
+
     addNewEvent(event) {
       // Check if the event already exists in the events array
       const exists = this.events.some((e) => e.id === event.id);
@@ -90,7 +114,7 @@ export const useEventStore = defineStore("eventStore", {
       return false;
     },
 
-    // Optional: Cleanup expired markers (older than one hour)
+    // Cleanup expired markers (older than one hour)
     cleanupNewEventMarkers() {
       const oneHour = 1000 * 60 * 60;
       const now = Date.now();
@@ -98,6 +122,10 @@ export const useEventStore = defineStore("eventStore", {
         (marker) => now - marker.addedAt < oneHour
       );
       setData(STORAGE_KEY, this.newEventMarkers);
+    },
+
+    isEventRead(eventId) {
+      return this.readEvents.includes(eventId);
     },
   },
 });
