@@ -167,7 +167,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   // Cleanup to prevent memory leaks
-  socket.off("eventCreated", handleNewEvent);
+  socket.off("eventCreated");
 });
 
 /**TEST */

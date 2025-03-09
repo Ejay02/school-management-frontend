@@ -23,7 +23,7 @@
           </div>
         </td>
 
-        <td>
+        <td class="">
           <span
             :class="[
               'px-2 py-1 rounded-full text-xs font-semibold',
@@ -68,10 +68,10 @@
               </span>
             </button>
           </div>
-          <div class="">
+          <div class="hidden md:table-cell">
             <router-link :to="`/event/${item.id}`">
               <button
-                class="bg-eduSky text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
+                class="bg-eduSky text-indigo-600 hover:bg-eduSkyLight px-2 py-1 rounded-md text-sm transition duration-300"
               >
                 View
               </button>

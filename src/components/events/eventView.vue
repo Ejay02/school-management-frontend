@@ -373,9 +373,7 @@
                   </p>
 
                   <!-- v-if="event?.attendees && event?.attendees.length" -->
-                  <div
-                    class="mt-5"
-                  >
+                  <div class="mt-5">
                     <p class="text-gray-700 mb-3 flex items-center">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -391,10 +389,9 @@
                           d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                         />
                       </svg>
-                      <span class="font-medium"
-                        >
+                      <span class="font-medium">
                         <!-- {{ event?.attendees.length }}  -->
-                       2 attendees</span
+                        2 attendees</span
                       >
                     </p>
                     <div class="flex flex-wrap gap-2">
@@ -417,8 +414,7 @@
                         <span class="text-sm font-medium text-indigo-700"
                           >+3
                           <!-- {{ event?.attendees.length - 5 }} -->
-                          </span
-                        >
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -566,7 +562,7 @@ const fetchCreator = async () => {
 
 // Navigation functions
 const goBack = () => {
-  router.back();
+  router.push("/events");
 };
 
 const editEvent = () => {
