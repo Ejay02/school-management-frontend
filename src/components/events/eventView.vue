@@ -335,7 +335,7 @@
                   class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all"
                 >
                   <p
-                    v-if="event?.targetRoles && event?.targetRoles.length"
+                    v-if="event?.classId"
                     class="flex items-center text-gray-700"
                   >
                     <svg
@@ -372,7 +372,6 @@
                     Open to everyone
                   </p>
 
-                  <!-- v-if="event?.attendees && event?.attendees.length" -->
                   <div class="mt-5">
                     <p class="text-gray-700 mb-3 flex items-center">
                       <svg
@@ -389,31 +388,35 @@
                           d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                         />
                       </svg>
+
                       <span class="font-medium">
-                        <!-- {{ event?.attendees.length }}  -->
-                        2 attendees</span
-                      >
+                        <template v-if="event?.class">
+                          {{ event?.class?.students.length }} attendees
+                        </template>
+                        <template v-else> Whole school event </template>
+                      </span>
                     </p>
+
+                    <!--  -->
                     <div class="flex flex-wrap gap-2">
-                      <!-- v-for="(attendee, index) in attendeePreview"
-                      :key="index" -->
                       <div
+                        v-for="(attendee, index) in event?.class?.students"
+                        :key="index"
                         class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-full h-10 w-10 flex items-center justify-center border border-indigo-200 shadow-sm"
                       >
-                        <span class="text-sm font-medium text-indigo-700">
-                          <!-- {{
-                          getInitials(attendee.name)
-                        }} -->
-                          XY
+                        <span
+                          class="text-sm font-medium text-indigo-700 capitalize"
+                        >
+                          {{ attendee?.name[0] }}{{ attendee?.surname[0] }}
                         </span>
                       </div>
-                      <!-- v-if="event?.attendees && event?.attendees.length > 5" -->
+
                       <div
+                        v-if="event?.class?.students.length > 5"
                         class="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full h-10 w-10 flex items-center justify-center shadow-sm"
                       >
-                        <span class="text-sm font-medium text-indigo-700"
-                          >+3
-                          <!-- {{ event?.attendees.length - 5 }} -->
+                        <span class="text-sm font-medium text-indigo-700">
+                          +{{ event?.class?.students.length - 5 }}
                         </span>
                       </div>
                     </div>
@@ -498,23 +501,10 @@ const loading = computed(() => eventStore.loading);
 const error = computed(() => eventStore.error);
 
 const event = computed(() => eventStore.selectedEvent);
+
 const creatorId = computed(() => event.value?.creatorId);
 
 const isCreator = computed(() => creatorId.value === userStore.userInfo.id);
-
-const attendeePreview = computed(() => {
-  if (!event.value?.attendees) return [];
-  return event.value.attendees.slice(0, 5);
-});
-
-const getInitials = (name) => {
-  if (!name) return "";
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-};
 
 const creatorRole = computed(() => {
   if (!creator.value) return "";
