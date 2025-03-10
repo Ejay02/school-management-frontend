@@ -50,17 +50,16 @@
         v-for="event in latestEvents"
         :key="event.id"
       >
-        <router-link :to="`/event/${event.id}`">
+        <router-link
+          :to="`/event/${event.id}`"
+          @click="handleMarkEventAsRead(event.id)"
+        >
           <!-- {{ event }} -->
           <div class="flex items-center justify-between mb-2">
             <h1 class="font-semibold text-gray-600 capitalize">
               {{ event.title }}
             </h1>
             <div class="mb-4">
-              <!-- <span class="text-gray-400 text-sm ml-4">
-              {{ formatEventDate(event.startTime) }} 
-              {{ formatEventDate(event.endTime) }}
-            </span> -->
               <div class="text-gray-400 text-xs ml-4">
                 {{ formatTime(event.startTime) }} -
                 {{ formatTime(event.endTime) }}
@@ -84,8 +83,19 @@
                   event.status === 'cancelled',
               }"
             >
+              <span
+                v-if="!eventStore.isEventRead(event.id)"
+                class="mr-2 inline-block w-2 h-2 bg-red-500 rounded-full"
+              ></span>
               {{ event.status }}</span
             >
+
+            <span
+              v-if="eventStore.isNewEvent(event.id)"
+              class="ml-2 inline-block px-2 py-1 text-xs font-semibold text-orange-600 bg-orange-100 border border-orange-600 rounded"
+            >
+              NEW
+            </span>
           </div>
         </router-link>
       </div>
@@ -98,8 +108,6 @@ import { useEventStore } from "../../store/eventStore";
 import {
   fetchCountry,
   fetchHolidays,
-  formatDate,
-  formatEventDate,
   formatTime,
 } from "../../utils/date.holidays";
 import EmptyState from "../emptyState.vue";
@@ -115,7 +123,7 @@ const currentMonth = ref({
   start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
 });
 
-const latestEvents = computed(() => [...eventStore.events].slice(-3).reverse());
+const latestEvents = computed(() => [...eventStore.events].slice(0, 3));
 
 onMounted(async () => {
   await eventStore.fetchEvents();
@@ -151,6 +159,10 @@ const attrs = computed(() => {
 
   return [...eventAttrs, ...holidayAttrs, todayAttr];
 });
+
+const handleMarkEventAsRead = async (eventId) => {
+  await eventStore.markEventAsRead(eventId);
+};
 </script>
 
 <style scoped>

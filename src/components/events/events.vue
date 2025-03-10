@@ -163,11 +163,21 @@ onMounted(async () => {
       eventStore.addNewEvent(data.event);
     }
   });
+
+  socket.on("deleteEvent", (data) => {
+    if (data && data.eventId) {
+      // Update the store by removing the deleted event
+      eventStore.events = eventStore.events.filter(
+        (event) => event.id !== data.eventId
+      );
+    }
+  });
 });
 
 onUnmounted(() => {
   // Cleanup to prevent memory leaks
   socket.off("eventCreated");
+  socket.off("deleteEvent");
 });
 
 /**TEST */
