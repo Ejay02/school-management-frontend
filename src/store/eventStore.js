@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { apolloClient } from "../../apollo-client";
 import { getEventById, getEvents } from "../graphql/queries";
 import { getData, setData } from "../utils/localStorageHelpers";
-import { markEventAsRead } from "../graphql/mutations";
+import { markEventAsRead, deleteEvent } from "../graphql/mutations";
 
 const STORAGE_KEY = "newEventMarkers";
 const READ_EVENTS_KEY = "readEvents";
@@ -83,6 +83,46 @@ export const useEventStore = defineStore("eventStore", {
         }
       }
       return true;
+    },
+
+    async deleteEvent(eventId) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const result = await apolloClient.mutate({
+          mutation: deleteEvent,
+          variables: { id: eventId },
+        });
+
+        if (result.data.deleteEvent) {
+          // Update local state by removing the deleted event
+          this.events = this.events.filter((event) => event.id !== eventId);
+
+          // If the deleted event is the selected event, clear the selection
+          if (this.selectedEvent && this.selectedEvent.id === eventId) {
+            this.selectedEvent = null;
+          }
+
+          // Remove from newEventMarkers if present
+          this.newEventMarkers = this.newEventMarkers.filter(
+            (marker) => marker.id !== eventId
+          );
+          setData(STORAGE_KEY, this.newEventMarkers);
+
+          // Remove from readEvents if present
+          this.readEvents = this.readEvents.filter((id) => id !== eventId);
+          setData(READ_EVENTS_KEY, this.readEvents);
+
+          return true;
+        }
+        return false;
+      } catch (error) {
+        this.error = error.message || "Error deleting event";
+        throw error;
+      } finally {
+        this.loading = false;
+      }
     },
 
     addNewEvent(event) {

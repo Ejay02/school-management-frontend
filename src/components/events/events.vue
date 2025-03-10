@@ -76,6 +76,7 @@ import { ref, computed, onMounted, onUnmounted } from "vue";
 import LoadingScreen from "../loadingScreen.vue";
 import { useUserStore } from "../../store/userStore";
 import { useEventStore } from "../../store/eventStore";
+import { useStorageSync } from "../../composables/useStorageSync";
 
 const eventStore = useEventStore();
 const userStore = useUserStore();
@@ -165,6 +166,7 @@ onMounted(async () => {
   });
 
   socket.on("deleteEvent", (data) => {
+  
     if (data && data.eventId) {
       // Update the store by removing the deleted event
       eventStore.events = eventStore.events.filter(
@@ -180,7 +182,9 @@ onUnmounted(() => {
   socket.off("deleteEvent");
 });
 
-/**TEST */
+useStorageSync('readEvents', (newReadEvents) => {
+  eventStore.readEvents = newReadEvents || [];
+});
 </script>
 
 <style scoped></style>

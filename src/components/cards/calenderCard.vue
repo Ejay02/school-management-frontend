@@ -91,7 +91,10 @@
             >
 
             <span
-              v-if="eventStore.isNewEvent(event.id)"
+              v-if="
+                eventStore.isNewEvent(event.id) &&
+                !eventStore.isEventRead(event.id)
+              "
               class="ml-2 inline-block px-2 py-1 text-xs font-semibold text-orange-600 bg-orange-100 border border-orange-600 rounded"
             >
               NEW
@@ -103,16 +106,18 @@
   </div>
 </template>
 <script setup>
-import { computed, onMounted, ref } from "vue";
-import { useEventStore } from "../../store/eventStore";
 import {
   fetchCountry,
   fetchHolidays,
   formatTime,
 } from "../../utils/date.holidays";
+import socket from "../../socket/socket";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
+import { useEventStore } from "../../store/eventStore";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useStorageSync } from "../../composables/useStorageSync";
 
 const eventStore = useEventStore();
 
@@ -131,6 +136,29 @@ onMounted(async () => {
   const countryCode = await fetchCountry();
   const fetchedHolidays = await fetchHolidays(countryCode);
   holidays.value = fetchedHolidays;
+
+  // Setup socket listener for new events
+  socket.on("eventCreated", (data) => {
+    if (data && data.event && data.event.id) {
+      // Add the new event to the store
+      eventStore.addNewEvent(data.event);
+    }
+  });
+
+  socket.on("deleteEvent", (data) => {
+    if (data && data.eventId) {
+      // Update the store by removing the deleted event
+      eventStore.events = eventStore.events.filter(
+        (event) => event.id !== data.eventId
+      );
+    }
+  });
+});
+
+onUnmounted(() => {
+  // Cleanup to prevent memory leaks
+  socket.off("eventCreated");
+  socket.off("deleteEvent");
 });
 
 const attrs = computed(() => {
@@ -163,6 +191,10 @@ const attrs = computed(() => {
 const handleMarkEventAsRead = async (eventId) => {
   await eventStore.markEventAsRead(eventId);
 };
+
+useStorageSync("readEvents", (newReadEvents) => {
+  eventStore.readEvents = newReadEvents || [];
+});
 </script>
 
 <style scoped>

@@ -561,8 +561,9 @@ const fetchCreator = async () => {
 };
 
 // Navigation functions
+
 const goBack = () => {
-  router.push("/events");
+  router.back();
 };
 
 const editEvent = () => {

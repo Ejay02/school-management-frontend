@@ -163,3 +163,8 @@ export const markEventAsRead = gql`
     markEventAsRead(eventId: $eventId)
   }
 `;
+export const deleteEvent = gql`
+  mutation deleteEvent($eventId: String!) {
+    deleteEvent(eventId: $eventId)
+  }
+`;
