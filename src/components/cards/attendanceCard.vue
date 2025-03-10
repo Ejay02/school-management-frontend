@@ -74,9 +74,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted, nextTick } from "vue";
 import { Chart, registerables } from "chart.js";
 import { useAttendanceStore } from "../../store/attendanceStore";
+import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
 
 const props = defineProps({
   label: {
@@ -187,7 +187,7 @@ function createChart() {
       labels: labels,
       datasets: [
         {
-          data: presentData.map((value) => Math.max(value, 0.5)), // Ensure minimum visible height
+          data: presentData, // No adjustment - use actual values
           backgroundColor: "#C3EBFA", // eduSky
           barThickness: 15,
           borderRadius: 10,
@@ -195,7 +195,7 @@ function createChart() {
           borderWidth: 2,
         },
         {
-          data: absentData.map((value) => Math.max(value, 0.5)), // Ensure minimum visible height
+          data: absentData, // No adjustment - use actual values
           backgroundColor: "#FAE27C", // eduYellow
           barThickness: 15,
           borderRadius: 10,
@@ -226,13 +226,12 @@ function createChart() {
           tooltip: {
             callbacks: {
               label: function (context) {
-                // Show the actual value in the tooltip, not the adjusted one
                 const datasetIndex = context.datasetIndex;
                 const index = context.dataIndex;
-                const actualValue =
+                const value =
                   datasetIndex === 0 ? presentData[index] : absentData[index];
                 const label = datasetIndex === 0 ? "Present: " : "Absent: ";
-                return label + actualValue;
+                return label + value;
               },
             },
           },
@@ -267,13 +266,9 @@ function createChart() {
               font: {
                 size: 10,
               },
-              // callback: function (value) {
-              //   // Only show actual values in the axis labels
-              //   return value > 0.5 ? value : 0;
-              // },
             },
-            // min: 0, // Start at zero
-            // suggestedMax: Math.max(...presentData, ...absentData) * 1.2 || 100, // Dynamic height with 20% padding
+            min: 0, // Explicitly set minimum to 0
+            suggestedMax: Math.max(...presentData, ...absentData) * 1.2 || 100, // Dynamic height with 20% padding
           },
         },
         animation: {
@@ -302,19 +297,42 @@ function handleResize() {
   }
 }
 
-onMounted(async () => {
-  // Get the current week's Monday and Friday
-  const { monday, friday } = getCurrentWeekRange();
-  // Pass ISO strings to match the DateTime scalar
-  await attendanceStore.fetchSchoolAttendanceStats(monday, friday);
+// onMounted(async () => {
+//   // Get the current week's Monday and Friday
+//   const { monday, friday } = getCurrentWeekRange();
+//   // Pass ISO strings to match the DateTime scalar
+//   await attendanceStore.fetchSchoolAttendanceStats(monday, friday);
 
-  // Create the chart after a short delay to ensure proper sizing
-  setTimeout(() => {
-    createChart();
-  }, 50);
+//   // Create the chart after a short delay to ensure proper sizing
+//   setTimeout(() => {
+//     createChart();
+//   }, 50);
 
-  // Add resize listener to handle responsive behavior better
+//   // Add resize listener to handle responsive behavior better
+//   window.addEventListener("resize", handleResize);
+// });
+
+// import { watch, onMounted, onUnmounted, nextTick } from "vue";
+
+onMounted(() => {
+  // Simply create the chart using the already fetched stats from the parent
+  createChart();
   window.addEventListener("resize", handleResize);
+});
+
+// Watch for changes in the store's stats and update the chart accordingly
+watch(
+  () => attendanceStore.stats,
+  (newStats) => {
+    createChart();
+  }
+);
+
+onUnmounted(() => {
+  window.removeEventListener("resize", handleResize);
+  if (currentChart) {
+    currentChart.destroy();
+  }
 });
 
 // Clean up event listener when component unmounts

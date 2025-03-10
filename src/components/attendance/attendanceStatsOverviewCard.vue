@@ -6,7 +6,7 @@
       class="bg-blue-50 p-4 rounded-lg shadow border border-blue-100 transition-transform duration-300 hover:scale-105 hover:shadow-lg"
     >
       <div class="text-blue-500 text-xl mb-1">Total Classes</div>
-      <div class="text-3xl font-bold">{{ stats?.classCount }}</div>
+      <div class="text-3xl font-bold">{{ stats?.studentCount }}</div>
     </div>
 
     <div

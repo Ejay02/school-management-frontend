@@ -15,6 +15,7 @@
               class="border rounded p-2 text-sm"
             />
           </div>
+
           <div class="flex items-center gap-2">
             <label class="text-sm text-gray-600">To:</label>
             <input
@@ -56,11 +57,16 @@
 </template>
 
 <script setup>
+import {
+  formatDateForInput,
+  getFriday,
+  getMonday,
+} from "../../utils/date.holidays";
 import ErrorScreen from "../errorScreen.vue";
+import { ref, computed, onMounted } from "vue";
 import LoadingScreen from "../loadingScreen.vue";
 
 import AttendanceTable from "./attendanceTable.vue";
-import { ref, computed, onMounted } from "vue";
 import AttendanceCard from "../cards/attendanceCard.vue";
 import { useAttendanceStore } from "../../store/attendanceStore";
 import AttendanceStatsOverviewCard from "./attendanceStatsOverviewCard.vue";
@@ -69,43 +75,13 @@ const attendanceStore = useAttendanceStore();
 
 const loading = computed(() => attendanceStore.loading);
 const error = computed(() => attendanceStore.error);
-
-// Date range for filtering
-const startDate = ref(
-  formatDateForInput(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
-); // Last 30 days
-const endDate = ref(formatDateForInput(new Date()));
-
-// Stats for the overview card
 const stats = computed(() => attendanceStore.stats);
 
-// Format date for input fields
-function formatDateForInput(date) {
-  return date.toISOString().split("T")[0];
-}
+const startDate = ref(formatDateForInput(getMonday(new Date())));
+const endDate = ref(formatDateForInput(getFriday(new Date())));
 
-// Fetch attendance data based on date range
-async function fetchAttendanceData() {
-  attendanceStore.loading = true;
-  attendanceStore.error = null;
-
-  try {
-    // Fetch weekly stats for chart
-    await attendanceStore.fetchSchoolAttendanceStats(
-      startDate.value,
-      endDate.value
-    );
-  } catch (err) {
-    attendanceStore.error =
-      "Failed to fetch attendance data. Please try again.";
-  } finally {
-    attendanceStore.loading = false;
-  }
-}
-
-// Initialize data on component mount
 onMounted(() => {
-  fetchAttendanceData();
+  attendanceStore.fetchAttendanceData(startDate.value, endDate.value);
 });
 </script>
 

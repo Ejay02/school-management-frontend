@@ -9,7 +9,7 @@ export const useAttendanceStore = defineStore("attendanceStore", {
       labels: [],
       present: [],
       absent: [],
-      classCount: 0,
+      studentCount: 0,
     },
     attendanceRecords: [],
     loading: false,
@@ -22,9 +22,17 @@ export const useAttendanceStore = defineStore("attendanceStore", {
       this.loading = true;
       this.error = null;
       try {
+        // Convert string dates to Date objects if they aren't already
+        const start =
+          startDate instanceof Date ? startDate : new Date(startDate);
+        const end = endDate instanceof Date ? endDate : new Date(endDate);
+
+        // Make sure end date includes the full day by setting time to 23:59:59
+        end.setHours(23, 59, 59);
+
         const res = await apolloClient.query({
           query: getSchoolAttendanceStats,
-          variables: { startDate, endDate },
+          variables: { startDate: start, endDate: end },
           fetchPolicy: "no-cache",
         });
 
@@ -33,7 +41,7 @@ export const useAttendanceStore = defineStore("attendanceStore", {
             labels: ["Mon", "Tue", "Wed", "Thu", "Fri"],
             present: [0, 0, 0, 0, 0],
             absent: [0, 0, 0, 0, 0],
-            classCount: 0,
+            studentCount: 0,
           };
         } else {
           this.stats = res.data.getSchoolAttendanceStats;
@@ -44,7 +52,7 @@ export const useAttendanceStore = defineStore("attendanceStore", {
         this.loading = false;
       }
     },
-    //
+
     async fetchAttendance() {
       this.loading = true;
       this.error = null;
@@ -55,10 +63,23 @@ export const useAttendanceStore = defineStore("attendanceStore", {
         });
 
         this.attendanceRecords = res.data.getAttendances;
-
-        // return res.data.getAttendances;
       } catch (error) {
         this.error = error.message || "Error fetching attendance stats";
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchAttendanceData(start, end) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        // Fetch weekly stats for chart
+        await this.fetchSchoolAttendanceStats(start, end);
+      } catch (err) {
+        this.error =
+          err.message || "Failed to fetch attendance data. Please try again.";
       } finally {
         this.loading = false;
       }
@@ -76,10 +97,14 @@ export const useAttendanceStore = defineStore("attendanceStore", {
           },
         });
 
-        // Optionally, update  local state with the new record.
-        // push the new record into attendanceRecords:
-        // this.attendanceRecords.push(res.data.markAttendance);
+        // Refresh data after marking attendance
         await this.fetchAttendance();
+
+        // Also refresh the attendance stats to update the charts
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        await this.fetchSchoolAttendanceStats(thirtyDaysAgo, today);
 
         return res.data.markAttendance;
       } catch (error) {
