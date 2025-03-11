@@ -13,7 +13,7 @@
               <input
                 type="text"
                 placeholder="Search conversations..."
-                class="w-full pl-8 pr-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full pl-8 pr-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
               />
               <svg
                 class="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400"
@@ -64,7 +64,7 @@
               :class="[
                 'flex-1 py-2 text-sm font-medium text-center',
                 activeTab === 'direct'
-                  ? 'text-blue-600 border-b-2 border-blue-500'
+                  ? 'text-indigo-600 border-b-2 border-indigo-500'
                   : 'text-gray-500 hover:text-gray-700',
               ]"
             >
@@ -75,7 +75,7 @@
               :class="[
                 'flex-1 py-2 text-sm font-medium text-center',
                 activeTab === 'groups'
-                  ? 'text-blue-600 border-b-2 border-blue-500'
+                  ? 'text-indigo-600 border-b-2 border-indigo-500'
                   : 'text-gray-500 hover:text-gray-700',
               ]"
             >
@@ -92,7 +92,7 @@
               :key="contact.id"
               :class="[
                 'flex items-center px-2 py-3 rounded-md my-1 cursor-pointer',
-                contact.id === activeChat ? 'bg-blue-100' : 'hover:bg-gray-100',
+                contact.id === activeChat ? 'bg-indigo-100' : 'hover:bg-gray-100',
               ]"
               @click="activeChat = contact.id"
             >
@@ -120,7 +120,7 @@
                   </p>
                   <span
                     v-if="contact.unread"
-                    class="ml-2 inline-flex items-center justify-center bg-blue-500 text-white text-xs rounded-full h-5 w-5 leading-none flex-shrink-0"
+                    class="ml-2 inline-flex items-center justify-center bg-indigo-500 text-white text-xs rounded-full h-5 w-5 leading-none flex-shrink-0"
                   >
                     {{ contact.unread }}
                   </span>
@@ -135,12 +135,12 @@
               :key="group.id"
               :class="[
                 'flex items-center px-2 py-3 rounded-md my-1 cursor-pointer',
-                group.id === activeChat ? 'bg-blue-100' : 'hover:bg-gray-100',
+                group.id === activeChat ? 'bg-indigo-100' : 'hover:bg-gray-100',
               ]"
               @click="activeChat = group.id"
             >
               <div
-                class="relative bg-gray-200 h-10 w-10 rounded-full mr-3 flex items-center justify-center"
+                class="relative bg-gray-100 h-10 w-10 rounded-full mr-3 flex items-center justify-center"
               >
                 <span class="text-sm font-medium text-gray-600">{{
                   group.acronym
@@ -161,7 +161,7 @@
                   <!--  -->
                   <span
                     v-if="group.unread"
-                    class="ml-2 inline-flex items-center justify-center bg-blue-500 text-white text-xs rounded-full h-5 w-5 leading-none flex-shrink-0"
+                    class="ml-2 inline-flex items-center justify-center bg-indigo-500 text-white text-xs rounded-full h-5 w-5 leading-none flex-shrink-0"
                   >
                     {{ group.unread }}
                   </span>
@@ -327,7 +327,7 @@
                   :class="[
                     'max-w-xs sm:max-w-md rounded-lg p-3 mb-1',
                     message.fromMe
-                      ? 'bg-blue-500 text-white rounded-br-none'
+                      ? 'bg-indigo-500 text-white rounded-br-none'
                       : 'bg-white text-gray-800 shadow-sm rounded-bl-none',
                   ]"
                 >
@@ -410,7 +410,7 @@
                   <svg
                     v-if="message.read"
                     xmlns="http://www.w3.org/2000/svg"
-                    class="h-3 w-3 inline text-blue-500"
+                    class="h-3 w-3 inline text-indigo-500"
                     viewBox="0 0 20 20"
                     fill="currentColor"
                   >
