@@ -1,7 +1,7 @@
 <template>
   <header class="relative bg-gray-200 shadow-md">
     <div class="container mx-auto py-6 flex justify-between items-center">
-      <router-link to="/" class="group">
+      <div @click="goBack" class="group">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -16,7 +16,7 @@
             d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18"
           />
         </svg>
-      </router-link>
+      </div>
     </div>
   </header>
 
@@ -80,7 +80,7 @@
 
         <button
           type="submit"
-          class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-500 transition duration-300 animate-bounce-once"
+          class="w-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white py-2 rounded-md hover:bg-indigo-500 transition duration-300 animate-bounce-once"
         >
           Send Message
         </button>
@@ -109,6 +109,9 @@
 
 <script setup>
 import { ref } from "vue";
+import { useNavigation } from "../../composables/useNavigation";
+
+const { goBack } = useNavigation();
 
 const name = ref("");
 const email = ref("");

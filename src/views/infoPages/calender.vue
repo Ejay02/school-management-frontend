@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-200 py-8">
     <div class="ml-8 mb-4">
-      <router-link to="/" class="group">
+      <div @click="goBack" class="group">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -16,7 +16,7 @@
             d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18"
           />
         </svg>
-      </router-link>
+      </div>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -95,7 +95,7 @@
                 <!-- Export Button -->
                 <button
                   @click="exportCalendar"
-                  class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 hover:shadow-lg flex items-center gap-2"
+                  class="px-4 py-2 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-md hover:bg-indigo-500 hover:shadow-lg flex items-center gap-2"
                 >
                   <svg
                     class="w-4 h-4"
@@ -247,6 +247,9 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { fetchCountry, fetchHolidays } from "../../utils/date.holidays";
+import { useNavigation } from "../../composables/useNavigation";
+
+const { goBack } = useNavigation();
 
 // State
 const currentDate = ref(new Date());

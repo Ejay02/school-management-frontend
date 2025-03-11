@@ -6,7 +6,7 @@
     >
       <!-- back arrow -->
       <div class="pl-4 mt-0">
-        <router-link to="/" class="group">
+        <div @click="goBack" class="group">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -21,7 +21,7 @@
               d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18"
             />
           </svg>
-        </router-link>
+        </div>
       </div>
 
       <div class="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -216,7 +216,7 @@
             <button
               :disabled="!isFormValid || isLoading"
               type="submit"
-              class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              class="flex w-full justify-center rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="isLoading" class="flex items-center gap-2">
                 <svg
@@ -280,6 +280,7 @@ import { useUserStore } from "../../store/userStore";
 import { ref, reactive, watch, computed } from "vue";
 import { useNotificationStore } from "../../store/notification";
 import { useMutation } from "@vue/apollo-composable";
+import { useNavigation } from "../../composables/useNavigation";
 
 const router = useRouter();
 const showPassword = ref(false);
@@ -287,6 +288,8 @@ const selectedRole = ref("");
 const isLoading = ref(false);
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
+
+const { goBack } = useNavigation();
 
 const defaultClasses = {
   PRIMARY_1: "Primary 1",

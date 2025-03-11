@@ -8,7 +8,9 @@
     <div
       class="bg-white cursor-pointer rounded-md w-96 h-auto mt-4 shadow-md overflow-auto"
     >
-      <div class="bg-eduPurple text-white p-4">
+      <div
+        class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4"
+      >
         <h3 class="text-xl font-medium capitalize items-center text-center">
           Edit {{ formatSourceTitle(source) }}
         </h3>
@@ -647,7 +649,7 @@
             Cancel
           </button>
           <button
-            class="hover:bg-purple-400 text-white py-2 px-4 rounded-md bg-purple-500 transition-colors"
+            class="hover:bg-purple-400 text-white py-2 px-4 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 transition-colors"
             @click="handleEdit"
           >
             {{ handleEdit ? "Edit" : "Editing ..." }}

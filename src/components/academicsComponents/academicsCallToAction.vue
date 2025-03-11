@@ -11,7 +11,7 @@
 
       <router-link
         to="/contact"
-        class="inline-block bg-indigo-600 text-eduSky px-8 py-3 rounded-md font-semibold hover:bg-indigo-500 hover:shadow-lg"
+        class="inline-block bg-gradient-to-br from-indigo-500 to-purple-600 text-eduSky px-8 py-3 rounded-md font-semibold hover:bg-indigo-500 hover:shadow-lg"
       >
         Schedule a Visit
       </router-link>

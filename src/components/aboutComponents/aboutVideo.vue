@@ -11,7 +11,7 @@
         </p>
         <button
           @click="openVideoModal"
-          class="flex items-center space-x-2 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-400 transition hover:animate-bounce-once"
+          class="flex items-center space-x-2 bg-gradient-to-br from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-400 transition hover:animate-bounce-once"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

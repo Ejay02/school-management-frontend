@@ -7,34 +7,36 @@
         {{ markAttendanceMode ? "Mark Attendance" : "Attendance Records" }}
       </h2>
 
-      <div v-if="userHasAccess" class="flex gap-2">
-        <button
-          v-if="
-            !markAttendanceMode &&
-            ['teacher', 'admin', 'super_admin'].includes(userRole)
-          "
-          @click="toggleMarkAttendanceMode"
-          class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
-        >
-          Mark Attendance
-        </button>
+      <div class="">
+        <div v-if="userHasAccess" class="flex gap-2">
+          <button
+            v-if="
+              !markAttendanceMode &&
+              ['teacher', 'admin', 'super_admin'].includes(userRole)
+            "
+            @click="toggleMarkAttendanceMode"
+            class="px-3 py-1 bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
+          >
+            Mark Attendance
+          </button>
 
-        <button
-          v-if="markAttendanceMode"
-          @click="toggleMarkAttendanceMode"
-          class="px-3 py-1 bg-gray-50 text-gray-600 text-sm rounded hover:bg-gray-100 transition-colors border border-gray-300"
-        >
-          Cancel
-        </button>
-        <button
-          v-if="markAttendanceMode"
-          @click="saveAttendance"
-          class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
-        >
-          Save
-        </button>
+          <button
+            v-if="markAttendanceMode"
+            @click="toggleMarkAttendanceMode"
+            class="px-3 py-1 bg-gray-50 text-gray-600 text-sm rounded hover:bg-gray-100 transition-colors border border-gray-300"
+          >
+            Cancel
+          </button>
+          <button
+            v-if="markAttendanceMode"
+            @click="saveAttendance"
+            class="px-3 py-1 bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
+          >
+            Save
+          </button>
+        </div>
+        <div v-else class="text-sm text-gray-500">View-only access</div>
       </div>
-      <div v-else class="text-sm text-gray-500">View-only access</div>
     </div>
 
     <!-- Regular Attendance View -->
@@ -336,12 +338,14 @@ import { useClassStore } from "../../store/classStore";
 import { useLessonStore } from "../../store/lessonStore";
 import { formatDate } from "../../utils/date.holidays";
 import Pagination from "../pagination.vue";
+import { useNotificationStore } from "../../store/notification";
 
 const userStore = useUserStore();
 const studentStore = useStudentStore();
 const attendanceStore = useAttendanceStore();
 const classStore = useClassStore();
 const lessonStore = useLessonStore();
+const notificationStore = useNotificationStore();
 
 const userRole = computed(() => userStore.currentRole);
 const userHasAccess = computed(() =>
@@ -511,7 +515,10 @@ function markStudentAttendance(studentId, isPresent) {
 // Save attendance changes
 async function saveAttendance() {
   if (!selectedClass.value || !selectedLesson.value || !selectedDate.value) {
-    alert("Please select a class, lesson, and date");
+    notificationStore.addNotification({
+      type: "error",
+      message: `Please select a class, lesson, and date`,
+    });
     return;
   }
 

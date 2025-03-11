@@ -1,7 +1,7 @@
 <template>
   <header class="relative bg-gray-200 shadow-md">
     <div class="container mx-auto py-6 flex justify-between items-center">
-      <router-link to="/" class="group">
+      <div class="group" @click="goBack">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -16,7 +16,7 @@
             d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18"
           />
         </svg>
-      </router-link>
+      </div>
       <!-- <nav class="space-x-4">
           <router-link
             to="/admissions"
@@ -35,6 +35,13 @@
   </header>
 </template>
 
-<script setup></script>
+<script setup>
+import { useRouter } from "vue-router";
+import { useNavigation } from "../../composables/useNavigation";
+
+const router = useRouter();
+
+const { goBack } = useNavigation();
+</script>
 
 <style scoped></style>

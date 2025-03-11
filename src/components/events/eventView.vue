@@ -486,6 +486,7 @@ import { useEventStore } from "../../store/eventStore";
 import { formatTargetRoles } from "../../utils/utility";
 import { useApolloClient } from "@vue/apollo-composable";
 import { formatEventDate, formatTime } from "../../utils/date.holidays";
+import { useNavigation } from "../../composables/useNavigation";
 
 const route = useRoute();
 const router = useRouter();
@@ -493,6 +494,8 @@ const eventId = route.params.id;
 
 const eventStore = useEventStore();
 const userStore = useUserStore();
+
+const { goBack } = useNavigation();
 
 const { client } = useApolloClient();
 const creator = ref(null);
@@ -550,11 +553,8 @@ const fetchCreator = async () => {
   }
 };
 
-// Navigation functions
 
-const goBack = () => {
-  router.back();
-};
+
 
 const editEvent = () => {
   router.push(`/events/edit/${eventId}`);

@@ -6,7 +6,7 @@
     >
       <!-- back arrow -->
       <div class="pl-4">
-        <router-link to="/" class="group">
+        <div class="group"   @click="goBack">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -21,7 +21,7 @@
               d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18"
             />
           </svg>
-        </router-link>
+        </div>
       </div>
 
       <!-- Icon and Header -->
@@ -105,7 +105,7 @@
             <button
               type="submit"
               :disabled="loading || !username || !password"
-              class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex w-full justify-center rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="loading" class="flex items-center gap-2">
                 <svg
@@ -165,11 +165,13 @@ import { useUserStore } from "../../store/userStore";
 import { useMutation } from "@vue/apollo-composable";
 import { loginMutation } from "../../graphql/mutations";
 import { useNotificationStore } from "../../store/notification";
+import { useNavigation } from "../../composables/useNavigation";
 
 const router = useRouter();
 const userStore = useUserStore();
 
 const notificationStore = useNotificationStore();
+const { goBack } = useNavigation();
 
 const username = ref("");
 const password = ref("");
@@ -210,6 +212,8 @@ const login = async () => {
     });
   }
 };
+
+
 </script>
 
 <style scoped></style>

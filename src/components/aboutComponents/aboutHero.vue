@@ -12,7 +12,7 @@
       </p>
       <div class="flex space-x-4">
         <button
-          class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-400 transition"
+          class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-400 transition"
         >
           Explore Programs
         </button>

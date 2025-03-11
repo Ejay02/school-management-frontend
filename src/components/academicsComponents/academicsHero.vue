@@ -8,7 +8,7 @@
       />
     </div>
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <router-link to="/" class="group">
+      <div class="group" @click="goBack">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -23,7 +23,7 @@
             d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18"
           />
         </svg>
-      </router-link>
+      </div>
 
       <h1 class="text-4xl font-bold text-gray-600 mb-4">Academic Excellence</h1>
       <p class="text-xl text-gray-500 max-w-3xl mx-auto">
@@ -34,6 +34,10 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { useNavigation } from "../../composables/useNavigation";
+
+const { goBack } = useNavigation();
+</script>
 
 <style scoped></style>
