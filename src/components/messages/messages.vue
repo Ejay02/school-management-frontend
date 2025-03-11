@@ -36,7 +36,7 @@
         <!-- New chat button -->
         <div class="p-3">
           <button
-            class="w-full flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            class="w-full flex items-center justify-center px-4 py-2 bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-md transition-colors"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -487,7 +487,7 @@
               />
             </div>
             <button
-              class="ml-4 w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 text-white"
+              class="ml-4 w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white"
             >
               <i class="fa-solid fa-paper-plane text-sm"></i>
             </button>
@@ -500,7 +500,6 @@
 
 <script setup>
 import { ref, computed } from "vue";
-
 
 const people = [
   {
@@ -560,7 +559,6 @@ const people = [
 // Chat tab state
 const activeTab = ref("direct");
 const activeChat = ref(1);
-
 
 const directChats = [
   {

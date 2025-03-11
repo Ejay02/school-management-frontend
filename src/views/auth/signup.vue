@@ -216,7 +216,7 @@
             <button
               :disabled="!isFormValid || isLoading"
               type="submit"
-              class="flex w-full justify-center rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex w-full justify-center rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span v-if="isLoading" class="flex items-center gap-2">
                 <svg

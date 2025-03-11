@@ -20,7 +20,7 @@
       </div>
       <button
         type="submit"
-        class="w-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white py-2 px-4 rounded-md focus-visible:outline-indigo-600 hover:bg-indigo-500 transition-colors"
+        class="w-full bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-2 px-4 rounded-md focus-visible:outline-indigo-600 transition-colors"
       >
         Get Started
       </button>

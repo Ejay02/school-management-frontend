@@ -11,7 +11,7 @@
       </p>
 
       <button
-        class="text-white px-8 py-3 rounded-md font-semibold bg-gradient-to-br from-indigo-500 to-purple-600 hover:bg-indigo-500 hover:scale-105 hover:shadow-lg transition-transform duration-300 ease-in-out"
+        class="text-white px-8 py-3 rounded-md font-semibold bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 hover:scale-105 hover:shadow-lg transition-transform duration-300 ease-in-out"
       >
         Schedule a Tour
       </button>

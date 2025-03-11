@@ -47,7 +47,7 @@
           </div>
           <button
             @click="handleRedirectToStripe"
-            class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-400 transition-colors"
+            class="px-4 py-2 bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-lg transition-colors"
           >
             Pay Full Year (${{ child.yearlyFee }})
           </button>
@@ -105,7 +105,7 @@
               </p>
               <div class="w-full bg-gray-200 rounded-full h-2">
                 <div
-                  class="bg-indigo-600 h-2 rounded-full"
+                  class="bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 cursor-pointer h-2 rounded-full"
                   :style="{ width: fee.progress + '%' }"
                 ></div>
               </div>
@@ -131,7 +131,7 @@
             <!-- Payment Actions -->
             <div class="flex space-x-4">
               <button
-                class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                class="flex-1 px-4 py-2 bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-lg 0 transition-colors"
               >
                 Pay Full Term
               </button>
@@ -181,7 +181,7 @@
         <h2 class="text-2xl font-bold text-gray-600">Payment Methods</h2>
         <button
           @click="showAddCard = true"
-          class="mt-4 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-500 focus:outline-none focus:ring-indigo-500 transition-colors"
+          class="mt-4 px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-lg focus:outline-none focus:ring-indigo-500 transition-colors"
         >
           <i class="fa-solid fa-plus"></i>
           Add Payment Method
@@ -401,7 +401,7 @@
             <button
               type="submit"
               :disabled="isProcessing"
-              class="mt-4 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              class="mt-4 px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
             >
               {{ isProcessing ? "Processing..." : "Add Card" }}
             </button>

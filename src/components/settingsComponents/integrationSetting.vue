@@ -62,7 +62,7 @@
               <button
                 v-if="integration.status === 'not_connected'"
                 @click="connectIntegration(integration.id)"
-                class="inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                class="inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 :disabled="integration.status === 'connecting'"
               >
                 <i class="fa-solid fa-plug-circle-plus mr-1.5"></i>

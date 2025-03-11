@@ -80,7 +80,7 @@
 
         <button
           type="submit"
-          class="w-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white py-2 rounded-md hover:bg-indigo-500 transition duration-300 animate-bounce-once"
+          class="w-full bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-2 rounded-md transition duration-300 animate-bounce-once"
         >
           Send Message
         </button>

@@ -3,7 +3,9 @@
     <form @submit.prevent="saveSettings" class="p-6">
       <!-- Notifications -->
       <div class="space-y-6 mb-8">
-        <h2 class="text-lg font-medium text-gray-600 text-center">Notification Settings</h2>
+        <h2 class="text-lg font-medium text-gray-600 text-center">
+          Notification Settings
+        </h2>
         <div class="space-y-4">
           <div class="flex items-center justify-between">
             <div>
@@ -69,7 +71,7 @@
       <div class="flex justify-end mt-4 border-t border-gray-200">
         <button
           type="submit"
-          class="mt-4 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+          class="mt-4 px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
         >
           Save Changes
         </button>
