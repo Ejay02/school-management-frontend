@@ -5,8 +5,9 @@
     @click.self="handleCancel"
     :key="isModalVisible"
   >
+  <!-- max-w-lg w-full text-left bg-white cursor-pointer rounded-md h-auto mt-4 shadow-md overflow-y-auto -->
     <div
-      class="bg-white cursor-pointer rounded-md w-96 h-auto mt-4 shadow-md overflow-auto"
+      class="max-w-lg w-full text-left bg-white cursor-pointer rounded-md h-auto mt-4 shadow-md overflow-y-auto"
     >
       <div
         class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4"
@@ -26,7 +27,7 @@
               >
               <input
                 v-model="data.name"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
             <div>
@@ -36,7 +37,7 @@
               <input
                 v-model="data.email"
                 type="email"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
           </div>
@@ -48,7 +49,7 @@
             <input
               v-model="data.photo"
               type="email"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
 
@@ -58,7 +59,7 @@
             >
             <input
               v-model="data.subjects"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
 
@@ -69,7 +70,7 @@
               >
               <input
                 v-model="data.classes"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
             <div>
@@ -78,7 +79,7 @@
               >
               <input
                 v-model="data.phone"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
           </div>
@@ -88,7 +89,7 @@
           >
           <input
             v-model="data.address"
-            class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
           />
         </template>
 
@@ -101,7 +102,7 @@
 
             <input
               v-model="name"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
 
@@ -112,7 +113,7 @@
             <input
               v-model="data.photo"
               type="email"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
 
@@ -122,7 +123,7 @@
             >
             <input
               v-model="data.description"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
 
@@ -133,7 +134,7 @@
               >
               <input
                 v-model="transformedData.email"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
 
@@ -143,7 +144,7 @@
               >
               <input
                 v-model="transformedData.date"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
           </div>
@@ -155,7 +156,7 @@
               >
               <input
                 v-model="transformedData.bloodgroup"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
 
@@ -165,7 +166,7 @@
               >
               <input
                 v-model="transformedData.phone"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
           </div>
@@ -179,7 +180,7 @@
             >
             <input
               v-model="data.name"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
 
@@ -191,7 +192,7 @@
               >
               <input
                 v-model="data.class"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
 
@@ -202,7 +203,7 @@
               >
               <input
                 v-model="data.grade"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
           </div>
@@ -213,7 +214,7 @@
               >
               <input
                 v-model="data.phone"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
 
@@ -223,7 +224,7 @@
               >
               <input
                 v-model="data.studentId"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
           </div>
@@ -233,7 +234,7 @@
           >
           <input
             v-model="data.address"
-            class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
           />
         </template>
 
@@ -245,7 +246,7 @@
             >
             <input
               v-model="data.name"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -254,7 +255,7 @@
             >
             <input
               v-model="data.email"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -263,7 +264,7 @@
             >
             <input
               v-model="data.students"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -272,7 +273,7 @@
             >
             <input
               v-model="data.phone"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
 
@@ -281,7 +282,7 @@
           >
           <input
             v-model="data.address"
-            class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
           />
         </template>
 
@@ -293,7 +294,7 @@
             >
             <input
               v-model="data.name"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -302,7 +303,7 @@
             >
             <input
               v-model="data.teachers"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
         </template>
@@ -315,7 +316,7 @@
             >
             <input
               v-model="data.name"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
 
@@ -326,7 +327,7 @@
               >
               <input
                 v-model="data.capacity"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
             <div>
@@ -335,7 +336,7 @@
               >
               <input
                 v-model="data.grade"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
           </div>
@@ -345,7 +346,7 @@
             >
             <input
               v-model="data.supervisor"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
         </template>
@@ -359,7 +360,7 @@
 
             <input
               v-model="data.name"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -369,7 +370,7 @@
 
             <input
               v-model="data.subject.name"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -378,7 +379,7 @@
             >
             <input
               v-model="data.class.name"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
 
@@ -389,7 +390,7 @@
 
             <input
               v-model="fullTeacherName"
-              class="capitalize w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="capitalize mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
         </template>
@@ -403,7 +404,7 @@
             <input
               v-model="data.subject"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -413,7 +414,7 @@
             <input
               v-model="data.class"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -423,7 +424,7 @@
             <input
               v-model="data.teacher"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -433,7 +434,7 @@
             <input
               type="date"
               v-model="data.date"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
         </template>
@@ -447,7 +448,7 @@
             <input
               v-model="data.subject"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -457,7 +458,7 @@
             <input
               v-model="data.class"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -467,7 +468,7 @@
             <input
               v-model="data.teacher"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -477,7 +478,7 @@
             <input
               type="date"
               v-model="data.dueDate"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
         </template>
@@ -491,7 +492,7 @@
             <input
               v-model="data.subject"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -501,7 +502,7 @@
             <input
               v-model="data.student"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div class="flex gap-2">
@@ -512,7 +513,7 @@
               <input
                 v-model="data.score"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
             <div>
@@ -522,7 +523,7 @@
               <input
                 v-model="data.class"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
           </div>
@@ -534,7 +535,7 @@
             <input
               v-model="data.teacher"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
 
@@ -545,7 +546,7 @@
             <input
               type="date"
               v-model="data.date"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
         </template>
@@ -559,7 +560,7 @@
             <input
               type="text"
               v-model="data.title"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -569,7 +570,7 @@
             <input
               v-model="data.class"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -579,7 +580,7 @@
             <input
               type="date"
               v-model="data.date"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div class="flex gap-2">
@@ -590,7 +591,7 @@
               <input
                 type="datetime"
                 v-model="data.startTime"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
             <div>
@@ -600,7 +601,7 @@
               <input
                 type="datetime"
                 v-model="data.endTime"
-                class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
           </div>
@@ -615,7 +616,7 @@
             <input
               type="text"
               v-model="data.title"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -625,7 +626,7 @@
             <input
               v-model="data.class"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
           <div>
@@ -635,7 +636,7 @@
             <input
               type="date"
               v-model="data.date"
-              class="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
         </template>
