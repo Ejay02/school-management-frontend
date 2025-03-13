@@ -72,10 +72,10 @@ import EventsTable from "./eventsTable.vue";
 
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
-import { ref, computed, onMounted, onUnmounted } from "vue";
 import LoadingScreen from "../loadingScreen.vue";
 import { useUserStore } from "../../store/userStore";
 import { useEventStore } from "../../store/eventStore";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useStorageSync } from "../../composables/useStorageSync";
 
 const eventStore = useEventStore();

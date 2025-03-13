@@ -3,8 +3,11 @@
     <div
       class="min-h-screen bg-gray-50 p-4 rounded-md flex-1 m-1 mt-0 shadow-xl"
     >
+      <LoadingScreen v-if="loading" message="Loading announcements..." />
+
+      <ErrorScreen v-else-if="error" />
       <!-- Main content view -->
-      <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main v-else class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="">
           <div
             class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between"
@@ -122,12 +125,13 @@
           </div>
 
           <!-- MAIN VIEW: Announcements List -->
+
           <div
-            v-if="activeView === 'main' && filteredAnnouncements.length"
+            v-if="activeView === 'main' && announcements.length"
             class="space-y-4 border-t pt-4"
           >
             <div
-              v-for="announcement in filteredAnnouncements"
+              v-for="announcement in announcements"
               :key="announcement.id"
               class="bg-white rounded-lg shadow-sm overflow-hidden transition-all hover:shadow-md"
               :class="{ 'border-l-4 border-indigo-500': !announcement.isRead }"
@@ -179,6 +183,11 @@
 
                 <div class="mt-4 flex justify-between items-center">
                   <div class="flex items-center text-sm text-gray-500">
+                    Posted by
+                    <span>{{ creatorName }}</span>
+                  </div>
+
+                  <!-- <div class="flex items-center text-sm text-gray-500">
                     <span>
                       Posted by
                       {{ formatCreatorRole(announcement.creatorRole) }}
@@ -186,7 +195,7 @@
                         >({{ announcement.class.name }})</span
                       >
                     </span>
-                  </div>
+                  </div> -->
                   <div class="flex space-x-2">
                     <button
                       v-if="!announcement.isRead"
@@ -308,8 +317,8 @@
           </div>
         </div>
 
+        <!-- Empty state for main view -->
         <div>
-          <!-- Empty state for main view -->
           <!-- class="bg-white rounded-lg shadow-sm p-12 text-center" -->
           <div
             v-if="activeView === 'main' && !filteredAnnouncements.length"
@@ -485,7 +494,7 @@
         </div>
 
         <!-- Real-time notification snackbar -->
-        <div
+        <!-- <div
           v-if="notification.show"
           class="fixed bottom-4 right-4 bg-indigo-600 text-white px-4 py-2 rounded-md shadow-lg transition-all duration-300"
           :class="{
@@ -494,107 +503,55 @@
           }"
         >
           <p>{{ notification.message }}</p>
-        </div>
+        </div> -->
       </main>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from "vue";
 import EmptyState from "../emptyState.vue";
+import { ref, computed, onMounted, watch } from "vue";
+import { useUserStore } from "../../store/userStore";
+import { formatDate } from "../../utils/date.holidays";
+import { useAnnouncementStore } from "../../store/announcementStore";
+import LoadingScreen from "../loadingScreen.vue";
+import ErrorScreen from "../errorScreen.vue";
 
-// Role enum to match backend
-const Roles = {
-  SUPER_ADMIN: "SUPER_ADMIN",
-  ADMIN: "ADMIN",
-  TEACHER: "TEACHER",
-  STUDENT: "STUDENT",
-  PARENT: "PARENT",
-};
+const announcementStore = useAnnouncementStore();
 
-// Mock user state - would be from auth store in real app
-const currentUser = ref({
-  id: "user123",
-  role: Roles.TEACHER, // Change to test different roles
-  name: "John Smith",
-});
+const announcements = computed(() => announcementStore?.announcements);
+console.log('announcements:', announcements)
 
-const userRole = computed(() => {
-  const roles = {
-    [Roles.SUPER_ADMIN]: "Super Admin",
-    [Roles.ADMIN]: "Admin",
-    [Roles.TEACHER]: "Teacher",
-    [Roles.STUDENT]: "Student",
-    [Roles.PARENT]: "Parent",
-  };
-  return roles[currentUser.value.role] || "User";
-});
+const loading = computed(() => announcementStore.loading);
+const error = computed(() => announcementStore.error);
 
-const userInitials = computed(() => {
-  const nameParts = currentUser.value.name.split(" ");
-  if (nameParts.length > 1) {
-    return `${nameParts[0][0]}${nameParts[1][0]}`;
+const userStore = useUserStore();
+
+const creators = ref({});
+const creatorName = ref("");
+
+const creatorIds = computed(() => announcements.value.map((a) => a.creatorId));
+
+console.log("creatorId:", creatorIds);
+
+async function fetchCreatorName() {
+  try {
+    const user = await user.findUserById(creatorIds);
+    console.log("user:", user);
+    // creatorName.value = user.name;
+    // creatorSurname.value = user.surname;
+  } catch (error) {
+    console.error("Error fetching creator details:", error);
+    creatorName.value = "Unknown";
   }
-  return nameParts[0].substring(0, 2).toUpperCase();
+}
+
+onMounted(() => {
+  fetchCreatorName();
 });
 
-// Role-based computed properties
-const isAdmin = computed(() =>
-  [Roles.ADMIN, Roles.SUPER_ADMIN].includes(currentUser.value.role)
-);
-
-const isTeacher = computed(() => currentUser.value.role === Roles.TEACHER);
-const isStudent = computed(() => currentUser.value.role === Roles.STUDENT);
-const isParent = computed(() => currentUser.value.role === Roles.PARENT);
-const isAdminOrTeacher = computed(() => isAdmin.value || isTeacher.value);
-
-const canCreateAnnouncement = computed(() =>
-  [Roles.ADMIN, Roles.SUPER_ADMIN, Roles.TEACHER].includes(
-    currentUser.value.role
-  )
-);
-
-// Mock classes for teachers
-const userClasses = ref([
-  { id: "class1", name: "Grade 10-A" },
-  { id: "class2", name: "Grade 11-B" },
-  { id: "class3", name: "Grade 9-C" },
-]);
-
-// Available target roles based on user's role
-const availableTargetRoles = computed(() => {
-  if (isAdmin.value) {
-    return [
-      { value: Roles.TEACHER, label: "All Teachers" },
-      { value: Roles.STUDENT, label: "All Students" },
-      { value: Roles.PARENT, label: "All Parents" },
-    ];
-  }
-
-  if (isTeacher.value) {
-    return [
-      { value: Roles.STUDENT, label: "Students" },
-      { value: Roles.PARENT, label: "Parents" },
-    ];
-  }
-
-  return [];
-});
-
-// Announcement state
-const announcements = ref([]);
-const archivedAnnouncements = ref([]); // New: store for archived announcements
-const unreadCount = ref(0);
-const searchQuery = ref("");
-const archiveSearchQuery = ref(""); // New: separate search for archives
-const selectedCategory = ref("");
-const selectedTargetRole = ref("");
-const showNewAnnouncementModal = ref(false);
 const editingAnnouncement = ref(null);
-const notification = ref({ show: false, message: "" });
-const activeView = ref("main"); // New: track active view (main/archive)
-
 const announcementForm = ref({
   title: "",
   content: "",
@@ -602,269 +559,25 @@ const announcementForm = ref({
   classId: "",
 });
 
-// Filter announcements
-const filteredAnnouncements = computed(() => {
-  return announcements.value
-    .filter((announcement) => {
-      // Filter by search query
-      if (
-        searchQuery.value &&
-        !announcement.title
-          .toLowerCase()
-          .includes(searchQuery.value.toLowerCase()) &&
-        !announcement.content
-          .toLowerCase()
-          .includes(searchQuery.value.toLowerCase())
-      ) {
-        return false;
-      }
+// State
+const activeView = ref("main");
+const searchQuery = ref("");
+const archiveSearchQuery = ref("");
+const selectedCategory = ref("");
+const selectedTargetRole = ref("");
+const showNewAnnouncementModal = ref(false);
 
-      // Filter by category (class vs general)
-      if (selectedCategory.value === "class" && !announcement.classId) {
-        return false;
-      }
+// Computed properties
+const availableTargetRoles = computed(() => [
+  { value: "STUDENT", label: "Students" },
+  { value: "TEACHER", label: "Teachers" },
+  { value: "PARENT", label: "Parents" },
+]);
 
-      if (selectedCategory.value === "general" && announcement.classId) {
-        return false;
-      }
-
-      // Filter by target role
-      if (
-        selectedTargetRole.value &&
-        (!announcement.targetRoles ||
-          !announcement.targetRoles.includes(selectedTargetRole.value))
-      ) {
-        return false;
-      }
-
-      return true;
-    })
-    .sort((a, b) => {
-      // Unread first, then sort by date
-      if (a.isRead !== b.isRead) {
-        return a.isRead ? 1 : -1;
-      }
-      return (
-        new Date(b.createdAt || b.updatedAt) -
-        new Date(a.createdAt || a.updatedAt)
-      );
-    });
+const userClasses = computed(() => {
+  return userStore.userInfo?.classes || [];
 });
 
-// New: Filter archived announcements
-const filteredArchivedAnnouncements = computed(() => {
-  return archivedAnnouncements.value
-    .filter((announcement) => {
-      // Only filter by archive search query
-      if (
-        archiveSearchQuery.value &&
-        !announcement.title
-          .toLowerCase()
-          .includes(archiveSearchQuery.value.toLowerCase()) &&
-        !announcement.content
-          .toLowerCase()
-          .includes(archiveSearchQuery.value.toLowerCase())
-      ) {
-        return false;
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      // Most recently archived first
-      return (
-        new Date(b.archivedAt || b.updatedAt || b.createdAt) -
-        new Date(a.archivedAt || a.updatedAt || a.createdAt)
-      );
-    });
-});
-
-// Format date for display
-const formatDate = (dateString) => {
-  if (!dateString) return "";
-
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-};
-
-// Format target roles for display
-const formatTargetRoles = (roles) => {
-  if (!roles || !roles.length) return "";
-
-  const roleMap = {
-    [Roles.TEACHER]: "Teachers",
-    [Roles.STUDENT]: "Students",
-    [Roles.PARENT]: "Parents",
-  };
-
-  return roles.map((role) => roleMap[role] || role).join(", ");
-};
-
-// Format creator role for display
-const formatCreatorRole = (role) => {
-  const roleMap = {
-    [Roles.SUPER_ADMIN]: "Admin",
-    [Roles.ADMIN]: "Admin",
-    [Roles.TEACHER]: "Teacher",
-  };
-
-  return roleMap[role] || role;
-};
-
-// Check if user can edit announcement
-const canEditAnnouncement = (announcement) => {
-  if (isAdmin.value) return true;
-
-  if (isTeacher.value) {
-    // Teachers can edit their own announcements
-    return announcement.creatorId === currentUser.value.id;
-  }
-
-  return false;
-};
-
-// Check if user can delete announcement
-const canDeleteAnnouncement = (announcement) => {
-  if (isAdmin.value) return true;
-
-  if (isTeacher.value) {
-    // Teachers can delete their own announcements
-    return announcement.creatorId === currentUser.value.id;
-  }
-
-  return false;
-};
-
-// Edit announcement
-const editAnnouncement = (announcement) => {
-  editingAnnouncement.value = announcement;
-  announcementForm.value = {
-    title: announcement.title,
-    content: announcement.content,
-    targetRoles: [...(announcement.targetRoles || [])],
-    classId: announcement.classId || "",
-  };
-  showNewAnnouncementModal.value = true;
-};
-
-// Delete announcement
-const deleteAnnouncement = async (id) => {
-  if (confirm("Are you sure you want to delete this announcement?")) {
-    try {
-      // This would be an API call in a real app
-      // await api.delete(`/announcements/${id}`);
-
-      // For now, just remove from local state
-      announcements.value = announcements.value.filter((a) => a.id !== id);
-
-      // Show notification
-      showNotification("Announcement deleted successfully");
-    } catch (error) {
-      console.error("Failed to delete announcement", error);
-      showNotification("Failed to delete announcement");
-    }
-  }
-};
-
-// Mark as read
-const markAsRead = async (id) => {
-  try {
-    // This would be an API call in a real app
-    // await api.post(`/announcements/${id}/read`);
-
-    // Update local state
-    const index = announcements.value.findIndex((a) => a.id === id);
-    if (index !== -1) {
-      announcements.value[index].isRead = true;
-
-      // Update unread count
-      unreadCount.value = Math.max(0, unreadCount.value - 1);
-    }
-  } catch (error) {
-    console.error("Failed to mark announcement as read", error);
-  }
-};
-
-// Hide announcement (personal delete)
-const hideAnnouncement = async (id) => {
-  try {
-    // This would be an API call in a real app
-    // await api.post(`/announcements/${id}/hide`);
-
-    // For now, just remove from local state
-    announcements.value = announcements.value.filter((a) => a.id !== id);
-
-    // Show notification
-    showNotification("Announcement hidden");
-  } catch (error) {
-    console.error("Failed to hide announcement", error);
-    showNotification("Failed to hide announcement");
-  }
-};
-
-// Save announcement
-const saveAnnouncement = async () => {
-  try {
-    const formData = {
-      ...announcementForm.value,
-      // Add required fields based on role
-      creatorId: currentUser.value.id,
-      creatorRole: currentUser.value.role,
-    };
-
-    let savedAnnouncement;
-
-    if (editingAnnouncement.value) {
-      // Update existing announcement - would be API call in real app
-      // const response = await api.put(`/announcements/${editingAnnouncement.value.id}`, formData);
-      // savedAnnouncement = response.data;
-
-      // For now, update locally
-      const index = announcements.value.findIndex(
-        (a) => a.id === editingAnnouncement.value.id
-      );
-      if (index !== -1) {
-        savedAnnouncement = {
-          ...announcements.value[index],
-          ...formData,
-          updatedAt: new Date().toISOString(),
-        };
-        announcements.value[index] = savedAnnouncement;
-      }
-
-      showNotification("Announcement updated successfully");
-    } else {
-      // Create new announcement - would be API call in real app
-      // const response = await api.post('/announcements', formData);
-      // savedAnnouncement = response.data;
-
-      // For now, create locally
-      savedAnnouncement = {
-        ...formData,
-        id: `ann_${Date.now()}`,
-        createdAt: new Date().toISOString(),
-        isRead: true, // Creator has read their own announcement
-      };
-      announcements.value.unshift(savedAnnouncement);
-
-      showNotification("Announcement published successfully");
-    }
-
-    // Reset form and close modal
-    resetForm();
-    showNewAnnouncementModal.value = false;
-  } catch (error) {
-    console.error("Failed to save announcement", error);
-    showNotification("Failed to save announcement");
-  }
-};
-
-// Reset form
 const resetForm = () => {
   announcementForm.value = {
     title: "",
@@ -875,128 +588,194 @@ const resetForm = () => {
   editingAnnouncement.value = null;
 };
 
-// Show notification
-const showNotification = (message) => {
-  notification.value = { show: true, message };
+// const announcements = computed(() => {
+//   const data = announcementStore.announcements;
+//   return Array.isArray(data) ? data : [];
+// });
 
-  // Auto-hide after 3 seconds
-  setTimeout(() => {
-    notification.value.show = false;
-  }, 3000);
-};
+const archivedAnnouncements = computed(() => {
+  // Temporarily return empty array until archive endpoint is ready
+  return [];
+});
 
-// Mock WebSocket for real-time updates
-let mockWebSocket = null;
+const filteredAnnouncements = computed(() => {
+  let filtered = announcements.value;
 
-const setupWebSocketListeners = () => {
-  // This would be a real WebSocket in production
-  mockWebSocket = {
-    onNewAnnouncement: (data) => {
-      // Add new announcement to the list
-      const newAnnouncement = {
-        ...data,
-        isRead: false,
-      };
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(
+      (a) =>
+        a.title.toLowerCase().includes(query) ||
+        a.content.toLowerCase().includes(query)
+    );
+  }
 
-      announcements.value.unshift(newAnnouncement);
-      unreadCount.value++;
+  if (selectedCategory.value) {
+    filtered = filtered.filter((a) =>
+      selectedCategory.value === "class" ? a.classId : !a.classId
+    );
+  }
 
-      showNotification("New announcement received");
-    },
+  if (selectedTargetRole.value) {
+    filtered = filtered.filter((a) =>
+      a.targetRoles?.includes(selectedTargetRole.value)
+    );
+  }
 
-    onAnnouncementUpdated: (data) => {
-      // Update existing announcement
-      const index = announcements.value.findIndex((a) => a.id === data.id);
-      if (index !== -1) {
-        announcements.value[index] = {
-          ...announcements.value[index],
-          ...data,
-          updatedAt: new Date().toISOString(),
-        };
+  return filtered;
+});
 
-        showNotification("An announcement has been updated");
-      }
-    },
+const filteredArchivedAnnouncements = computed(() => {
+  if (!archiveSearchQuery.value) return archivedAnnouncements.value;
 
-    disconnect: () => {
-      // Clean up websocket
-      console.log("WebSocket disconnected");
-    },
+  const query = archiveSearchQuery.value.toLowerCase();
+  return archivedAnnouncements.value.filter(
+    (a) =>
+      a.title.toLowerCase().includes(query) ||
+      a.content.toLowerCase().includes(query)
+  );
+});
+
+const editAnnouncement = (announcement) => {
+  editingAnnouncement.value = announcement;
+  announcementForm.value = {
+    title: announcement.title,
+    content: announcement.content,
+    targetRoles: announcement.targetRoles || [],
+    classId: announcement.classId || "",
   };
+  showNewAnnouncementModal.value = true;
 };
 
-// Fetch announcements and unread count
-const fetchAnnouncements = async () => {
+const showNotification = (message, type = "success") => {
+  console.log(`${type}: ${message}`);
+};
+// Permissions
+const isAdminOrTeacher = computed(() => {
+  const role = userStore.userInfo?.role?.toLowerCase();
+  return role === "admin" || role === "teacher" || role === "super_admin";
+});
+
+const isAdmin = computed(() => {
+  const role = userStore.userInfo?.role?.toLowerCase();
+  return role === "admin" || role === "super_admin";
+});
+
+const isTeacher = computed(() => {
+  return userStore.userInfo?.role?.toLowerCase() === "teacher";
+});
+
+const canCreateAnnouncement = computed(() => isAdminOrTeacher.value);
+
+const saveAnnouncement = async () => {
   try {
-    // This would be an API call in a real app
-    // const response = await api.get('/announcements', { params: { page: 1, limit: 20 } });
-    // announcements.value = response.data.items;
+    const formData = {
+      ...announcementForm.value,
+      creatorId: userStore.userInfo?.id,
+      creatorRole: userStore.userInfo?.role,
+    };
 
-    // For now, use mock data
-    announcements.value = [
-      {
-        id: "ann1",
-        title: "School Closed Due to Weather",
-        content:
-          "Due to the expected snowstorm, school will be closed tomorrow. Stay safe and warm!",
-        creatorId: "admin1",
-        creatorRole: Roles.ADMIN,
-        targetRoles: [Roles.TEACHER, Roles.STUDENT, Roles.PARENT],
-        createdAt: "2025-03-10T08:00:00Z",
-        isRead: false,
-      },
-      {
-        id: "ann2",
-        title: "Parent-Teacher Conference Schedule",
-        content:
-          "The parent-teacher conferences are scheduled for next week. Please check the attached schedule and sign up for your preferred time slot.",
-        creatorId: currentUser.value.id,
-        creatorRole: Roles.TEACHER,
-        classId: "class1",
-        targetRoles: [Roles.PARENT],
-        createdAt: "2025-03-09T14:30:00Z",
-        isRead: true,
-      },
-      {
-        id: "ann3",
-        title: "Math Quiz Reminder",
-        content:
-          "Reminder that the algebra quiz will be held tomorrow. Topics covered: linear equations, quadratic functions, and polynomials.",
-        creatorId: currentUser.value.id,
-        creatorRole: Roles.TEACHER,
-        classId: "class2",
-        createdAt: "2025-03-08T10:15:00Z",
-        isRead: false,
-      },
-      {
-        id: "ann4",
-        title: "New Curriculum Updates",
-        content:
-          "Please review the updated curriculum guidelines for the next semester. Important changes have been made to the science and math programs.",
-        creatorId: "admin2",
-        creatorRole: Roles.ADMIN,
-        targetRoles: [Roles.TEACHER],
-        createdAt: "2025-03-07T09:00:00Z",
-        isRead: false,
-      },
-    ];
+    if (editingAnnouncement.value) {
+      await announcementStore.updateAnnouncement(
+        editingAnnouncement.value.id,
+        formData
+      );
+      showNotification("Announcement updated successfully");
+    } else {
+      await announcementStore.createAnnouncement(formData);
+      showNotification("Announcement published successfully");
+    }
 
-    // Count unread announcements
-    unreadCount.value = announcements.value.filter((a) => !a.isRead).length;
+    resetForm();
+    showNewAnnouncementModal.value = false;
   } catch (error) {
-    console.error("Failed to fetch announcements", error);
+    console.error("Failed to save announcement", error);
+    showNotification("Failed to save announcement", "error");
   }
 };
 
-// Lifecycle hooks
-onMounted(() => {
-  fetchAnnouncements();
-  setupWebSocketListeners();
-});
+const canEditAnnouncement = (announcement) => {
+  const userId = userStore.userInfo?.id;
+  const userRole = userStore.userInfo?.role?.toLowerCase();
+  return (
+    userRole === "admin" ||
+    userRole === "super_admin" ||
+    announcement.creatorId === userId
+  );
+};
 
-onUnmounted(() => {
-  if (mockWebSocket) {
-    mockWebSocket.disconnect();
+const canDeleteAnnouncement = canEditAnnouncement;
+
+// Actions
+const markAsRead = async (id) => {
+  try {
+    await announcementStore.markAsRead(id);
+  } catch (error) {
+    console.error("Failed to mark as read:", error);
+  }
+};
+
+const archiveAnnouncement = async (announcement) => {
+  try {
+    await announcementStore.archiveAnnouncement(announcement.id);
+  } catch (error) {
+    console.error("Failed to archive:", error);
+  }
+};
+
+const restoreAnnouncement = async (announcement) => {
+  try {
+    await announcementStore.restoreAnnouncement(announcement.id);
+  } catch (error) {
+    console.error("Failed to restore:", error);
+  }
+};
+
+const deleteAnnouncement = async (id) => {
+  if (!confirm("Are you sure you want to delete this announcement?")) return;
+
+  try {
+    await announcementStore.deleteAnnouncement(id);
+  } catch (error) {
+    console.error("Failed to delete:", error);
+  }
+};
+
+// Helpers
+const formatTargetRoles = (roles) => {
+  return roles.map((role) => role.toLowerCase()).join(", ");
+};
+
+const formatCreatorRole = (role) => {
+  return role?.toLowerCase() || "unknown";
+};
+
+const handleViewChange = async (newView) => {
+  if (newView === "main") {
+    await announcementStore.fetchAnnouncements();
+  } else if (newView === "archive") {
+    console.log("Archive feature coming soon");
+    // Uncomment when archive endpoint is ready
+    // await announcementStore.fetchArchivedAnnouncements();
+  }
+};
+
+watch(activeView, handleViewChange);
+
+// Update lifecycle hook
+onMounted(async () => {
+  try {
+    await announcementStore.fetchAnnouncements();
+    // Remove or comment out archived announcements fetch
+    // await announcementStore.fetchArchivedAnnouncements();
+  } catch (error) {
+    console.error("Failed to fetch announcements:", error);
   }
 });
+
+// onMounted(async () => {
+//   if (creatorId) {
+//     creator.value = await findUserById(props.creatorId, apolloClient);
+//   }
+// });
 </script>

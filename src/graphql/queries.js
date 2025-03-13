@@ -400,7 +400,7 @@ export const getEvents = gql`
       class {
         id
         name
-        students{
+        students {
           id
           name
           surname
@@ -430,7 +430,7 @@ export const getEventById = gql`
       class {
         id
         name
-        students{
+        students {
           id
           name
           surname
@@ -495,8 +495,51 @@ export const getUserById = gql`
         email
         img
         teacherRole: role
-     
       }
     }
+  }
+`;
+
+export const getAllAnnouncements = gql`
+  query getAllAnnouncements($params: PaginationInput) {
+    getAllAnnouncements(params: $params) {
+      id
+      title
+      content
+      classId
+      class {
+        id
+        name
+      }
+      creatorId
+      creatorRole
+      targetRoles
+      createdAt
+    }
+  }
+`;
+
+export const getAnnouncementById = gql`
+  query getAnnouncementById($id: String!) {
+    getAnnouncementById(id: $id) {
+      id
+      title
+      content
+      classId
+      class {
+        id
+        name
+      }
+      creatorId
+      creatorRole
+      targetRoles
+      createdAt
+    }
+  }
+`;
+
+export const getUnreadAnnouncementsCount = gql`
+  query getUnreadAnnouncementsCount {
+    getUnreadAnnouncementsCount
   }
 `;

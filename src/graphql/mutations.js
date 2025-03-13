@@ -163,8 +163,81 @@ export const markEventAsRead = gql`
     markEventAsRead(eventId: $eventId)
   }
 `;
+
 export const deleteEvent = gql`
   mutation deleteEvent($eventId: String!) {
     deleteEvent(eventId: $eventId)
   }
 `;
+
+export const createAnnouncement = `
+  mutation createAnnouncement($input: CreateAnnouncementInput!) {
+    createAnnouncement(input: $input) {
+      id
+      title
+      content
+      createdAt
+      classId
+      creatorId
+      creatorRole
+      targetRoles
+    }
+  }
+`;
+
+export const updateAnnouncement = `
+  mutation updateAnnouncement($id: ID!, $input: UpdateAnnouncementInput!) {
+    updateAnnouncement(id: $id, input: $input) {
+      id
+      title
+      content
+      updatedAt
+      classId
+      targetRoles
+    }
+  }
+`;
+
+export const deleteAnnouncement = `
+  mutation deleteAnnouncement($id: ID!) {
+    deleteAnnouncement(id: $id)
+  }
+`;
+
+export const markAnnouncementAsRead = `
+  mutation markAnnouncementAsRead($id: ID!) {
+    markAnnouncementAsRead(id: $id) {
+      id
+      isRead
+    }
+  }
+`;
+
+export const archiveAnnouncement = `
+  mutation archiveAnnouncement($id: ID!) {
+    archiveAnnouncement(id: $id) {
+      id
+      archivedAt
+    }
+  }
+`;
+
+export const restoreAnnouncement = `
+  mutation restoreAnnouncement($id: ID!) {
+    restoreAnnouncement(id: $id) {
+      id
+    }
+  }
+`;
+
+export const globalAnnouncementDelete = gql`
+  mutation globalAnnouncementDelete($announcementId: String!) {
+    globalAnnouncementDelete(announcementId: $announcementId)
+  }
+`;
+export const personalAnnouncementDelete = gql`
+  mutation personalAnnouncementDelete($announcementId: String!) {
+    personalAnnouncementDelete(announcementId: $announcementId)
+  }
+`;
+
