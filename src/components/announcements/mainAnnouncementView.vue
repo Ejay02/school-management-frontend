@@ -168,13 +168,14 @@
 </template>
 
 <script setup>
+import ErrorScreen from "../errorScreen.vue";
+import EmptyState from "../emptyState.vue";
+import LoadingScreen from "../loadingScreen.vue";
+import { useUserStore } from "../../store/userStore";
 import { ref, computed, watch, onMounted } from "vue";
 import { formatDate } from "../../utils/date.holidays";
+import { useApolloClient } from "@vue/apollo-composable";
 import { useAnnouncementStore } from "../../store/announcementStore";
-import { useUserStore } from "../../store/userStore";
-import LoadingScreen from "../loadingScreen.vue";
-import EmptyState from "../emptyState.vue";
-import ErrorScreen from "../errorScreen.vue";
 
 const announcementStore = useAnnouncementStore();
 const userStore = useUserStore();
@@ -231,30 +232,39 @@ const isAdminOrTeacher = computed(() => {
   return role === "admin" || role === "teacher" || role === "super_admin";
 });
 
-// Methods
+const getCreatorName = (creatorId) => {
+  if (!creatorId) return "Unknown";
+  const creator = creators.value[creatorId];
+  if (!creator) return "Unknown";
+
+  return creator.name
+    ? `${creator.name} ${creator.surname || ""}`.trim()
+    : creator.username || creator.email || "Unknown";
+};
+
+const { client: apolloClient } = useApolloClient();
+
 const fetchCreatorDetails = async () => {
   try {
     const uniqueCreatorIds = [
-      ...new Set(announcements.value.map((a) => a.creatorId)),
+      ...new Set(
+        announcements.value.filter((a) => a.creatorId).map((a) => a.creatorId)
+      ),
     ];
+
     for (const creatorId of uniqueCreatorIds) {
-      if (!creatorId || creators.value[creatorId]) continue;
-      const userData = await userStore.findUserById(creatorId);
-      if (userData) {
-        creators.value[creatorId] = userData;
+      if (!creators.value[creatorId]) {
+        const userData = await userStore.findUserById(creatorId, apolloClient);
+        if (userData) {
+          creators.value[creatorId] = userData;
+        } else {
+          creators.value[creatorId] = { username: "Unknown" };
+        }
       }
     }
   } catch (error) {
     console.error("Error fetching creator details:", error);
   }
-};
-
-const getCreatorName = (creatorId) => {
-  const creator = creators.value[creatorId];
-  if (!creator) return "Unknown";
-  return creator.name
-    ? `${creator.name} ${creator.surname || ""}`.trim()
-    : creator.username || creator.email || "Unknown";
 };
 
 const canEditAnnouncement = (announcement) => {
