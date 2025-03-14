@@ -112,30 +112,28 @@ export const useUserStore = defineStore("user", () => {
 
   const findUserById = async (id, apolloClient) => {
     if (!id) return null;
-
+  
     // Check cache first
     if (userCache.value[id]) {
       return userCache.value[id];
     }
-
+  
     try {
       const { data } = await apolloClient.query({
         query: getUserById,
         variables: { id },
-        fetchPolicy: "network-only", // Ensures fresh data
+        fetchPolicy: "network-only",
       });
-
+  
       if (data?.getUserById) {
-        userCache.value[id] = data.getUserById; // Cache the result
+        userCache.value[id] = data.getUserById;
         return data.getUserById;
       }
+      return null;
     } catch (error) {
-      notificationStore.addNotification({
-        type: "error",
-        message: "Failed to fetch user details.",
-      });
+      console.warn(`Failed to fetch user details for ID ${id}:`, error);
+      return null;
     }
-    return null;
   };
 
   return {

@@ -501,7 +501,7 @@ export const getUserById = gql`
 `;
 
 export const getAllAnnouncements = gql`
-  query getAllAnnouncements($params: PaginationInput) {
+  query getAllAnnouncements($params: AnnouncementQueryInput) {
     getAllAnnouncements(params: $params) {
       id
       title
@@ -514,6 +514,8 @@ export const getAllAnnouncements = gql`
       creatorId
       creatorRole
       targetRoles
+      isArchived
+      archivedAt
       createdAt
     }
   }

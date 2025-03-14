@@ -38,6 +38,7 @@ import TeamSetting from "../components/settingsComponents/teamSetting.vue";
 import IntegrationSetting from "../components/settingsComponents/integrationSetting.vue";
 import Attendance from "../components/attendance/attendance.vue";
 import EventView from "../components/events/eventView.vue";
+import AnnouncementView from "../components/announcements/announcementView.vue";
 
 const publicRoutes = [
   "Home",
@@ -197,6 +198,14 @@ const routes = [
         path: "/announcements",
         name: "Announcements",
         component: Announcements,
+      },
+      {
+        path: "/announcements/:id",
+        name: "AnnouncementView",
+        component: AnnouncementView,
+        meta: {
+          requiresAuth: true,
+        },
       },
       {
         path: "/attendance",

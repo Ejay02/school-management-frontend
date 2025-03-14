@@ -1,0 +1,319 @@
+<template>
+  <div>
+    <div v-if="loading" class="flex justify-center items-center py-8">
+      <LoadingScreen message="Loading announcements..." />
+    </div>
+    <div v-else-if="error" class="flex justify-center items-center py-8">
+      <ErrorScreen :message="error" />
+    </div>
+    <div
+      v-else-if="!filteredAnnouncements.length"
+      class="flex justify-center items-center py-8"
+    >
+      <EmptyState
+        icon="fa-solid fa-bell"
+        heading="No announcements found"
+        description="Check back later for updates"
+      />
+    </div>
+    <div v-else>
+      <!-- Filters -->
+      <div class="mb-6 bg-white rounded-lg shadow-sm p-4">
+        <div
+          class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4"
+        >
+          <div class="relative flex-1">
+            <input
+              type="text"
+              v-model="searchQuery"
+              placeholder="Search announcements..."
+              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+          <div
+            class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2"
+          >
+            <select
+              v-model="selectedCategory"
+              class="px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-gray-700"
+            >
+              <option value="">All Categories</option>
+              <option value="class">Class Announcements</option>
+              <option value="general">General Announcements</option>
+            </select>
+            <select
+              v-if="isAdminOrTeacher"
+              v-model="selectedTargetRole"
+              class="px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-gray-700"
+            >
+              <option value="">All Audiences</option>
+              <option
+                v-for="role in availableTargetRoles"
+                :key="role.value"
+                :value="role.value"
+              >
+                {{ role.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Announcements list -->
+      <div class="space-y-4 border-t pt-4">
+        <div
+          v-for="announcement in filteredAnnouncements"
+          :key="announcement.id"
+          class="bg-white rounded-lg shadow-sm overflow-hidden transform transition-all hover:scale-105 hover:shadow-xl"
+          :class="{ 'border-l-4 border-indigo-500': !announcement.isRead }"
+        >
+          <div class="p-6">
+            <router-link
+              :to="`/announcements/${announcement.id}`"
+              class="block cursor-pointer"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span
+                    :class="{
+                      'bg-blue-100 text-blue-800': announcement.classId,
+                      'bg-purple-100 text-purple-800': !announcement.classId,
+                    }"
+                    class="px-2 py-1 text-xs font-medium rounded-md"
+                  >
+                    {{
+                      announcement.classId
+                        ? announcement.class?.name || "Class"
+                        : "General"
+                    }}
+                  </span>
+                  <span
+                    v-if="
+                      announcement.targetRoles &&
+                      announcement.targetRoles.length
+                    "
+                    class="px-2 py-1 text-xs font-medium rounded-md bg-teal-100 text-teal-800"
+                  >
+                    For: {{ formatTargetRoles(announcement.targetRoles) }}
+                  </span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <span
+                    v-if="!announcement.isRead"
+                    class="h-2 w-2 rounded-full bg-indigo-500"
+                  ></span>
+                  <p class="text-sm text-gray-500">
+                    {{
+                      formatDate(
+                        announcement.createdAt || announcement.updatedAt
+                      )
+                    }}
+                  </p>
+                </div>
+              </div>
+
+              <h3 class="mt-3 text-lg font-medium text-gray-900">
+                {{ announcement.title }}
+              </h3>
+              <div
+                class="mt-2 text-sm text-gray-600"
+                v-html="announcement.content"
+              ></div>
+            </router-link>
+
+            <div class="mt-4 flex justify-between items-center">
+              <small>
+                Posted by:
+                <span>
+                  {{ getCreatorName(announcement.creatorId) }}
+                </span>
+              </small>
+
+              <div class="flex space-x-2">
+                <button
+                  v-if="!announcement.isRead"
+                  @click="markAsRead(announcement.id)"
+                  class="text-indigo-600 hover:text-indigo-400 text-sm font-medium transform transition-all hover:scale-105"
+                >
+                  Mark as Read
+                </button>
+                <button
+                  v-if="canEditAnnouncement(announcement)"
+                  @click="$emit('edit-announcement', announcement)"
+                  class="text-indigo-600 hover:text-indigo-400 text-sm font-medium transform transition-all hover:scale-105"
+                >
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button
+                  v-if="canDeleteAnnouncement(announcement)"
+                  @click="deleteAnnouncement(announcement.id)"
+                  class="text-red-600 hover:text-red-400 text-sm font-medium transform transition-all hover:scale-105"
+                >
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+                <button
+                  v-else
+                  @click="archiveAnnouncement(announcement)"
+                  class="text-gray-600 hover:text-gray-800 text-sm font-medium"
+                >
+                  <i class="fa-solid fa-box-archive"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, watch, onMounted } from "vue";
+import { formatDate } from "../../utils/date.holidays";
+import { useAnnouncementStore } from "../../store/announcementStore";
+import { useUserStore } from "../../store/userStore";
+import LoadingScreen from "../loadingScreen.vue";
+import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
+
+const announcementStore = useAnnouncementStore();
+const userStore = useUserStore();
+
+// State
+const searchQuery = ref("");
+const selectedCategory = ref("");
+const selectedTargetRole = ref("");
+const creators = ref({});
+
+// Computed properties
+const loading = computed(() => announcementStore.loading);
+const error = computed(() => announcementStore.error);
+
+const announcements = computed(
+  () => announcementStore.announcements?.filter((a) => !a.isArchived) || []
+);
+
+const filteredAnnouncements = computed(() => {
+  let filtered = announcements.value;
+
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(
+      (a) =>
+        a.title.toLowerCase().includes(query) ||
+        a.content.toLowerCase().includes(query)
+    );
+  }
+
+  if (selectedCategory.value) {
+    filtered = filtered.filter((a) =>
+      selectedCategory.value === "class" ? a.classId : !a.classId
+    );
+  }
+
+  if (selectedTargetRole.value) {
+    filtered = filtered.filter((a) =>
+      a.targetRoles?.includes(selectedTargetRole.value)
+    );
+  }
+
+  return filtered;
+});
+
+const availableTargetRoles = computed(() => [
+  { value: "STUDENT", label: "Students" },
+  { value: "TEACHER", label: "Teachers" },
+  { value: "PARENT", label: "Parents" },
+]);
+
+const isAdminOrTeacher = computed(() => {
+  const role = userStore.userInfo?.role?.toLowerCase();
+  return role === "admin" || role === "teacher" || role === "super_admin";
+});
+
+// Methods
+const fetchCreatorDetails = async () => {
+  try {
+    const uniqueCreatorIds = [
+      ...new Set(announcements.value.map((a) => a.creatorId)),
+    ];
+    for (const creatorId of uniqueCreatorIds) {
+      if (!creatorId || creators.value[creatorId]) continue;
+      const userData = await userStore.findUserById(creatorId);
+      if (userData) {
+        creators.value[creatorId] = userData;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching creator details:", error);
+  }
+};
+
+const getCreatorName = (creatorId) => {
+  const creator = creators.value[creatorId];
+  if (!creator) return "Unknown";
+  return creator.name
+    ? `${creator.name} ${creator.surname || ""}`.trim()
+    : creator.username || creator.email || "Unknown";
+};
+
+const canEditAnnouncement = (announcement) => {
+  const userId = userStore.userInfo?.id;
+  const userRole = userStore.userInfo?.role?.toLowerCase();
+  return (
+    userRole === "admin" ||
+    userRole === "super_admin" ||
+    announcement.creatorId === userId
+  );
+};
+
+const canDeleteAnnouncement = canEditAnnouncement;
+
+const markAsRead = async (id) => {
+  try {
+    await announcementStore.markAsRead(id);
+  } catch (error) {
+    console.error("Failed to mark as read:", error);
+  }
+};
+
+const archiveAnnouncement = async (announcement) => {
+  try {
+    await announcementStore.archiveAnnouncement(announcement.id);
+  } catch (error) {
+    console.error("Failed to archive:", error);
+  }
+};
+
+const deleteAnnouncement = async (id) => {
+  if (!confirm("Are you sure you want to delete this announcement?")) return;
+
+  try {
+    await announcementStore.deleteAnnouncement(id);
+  } catch (error) {
+    console.error("Failed to delete:", error);
+  }
+};
+
+const formatTargetRoles = (roles) => {
+  return roles.map((role) => role.toLowerCase()).join(", ");
+};
+
+// Lifecycle hooks
+onMounted(async () => {
+  try {
+    await announcementStore.fetchAnnouncements();
+    await fetchCreatorDetails();
+  } catch (error) {
+    console.error("Failed to initialize component:", error);
+  }
+});
+
+// Watch for changes to announcements to update creator details
+watch(announcements, async () => {
+  await fetchCreatorDetails();
+});
+
+// Emit events
+defineEmits(["edit-announcement"]);
+</script>

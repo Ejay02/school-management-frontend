@@ -213,15 +213,6 @@ export const markAnnouncementAsRead = `
   }
 `;
 
-export const archiveAnnouncement = `
-  mutation archiveAnnouncement($id: ID!) {
-    archiveAnnouncement(id: $id) {
-      id
-      archivedAt
-    }
-  }
-`;
-
 export const restoreAnnouncement = `
   mutation restoreAnnouncement($id: ID!) {
     restoreAnnouncement(id: $id) {
@@ -241,3 +232,19 @@ export const personalAnnouncementDelete = gql`
   }
 `;
 
+export const archiveAnnouncement = gql`
+  mutation archiveAnnouncement($announcementId: String!) {
+    archiveAnnouncement(announcementId: $announcementId) {
+      id
+      archivedAt
+    }
+  }
+`;
+
+export const unarchiveAnnouncement = gql`
+  mutation unarchiveAnnouncement($announcementId: String!) {
+    unarchiveAnnouncement(announcementId: $announcementId) {
+      id
+    }
+  }
+`;
