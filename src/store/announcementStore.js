@@ -3,13 +3,18 @@ import { apolloClient } from "../../apollo-client";
 import { getAllAnnouncements } from "../graphql/queries";
 import {
   createAnnouncement,
-  updateAnnouncement,
-  deleteAnnouncement,
   markAnnouncementAsRead,
   archiveAnnouncement,
-  restoreAnnouncement,
+  editAnnouncement,
+  unarchiveAnnouncement,
+  globalAnnouncementDelete,
+  personalAnnouncementDelete,
 } from "../graphql/mutations";
-import socket from "../socket/socket";
+
+import { useUserStore } from "./userStore";
+import { getData, setData } from "../utils/localStorageHelpers";
+
+const READ_ANNOUNCEMENTS_KEY = "readAnnouncements";
 
 export const useAnnouncementStore = defineStore("announcement", {
   state: () => ({
@@ -17,6 +22,8 @@ export const useAnnouncementStore = defineStore("announcement", {
     archivedAnnouncements: [],
     loading: false,
     error: null,
+    creators: {},
+    readAnnouncements: getData(READ_ANNOUNCEMENTS_KEY) || [],
   }),
 
   actions: {
@@ -78,11 +85,16 @@ export const useAnnouncementStore = defineStore("announcement", {
       }
     },
 
-    async updateAnnouncement(id, input) {
+    async updateAnnouncement(announcementId, title, content, targetRoles) {
       try {
         const res = await apolloClient.mutate({
-          mutation: updateAnnouncement,
-          variables: { id, input },
+          mutation: editAnnouncement,
+          variables: {
+            announcementId,
+            title,
+            content,
+            targetRoles,
+          },
         });
         const index = this.announcements.findIndex((a) => a.id === id);
         if (index !== -1) {
@@ -98,34 +110,56 @@ export const useAnnouncementStore = defineStore("announcement", {
       }
     },
 
-    async deleteAnnouncement(id) {
+    async globalAnnouncementDelete(announcementId) {
       try {
         await apolloClient.mutate({
-          mutation: deleteAnnouncement,
-          variables: { id },
+          mutation: globalAnnouncementDelete,
+          variables: { announcementId },
         });
-        this.announcements = this.announcements.filter((a) => a.id !== id);
+        this.announcements = this.announcements.filter(
+          (a) => a.id !== announcementId
+        );
       } catch (error) {
         this.error = error.message;
         throw error;
       }
     },
 
-    async markAsRead(id) {
+    async personalAnnouncementDelete(announcementId) {
       try {
-        const res = await apolloClient.mutate({
-          mutation: markAnnouncementAsRead,
-          variables: { id },
+        await apolloClient.mutate({
+          mutation: personalAnnouncementDelete,
+          variables: { announcementId },
         });
-        const index = this.announcements.findIndex((a) => a.id === id);
-        if (index !== -1) {
-          this.announcements[index].isRead = true;
-        }
-        return res.data.markAnnouncementAsRead;
+        this.announcements = this.announcements.filter(
+          (a) => a.id !== announcementId
+        );
       } catch (error) {
         this.error = error.message;
         throw error;
       }
+    },
+
+    async markAsRead(announcementId) {
+      if (!this.isAnnouncementRead(announcementId)) {
+        try {
+          const res = await apolloClient.mutate({
+            mutation: markAnnouncementAsRead,
+            variables: { announcementId },
+          });
+          if (res.data.markAnnouncementAsRead) {
+            this.readAnnouncements.push(announcementId);
+            setData(READ_ANNOUNCEMENTS_KEY, this.readAnnouncements);
+            return true;
+          }
+          return false;
+        } catch (error) {
+          console.log("error:", error);
+          this.error = error.message;
+          throw error;
+        }
+      }
+      return true;
     },
 
     async archiveAnnouncement(announcementId) {
@@ -155,7 +189,7 @@ export const useAnnouncementStore = defineStore("announcement", {
     async restoreAnnouncement(announcementId) {
       try {
         await apolloClient.mutate({
-          mutation: restoreAnnouncement,
+          mutation: unarchiveAnnouncement,
           variables: { announcementId },
         });
         const announcement = this.archivedAnnouncements.find(
@@ -190,40 +224,47 @@ export const useAnnouncementStore = defineStore("announcement", {
       }
     },
 
-    // Socket listeners
-    initializeSocketListeners() {
-      socket.on("newAnnouncement", (announcement) => {
-        this.announcements.unshift(announcement);
-      });
+    async fetchCreatorDetails(apolloClient) {
+      const userStore = useUserStore();
+      try {
+        const uniqueCreatorIds = [
+          ...new Set(
+            this.announcements
+              .filter((a) => a.creatorId)
+              .map((a) => a.creatorId)
+          ),
+        ];
 
-      socket.on("announcementUpdated", (updatedAnnouncement) => {
-        const index = this.announcements.findIndex(
-          (a) => a.id === updatedAnnouncement.id
-        );
-        if (index !== -1) {
-          this.announcements[index] = updatedAnnouncement;
+        for (const creatorId of uniqueCreatorIds) {
+          if (!this.creators[creatorId]) {
+            const userData = await userStore.findUserById(
+              creatorId,
+              apolloClient
+            );
+            if (userData) {
+              this.creators[creatorId] = userData;
+            } else {
+              this.creators[creatorId] = { username: "Unknown" };
+            }
+          }
         }
-      });
+      } catch (error) {
+        console.error("Error fetching creator details:", error);
+      }
+    },
 
-      socket.on("announcementArchived", (id) => {
-        const announcement = this.announcements.find((a) => a.id === id);
-        if (announcement) {
-          this.archivedAnnouncements.unshift(announcement);
-          this.announcements = this.announcements.filter((a) => a.id !== id);
-        }
-      });
+    getCreatorName(creatorId) {
+      if (!creatorId) return "Unknown";
+      const creator = this.creators[creatorId];
+      if (!creator) return "Unknown";
 
-      socket.on("announcementRestored", (id) => {
-        const announcement = this.archivedAnnouncements.find(
-          (a) => a.id === id
-        );
-        if (announcement) {
-          this.announcements.unshift(announcement);
-          this.archivedAnnouncements = this.archivedAnnouncements.filter(
-            (a) => a.id !== id
-          );
-        }
-      });
+      return creator.name
+        ? `${creator.name} ${creator.surname || ""}`.trim()
+        : creator.username || creator.email || "Unknown";
+    },
+
+    isAnnouncementRead(announcementId) {
+      return this.readAnnouncements.includes(announcementId);
     },
   },
 });

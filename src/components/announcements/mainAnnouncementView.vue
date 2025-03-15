@@ -65,7 +65,10 @@
           v-for="announcement in filteredAnnouncements"
           :key="announcement.id"
           class="bg-white rounded-lg shadow-sm overflow-hidden transform transition-all hover:scale-105 hover:shadow-xl"
-          :class="{ 'border-l-4 border-indigo-500': !announcement.isRead }"
+          :class="{
+            'border-l-4 border-indigo-500':
+              !announcementStore.isAnnouncementRead(announcement.id),
+          }"
         >
           <div class="p-6">
             <router-link
@@ -92,14 +95,16 @@
                       announcement.targetRoles &&
                       announcement.targetRoles.length
                     "
-                    class="px-2 py-1 text-xs font-medium rounded-md bg-teal-100 text-teal-800"
+                    class="px-2 py-1 text-xs font-medium rounded-md bg-teal-100 text-teal-800 capitalize"
                   >
-                    For: {{ formatTargetRoles(announcement.targetRoles) }}
+                    For: {{ formatTargetRoles(announcement.targetRoles) }}s
                   </span>
                 </div>
                 <div class="flex items-center space-x-2">
                   <span
-                    v-if="!announcement.isRead"
+                    v-if="
+                      !announcementStore.isAnnouncementRead(announcement.id)
+                    "
                     class="h-2 w-2 rounded-full bg-indigo-500"
                   ></span>
                   <p class="text-sm text-gray-500">
@@ -124,14 +129,16 @@
             <div class="mt-4 flex justify-between items-center">
               <small>
                 Posted by:
-                <span>
-                  {{ getCreatorName(announcement.creatorId) }}
-                </span>
+                <span class="capitalize">
+                  {{
+                    announcementStore.getCreatorName(announcement.creatorId)
+                  }}</span
+                >
               </small>
 
               <div class="flex space-x-2">
                 <button
-                  v-if="!announcement.isRead"
+                  v-if="!announcementStore.isAnnouncementRead(announcement.id)"
                   @click="markAsRead(announcement.id)"
                   class="text-indigo-600 hover:text-indigo-400 text-sm font-medium transform transition-all hover:scale-105"
                 >
@@ -176,17 +183,19 @@ import { ref, computed, watch, onMounted } from "vue";
 import { formatDate } from "../../utils/date.holidays";
 import { useApolloClient } from "@vue/apollo-composable";
 import { useAnnouncementStore } from "../../store/announcementStore";
+import { onUnmounted } from "vue";
+import { useStorageSync } from "../../composables/useStorageSync";
+import socket from "../../socket/socket";
 
-const announcementStore = useAnnouncementStore();
+defineEmits(["edit-announcement"]);
+
 const userStore = useUserStore();
+const announcementStore = useAnnouncementStore();
 
-// State
 const searchQuery = ref("");
 const selectedCategory = ref("");
 const selectedTargetRole = ref("");
-const creators = ref({});
 
-// Computed properties
 const loading = computed(() => announcementStore.loading);
 const error = computed(() => announcementStore.error);
 
@@ -232,40 +241,7 @@ const isAdminOrTeacher = computed(() => {
   return role === "admin" || role === "teacher" || role === "super_admin";
 });
 
-const getCreatorName = (creatorId) => {
-  if (!creatorId) return "Unknown";
-  const creator = creators.value[creatorId];
-  if (!creator) return "Unknown";
-
-  return creator.name
-    ? `${creator.name} ${creator.surname || ""}`.trim()
-    : creator.username || creator.email || "Unknown";
-};
-
 const { client: apolloClient } = useApolloClient();
-
-const fetchCreatorDetails = async () => {
-  try {
-    const uniqueCreatorIds = [
-      ...new Set(
-        announcements.value.filter((a) => a.creatorId).map((a) => a.creatorId)
-      ),
-    ];
-
-    for (const creatorId of uniqueCreatorIds) {
-      if (!creators.value[creatorId]) {
-        const userData = await userStore.findUserById(creatorId, apolloClient);
-        if (userData) {
-          creators.value[creatorId] = userData;
-        } else {
-          creators.value[creatorId] = { username: "Unknown" };
-        }
-      }
-    }
-  } catch (error) {
-    console.error("Error fetching creator details:", error);
-  }
-};
 
 const canEditAnnouncement = (announcement) => {
   const userId = userStore.userInfo?.id;
@@ -281,6 +257,7 @@ const canDeleteAnnouncement = canEditAnnouncement;
 
 const markAsRead = async (id) => {
   try {
+    console.log("hello there!:", id);
     await announcementStore.markAsRead(id);
   } catch (error) {
     console.error("Failed to mark as read:", error);
@@ -309,21 +286,71 @@ const formatTargetRoles = (roles) => {
   return roles.map((role) => role.toLowerCase()).join(", ");
 };
 
+const setupSocketConnection = () => {
+  // Join appropriate rooms based on user role and class
+  socket.emit("joinRooms", {
+    role: userStore.userInfo?.role,
+    classId: userStore.userInfo?.classId,
+    userId: userStore.userInfo?.id,
+  });
+
+  // Listen for new announcements
+  socket.on("newAnnouncement", (announcement) => {
+    announcementStore.announcements.unshift(announcement);
+  });
+
+  // Listen for deleted announcements
+  socket.on("announcementDeleted", ({ id }) => {
+    announcementStore.announcements = announcementStore.announcements.filter(
+      (announcement) => announcement.id !== id
+    );
+  });
+
+  // Listen for read status updates
+  socket.on("readStatus", ({ announcementId, isRead }) => {
+    const announcement = announcementStore.announcements.find(
+      (a) => a.id === announcementId
+    );
+    if (announcement) {
+      announcement.isRead = isRead;
+    }
+  });
+
+  // Listen for archive status updates
+  socket.on("announcementArchiveStatus", ({ id, isArchived }) => {
+    const announcement = announcementStore.announcements.find(
+      (a) => a.id === id
+    );
+    if (announcement) {
+      if (isArchived) {
+        announcementStore.announcements =
+          announcementStore.announcements.filter((a) => a.id !== id);
+      }
+    }
+  });
+};
+
 // Lifecycle hooks
 onMounted(async () => {
-  try {
-    await announcementStore.fetchAnnouncements();
-    await fetchCreatorDetails();
-  } catch (error) {
-    console.error("Failed to initialize component:", error);
-  }
+  await announcementStore.fetchAnnouncements();
+  await announcementStore.fetchCreatorDetails(apolloClient);
+
+  setupSocketConnection();
 });
 
-// Watch for changes to announcements to update creator details
+onUnmounted(() => {
+  socket.off("newAnnouncement");
+  socket.off("announcementDeleted");
+  socket.off("readStatus");
+  socket.off("announcementArchiveStatus");
+});
+
+// Update watch
 watch(announcements, async () => {
-  await fetchCreatorDetails();
+  await announcementStore.fetchCreatorDetails(apolloClient);
 });
 
-// Emit events
-defineEmits(["edit-announcement"]);
+useStorageSync("readAnnouncements", (newReadAnnouncements) => {
+  announcementStore.readAnnouncements = newReadAnnouncements || [];
+});
 </script>
