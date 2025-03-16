@@ -88,7 +88,7 @@
             <img
               v-if="userStore?.userInfo?.img"
               :src="userStore?.userInfo?.img"
-              :alt="`${capitalizedName} image`"
+              :alt="`${capitalizedName} avatar`"
               class="w-16 h-16 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
             />
 

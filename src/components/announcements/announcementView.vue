@@ -17,10 +17,10 @@
       <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full">
         <!-- Gradient header -->
         <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
-          <div class="flex items-center space-x-3 gap-4 relative">
+          <div class="flex items-center gap-4">
             <button
               @click="goBack"
-              class="absolute bg-white/20 backdrop-blur-sm p-2 rounded-full text-white hover:bg-white/30 transition-all animate-bounce-once"
+              class="bg-white/20 backdrop-blur-sm p-2 rounded-full text-white hover:bg-white/30 transition-all animate-bounce-once flex-shrink-0"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -43,7 +43,7 @@
             </h1>
           </div>
 
-          <div class="flex flex-wrap gap-2 mt-4">
+          <div class="flex flex-wrap gap-2 mt-4 ml-12">
             <span
               v-if="announcement?.classId"
               class="px-3 py-1 rounded-full text-sm bg-white bg-opacity-20 text-white font-medium"
@@ -52,7 +52,7 @@
             </span>
             <span
               v-if="announcement?.targetRoles?.length"
-              class="px-3 py-1 rounded-full text-sm bg-white bg-opacity-20 text-white font-medium"
+              class="px-3 py-1 rounded-full text-sm bg-white bg-opacity-20 text-white font-medium capitalize"
             >
               {{ formatTargetRoles(announcement.targetRoles) }}
             </span>
@@ -61,20 +61,30 @@
 
         <!-- Content area -->
         <div class="p-6">
-          <div class="prose max-w-none" v-html="announcement?.content"></div>
+          <div class="prose max-w-none font-serif text-lg" v-html="announcement?.content"></div>
         </div>
 
         <!-- Footer -->
         <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
           <div class="flex justify-between items-center">
             <div class="flex items-center space-x-3">
-              <img
-                :src="creator?.img || '/default-avatar.png'"
-                class="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
-                alt="Creator avatar"
-              />
+              <div class="">
+                <img
+                  v-if="creator?.img"
+                  :src="creator?.img"
+                  class="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                  alt="Creator avatar"
+                />
+                <div
+                  v-else
+                  class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200 capitalize"
+                >
+                  {{ creator?.name[0] }}{{ creator?.surname[0] }}
+                </div>
+              </div>
               <div>
-                <p class="text-sm font-medium text-gray-900">
+                <p class="text-sm font-medium text-gray-900 capitalize">
+                  <!-- {{ creator?.name }} -->
                   {{ getCreatorName }}
                 </p>
                 <p class="text-xs text-gray-500">
