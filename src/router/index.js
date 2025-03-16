@@ -200,7 +200,7 @@ const routes = [
         component: Announcements,
       },
       {
-        path: "/announcements/:id",
+        path: "/announcement/:id",
         name: "AnnouncementView",
         component: AnnouncementView,
         meta: {

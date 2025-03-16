@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { apolloClient } from "../../apollo-client";
-import { getAllAnnouncements } from "../graphql/queries";
+import { getAllAnnouncements, getAnnouncementById } from "../graphql/queries";
 import {
   createAnnouncement,
   markAnnouncementAsRead,
@@ -19,6 +19,7 @@ const READ_ANNOUNCEMENTS_KEY = "readAnnouncements";
 export const useAnnouncementStore = defineStore("announcement", {
   state: () => ({
     announcements: [],
+    selectedAnnouncement: null,
     archivedAnnouncements: [],
     loading: false,
     error: null,
@@ -44,8 +45,28 @@ export const useAnnouncementStore = defineStore("announcement", {
         this.announcements = res.data.getAllAnnouncements;
         return this.announcements;
       } catch (error) {
-        console.log("error:", error);
         this.error = error.message;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchAnnouncementById(announcementId) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const res = await apolloClient.query({
+          query: getAnnouncementById,
+          variables: { announcementId },
+          fetchPolicy: "no-cache",
+        });
+
+        this.selectedAnnouncement = res.data.getAnnouncementById;
+        return res.data.getAnnouncementById;
+      } catch (error) {
+        this.error = error.message || "Error fetching event";
+        throw error;
       } finally {
         this.loading = false;
       }
@@ -204,23 +225,6 @@ export const useAnnouncementStore = defineStore("announcement", {
       } catch (error) {
         this.error = error.message;
         throw error;
-      }
-    },
-
-    async fetchAnnouncementById(id) {
-      this.loading = true;
-      try {
-        const res = await apolloClient.query({
-          query: getAnnouncementById,
-          variables: { id },
-          fetchPolicy: "no-cache",
-        });
-        return res.data.getAnnouncementById;
-      } catch (error) {
-        this.error = error.message;
-        throw error;
-      } finally {
-        this.loading = false;
       }
     },
 

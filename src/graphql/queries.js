@@ -522,8 +522,8 @@ export const getAllAnnouncements = gql`
 `;
 
 export const getAnnouncementById = gql`
-  query getAnnouncementById($id: String!) {
-    getAnnouncementById(id: $id) {
+  query getAnnouncementById($announcementId: String!) {
+    getAnnouncementById(announcementId: $announcementId) {
       id
       title
       content

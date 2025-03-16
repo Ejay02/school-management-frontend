@@ -131,9 +131,14 @@
             <router-link :to="`/event/${event.id}`">
               <button
                 @click="handleMarkEventAsRead(event.id)"
-                class="bg-eduSky text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
+                class="group relative bg-eduSky text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
               >
                 <i class="fa-solid fa-arrow-right"></i>
+                <span
+                  class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                >
+                  View
+                </span>
               </button>
             </router-link>
             <!--  -->

@@ -271,7 +271,7 @@
                       <img
                         v-if="creator?.img"
                         :src="creator?.img"
-                        :alt="`${creator?.username} image`"
+                        :alt="`${creator?.username}`"
                         class="w-16 h-16 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
                       />
 
@@ -552,9 +552,6 @@ const fetchCreator = async () => {
     }
   }
 };
-
-
-
 
 const editEvent = () => {
   router.push(`/events/edit/${eventId}`);

@@ -70,9 +70,9 @@
               !announcementStore.isAnnouncementRead(announcement.id),
           }"
         >
-          <div class="p-6">
+          <div class="p-6" @click="markAsRead(announcement.id)">
             <router-link
-              :to="`/announcements/${announcement.id}`"
+              :to="`/announcement/${announcement.id}`"
               class="block cursor-pointer"
             >
               <div class="flex items-center justify-between">
@@ -101,12 +101,6 @@
                   </span>
                 </div>
                 <div class="flex items-center space-x-2">
-                  <span
-                    v-if="
-                      !announcementStore.isAnnouncementRead(announcement.id)
-                    "
-                    class="h-2 w-2 rounded-full bg-indigo-500"
-                  ></span>
                   <p class="text-sm text-gray-500">
                     {{
                       formatDate(
@@ -147,23 +141,38 @@
                 <button
                   v-if="canEditAnnouncement(announcement)"
                   @click="$emit('edit-announcement', announcement)"
-                  class="text-indigo-600 hover:text-indigo-400 text-sm font-medium transform transition-all hover:scale-105"
+                  class="group relative text-indigo-600 hover:text-indigo-400 text-sm font-medium transform transition-all hover:scale-105"
                 >
                   <i class="fa-solid fa-pen-to-square"></i>
+                  <span
+                    class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  >
+                    Edit
+                  </span>
                 </button>
                 <button
                   v-if="canDeleteAnnouncement(announcement)"
                   @click="deleteAnnouncement(announcement.id)"
-                  class="text-red-600 hover:text-red-400 text-sm font-medium transform transition-all hover:scale-105"
+                  class="group relative text-red-600 hover:text-red-400 text-sm font-medium transform transition-all hover:scale-105"
                 >
                   <i class="fa-solid fa-trash-can"></i>
+                  <span
+                    class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  >
+                    Delete
+                  </span>
                 </button>
                 <button
                   v-else
                   @click="archiveAnnouncement(announcement)"
-                  class="text-gray-600 hover:text-gray-800 text-sm font-medium"
+                  class="group relative text-gray-600 hover:text-gray-800 text-sm font-medium"
                 >
                   <i class="fa-solid fa-box-archive"></i>
+                  <span
+                    class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  >
+                    Archive
+                  </span>
                 </button>
               </div>
             </div>
