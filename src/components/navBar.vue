@@ -60,7 +60,7 @@
           <div
             class="absolute -top-3 -right-3 w-5 h-5 flex items-center justify-center bg-indigo-500 text-white rounded-full text-[8px] font-medium"
           >
-            12
+            {{ announcementStore.getUnreadCount }}
           </div>
         </router-link>
 
@@ -112,9 +112,11 @@ import { ref, computed } from "vue";
 import { useUserStore } from "../store/userStore";
 import ProfileDropdown from "./dropdown/profileDropdown.vue";
 import { useNotificationStore } from "../store/notification";
+import { useAnnouncementStore } from "../store/announcementStore";
 
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
+const announcementStore = useAnnouncementStore();
 
 const role = userStore.currentRole;
 

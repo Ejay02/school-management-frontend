@@ -24,9 +24,16 @@ export const useAnnouncementStore = defineStore("announcement", {
     loading: false,
     error: null,
     creators: {},
+    unreadCount: 0,
     readAnnouncements: getData(READ_ANNOUNCEMENTS_KEY) || [],
   }),
-
+  getters: {
+    getUnreadCount: (state) => {
+      return state.announcements.filter(
+        (announcement) => !state.readAnnouncements.includes(announcement.id)
+      ).length;
+    },
+  },
   actions: {
     async fetchAnnouncements() {
       this.loading = true;
@@ -43,12 +50,19 @@ export const useAnnouncementStore = defineStore("announcement", {
         });
 
         this.announcements = res.data.getAllAnnouncements;
+        this.updateUnreadCount();
         return this.announcements;
       } catch (error) {
         this.error = error.message;
       } finally {
         this.loading = false;
       }
+    },
+
+    updateUnreadCount() {
+      this.unreadCount = this.announcements.filter(
+        (announcement) => !this.readAnnouncements.includes(announcement.id)
+      ).length;
     },
 
     async fetchAnnouncementById(announcementId) {
@@ -171,6 +185,7 @@ export const useAnnouncementStore = defineStore("announcement", {
           if (res.data.markAnnouncementAsRead) {
             this.readAnnouncements.push(announcementId);
             setData(READ_ANNOUNCEMENTS_KEY, this.readAnnouncements);
+            this.updateUnreadCount();
             return true;
           }
           return false;
