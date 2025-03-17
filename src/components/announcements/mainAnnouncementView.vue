@@ -95,7 +95,7 @@
                       announcement.targetRoles &&
                       announcement.targetRoles.length
                     "
-                    class="px-2 py-1 text-xs font-medium rounded-md bg-teal-100 text-teal-800 capitalize"
+                    class="hidden md:table-cell px-2 py-1 text-xs font-medium rounded-md bg-teal-100 text-teal-800 capitalize"
                   >
                     For: {{ formatTargetRoles(announcement.targetRoles) }}s
                   </span>
@@ -138,9 +138,17 @@
                 >
                   Mark as Read
                 </button>
+
                 <button
                   v-if="canEditAnnouncement(announcement)"
-                  @click="$emit('edit-announcement', announcement)"
+                  @click="
+                    showEditModal(
+                      announcement.id,
+                      announcement.title,
+                      announcement,
+                      'announcementList'
+                    )
+                  "
                   class="group relative text-indigo-600 hover:text-indigo-400 text-sm font-medium transform transition-all hover:scale-105"
                 >
                   <i class="fa-solid fa-pen-to-square"></i>
@@ -152,7 +160,13 @@
                 </button>
                 <button
                   v-if="canDeleteAnnouncement(announcement)"
-                  @click="deleteAnnouncement(announcement.id)"
+                  @click="
+                    showDelModal(
+                      announcement.id,
+                      announcement.title,
+                      'announcementList'
+                    )
+                  "
                   class="group relative text-red-600 hover:text-red-400 text-sm font-medium transform transition-all hover:scale-105"
                 >
                   <i class="fa-solid fa-trash-can"></i>
@@ -195,8 +209,26 @@ import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { useAnnouncementStore } from "../../store/announcementStore";
 
 import { useStorageSync } from "../../composables/useStorageSync";
+import { useModalStore } from "../../store/useModalStore";
 
 defineEmits(["edit-announcement"]);
+
+const modalStore = useModalStore();
+
+const showDelModal = (id, title, type) => {
+  modalStore.deleteModal = true;
+  modalStore.modalId = id;
+  modalStore.modalTitle = title;
+  modalStore.source = type;
+};
+
+const showEditModal = (id, title, data, type) => {
+  modalStore.editModal = true;
+  modalStore.modalId = id;
+  modalStore.modalTitle = title;
+  modalStore.data = data;
+  modalStore.source = type;
+};
 
 const userStore = useUserStore();
 const announcementStore = useAnnouncementStore();

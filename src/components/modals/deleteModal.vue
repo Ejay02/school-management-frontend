@@ -6,9 +6,9 @@
       @click.self="handleCancel"
       :key="isModalVisible"
     >
-      <div class="bg-white p-4 rounded-md w-96 h-40 mt-4 shadow-md">
+      <div class="bg-white p-6 rounded-md w-[450px] h-auto min-h-[180px] mt-4 shadow-md">
         <!--  -->
-        <!-- <div class="p-6"> -->
+      
         <div class="flex items-center">
           <!-- Icon (using an inline SVG for the exclamation triangle) -->
           <svg
@@ -29,22 +29,22 @@
           </h3>
         </div>
 
-        <div class="mt-2">
+        <div class="mt-4">
           <p class="text-gray-600 text-sm">
             Are you sure you want to delete
             <b class="capitalize">{{ title }}</b> ? This action cannot be
             undone.
           </p>
         </div>
-        <div class="mt-6 flex justify-end gap-2">
+        <div class="mt-8 flex justify-end gap-3">
           <button
-            class="bg-white border border-gray-300 text-gray-600 py-1 px-4 rounded-md cursor-pointer"
+            class="bg-white border border-gray-300 text-gray-600 py-2 px-5 rounded-md cursor-pointer"
             @click="handleCancel"
           >
             Cancel
           </button>
           <button
-            class="bg-red-500 text-white py-1 px-4 rounded-md cursor-pointer"
+            class="bg-red-500 text-white py-2 px-5 rounded-md cursor-pointer"
             @click="handleDelete"
           >
             OK
@@ -116,8 +116,8 @@ const handleDelete = async () => {
       console.log("hello from assignments");
     } else if (source.value === "announcementList") {
       console.log("hello from announcements");
-    } else if (source.value === "lessonList") {
-      console.log("hello from lessons");
+    } else if (source.value === "announcementList") {
+      console.log("hello from announcement");
     }
     modalStore.deleteModal = false;
   } catch (error) {

@@ -38,8 +38,9 @@
           >
             <span
               v-if="!eventStore.isEventRead(item.id)"
-              class="mr-2 inline-block w-2 h-2 bg-red-500 rounded-full"
+              class="mr-1 inline-block w-2 h-2 bg-red-500 rounded-full"
             ></span>
+            <span v-else class="rounded-full mr-3 h-2 w-2"></span>
 
             {{ item.status }}
           </span>

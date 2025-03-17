@@ -101,6 +101,7 @@ import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
 import { useResultStore } from "../../store/resultStore";
 import { ref, onMounted, watch, computed, nextTick } from "vue";
+import { classes } from "../../utils/data";
 
 const chartCanvas = ref(null);
 let myChart = null;
@@ -110,21 +111,6 @@ const loading = computed(() => resultStore.loading);
 const error = computed(() => resultStore.error);
 
 const generatingDummy = ref(false);
-
-const classes = [
-  "Primary 1",
-  "Primary 2",
-  "Primary 3",
-  "Primary 4",
-  "Primary 5",
-  "Primary 6",
-  "JSS 1",
-  "JSS 2",
-  "JSS 3",
-  "SS 1",
-  "SS 2",
-  "SS 3",
-];
 
 const selectedClass = ref("Primary 1");
 

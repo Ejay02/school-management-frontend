@@ -5,7 +5,7 @@
     @click.self="handleCancel"
     :key="isModalVisible"
   >
-  <!-- max-w-lg w-full text-left bg-white cursor-pointer rounded-md h-auto mt-4 shadow-md overflow-y-auto -->
+    <!-- max-w-lg w-full text-left bg-white cursor-pointer rounded-md h-auto mt-4 shadow-md overflow-y-auto -->
     <div
       class="max-w-lg w-full text-left bg-white cursor-pointer rounded-md h-auto mt-4 shadow-md overflow-y-auto"
     >
@@ -23,151 +23,151 @@
           <div class="flex gap-2">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Name</label
-              >
-              <input
-                v-model="data.name"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Name
+                <input
+                  v-model="data.name"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Email</label
-              >
-              <input
-                v-model="data.email"
-                type="email"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Email
+                <input
+                  v-model="data.email"
+                  type="email"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Photo</label
-            >
-            <input
-              v-model="data.photo"
-              type="email"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Photo
+              <input
+                v-model="data.photo"
+                type="email"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Subjects</label
-            >
-            <input
-              v-model="data.subjects"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Subjects
+              <input
+                v-model="data.subjects"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
 
           <div class="flex gap-2">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Classes</label
-              >
-              <input
-                v-model="data.classes"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Classes
+                <input
+                  v-model="data.classes"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Phone</label
-              >
-              <input
-                v-model="data.phone"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Phone
+                <input
+                  v-model="data.phone"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
           </div>
 
           <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Address</label
-          >
-          <input
-            v-model="data.address"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-          />
+            >Address
+            <input
+              v-model="data.address"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+            />
+          </label>
         </template>
 
         <!-- teacher card -->
         <template v-if="source === 'teacherCard'">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Name</label
-            >
+              >Name
 
-            <input
-              v-model="name"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              <input
+                v-model="name"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Photo</label
-            >
-            <input
-              v-model="data.photo"
-              type="email"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Photo
+              <input
+                v-model="data.photo"
+                type="email"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Description</label
-            >
-            <input
-              v-model="data.description"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Description
+              <input
+                v-model="data.description"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
 
           <div class="flex gap-2">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Email</label
-              >
-              <input
-                v-model="transformedData.email"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Email
+                <input
+                  v-model="transformedData.email"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Birthday</label
-              >
-              <input
-                v-model="transformedData.date"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Birthday
+                <input
+                  v-model="transformedData.date"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
           </div>
 
           <div class="flex gap-2">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Blood Group</label
-              >
-              <input
-                v-model="transformedData.bloodgroup"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Blood Group
+                <input
+                  v-model="transformedData.bloodgroup"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Phone</label
-              >
-              <input
-                v-model="transformedData.phone"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Phone
+                <input
+                  v-model="transformedData.phone"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
           </div>
         </template>
@@ -176,135 +176,135 @@
         <template v-if="source === 'studentList'">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Name</label
-            >
-            <input
-              v-model="data.name"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Name
+              <input
+                v-model="data.name"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
 
           <div class="flex gap-2">
             <div>
               <label
                 class="block text-sm font-medium text-gray-700 mb-1 capitalize"
-                >class</label
-              >
-              <input
-                v-model="data.class"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >class
+                <input
+                  v-model="data.class"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
 
             <div>
               <label
                 class="block text-sm font-medium text-gray-700 mb-1 capitalize"
-                >grade</label
-              >
-              <input
-                v-model="data.grade"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >grade
+                <input
+                  v-model="data.grade"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
           </div>
           <div class="flex gap-2">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Phone</label
-              >
-              <input
-                v-model="data.phone"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Phone
+                <input
+                  v-model="data.phone"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Student Id</label
-              >
-              <input
-                v-model="data.studentId"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Student Id
+                <input
+                  v-model="data.studentId"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
           </div>
 
           <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Address</label
-          >
-          <input
-            v-model="data.address"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-          />
+            >Address
+            <input
+              v-model="data.address"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+            />
+          </label>
         </template>
 
         <!-- parent list -->
         <template v-if="source === 'parentList'">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Name</label
-            >
-            <input
-              v-model="data.name"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Name
+              <input
+                v-model="data.name"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Email</label
-            >
-            <input
-              v-model="data.email"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Email
+              <input
+                v-model="data.email"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Student Name</label
-            >
-            <input
-              v-model="data.students"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Student Name
+              <input
+                v-model="data.students"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Phone</label
-            >
-            <input
-              v-model="data.phone"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Phone
+              <input
+                v-model="data.phone"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
 
           <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Address</label
-          >
-          <input
-            v-model="data.address"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-          />
+            >Address
+            <input
+              v-model="data.address"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+            />
+          </label>
         </template>
 
         <!-- subject list -->
         <template v-else-if="source === 'subjectList'">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Subject Name</label
-            >
-            <input
-              v-model="data.name"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Subject Name
+              <input
+                v-model="data.name"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Teachers</label
-            >
-            <input
-              v-model="data.teachers"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Teachers
+              <input
+                v-model="data.teachers"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
         </template>
 
@@ -312,42 +312,42 @@
         <template v-else-if="source === 'classList'">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Class Name</label
-            >
-            <input
-              v-model="data.name"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Class Name
+              <input
+                v-model="data.name"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
 
           <div class="flex gap-2">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Capacity</label
-              >
-              <input
-                v-model="data.capacity"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Capacity
+                <input
+                  v-model="data.capacity"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Grade</label
-              >
-              <input
-                v-model="data.grade"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Grade
+                <input
+                  v-model="data.grade"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Supervisor</label
-            >
-            <input
-              v-model="data.supervisor"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Supervisor
+              <input
+                v-model="data.supervisor"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
         </template>
 
@@ -355,43 +355,43 @@
         <template v-else-if="source === 'lessonList'">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Lesson</label
-            >
+              >Lesson
 
-            <input
-              v-model="data.name"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              <input
+                v-model="data.name"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Subject</label
-            >
+              >Subject
 
-            <input
-              v-model="data.subject.name"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              <input
+                v-model="data.subject.name"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Class</label
-            >
-            <input
-              v-model="data.class.name"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Class
+              <input
+                v-model="data.class.name"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Teacher</label
-            >
+              >Teacher
 
-            <input
-              v-model="fullTeacherName"
-              class="capitalize mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              <input
+                v-model="fullTeacherName"
+                class="capitalize mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
         </template>
 
@@ -399,43 +399,43 @@
         <template v-else-if="source === 'examList'">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Subject</label
-            >
-            <input
-              v-model="data.subject"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Subject
+              <input
+                v-model="data.subject"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Class</label
-            >
-            <input
-              v-model="data.class"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Class
+              <input
+                v-model="data.class"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Teacher</label
-            >
-            <input
-              v-model="data.teacher"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Teacher
+              <input
+                v-model="data.teacher"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Date</label
-            >
-            <input
-              type="date"
-              v-model="data.date"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Date
+              <input
+                type="date"
+                v-model="data.date"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
         </template>
 
@@ -443,43 +443,43 @@
         <template v-else-if="source === 'assignmentList'">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Subject</label
-            >
-            <input
-              v-model="data.subject"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Subject
+              <input
+                v-model="data.subject"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Class</label
-            >
-            <input
-              v-model="data.class"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Class
+              <input
+                v-model="data.class"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Teacher</label
-            >
-            <input
-              v-model="data.teacher"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Teacher
+              <input
+                v-model="data.teacher"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Due Date</label
-            >
-            <input
-              type="date"
-              v-model="data.dueDate"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Due Date
+              <input
+                type="date"
+                v-model="data.dueDate"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
         </template>
 
@@ -487,67 +487,67 @@
         <template v-else-if="source === 'resultList'">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Subject</label
-            >
-            <input
-              v-model="data.subject"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Subject
+              <input
+                v-model="data.subject"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Student</label
-            >
-            <input
-              v-model="data.student"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Student
+              <input
+                v-model="data.student"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div class="flex gap-2">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Score</label
-              >
-              <input
-                v-model="data.score"
-                type="text"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Score
+                <input
+                  v-model="data.score"
+                  type="text"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Class</label
-              >
-              <input
-                v-model="data.class"
-                type="text"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Class
+                <input
+                  v-model="data.class"
+                  type="text"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Teacher</label
-            >
-            <input
-              v-model="data.teacher"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Teacher
+              <input
+                v-model="data.teacher"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Date</label
-            >
-            <input
-              type="date"
-              v-model="data.date"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Date
+              <input
+                type="date"
+                v-model="data.date"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
         </template>
 
@@ -555,54 +555,54 @@
         <template v-else-if="source === 'eventList'">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Title</label
-            >
-            <input
-              type="text"
-              v-model="data.title"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Title
+              <input
+                type="text"
+                v-model="data.title"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Class</label
-            >
-            <input
-              v-model="data.class"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Class
+              <input
+                v-model="data.class"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Date</label
-            >
-            <input
-              type="date"
-              v-model="data.date"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Date
+              <input
+                type="date"
+                v-model="data.date"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div class="flex gap-2">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Start Time</label
-              >
-              <input
-                type="datetime"
-                v-model="data.startTime"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >Start Time
+                <input
+                  type="datetime"
+                  v-model="data.startTime"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >End Time</label
-              >
-              <input
-                type="datetime"
-                v-model="data.endTime"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+                >End Time
+                <input
+                  type="datetime"
+                  v-model="data.endTime"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
             </div>
           </div>
         </template>
@@ -611,33 +611,54 @@
         <template v-else-if="source === 'announcementList'">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Title</label
-            >
-            <input
-              type="text"
-              v-model="data.title"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Title
+              <input
+                type="text"
+                v-model="data.title"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Class</label
-            >
-            <input
-              v-model="data.class"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Content
+              <textarea
+                v-model="data.content"
+                rows="4"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Date</label
-            >
-            <input
-              type="date"
-              v-model="data.date"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Target Roles
+              <input
+                type="text"
+                v-model="data.targetRole"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
+          </div>
+          <div class="">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Select a class[Optional]
+              <select
+                v-model="selectedClass"
+                @change="handleClassChange"
+                class="border rounded p-2 w-full focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
+              >
+                <option value="" selected>No class</option>
+                <option
+                  v-for="(name, index) in classes"
+                  :key="index"
+                  :value="name"
+                  class="cursor-pointer"
+                >
+                  {{ name }}
+                </option>
+              </select>
+            </label>
           </div>
         </template>
 
@@ -662,7 +683,9 @@
 </template>
 
 <script setup>
+import { classes } from "../../utils/data";
 import { computed, ref, watch } from "vue";
+
 import { useModalStore } from "@/store/useModalStore";
 
 const modalStore = useModalStore();
@@ -671,6 +694,8 @@ const isModalVisible = ref(modalStore.editModal);
 const title = ref(modalStore.modalTitle);
 const source = ref(modalStore.source);
 const data = ref(modalStore.data);
+
+const selectedClass = ref("");
 
 const transformedData = ref({});
 

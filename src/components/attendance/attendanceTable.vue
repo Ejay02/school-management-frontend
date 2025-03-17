@@ -565,7 +565,6 @@ async function saveAttendance() {
     // Refresh the attendance records
     await attendanceStore.fetchAttendance();
   } catch (err) {
-    console.error("Error saving attendance:", err);
     attendanceStore.error = "Failed to save attendance";
   } finally {
     attendanceStore.loading = false;
