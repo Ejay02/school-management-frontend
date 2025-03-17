@@ -535,6 +535,8 @@ export const getAnnouncementById = gql`
       creatorId
       creatorRole
       targetRoles
+      isArchived
+      archivedAt
       createdAt
     }
   }

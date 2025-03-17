@@ -184,17 +184,17 @@
 </template>
 
 <script setup>
-import ErrorScreen from "../errorScreen.vue";
+import socket from "../../socket/socket";
 import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
 import { useUserStore } from "../../store/userStore";
-import { ref, computed, watch, onMounted } from "vue";
 import { formatDate } from "../../utils/date.holidays";
 import { useApolloClient } from "@vue/apollo-composable";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { useAnnouncementStore } from "../../store/announcementStore";
-import { onUnmounted } from "vue";
+
 import { useStorageSync } from "../../composables/useStorageSync";
-import socket from "../../socket/socket";
 
 defineEmits(["edit-announcement"]);
 
@@ -208,9 +208,9 @@ const selectedTargetRole = ref("");
 const loading = computed(() => announcementStore.loading);
 const error = computed(() => announcementStore.error);
 
-const announcements = computed(
-  () => announcementStore.announcements?.filter((a) => !a.isArchived) || []
-);
+const announcements = computed(() => {
+  return announcementStore.announcements || [];
+});
 
 const filteredAnnouncements = computed(() => {
   let filtered = announcements.value;
@@ -266,7 +266,6 @@ const canDeleteAnnouncement = canEditAnnouncement;
 
 const markAsRead = async (id) => {
   try {
-    console.log("hello there!:", id);
     await announcementStore.markAsRead(id);
   } catch (error) {
     console.error("Failed to mark as read:", error);

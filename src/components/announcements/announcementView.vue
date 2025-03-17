@@ -61,7 +61,10 @@
 
         <!-- Content area -->
         <div class="p-6">
-          <div class="prose max-w-none font-serif text-lg" v-html="announcement?.content"></div>
+          <div
+            class="prose max-w-none font-serif text-lg"
+            v-html="announcement?.content"
+          ></div>
         </div>
 
         <!-- Footer -->
@@ -79,11 +82,12 @@
                   v-else
                   class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200 capitalize"
                 >
-                  {{ creator?.name[0] }}{{ creator?.surname[0] }}
+                  {{ creator?.name?.[0] || "N"
+                  }}{{ creator?.surname?.[0] || "A" }}
                 </div>
               </div>
               <div>
-                <p class="text-sm font-medium text-gray-900 capitalize">
+                <p class="text-sm font-medium text-gray-900">
                   <!-- {{ creator?.name }} -->
                   {{ getCreatorName }}
                 </p>
@@ -123,21 +127,21 @@
 </template>
 
 <script setup>
+import ErrorScreen from "../errorScreen.vue";
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useUserStore } from "../../store/userStore";
-import { useAnnouncementStore } from "../../store/announcementStore";
-import { useApolloClient } from "@vue/apollo-composable";
-import { formatDate } from "../../utils/date.holidays";
-import { useNavigation } from "../../composables/useNavigation";
 import LoadingScreen from "../loadingScreen.vue";
-import ErrorScreen from "../errorScreen.vue";
+import { useUserStore } from "../../store/userStore";
+import { formatDate } from "../../utils/date.holidays";
+import { useApolloClient } from "@vue/apollo-composable";
+import { useNavigation } from "../../composables/useNavigation";
+import { useAnnouncementStore } from "../../store/announcementStore";
 
 const route = useRoute();
 const router = useRouter();
 
 const announcementId = route.params.id;
-console.log("announcementId:", announcementId);
+
 
 const { goBack } = useNavigation();
 const { client } = useApolloClient();
@@ -164,7 +168,7 @@ const getCreatorName = computed(() => {
   if (!creator.value) return "";
   return creator.value.name
     ? `${creator.value.name} ${creator.value.surname || ""}`.trim()
-    : creator.value.email;
+    : creator.value.username;
 });
 
 const formatTargetRoles = (roles) => {

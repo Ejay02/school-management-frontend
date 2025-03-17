@@ -151,7 +151,7 @@
     <div class="right hidden lg:block lg:w-1/2 h-screen">
       <img
         src="/kimberly-farmer-lUaaKCUANVI-unsplash.jpg"
-        alt="Background Image"
+        alt="Background pix"
         class="h-full w-full object-cover"
       />
     </div>

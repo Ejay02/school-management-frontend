@@ -32,18 +32,17 @@
 </template>
 
 <script setup>
-import EmptyState from "../emptyState.vue";
-import ErrorScreen from "../errorScreen.vue";
-import LoadingScreen from "../loadingScreen.vue";
-import AnnouncementHeader from "./announcementHeader.vue";
-import ArchivedAnnouncements from "./archivedAnnouncements.vue";
-import MainAnnouncementView from "./mainAnnouncementView.vue";
-import { useAnnouncementStore } from "../../store/announcementStore";
-import { useUserStore } from "../../store/userStore";
 import { ref, computed, onMounted } from "vue";
+import { useUserStore } from "../../store/userStore";
+import AnnouncementHeader from "./announcementHeader.vue";
+import MainAnnouncementView from "./mainAnnouncementView.vue";
+import { useNotificationStore } from "../../store/notification";
+import ArchivedAnnouncements from "./archivedAnnouncements.vue";
+import { useAnnouncementStore } from "../../store/announcementStore";
 
-const announcementStore = useAnnouncementStore();
 const userStore = useUserStore();
+const announcementStore = useAnnouncementStore();
+const notificationStore = useNotificationStore();
 
 // State
 const activeView = ref("main"); // Start with main view
@@ -73,14 +72,17 @@ const resetForm = () => {
 };
 
 const handleViewChange = async (newView) => {
-  console.log("Changing view to:", newView);
   activeView.value = newView;
 
   try {
     // Always fetch all announcements when changing views
     await announcementStore.fetchAnnouncements();
+    await announcementStore.fetchArchivedAnnouncements();
   } catch (error) {
-    console.error(`Failed to fetch announcements:`, error);
+    notificationStore.addNotification({
+      type: "error",
+      message: `Failed to fetch announcements: ${error.message}`,
+    });
   }
 };
 
@@ -97,10 +99,16 @@ const saveAnnouncement = async () => {
         editingAnnouncement.value.id,
         formData
       );
-      showNotification("Announcement updated successfully");
+      notificationStore.addNotification({
+        type: "success",
+        message: `Announcement updated successfully`,
+      });
     } else {
       await announcementStore.createAnnouncement(formData);
-      showNotification("Announcement published successfully");
+      notificationStore.addNotification({
+        type: "success",
+        message: `Announcement published successfully`,
+      });
     }
 
     resetForm();
@@ -108,8 +116,10 @@ const saveAnnouncement = async () => {
     // Refresh announcements after saving
     await announcementStore.fetchAnnouncements();
   } catch (error) {
-    console.error("Failed to save announcement", error);
-    showNotification("Failed to save announcement", "error");
+    notificationStore.addNotification({
+      type: "error",
+      message: `Failed to save announcement: ${error.message}`,
+    });
   }
 };
 
@@ -124,16 +134,7 @@ const editAnnouncement = (announcement) => {
   showNewAnnouncementModal.value = true;
 };
 
-const showNotification = (message, type = "success") => {
-  console.log(`${type}: ${message}`);
-};
-
-// Lifecycle
 onMounted(async () => {
-  try {
-    await announcementStore.fetchAnnouncements();
-  } catch (error) {
-    console.error("Failed to initialize component:", error);
-  }
+  await announcementStore.fetchAnnouncements();
 });
 </script>

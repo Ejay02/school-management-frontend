@@ -44,6 +44,10 @@ export const useAnnouncementStore = defineStore("announcement", {
           variables: {
             params: {
               isArchived: false,
+              page: 1,
+              limit: 50,
+              sortBy: "createdAt",
+              sortOrder: "DESC",
             },
           },
           fetchPolicy: "no-cache",
@@ -76,8 +80,8 @@ export const useAnnouncementStore = defineStore("announcement", {
           fetchPolicy: "no-cache",
         });
 
-        this.selectedAnnouncement = res.data.getAnnouncementById;
-        return res.data.getAnnouncementById;
+        this.selectedAnnouncement = res?.data?.getAnnouncementById;
+        return res?.data?.getAnnouncementById;
       } catch (error) {
         this.error = error.message || "Error fetching event";
         throw error;
@@ -94,10 +98,15 @@ export const useAnnouncementStore = defineStore("announcement", {
           variables: {
             params: {
               isArchived: true,
+              page: 1,
+              limit: 50,
+              sortBy: "createdAt",
+              sortOrder: "DESC",
             },
           },
           fetchPolicy: "no-cache",
         });
+
         this.archivedAnnouncements = res.data.getAllAnnouncements;
       } catch (error) {
         this.error = error.message;
@@ -190,7 +199,6 @@ export const useAnnouncementStore = defineStore("announcement", {
           }
           return false;
         } catch (error) {
-          console.log("error:", error);
           this.error = error.message;
           throw error;
         }

@@ -58,6 +58,7 @@
           />
 
           <div
+            v-if="announcementStore.getUnreadCount > 0"
             class="absolute -top-3 -right-3 w-5 h-5 flex items-center justify-center bg-indigo-500 text-white rounded-full text-[8px] font-medium"
           >
             {{ announcementStore.getUnreadCount }}
