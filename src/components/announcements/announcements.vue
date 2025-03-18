@@ -16,16 +16,13 @@
 
         <!-- MAIN VIEW: Announcements List -->
         <div v-if="activeView === 'main'">
-          <MainAnnouncementView @edit-announcement="editAnnouncement" />
+          <MainAnnouncementView  />
         </div>
 
         <!-- ARCHIVE VIEW: Archived Announcements List -->
         <div v-if="activeView === 'archive'">
           <ArchivedAnnouncements />
         </div>
-
-        <!-- New/Edit Announcement Modal -->
-        <!-- Modal implementation here -->
       </main>
     </div>
   </div>

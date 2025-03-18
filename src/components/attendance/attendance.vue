@@ -12,7 +12,7 @@
             <input
               type="date"
               v-model="startDate"
-              class="border rounded p-2 text-sm"
+              class="border border-gray-300 rounded-md p-2 text-sm focus:ring-eduPurple focus:border-eduPurple focus:outline-none cursor-pointer"
             />
           </div>
 
@@ -21,7 +21,7 @@
             <input
               type="date"
               v-model="endDate"
-              class="border rounded p-2 text-sm"
+              class="border border-gray-300 rounded-md p-2 text-sm focus:ring-eduPurple focus:border-eduPurple focus:outline-none cursor-pointer"
             />
           </div>
           <button

@@ -701,14 +701,28 @@ const transformedData = ref({});
 
 const fullTeacherName = computed({
   get() {
-    // Returns both name and surname concatenated
-    return `${data?.value?.teacher?.name} ${data?.value?.teacher?.surname}`.trim();
+    // Returns both name and surname concatenated or NA if null
+    if (!data?.value?.teacher?.name && !data?.value?.teacher?.surname) {
+      return "NA";
+    }
+    return `${data?.value?.teacher?.name || ""} ${data?.value?.teacher?.surname || ""}`.trim();
   },
   set(newValue) {
+    // If NA is entered, set both name and surname to empty
+    if (newValue === "NA") {
+      if (data.value && data.value.teacher) {
+        data.value.teacher.name = "";
+        data.value.teacher.surname = "";
+      }
+      return;
+    }
+    
     // Split the input value into parts
     const parts = newValue.split(" ");
-    data.value.teacher.name = parts.shift() || "";
-    data.value.teacher.surname = parts.join(" ");
+    if (data.value && data.value.teacher) {
+      data.value.teacher.name = parts.shift() || "";
+      data.value.teacher.surname = parts.join(" ");
+    }
   },
 });
 

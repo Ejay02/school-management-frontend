@@ -6,18 +6,8 @@
     <div v-else-if="error" class="flex justify-center items-center py-8">
       <ErrorScreen :message="error" />
     </div>
-    <div
-      v-else-if="!filteredAnnouncements.length"
-      class="flex justify-center items-center py-8"
-    >
-      <EmptyState
-        icon="fa-solid fa-bell"
-        heading="No announcements found"
-        description="Check back later for updates"
-      />
-    </div>
     <div v-else>
-      <!-- Filters -->
+      <!-- Filters - Always show when not loading or error -->
       <div class="mb-6 bg-white rounded-lg shadow-sm p-4">
         <div
           class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4"
@@ -27,7 +17,7 @@
               type="text"
               v-model="searchQuery"
               placeholder="Search announcements..."
-              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-eduPurple focus:border-eduPurple focus:outline-none cursor-pointer"
             />
           </div>
           <div
@@ -35,7 +25,7 @@
           >
             <select
               v-model="selectedCategory"
-              class="px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-gray-700"
+              class="px-4 py-2 border border-gray-300 rounded-md focus:ring-eduPurple focus:border-eduPurple focus:outline-none text-gray-700 cursor-pointer"
             >
               <option value="">All Categories</option>
               <option value="class">Class Announcements</option>
@@ -44,7 +34,7 @@
             <select
               v-if="isAdminOrTeacher"
               v-model="selectedTargetRole"
-              class="px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-gray-700"
+              class="px-4 py-2 border border-gray-300 rounded-md focus:ring-eduPurple focus:border-eduPurple focus:outline-none text-gray-700 cursor-pointer"
             >
               <option value="">All Audiences</option>
               <option
@@ -59,8 +49,20 @@
         </div>
       </div>
 
+      <!-- Empty state when no announcements match -->
+      <div
+        v-if="!filteredAnnouncements.length"
+        class="flex justify-center items-center py-8 w-full max-w-5xl mx-auto"
+      >
+        <EmptyState
+          icon="fa-solid fa-bell"
+          heading="No announcement found"
+          description="Check back later for updates"
+        />
+      </div>
+
       <!-- Announcements list -->
-      <div class="space-y-4 border-t pt-4">
+      <div v-else class="space-y-4 border-t pt-4">
         <div
           v-for="announcement in filteredAnnouncements"
           :key="announcement.id"
