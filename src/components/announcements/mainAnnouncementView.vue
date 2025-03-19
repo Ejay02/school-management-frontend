@@ -72,7 +72,7 @@
               !announcementStore.isAnnouncementRead(announcement.id),
           }"
         >
-          <div class="p-6" @click="markAsRead(announcement.id)">
+          <div class="p-6">
             <router-link
               :to="`/announcement/${announcement.id}`"
               class="block cursor-pointer"
@@ -277,6 +277,7 @@ const availableTargetRoles = computed(() => [
   { value: "STUDENT", label: "Students" },
   { value: "TEACHER", label: "Teachers" },
   { value: "PARENT", label: "Parents" },
+  { value: "ADMIN", label: "Admins" },
 ]);
 
 const isAdminOrTeacher = computed(() => {

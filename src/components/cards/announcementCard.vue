@@ -8,56 +8,130 @@
     </div>
 
     <div class="flex flex-col gap-4">
+      <div v-if="loading" class="flex justify-center items-center py-8">
+        <LoadingScreen message="Loading announcements..." />
+      </div>
+      <div v-else-if="error" class="flex justify-center items-center py-8">
+        <ErrorScreen :message="error" />
+      </div>
+
+      <EmptyState
+        v-if="!announcements.length"
+        icon="fa-solid fa-bell"
+        heading="No announcement found"
+        description="Check back later for updates"
+      />
+
       <div
-        class="p-5 rounded-md odd:bg-eduSkyLight even:bg-eduPurpleLight hover:bg-gray-100"
+        class="p-5 rounded-md odd:bg-eduSkyLight even:bg-eduPurpleLight hover:bg-gray-100 cursor-pointer shadow-sm border-gray-200 hover:shadow-md transition-all"
         v-for="announce in announcements"
         :key="announce?.id"
+        :class="{
+          'border-l-4 border-indigo-500': !announcementStore.isAnnouncementRead(
+            announce.id
+          ),
+        }"
       >
-        <div class="flex items-center justify-between mb-2">
-          <h1 class="font-medium text-gray-600 capitalize text-xs">
-            {{ announce?.title }}
-          </h1>
-          <span
-            class="text-[10px] bg-gray-50 rounded-md px-1 py-1 inline-flex items-center font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
-            >{{ announce?.date }}</span
-          >
-        </div>
+        <router-link :to="`/announcement/${announce.id}`" class="block">
+          <div class="flex items-center justify-between">
+            <h1
+              class="line-clamp-1 font-medium text-gray-600 capitalize text-sm"
+            >
+              {{ announce?.title }}
+            </h1>
+            <span class="text-[10px] items-center font-medium text-gray-600">{{
+              formatDate(announce?.createdAt)
+            }}</span>
+          </div>
 
-        <div class="mt-2">
-          <span class="text-gray-400 line-clamp-2 text-xs">{{
-            announce?.description
-          }}</span>
-        </div>
+          <div class="mt-2">
+            <span class="text-gray-400 line-clamp-2 text-xs">{{
+              announce?.content
+            }}</span>
+          </div>
+        </router-link>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, onMounted, onUnmounted } from "vue"; // Add onUnmounted
+import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
+import LoadingScreen from "../loadingScreen.vue";
+import { formatDate } from "../../utils/date.holidays";
+import { useAnnouncementStore } from "../../store/announcementStore";
+import socket from "../../socket/socket"; // Add socket import
+import { useUserStore } from "../../store/userStore"; // Add userStore import
 
-const announcements = ref([
-  {
-    id: 1,
-    title: "Lorem ipsum dolor sit",
-    description: "Lorem ipsum dolor sit amet consectetur adipisicing.",
-    date: "2024-10-10",
-  },
-  {
-    id: 2,
-    title: "Lorem ipsum dolor sit",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae, ut ullam. Quidem doloribus eos ducimus culpa quod mollitia libero qui, eum ipsum eveniet voluptate alias. Atque unde autem veritatis incidunt?",
-    date: "2024-11-11",
-  },
-  {
-    id: 3,
-    title: "Lorem ipsum dolor sit",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae, ut ullam. Quidem doloribus eos ducimus culpa quod mollitia libero qui, eum ipsum eveniet voluptate alias. Atque unde autem veritatis incidunt?",
-    date: "2024-11-21",
-  },
-]);
+const userStore = useUserStore();
+const announcementStore = useAnnouncementStore();
+
+const loading = computed(() => announcementStore.loading);
+const error = computed(() => announcementStore.error);
+
+const announcements = computed(() => {
+  return (announcementStore.announcements || []).slice(0, 3);
+});
+
+const setupSocketConnection = () => {
+  // Join appropriate rooms based on user role and class
+  socket.emit("joinRooms", {
+    role: userStore.userInfo?.role,
+    classId: userStore.userInfo?.classId,
+    userId: userStore.userInfo?.id,
+  });
+
+  // Listen for new announcements
+  socket.on("newAnnouncement", (announcement) => {
+    announcementStore.announcements.unshift(announcement);
+  });
+
+  // Listen for deleted announcements
+  socket.on("announcementDeleted", ({ id }) => {
+    announcementStore.announcements = announcementStore.announcements.filter(
+      (announcement) => announcement.id !== id
+    );
+  });
+
+  // Listen for read status updates
+  socket.on("readStatus", ({ announcementId, isRead }) => {
+    const announcement = announcementStore.announcements.find(
+      (a) => a.id === announcementId
+    );
+    if (announcement) {
+      announcement.isRead = isRead;
+    }
+  });
+
+  // Listen for archive status updates
+  socket.on("announcementArchiveStatus", ({ id, isArchived }) => {
+    const announcement = announcementStore.announcements.find(
+      (a) => a.id === id
+    );
+    if (announcement) {
+      if (isArchived) {
+        announcementStore.announcements = announcementStore.announcements.filter(
+          (a) => a.id !== id
+        );
+      }
+    }
+  });
+};
+
+onMounted(() => {
+  announcementStore.fetchAnnouncements();
+  setupSocketConnection();
+});
+
+onUnmounted(() => {
+  // Cleanup socket listeners
+  socket.off("newAnnouncement");
+  socket.off("announcementDeleted");
+  socket.off("readStatus");
+  socket.off("announcementArchiveStatus");
+});
 </script>
 
 <style scoped></style>

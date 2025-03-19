@@ -39,41 +39,45 @@
       <EmptyState
         v-else-if="!eventStore.events.length"
         icon="fa-solid fa-calendar-days"
-        heading="No Events Found"
+        heading="No Event Found"
         description="There are currently no events scheduled."
       />
 
       <!-- Card View -->
 
       <div
-        class="cursor-pointer p-5 rounded-md border-2 border-gray-100 border-t-4 odd:border-t-eduSky even:border-t-eduPurple hover:bg-gray-100"
+        class="cursor-pointer p-5 odd:bg-eduSkyLight even:bg-eduPurpleLight hover:bg-gray-100 rounded-md shadow-sm border border-gray-200 hover:shadow-md transition-all"
         v-for="event in latestEvents"
         :key="event.id"
+        :class="{
+          'border-l-4 border-l-indigo-500': !eventStore.isEventRead(event.id),
+        }"
       >
         <router-link
           :to="`/event/${event.id}`"
           @click="handleMarkEventAsRead(event.id)"
         >
           <!-- {{ event }} -->
-          <div class="flex items-center justify-between mb-2">
-            <h1 class="font-semibold text-gray-600 capitalize">
+          <div class="flex items-center justify-between">
+            <h1
+              class="font-medium text-gray-600 capitalize line-clamp-1 text-sm"
+            >
               {{ event.title }}
             </h1>
             <div class="mb-4">
-              <div class="text-gray-400 text-xs ml-4">
-                {{ formatTime(event.startTime) }} -
-                {{ formatTime(event.endTime) }}
+              <div class="text-gray-600 text-[10px] ml-4">
+                {{ formatDate(event?.startTime) }}
               </div>
             </div>
           </div>
 
-          <div class="justify-between flex mt-2">
+          <div class="justify-between flex">
             <span class="line-clamp-2 text-gray-400 text-sm flex-1">
               {{ event.description }}
             </span>
 
             <span
-              class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset whitespace-nowrap self-start"
+              class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset whitespace-nowrap self-start text-[10px]"
               :class="{
                 'text-green-700 bg-green-50 ring-green-600/20':
                   event.status === 'completed',
@@ -89,16 +93,6 @@
               ></span>
               {{ event.status }}</span
             >
-
-            <span
-              v-if="
-                eventStore.isNewEvent(event.id) &&
-                !eventStore.isEventRead(event.id)
-              "
-              class="ml-2 inline-block px-2 py-1 text-xs font-semibold text-orange-600 bg-orange-100 border border-orange-600 rounded"
-            >
-              NEW
-            </span>
           </div>
         </router-link>
       </div>
@@ -109,7 +103,7 @@
 import {
   fetchCountry,
   fetchHolidays,
-  formatTime,
+  formatDate,
 } from "../../utils/date.holidays";
 import socket from "../../socket/socket";
 import EmptyState from "../emptyState.vue";
