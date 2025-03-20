@@ -167,5 +167,13 @@ export const useEventStore = defineStore("eventStore", {
     isEventRead(eventId) {
       return this.readEvents.includes(eventId);
     },
+
+    isEventNow(event) {
+      const now = new Date().getTime();
+      const startTime = new Date(event.startTime).getTime();
+      const endTime = new Date(event.endTime).getTime();
+
+      return now >= startTime && now <= endTime;
+    },
   },
 });

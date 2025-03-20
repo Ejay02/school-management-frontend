@@ -9,7 +9,7 @@
       borderless
     />
 
-    <div class="flex justify-between items-center mb-6 mt-10">
+    <div class="flex justify-between items-center mb-6 ">
       <h1 class="text-lg font-semibold">Events</h1>
       <div
         class="text-gray-600 hover:text-gray-800 p-1 rounded-full hover:bg-gray-100"

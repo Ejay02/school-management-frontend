@@ -36,6 +36,13 @@
             >
               NEW
             </span>
+
+            <span
+              v-if="eventStore.isEventNow(event)"
+              class="ml-2 inline-block px-2 py-1 text-xs font-semibold text-green-600 bg-green-100 border border-green-600 rounded animate-pulse"
+            >
+              NOW
+            </span>
           </div>
 
           <div class="flex items-center">
