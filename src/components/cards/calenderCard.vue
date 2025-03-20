@@ -56,6 +56,7 @@
         <router-link
           :to="`/event/${event.id}`"
           @click="handleMarkEventAsRead(event.id)"
+          class="block"
         >
           <!-- {{ event }} -->
           <div class="flex items-center justify-between">

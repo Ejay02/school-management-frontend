@@ -35,19 +35,19 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
-import { useQuery } from "@vue/apollo-composable";
-import UserCard from "../../components/cards/userCard.vue";
-import CountCard from "../../components/cards/countCard.vue";
-import FinanceCard from "../../components/cards/financeCard.vue";
-import { getDashboardUserCardSummary } from "../../graphql/queries";
-import AttendanceCard from "../../components/cards/attendanceCard.vue";
-import { useAttendanceStore } from "../../store/attendanceStore";
 import {
   formatDateForInput,
   getFriday,
   getMonday,
 } from "../../utils/date.holidays";
+import { computed, onMounted, ref } from "vue";
+import { useQuery } from "@vue/apollo-composable";
+import UserCard from "../../components/cards/userCard.vue";
+import CountCard from "../../components/cards/countCard.vue";
+import FinanceCard from "../../components/cards/financeCard.vue";
+import { useAttendanceStore } from "../../store/attendanceStore";
+import { getDashboardUserCardSummary } from "../../graphql/queries";
+import AttendanceCard from "../../components/cards/attendanceCard.vue";
 
 const attendanceStore = useAttendanceStore();
 
