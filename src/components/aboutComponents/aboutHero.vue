@@ -1,8 +1,8 @@
 <template>
   <section
-    class="container mx-auto px-4 py-16 grid md:grid-cols-2 gap-12 items-center"
+    class="container mx-auto px-16 py-16 grid md:grid-cols-2 gap-12 items-center"
   >
-    <div>
+    <div class="px-16">
       <h2 class="text-4xl font-extrabold text-gray-600 mb-6">
         Transforming Education, Inspiring Futures
       </h2>

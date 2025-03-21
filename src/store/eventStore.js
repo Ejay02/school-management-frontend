@@ -79,6 +79,7 @@ export const useEventStore = defineStore("eventStore", {
           }
           return false;
         } catch (error) {
+          this.error = error.message || "Error marking event as read";
           throw error;
         }
       }

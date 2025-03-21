@@ -16,13 +16,14 @@
       </div>
 
       <EmptyState
-        v-if="!announcements.length"
+        v-else-if="!announcements.length"
         icon="fa-solid fa-bell"
         heading="No announcement found"
         description="Check back later for updates"
       />
 
       <div
+      v-else
         class="p-5 rounded-md odd:bg-eduSkyLight even:bg-eduPurpleLight hover:bg-gray-100 cursor-pointer shadow-sm border-gray-200 hover:shadow-md transition-all"
         v-for="announce in announcements"
         :key="announce?.id"

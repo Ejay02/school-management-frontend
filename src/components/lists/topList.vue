@@ -66,4 +66,4 @@ const showAddModal = (type) => {
 };
 </script>
 
-<style scoped></style>
+

@@ -19,41 +19,52 @@
       <div class="p-6 space-y-4 cursor-pointer">
         <!-- teacher list -->
         <template v-if="source === 'teachers'">
+          <!-- Name and Email row -->
           <div class="flex gap-2">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
+            <div class="w-1/2">
+              <label
+                for="name"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >Name</label
               >
               <input
                 v-model="name"
+                placeholder="John"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Email</label
+            <div class="w-1/2">
+              <label
+                for="surname"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Surname</label
               >
               <input
-                v-model="email"
-                type="email"
+                v-model="surname"
+                placeholder="Smith"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
           </div>
 
+          <!--  -->
           <div class="flex gap-2">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Birthday</label
+            <div class="w-1/2">
+              <label
+                for="username"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Username</label
               >
               <input
-                type="date"
-                v-model="birthday"
+                v-model="username"
+                placeholder="Smith"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
+            <div class="w-1/2">
+              <label
+                for="bloodGroup"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >Blood Group</label
               >
               <input
@@ -64,9 +75,12 @@
             </div>
           </div>
 
-          <div class="flex gap-2 justify-between">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
+          <!-- Image and Address row -->
+          <div class="flex gap-2">
+            <div class="w-1/2">
+              <label
+                for="image"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >Image</label
               >
               <input
@@ -75,8 +89,10 @@
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
-            <div class="">
-              <label class="block text-sm font-medium text-gray-700 mb-1"
+            <div class="w-1/2">
+              <label
+                for="address"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >Address</label
               >
               <input
@@ -85,8 +101,12 @@
               />
             </div>
           </div>
+
+          <!-- Subjects field -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="subjects"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Subjects</label
             >
             <input
@@ -95,18 +115,34 @@
             />
           </div>
 
+          <!-- Class and Phone row -->
           <div class="flex gap-2">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Classes</label
+            <div class="w-1/2">
+              <label
+                for="class"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Select a class</label
               >
-              <input
-                v-model="classes"
+              <select
+                v-model="selectedClass"
+                @change="handleClassChange"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+              >
+                <option value="" selected>No class</option>
+                <option
+                  v-for="(name, index) in classes"
+                  :key="index"
+                  :value="name"
+                  class="cursor-pointer"
+                >
+                  {{ name }}
+                </option>
+              </select>
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
+            <div class="w-1/2">
+              <label
+                for="phone"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >Phone</label
               >
               <input
@@ -119,42 +155,51 @@
 
         <!-- student List -->
         <template v-if="source === 'students'">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Name</label
-            >
-            <input
-              v-model="name"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </div>
-
           <div class="flex gap-2">
-            <div>
+            <div class="w-1/2">
               <label
-                class="block text-sm font-medium text-gray-700 mb-1 capitalize"
-                >class</label
+                for="name"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Name</label
               >
               <input
-                v-model="classes"
+                v-model="name"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
-
-            <div>
+            <div class="w-1/2">
               <label
-                class="block text-sm font-medium text-gray-700 mb-1 capitalize"
-                >grade</label
+                for="surname"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Surname</label
               >
               <input
-                v-model="grade"
+                v-model="surname"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
           </div>
+
+          <!-- Class and Phone row -->
           <div class="flex gap-2">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
+            <div class="w-1/2">
+              <label
+                for="email"
+                required
+                type="email"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >eMail</label
+              >
+              <input
+                v-model="email"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
+
+            <div class="w-1/2">
+              <label
+                for="phone"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >Phone</label
               >
               <input
@@ -162,23 +207,49 @@
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
+          </div>
+          <div class="flex gap-2 w-full">
+            <div class="w-1/2">
+              <label
+                for="class"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Select a class</label
+              >
+              <select
+                v-model="selectedClass"
+                @change="handleClassChange"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              >
+                <option value="" selected>No class</option>
+                <option
+                  v-for="(name, index) in classes"
+                  :key="index"
+                  :value="name"
+                  class="cursor-pointer"
+                >
+                  {{ name }}
+                </option>
+              </select>
+            </div>
 
-            <div>
+            <div class="w-1/2">
               <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Student Id</label
+                >Parent Id</label
               >
               <input
-                v-model="studentId"
+                v-model="parentId"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
           </div>
 
+          <!--  -->
+
           <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Address</label
+            >Password</label
           >
           <input
-            v-model="address"
+            v-model="password"
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
           />
         </template>
@@ -186,7 +257,9 @@
         <!-- parent list -->
         <template v-if="source === 'parents'">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="parentName"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Name</label
             >
             <input
@@ -195,7 +268,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="email"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Email</label
             >
             <input
@@ -204,7 +279,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="studentName"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Student Name</label
             >
             <input
@@ -231,6 +308,43 @@
           />
         </template>
 
+        <!-- class list -->
+        <template v-else-if="source === 'classes'">
+          <div class="flex gap-2">
+            <div class="w-1/2">
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Class Name</label
+              >
+              <input
+                v-model="name"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
+
+            <div class="w-1/2">
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Capacity</label
+              >
+              <input
+                v-model="capacity"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
+          </div>
+
+          <!-- TODO -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Supervisor</label
+            >
+            <input
+              v-model="supervisor"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+            />
+          </div>
+        </template>
+
+        <!-- TODO -->
         <!-- subject list -->
         <template v-else-if="source === 'subjects'">
           <div>
@@ -253,78 +367,106 @@
           </div>
         </template>
 
-        <!-- class list -->
-        <template v-else-if="source === 'classes'">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Class Name</label
-            >
-            <input
-              v-model="name"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </div>
-
-          <div class="flex gap-2">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Capacity</label
-              >
-              <input
-                v-model="capacity"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Grade</label
-              >
-              <input
-                v-model="grade"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Supervisor</label
-            >
-            <input
-              v-model="supervisor"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </div>
-        </template>
+        <!-- name, day, time, subject Id, classId -->
 
         <!-- lesson -->
         <template v-else-if="source === 'lessons'">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Subject</label
-            >
-            <input
-              v-model="subject"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Class</label
-            >
-            <input
-              v-model="classes"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+          <div class="flex gap-2">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Subject Name</label
+              >
+              <input
+                v-model="subject"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
+
+            <div class="w-1/2">
+              <label
+                for="class"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Select a class</label
+              >
+              <select
+                v-model="selectedClass"
+                @change="handleClassChange"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              >
+                <option value="" selected>No class</option>
+                <option
+                  v-for="(name, index) in classes"
+                  :key="index"
+                  :value="name"
+                  class="cursor-pointer"
+                >
+                  {{ name }}
+                </option>
+              </select>
+            </div>
+            <div class="w-1/2">
+              <label
+                for="class"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Select subject</label
+              >
+              <select
+                v-model="selectedClass"
+                @change="handleClassChange"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              >
+                <option value="" selected disabled>Select subject</option>
+                <option
+                  v-for="(name, index) in classes"
+                  :key="index"
+                  :value="name"
+                  class="cursor-pointer"
+                >
+                  {{ name }}
+                </option>
+              </select>
+            </div>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Teacher</label
-            >
-            <input
-              v-model="teacher"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+          <!--  -->
+          <div class="flex gap-2">
+            <div class="w-1/3">
+              <label
+                for="date"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Date</label
+              >
+              <input
+                type="date"
+                v-model="date"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
+
+            <div class="w-1/3">
+              <label
+                for="startTime"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Start Time</label
+              >
+              <input
+                type="time"
+                v-model="startTime"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
+            <div class="w-1/3">
+              <label
+                for="endTime"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >End Time</label
+              >
+              <input
+                type="time"
+                v-model="endTime"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
           </div>
         </template>
 
@@ -487,7 +629,9 @@
         <!-- event -->
         <template v-else-if="source === 'events'">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="title"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Title</label
             >
             <input
@@ -498,41 +642,86 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Class</label
-            >
-            <input
-              v-model="classes"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Content
+              <textarea
+                v-model="content"
+                rows="4"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Date</label
-            >
-            <input
-              type="date"
-              v-model="date"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </div>
+
           <div class="flex gap-2">
-            <div>
+            <div class="">
               <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Select a class[Optional]
+                <select
+                  v-model="selectedClass"
+                  @change="handleClassChange"
+                  class="mt-1 border rounded p-2 w-full focus:outline-none focus:ring-0 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
+                >
+                  <option value="" selected>No class</option>
+                  <option
+                    v-for="(name, index) in classes"
+                    :key="index"
+                    :value="name"
+                    class="cursor-pointer"
+                  >
+                    {{ name }}
+                  </option>
+                </select>
+              </label>
+            </div>
+
+            <div>
+              <label
+                for="location"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Location</label
+              >
+              <input
+                type="text"
+                v-model="location"
+                class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <div class="w-1/3">
+              <label
+                for="date"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Date</label
+              >
+              <input
+                type="date"
+                v-model="date"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
+
+            <div class="w-1/3">
+              <label
+                for="startTime"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >Start Time</label
               >
               <input
-                type="datetime"
+                type="time"
                 v-model="startTime"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
+            <div class="w-1/3">
+              <label
+                for="endTime"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >End Time</label
               >
               <input
-                type="datetime"
+                type="time"
                 v-model="endTime"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
@@ -543,7 +732,9 @@
         <!-- announcement -->
         <template v-else-if="source === 'announcements'">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="title"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Title</label
             >
             <input
@@ -595,8 +786,9 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
 import { useModalStore } from "@/store/useModalStore";
+import { ref, watch } from "vue";
+import { classes } from "../../utils/data";
 
 const modalStore = useModalStore();
 const isModalVisible = ref(modalStore.addModal);
@@ -614,7 +806,7 @@ const photo = ref("");
 const score = ref("");
 const subject = ref("");
 const subjects = ref([]);
-const classes = ref([]);
+const selectedClass = ref("");
 const phone = ref("");
 const student = ref("");
 const address = ref("");

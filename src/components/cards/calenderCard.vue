@@ -77,23 +77,30 @@
               {{ event.description }}
             </span>
 
-            <span
-              class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset whitespace-nowrap self-start text-[10px]"
-              :class="{
-                'text-green-700 bg-green-50 ring-green-600/20':
-                  event.status === 'completed',
-                'bg-yellow-50 text-yellow-800 ring-yellow-600/20':
-                  event.status === 'scheduled',
-                'bg-red-50 text-red-700 ring-red-600/10':
-                  event.status === 'cancelled',
-              }"
-            >
+            <div class="flex gap-2 items-start">
+              <!-- Add NOW indicator -->
               <span
-                v-if="!eventStore.isEventRead(event.id)"
-                class="mr-2 inline-block w-2 h-2 bg-red-500 rounded-full"
-              ></span>
-              {{ event.status }}</span
-            >
+                v-if="isEventNow(event)"
+                class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset whitespace-nowrap self-start text-[10px] text-green-700 bg-green-50 ring-green-600/20 animate-pulse"
+              >
+                NOW
+              </span>
+
+              <span
+                class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset whitespace-nowrap self-start text-[10px]"
+                :class="{
+                  'text-green-700 bg-green-50 ring-green-600/20':
+                    event.status === 'completed',
+                  'bg-yellow-50 text-yellow-800 ring-yellow-600/20':
+                    event.status === 'scheduled',
+                  'bg-red-50 text-red-700 ring-red-600/10':
+                    event.status === 'cancelled',
+                }"
+              >
+              
+                {{ event.status }}
+              </span>
+            </div>
           </div>
         </router-link>
       </div>
@@ -123,7 +130,37 @@ const currentMonth = ref({
   start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
 });
 
-const latestEvents = computed(() => [...eventStore.events].slice(0, 3));
+const latestEvents = computed(() => {
+  const now = new Date();
+  
+  return [...eventStore.events]
+    .sort((a, b) => {
+      const aStart = new Date(a.startTime);
+      const bStart = new Date(b.startTime);
+      const aEnd = new Date(a.endTime);
+      const bEnd = new Date(b.endTime);
+
+      // Check if events are currently happening
+      const aIsNow = now >= aStart && now <= aEnd;
+      const bIsNow = now >= bStart && now <= bEnd;
+
+      if (aIsNow && !bIsNow) return -1; // a is happening now, show first
+      if (!aIsNow && bIsNow) return 1;  // b is happening now, show first
+
+      // If neither is happening now, sort by closest upcoming
+      if (aStart > now && bStart > now) {
+        return aStart - bStart; // Show soonest upcoming first
+      }
+
+      // If one is past and one is upcoming, show upcoming first
+      if (aStart > now) return -1;
+      if (bStart > now) return 1;
+
+      // If both are past, show most recent first
+      return bEnd - aEnd;
+    })
+    .slice(0, 3); // Keep only first 3 events
+});
 
 onMounted(async () => {
   await eventStore.fetchEvents();
@@ -190,6 +227,14 @@ const handleMarkEventAsRead = async (eventId) => {
 useStorageSync("readEvents", (newReadEvents) => {
   eventStore.readEvents = newReadEvents || [];
 });
+
+// Add this helper function
+const isEventNow = (event) => {
+  const now = new Date();
+  const startTime = new Date(event.startTime);
+  const endTime = new Date(event.endTime);
+  return now >= startTime && now <= endTime;
+};
 </script>
 
 <style scoped>

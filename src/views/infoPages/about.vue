@@ -1,6 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-indigo-50 to-sky-100">
+  <div class="min-h-screen  bg-gradient-to-br from-indigo-50 to-sky-100">
     <!-- Header Section -->
+     
     <AboutHeader />
 
     <!-- Hero Section -->

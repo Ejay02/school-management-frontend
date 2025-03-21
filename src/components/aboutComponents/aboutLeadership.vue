@@ -1,6 +1,6 @@
 <template>
-  <section class="bg-gray-200 py-16">
-    <div class="container mx-auto px-4">
+  <section class="bg-gray-200 py-16 px-16">
+    <div class="container mx-auto  px-16">
       <div class="text-center mb-12">
         <h2 class="text-3xl font-bold text-gray-600 mb-4">
           Our Visionary Leadership

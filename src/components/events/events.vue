@@ -4,7 +4,8 @@
       <!-- top -->
       <div class="border-b p-4 flex items-center justify-between">
         <!-- View toggle buttons -->
-        <div class="inline-flex rounded-md shadow-sm justify-end" role="group">
+        <fieldset class="inline-flex rounded-md shadow-sm justify-end">
+          <legend class="sr-only">View mode selection</legend>
           <button
             @click="viewMode = 'cards'"
             :class="[
@@ -27,7 +28,7 @@
           >
             <i class="fas fa-list mr-1"></i> List
           </button>
-        </div>
+        </fieldset>
 
         <TopList :txt="' '" />
       </div>
@@ -166,7 +167,6 @@ onMounted(async () => {
   });
 
   socket.on("deleteEvent", (data) => {
-  
     if (data && data.eventId) {
       // Update the store by removing the deleted event
       eventStore.events = eventStore.events.filter(
@@ -182,9 +182,7 @@ onUnmounted(() => {
   socket.off("deleteEvent");
 });
 
-useStorageSync('readEvents', (newReadEvents) => {
+useStorageSync("readEvents", (newReadEvents) => {
   eventStore.readEvents = newReadEvents || [];
 });
 </script>
-
-<style scoped></style>
