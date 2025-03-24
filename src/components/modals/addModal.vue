@@ -233,7 +233,9 @@
             </div>
 
             <div class="w-1/2">
-              <label class="block text-sm font-medium text-gray-700 mb-1"
+              <label
+                for="parentId"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >Parent Id</label
               >
               <input
@@ -245,7 +247,9 @@
 
           <!--  -->
 
-          <label class="block text-sm font-medium text-gray-700 mb-1"
+          <label
+            for="password"
+            class="block text-sm font-medium text-gray-700 mb-1"
             >Password</label
           >
           <input
@@ -290,7 +294,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="phone"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Phone</label
             >
             <input
@@ -299,7 +305,9 @@
             />
           </div>
 
-          <label class="block text-sm font-medium text-gray-700 mb-1"
+          <label
+            for="address"
+            class="block text-sm font-medium text-gray-700 mb-1"
             >Address</label
           >
           <input
@@ -312,7 +320,9 @@
         <template v-else-if="source === 'classes'">
           <div class="flex gap-2">
             <div class="w-1/2">
-              <label class="block text-sm font-medium text-gray-700 mb-1"
+              <label
+                for="className"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >Class Name</label
               >
               <input
@@ -322,7 +332,9 @@
             </div>
 
             <div class="w-1/2">
-              <label class="block text-sm font-medium text-gray-700 mb-1"
+              <label
+                for="capacity"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >Capacity</label
               >
               <input
@@ -334,7 +346,9 @@
 
           <!-- TODO -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="supervisor"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Supervisor</label
             >
             <input
@@ -348,7 +362,9 @@
         <!-- subject list -->
         <template v-else-if="source === 'subjects'">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="subjectName"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Subject Name</label
             >
             <input
@@ -357,7 +373,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="teachers"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Teachers</label
             >
             <input
@@ -373,7 +391,9 @@
         <template v-else-if="source === 'lessons'">
           <div class="flex gap-2">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
+              <label
+                for="subjectName"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >Subject Name</label
               >
               <input
@@ -473,7 +493,9 @@
         <!-- exam -->
         <template v-else-if="source === 'exams'">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="subject"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Subject</label
             >
             <input
@@ -483,7 +505,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="class"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Class</label
             >
             <input
@@ -493,7 +517,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="teacher"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Teacher</label
             >
             <input
@@ -503,7 +529,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="date"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Date</label
             >
             <input
@@ -517,7 +545,9 @@
         <!-- assignment -->
         <template v-else-if="source === 'assignments'">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="subject"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Subject</label
             >
             <input
@@ -527,7 +557,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="class"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Class</label
             >
             <input
@@ -537,7 +569,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="teacher"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Teacher</label
             >
             <input
@@ -547,7 +581,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="dueDate"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Due Date</label
             >
             <input
@@ -561,7 +597,9 @@
         <!-- result -->
         <template v-else-if="source === 'results'">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="subject"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Subject</label
             >
             <input
@@ -571,7 +609,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="student"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Student</label
             >
             <input
@@ -582,7 +622,9 @@
           </div>
           <div class="flex gap-2">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
+              <label
+                for="score"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >Score</label
               >
               <input
@@ -592,7 +634,9 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
+              <label
+                for="class"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >Class</label
               >
               <input
@@ -604,7 +648,9 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="teacher"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Teacher</label
             >
             <input
@@ -615,7 +661,9 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label
+              for="date"
+              class="block text-sm font-medium text-gray-700 mb-1"
               >Date</label
             >
             <input

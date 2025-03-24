@@ -9,7 +9,9 @@
 
     <!-- Add filters section -->
     <div class="mb-6 bg-white rounded-lg shadow-sm p-4">
-      <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+      <div
+        class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4"
+      >
         <div class="relative flex-1">
           <input
             type="text"
@@ -18,7 +20,9 @@
             class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-eduPurple focus:border-eduPurple focus:outline-none cursor-pointer"
           />
         </div>
-        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+        <div
+          class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2"
+        >
           <select
             v-model="selectedCategory"
             class="px-4 py-2 border border-gray-300 rounded-md focus:ring-eduPurple focus:border-eduPurple focus:outline-none text-gray-700 cursor-pointer"
@@ -33,7 +37,11 @@
             class="px-4 py-2 border border-gray-300 rounded-md focus:ring-eduPurple focus:border-eduPurple focus:outline-none text-gray-700 cursor-pointer"
           >
             <option value="">All Audiences</option>
-            <option v-for="role in availableTargetRoles" :key="role.value" :value="role.value">
+            <option
+              v-for="role in availableTargetRoles"
+              :key="role.value"
+              :value="role.value"
+            >
               {{ role.label }}
             </option>
           </select>
@@ -53,7 +61,6 @@
     </div>
 
     <div v-else class="space-y-4 mt-2">
-    
       <div
         v-for="announcement in archivedAnnouncements"
         :key="announcement.id"
@@ -157,13 +164,13 @@
 </template>
 
 <script setup>
-import EmptyState from "../emptyState.vue";
-import ErrorScreen from "../errorScreen.vue";
-import { ref, computed, onMounted } from "vue";
-import LoadingScreen from "../loadingScreen.vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useAnnouncementStore } from "../../store/announcementStore";
 import { useUserStore } from "../../store/userStore";
 import { formatDate } from "../../utils/date.holidays";
-import { useAnnouncementStore } from "../../store/announcementStore";
+import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
+import LoadingScreen from "../loadingScreen.vue";
 
 const announcementStore = useAnnouncementStore();
 const userStore = useUserStore();
@@ -187,6 +194,20 @@ const formatTargetRoles = (roles) => {
 
 onMounted(async () => {
   await announcementStore.fetchArchivedAnnouncements();
+
+  socket.on("announcementDeleted", (data) => {
+    if (data && data.announcementId) {
+      // Remove announcement from archived list
+      announcementStore.archivedAnnouncements =
+        announcementStore.archivedAnnouncements.filter(
+          (announcement) => announcement.id !== data.announcementId
+        );
+    }
+  });
+});
+
+onUnmounted(() => {
+  socket.off("announcementDeleted");
 });
 
 const selectedCategory = ref("");

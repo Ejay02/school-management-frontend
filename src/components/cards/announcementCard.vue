@@ -23,7 +23,7 @@
       />
 
       <div
-      v-else
+        v-else
         class="p-5 rounded-md odd:bg-eduSkyLight even:bg-eduPurpleLight hover:bg-gray-100 cursor-pointer shadow-sm border-gray-200 hover:shadow-md transition-all"
         v-for="announce in announcements"
         :key="announce?.id"
@@ -57,14 +57,14 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted } from "vue"; // Add onUnmounted
+import { computed, onMounted, onUnmounted } from "vue";
+import { socket } from "../../socket/socket";
+import { useAnnouncementStore } from "../../store/announcementStore";
+import { useUserStore } from "../../store/userStore";
+import { formatDate } from "../../utils/date.holidays";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
-import { formatDate } from "../../utils/date.holidays";
-import { useAnnouncementStore } from "../../store/announcementStore";
-import socket from "../../socket/socket"; // Add socket import
-import { useUserStore } from "../../store/userStore"; // Add userStore import
 
 const userStore = useUserStore();
 const announcementStore = useAnnouncementStore();
@@ -113,9 +113,8 @@ const setupSocketConnection = () => {
     );
     if (announcement) {
       if (isArchived) {
-        announcementStore.announcements = announcementStore.announcements.filter(
-          (a) => a.id !== id
-        );
+        announcementStore.announcements =
+          announcementStore.announcements.filter((a) => a.id !== id);
       }
     }
   });

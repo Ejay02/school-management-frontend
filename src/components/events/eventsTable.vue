@@ -98,9 +98,9 @@
 
 <script setup>
 import { computed } from "vue";
-import { useUserStore } from "../../store/userStore";
 import { useEventStore } from "../../store/eventStore";
 import { useModalStore } from "../../store/useModalStore";
+import { useUserStore } from "../../store/userStore";
 
 const props = defineProps({
   columns: {
@@ -116,8 +116,6 @@ const props = defineProps({
 const userStore = useUserStore();
 const eventStore = useEventStore();
 
-// const role = userStore.currentRole;
-
 const isCreator = computed(
   () => props.data[0].creatorId === userStore.userInfo.id
 );
@@ -128,14 +126,6 @@ const showDelModal = (id, title, type) => {
   modalStore.deleteModal = true;
   modalStore.modalId = id;
   modalStore.modalTitle = title;
-  modalStore.source = type;
-};
-
-const showEditModal = (id, title, data, type) => {
-  modalStore.editModal = true;
-  modalStore.modalId = id;
-  modalStore.modalTitle = title;
-  modalStore.data = data;
   modalStore.source = type;
 };
 

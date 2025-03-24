@@ -49,7 +49,7 @@
           </div>
         </div>
 
-        <!-- Attendance table -->
+        <!-- Mark attendance | list -->
         <AttendanceTable class="shadow" />
       </div>
     </div>

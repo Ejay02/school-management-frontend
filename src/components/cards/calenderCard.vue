@@ -9,7 +9,7 @@
       borderless
     />
 
-    <div class="flex justify-between items-center mb-6 ">
+    <div class="flex justify-between items-center mb-6">
       <h1 class="text-lg font-semibold">Events</h1>
       <div
         class="text-gray-600 hover:text-gray-800 p-1 rounded-full hover:bg-gray-100"
@@ -97,7 +97,6 @@
                     event.status === 'cancelled',
                 }"
               >
-              
                 {{ event.status }}
               </span>
             </div>
@@ -108,18 +107,19 @@
   </div>
 </template>
 <script setup>
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useStorageSync } from "../../composables/useStorageSync";
+
+import { socket } from "../../socket/socket";
+import { useEventStore } from "../../store/eventStore";
 import {
   fetchCountry,
   fetchHolidays,
   formatDate,
 } from "../../utils/date.holidays";
-import socket from "../../socket/socket";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
-import { useEventStore } from "../../store/eventStore";
-import { computed, onMounted, onUnmounted, ref } from "vue";
-import { useStorageSync } from "../../composables/useStorageSync";
 
 const eventStore = useEventStore();
 
@@ -132,7 +132,7 @@ const currentMonth = ref({
 
 const latestEvents = computed(() => {
   const now = new Date();
-  
+
   return [...eventStore.events]
     .sort((a, b) => {
       const aStart = new Date(a.startTime);
@@ -145,7 +145,7 @@ const latestEvents = computed(() => {
       const bIsNow = now >= bStart && now <= bEnd;
 
       if (aIsNow && !bIsNow) return -1; // a is happening now, show first
-      if (!aIsNow && bIsNow) return 1;  // b is happening now, show first
+      if (!aIsNow && bIsNow) return 1; // b is happening now, show first
 
       // If neither is happening now, sort by closest upcoming
       if (aStart > now && bStart > now) {
@@ -185,12 +185,25 @@ onMounted(async () => {
       );
     }
   });
+
+  socket.on("eventUpdated", (data) => {
+    if (data && data.event && data.event.id) {
+      // Find and update the event in the store
+      const index = eventStore.events.findIndex(
+        (event) => event.id === data.event.id
+      );
+      if (index !== -1) {
+        eventStore.events[index] = data.event;
+      }
+    }
+  });
 });
 
 onUnmounted(() => {
   // Cleanup to prevent memory leaks
   socket.off("eventCreated");
   socket.off("deleteEvent");
+  socket.off("eventUpdated");
 });
 
 const attrs = computed(() => {

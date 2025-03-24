@@ -55,9 +55,9 @@
 
 <script setup>
 import axios from "axios";
-import { ref, nextTick } from "vue";
+import { nextTick, ref } from "vue";
 import ChatMessage from "../../components/chat/chatMessage.vue";
-import { schoolProfile, generateSchoolPrompt } from "../../utils/aiResponse";
+import { generateSchoolPrompt, schoolProfile } from "../../utils/aiResponse";
 
 const isChatOpen = ref(false);
 const messages = ref([

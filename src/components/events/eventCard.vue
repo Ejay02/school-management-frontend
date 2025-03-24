@@ -195,9 +195,9 @@
 
 <script setup>
 import { computed } from "vue";
-import { useUserStore } from "../../store/userStore";
 import { useEventStore } from "../../store/eventStore";
 import { useModalStore } from "../../store/useModalStore";
+import { useUserStore } from "../../store/userStore";
 import { formatEventDate, formatTime } from "../../utils/date.holidays";
 import { formatEventType, formatTargetRoles } from "../../utils/utility";
 

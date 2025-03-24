@@ -65,19 +65,19 @@
 </template>
 
 <script setup>
-import EventCard from "./eventCard.vue";
-import socket from "../../socket/socket";
+import { socket } from "../../socket/socket";
 import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
+import EventCard from "./eventCard.vue";
 import EventsTable from "./eventsTable.vue";
 
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useStorageSync } from "../../composables/useStorageSync";
+import { useEventStore } from "../../store/eventStore";
+import { useUserStore } from "../../store/userStore";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
-import { useUserStore } from "../../store/userStore";
-import { useEventStore } from "../../store/eventStore";
-import { ref, computed, onMounted, onUnmounted } from "vue";
-import { useStorageSync } from "../../composables/useStorageSync";
 
 const eventStore = useEventStore();
 const userStore = useUserStore();
@@ -174,12 +174,25 @@ onMounted(async () => {
       );
     }
   });
+
+  socket.on("eventUpdated", (data) => {
+    if (data && data.event && data.event.id) {
+      // Find and update the event in the store
+      const index = eventStore.events.findIndex(
+        (event) => event.id === data.event.id
+      );
+      if (index !== -1) {
+        eventStore.events[index] = data.event;
+      }
+    }
+  });
 });
 
 onUnmounted(() => {
   // Cleanup to prevent memory leaks
   socket.off("eventCreated");
   socket.off("deleteEvent");
+  socket.off("eventUpdated");
 });
 
 useStorageSync("readEvents", (newReadEvents) => {

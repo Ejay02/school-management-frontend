@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
 import { apolloClient } from "../../apollo-client";
+import { deleteEvent, markEventAsRead } from "../graphql/mutations";
 import { getEventById, getEvents } from "../graphql/queries";
 import { getData, setData } from "../utils/localStorageHelpers";
-import { markEventAsRead, deleteEvent } from "../graphql/mutations";
 
 const STORAGE_KEY = "newEventMarkers";
 const READ_EVENTS_KEY = "readEvents";
@@ -175,6 +175,22 @@ export const useEventStore = defineStore("eventStore", {
       const endTime = new Date(event.endTime).getTime();
 
       return now >= startTime && now <= endTime;
+    },
+
+    updateEvent(updatedEvent) {
+      const index = this.events.findIndex(
+        (event) => event.id === updatedEvent.id
+      );
+      if (index !== -1) {
+        // Replace the event with the updated version
+        this.events.splice(index, 1, updatedEvent);
+        // If the updated event is the selected event, update it too
+        if (this.selectedEvent && this.selectedEvent.id === updatedEvent.id) {
+          this.selectedEvent = updatedEvent;
+        }
+        return true;
+      }
+      return false;
     },
   },
 });

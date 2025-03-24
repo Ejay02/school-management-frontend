@@ -200,18 +200,17 @@
 </template>
 
 <script setup>
-import socket from "../../socket/socket";
+import { useApolloClient } from "@vue/apollo-composable";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { useStorageSync } from "../../composables/useStorageSync";
+import { socket } from "../../socket/socket";
+import { useAnnouncementStore } from "../../store/announcementStore";
+import { useModalStore } from "../../store/useModalStore";
+import { useUserStore } from "../../store/userStore";
+import { formatDate } from "../../utils/date.holidays";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
-import { useUserStore } from "../../store/userStore";
-import { formatDate } from "../../utils/date.holidays";
-import { useApolloClient } from "@vue/apollo-composable";
-import { ref, computed, watch, onMounted, onUnmounted } from "vue";
-import { useAnnouncementStore } from "../../store/announcementStore";
-
-import { useStorageSync } from "../../composables/useStorageSync";
-import { useModalStore } from "../../store/useModalStore";
 
 defineEmits(["edit-announcement"]);
 
@@ -238,6 +237,8 @@ const announcementStore = useAnnouncementStore();
 const searchQuery = ref("");
 const selectedCategory = ref("");
 const selectedTargetRole = ref("");
+
+const { client: apolloClient } = useApolloClient();
 
 const loading = computed(() => announcementStore.loading);
 const error = computed(() => announcementStore.error);
@@ -285,8 +286,6 @@ const isAdminOrTeacher = computed(() => {
   return role === "admin" || role === "teacher" || role === "super_admin";
 });
 
-const { client: apolloClient } = useApolloClient();
-
 const canEditAnnouncement = (announcement) => {
   const userId = userStore.userInfo?.id;
   const userRole = userStore.userInfo?.role?.toLowerCase();
@@ -315,16 +314,6 @@ const archiveAnnouncement = async (announcement) => {
   }
 };
 
-const deleteAnnouncement = async (id) => {
-  if (!confirm("Are you sure you want to delete this announcement?")) return;
-
-  try {
-    await announcementStore.deleteAnnouncement(id);
-  } catch (error) {
-    console.error("Failed to delete:", error);
-  }
-};
-
 const formatTargetRoles = (roles) => {
   return roles.map((role) => role.toLowerCase()).join(", ");
 };
@@ -340,6 +329,15 @@ const setupSocketConnection = () => {
   // Listen for new announcements
   socket.on("newAnnouncement", (announcement) => {
     announcementStore.announcements.unshift(announcement);
+  });
+
+  socket.on("announcementArchived", (data) => {
+    if (data && data.announcementId) {
+      // Remove announcement from active list
+      announcementStore.announcements = announcementStore.announcements.filter(
+        (announcement) => announcement.id !== data.announcementId
+      );
+    }
   });
 
   // Listen for deleted announcements
@@ -385,6 +383,8 @@ onUnmounted(() => {
   socket.off("newAnnouncement");
   socket.off("announcementDeleted");
   socket.off("readStatus");
+  socket.off("announcementArchived");
+  socket.off("announcementDeleted");
   socket.off("announcementArchiveStatus");
 });
 

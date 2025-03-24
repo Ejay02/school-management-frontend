@@ -1,8 +1,14 @@
-import socket from "./socket";
+import { socket, updateToken } from "./socket";
 
 export default {
   install(app) {
-    // Make the socket instance available in all components via this.$socket
     app.config.globalProperties.$socket = socket;
+    app.config.globalProperties.$updateSocketToken = updateToken;
+    
+    // Connect socket if token exists
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      socket.connect();
+    }
   },
 };

@@ -161,6 +161,7 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { updateToken } from "../../socket/socket";
 import { useUserStore } from "../../store/userStore";
 import { useMutation } from "@vue/apollo-composable";
 import { loginMutation } from "../../graphql/mutations";
@@ -195,6 +196,8 @@ const login = async () => {
       userStore.setUser(userData);
       localStorage.setItem("token", userData.token);
       localStorage.setItem("refreshToken", userData.refreshToken);
+
+      updateToken(userData.token);
 
       const dashboardPath =
         role === "super_admin" ? "/dashboard/admin" : `/dashboard/${role}`;

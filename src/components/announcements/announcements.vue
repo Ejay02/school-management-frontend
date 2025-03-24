@@ -16,7 +16,7 @@
 
         <!-- MAIN VIEW: Announcements List -->
         <div v-if="activeView === 'main'">
-          <MainAnnouncementView  />
+          <MainAnnouncementView />
         </div>
 
         <!-- ARCHIVE VIEW: Archived Announcements List -->
@@ -52,12 +52,10 @@ const announcementForm = ref({
   classId: "",
 });
 
-// Computed properties
 const archivedAnnouncements = computed(
   () => announcementStore.announcements?.filter((a) => a.isArchived) || []
 );
 
-// Methods
 const resetForm = () => {
   announcementForm.value = {
     title: "",
