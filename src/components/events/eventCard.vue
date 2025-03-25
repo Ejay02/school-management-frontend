@@ -8,23 +8,28 @@
       <div class="p-6">
         <div class="flex justify-between items-center mb-4">
           <div class="flex items-center">
-            <span
-              :class="[
-                'px-3 py-1 rounded-full text-xs font-semibold',
-                event.status === 'SCHEDULED'
-                  ? 'bg-eduSky text-blue-800'
-                  : event.status === 'CANCELLED'
-                  ? 'bg-red-200 text-red-800'
-                  : event.status === 'COMPLETED'
-                  ? 'bg-green-200 text-green-800'
-                  : '',
-              ]"
-            >
-              <span
-                v-if="!eventStore.isEventRead(event.id)"
-                class="mr-2 inline-block w-2 h-2 bg-red-500 rounded-full"
-              ></span>
-              {{ event.status }}
+            <span class="flex">
+              <div class="">
+                <span
+                  v-if="!eventStore.isEventRead(event.id)"
+                  class="mr-2 inline-block w-2 h-2 bg-red-500 rounded-full"
+                ></span>
+              </div>
+              <!-- {{ event.status }} -->
+              <div class="">
+                <div class="" v-if="event.status === 'COMPLETED'">
+                  <i
+                    class="fa-regular fa-calendar-check mr-1 text-green-600"
+                  ></i>
+                </div>
+                <div class="" v-if="event.status === 'SCHEDULED'">
+                  <i class="fa-solid fa-calendar-day mr-1 text-blue-500"></i>
+                </div>
+                <div class="" v-if="event.status === 'CANCELLED'">
+                  <i class="fa-regular fa-calendar-xmark mr-1 text-red-700"></i>
+                </div>
+              </div>
+              <!--  -->
             </span>
 
             <span

@@ -87,17 +87,23 @@
               </span>
 
               <span
-                class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset whitespace-nowrap self-start text-[10px]"
-                :class="{
-                  'text-green-700 bg-green-50 ring-green-600/20':
-                    event.status === 'completed',
-                  'bg-yellow-50 text-yellow-800 ring-yellow-600/20':
-                    event.status === 'scheduled',
-                  'bg-red-50 text-red-700 ring-red-600/10':
-                    event.status === 'cancelled',
-                }"
+                class="inline-flex items-center rounded-md whitespace-nowrap self-start text-md ml-2"
               >
-                {{ event.status }}
+                <div class="">
+                  <div class="" v-if="event.status === 'COMPLETED'">
+                    <i
+                      class="fa-regular fa-calendar-check mr-1 text-green-600"
+                    ></i>
+                  </div>
+                  <div class="" v-if="event.status === 'SCHEDULED'">
+                    <i class="fa-solid fa-calendar-day mr-1 text-blue-500"></i>
+                  </div>
+                  <div class="" v-if="event.status === 'CANCELLED'">
+                    <i
+                      class="fa-regular fa-calendar-xmark mr-1 text-red-500"
+                    ></i>
+                  </div>
+                </div>
               </span>
             </div>
           </div>

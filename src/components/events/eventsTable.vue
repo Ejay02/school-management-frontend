@@ -3,11 +3,15 @@
     <thead>
       <tr class="text-left text-gray-500 text-sm">
         <th
-          v-for="column in columns"
+          v-for="(column, index) in columns"
           :key="column?.header"
           :class="['flex-1', 'text-left', 'p-2', column?.class || '']"
         >
-          {{ column?.header }}
+          <div class="flex">
+            <div :class="{ 'ml-4': index === 0, 'ml-0': index !== 0 }">
+              {{ column?.header }}
+            </div>
+          </div>
         </th>
       </tr>
     </thead>
@@ -18,38 +22,44 @@
         class="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-eduSkyLight"
       >
         <td class="flex items-center gap-4 p-2">
-          <div class="flex flex-col">
+          <div class="flex">
+            <div class="mr-2">
+              <span class="flex gap-1">
+                <div class="">
+                  <span
+                    v-if="!eventStore.isEventRead(item.id)"
+                    class="mr-1 inline-block w-2 h-2 bg-red-500 rounded-full"
+                  ></span>
+                  <span v-else class="rounded-full mr-3 h-2 w-2"></span>
+                </div>
+
+                <!-- {{ item.status }} -->
+                <div class="hidden md:table-cell">
+                  <div class="" v-if="item.status === 'COMPLETED'">
+                    <i
+                      class="fa-regular fa-calendar-check mr-1 text-green-600"
+                    ></i>
+                  </div>
+                  <div class="" v-if="item.status === 'SCHEDULED'">
+                    <i class="fa-solid fa-calendar-day mr-1 text-blue-500"></i>
+                  </div>
+                  <div class="" v-if="item.status === 'CANCELLED'">
+                    <i
+                      class="fa-regular fa-calendar-xmark mr-1 text-red-500"
+                    ></i>
+                  </div>
+                </div>
+              </span>
+              <span
+                v-if="eventStore.isNewEvent(item.id)"
+                class="ml-2 inline-block px-2 py-1 text-xs font-semibold text-orange-600 bg-orange-100 border border-orange-600 rounded"
+              >
+                New
+              </span>
+            </div>
+            <!--  -->
             <div class="font-semibold">{{ item?.title }}</div>
           </div>
-        </td>
-
-        <td class="">
-          <span
-            :class="[
-              'px-2 py-1 rounded-full text-xs font-semibold',
-              item.status === 'SCHEDULED'
-                ? 'bg-eduSky text-blue-800'
-                : item.status === 'CANCELLED'
-                ? 'bg-red-200 text-red-800'
-                : item.status === 'COMPLETED'
-                ? 'bg-green-200 text-green-800'
-                : '',
-            ]"
-          >
-            <span
-              v-if="!eventStore.isEventRead(item.id)"
-              class="mr-1 inline-block w-2 h-2 bg-red-500 rounded-full"
-            ></span>
-            <span v-else class="rounded-full mr-3 h-2 w-2"></span>
-
-            {{ item.status }}
-          </span>
-          <span
-            v-if="eventStore.isNewEvent(item.id)"
-            class="ml-2 inline-block px-2 py-1 text-xs font-semibold text-orange-600 bg-orange-100 border border-orange-600 rounded"
-          >
-            New
-          </span>
         </td>
 
         <td class="hidden md:table-cell">
