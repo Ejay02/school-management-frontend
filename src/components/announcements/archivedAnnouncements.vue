@@ -171,6 +171,7 @@ import { formatDate } from "../../utils/date.holidays";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
+import { socket } from "../../socket/socket";
 
 const announcementStore = useAnnouncementStore();
 const userStore = useUserStore();
