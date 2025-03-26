@@ -20,9 +20,10 @@
         <td class="flex items-center gap-4 p-2">
           <div class="flex flex-col">
             <div class="font-semibold">{{ item?.name }}</div>
+            <div class="text-xs text-gray-500">{{ item?.class?.name }}</div>
           </div>
         </td>
-
+      
         <td class="hidden md:table-cell">
           <template v-if="item?.teachers && item.teachers.length">
             <span

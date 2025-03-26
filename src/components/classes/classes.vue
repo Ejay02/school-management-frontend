@@ -36,15 +36,19 @@
 import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
 
-import ClassesTable from "./classesTable.vue";
-import LoadingScreen from "../loadingScreen.vue";
-import ErrorScreen from "../errorScreen.vue";
-import EmptyState from "../emptyState.vue";
-import { useClassStore } from "../../store/classStore";
 import { computed, onMounted, ref, watch } from "vue";
+import { useClassStore } from "../../store/classStore";
+import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
+import LoadingScreen from "../loadingScreen.vue";
+import ClassesTable from "./classesTable.vue";
 
 const limit = 10;
+const searchQuery = ref("");
+const filterStatus = ref("all");
 const currentPage = ref(1);
+const pageSize = ref(10);
+
 const classStore = useClassStore();
 const loading = computed(() => classStore.loading);
 const error = computed(() => classStore.error);

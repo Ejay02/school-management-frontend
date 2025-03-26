@@ -227,6 +227,10 @@ export const getAllSubjects = gql`
         id
         name
       }
+      class{
+        id
+        name
+      }
     }
   }
 `;

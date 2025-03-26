@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 
-import { useApolloClient } from "@vue/apollo-composable";
+import { apolloClient } from "../../apollo-client";
 import { getAllAssignments } from "../graphql/queries";
 
 export const useAssignmentStore = defineStore("assignmentStore", {
@@ -22,13 +22,12 @@ export const useAssignmentStore = defineStore("assignmentStore", {
       this.loading = true;
 
       try {
-        const { client } = useApolloClient();
         const paginationParams = { page, limit };
         if (search) paginationParams.search = search;
         if (sortBy) paginationParams.sortBy = sortBy;
         if (sortOrder) paginationParams.sortOrder = sortOrder;
 
-        const { data } = await client.query({
+        const { data } = await apolloClient.query({
           query: getAllAssignments,
           variables: { pagination: paginationParams },
         });

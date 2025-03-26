@@ -36,12 +36,12 @@
 import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
 
-import EmptyState from "../emptyState.vue";
-import ErrorScreen from "../errorScreen.vue";
-import SubjectTable from "./subjectTable.vue";
-import LoadingScreen from "../loadingScreen.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useSubjectStore } from "../../store/subjectStore";
+import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
+import LoadingScreen from "../loadingScreen.vue";
+import SubjectTable from "./subjectTable.vue";
 
 const limit = 10;
 const currentPage = ref(1);
@@ -67,6 +67,7 @@ const columns = [
     header: "Subject Name",
     accessor: "name",
   },
+
   {
     header: "Teachers",
     accessor: "teachers",

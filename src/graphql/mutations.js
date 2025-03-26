@@ -252,3 +252,109 @@ export const unarchiveAnnouncement = gql`
     unarchiveAnnouncement(announcementId: $announcementId)
   }
 `;
+
+export const createClass = gql`
+  mutation CreateClass($input: CreateClassInput!) {
+    createClass(input: $input) {
+      id
+      name
+      capacity
+      supervisor {
+        id
+        name
+        surname
+      }
+      supervisorId
+      students {
+        id
+        name
+        surname
+      }
+    }
+  }
+`;
+
+export const createExam = gql`
+  mutation CreateExam($input: CreateExamInput!) {
+    createExam(input: $input) {
+      id
+      title
+      class {
+        id
+        name
+        students {
+          id
+          name
+          surname
+        }
+      }
+
+      classId
+      startTime
+      endTime
+      lesson {
+        id
+        name
+      }
+      teacher {
+        id
+        name
+        surname
+      }
+    }
+  }
+`;
+
+export const createLesson = gql`
+  mutation CreateLesson(
+    $classId: String!
+    $input: CreateLessonInput!
+    $subjectId: String!
+  ) {
+    createLesson(input: $input, classId: $classId, subjectId: $subjectId) {
+      id
+      name
+      class {
+        id
+        name
+        students {
+          id
+          name
+          surname
+        }
+      }
+
+      classId
+      startTime
+      endTime
+
+      teacher {
+        id
+        name
+        surname
+      }
+    }
+  }
+`;
+
+export const createAssignment = gql`
+  mutation CreateAssignment($input: CreateAssignmentInput!) {
+    createAssignment(input: $input) {
+      id
+      title
+      lesson {
+        id
+        name
+      }
+
+      classId
+      dueDate
+      teacher {
+        id
+        name
+        surname
+      }
+      dueDate
+    }
+  }
+`;

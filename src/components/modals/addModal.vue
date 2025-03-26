@@ -344,7 +344,7 @@
             </div>
           </div>
 
-          <!-- TODO -->
+          <!-- TODO  add supervison on the BE-->
           <div>
             <label
               for="supervisor"
@@ -358,7 +358,7 @@
           </div>
         </template>
 
-        <!-- TODO -->
+        <!-- TODO  create endpoint-->
         <!-- subject list -->
         <template v-else-if="source === 'subjects'">
           <div>
@@ -387,7 +387,8 @@
 
         <!-- name, day, time, subject Id, classId -->
 
-        <!-- lesson -->
+        <!-- TODO : add content for lesson, exam, add teacher for creating class -->
+        <!-- lesson  -->
         <template v-else-if="source === 'lessons'">
           <div class="flex gap-2">
             <div>
@@ -504,30 +505,43 @@
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
-          <div>
-            <label
-              for="class"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Class</label
-            >
-            <input
-              v-model="classes"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+          <div class="flex gap-2">
+            <div class="w-1/2">
+              <label
+                for="class"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Select a class</label
+              >
+              <select
+                v-model="selectedClass"
+                @change="handleClassChange"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              >
+                <option value="" selected>No class</option>
+                <option
+                  v-for="(name, index) in classes"
+                  :key="index"
+                  :value="name"
+                  class="cursor-pointer"
+                >
+                  {{ name }}
+                </option>
+              </select>
+            </div>
+            <div class="w-1/2">
+              <label
+                for="teacher"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Teacher</label
+              >
+              <input
+                v-model="teacher"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
           </div>
-          <div>
-            <label
-              for="teacher"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Teacher</label
-            >
-            <input
-              v-model="teacher"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </div>
+          <!--  -->
           <div>
             <label
               for="date"
@@ -836,9 +850,18 @@
 <script setup>
 import { useModalStore } from "@/store/useModalStore";
 import { ref, watch } from "vue";
+import { apolloClient } from "../../../apollo-client";
+import {
+  createAnnouncement,
+  createClass,
+  createEvent,
+} from "../../graphql/mutations";
+import { useNotificationStore } from "../../store/notification";
 import { classes } from "../../utils/data";
+import { useClassStore } from "../../store/classStore";
 
 const modalStore = useModalStore();
+const classStore = useClassStore();
 const isModalVisible = ref(modalStore.addModal);
 
 const title = ref("");
@@ -867,6 +890,8 @@ const startTime = ref("");
 const endTime = ref("");
 const source = ref(modalStore.source);
 
+const notificationStore = useNotificationStore();
+
 // Watchers to sync with modal store
 watch(
   () => modalStore.addModal,
@@ -891,31 +916,210 @@ const handleCancel = () => {
 const handleAdd = async () => {
   try {
     if (source.value === "teachers") {
-      console.log("hello from teachers");
+      // Create teacher logic
+      console.log("Creating teacher...");
+      // Example: const result = await apolloClient.mutate({
+      //   mutation: createTeacher,
+      //   variables: {
+      //     input: {
+      //       name: name.value,
+      //       surname: surname.value,
+      //       username: username.value,
+      //       bloodGroup: bloodGroup.value,
+      //       address: address.value,
+      //       subjects: subjects.value,
+      //       classId: selectedClass.value,
+      //       phone: phone.value
+      //     }
+      //   }
+      // });
     } else if (source.value === "students") {
-      console.log("hello from students");
+      // Create student logic
+      console.log("Creating student...");
+      // Example: const result = await apolloClient.mutate({
+      //   mutation: createStudent,
+      //   variables: {
+      //     input: {
+      //       name: name.value,
+      //       surname: surname.value,
+      //       email: email.value,
+      //       phone: phone.value,
+      //       classId: selectedClass.value,
+      //       parentId: parentId.value,
+      //       password: password.value
+      //     }
+      //   }
+      // });
     } else if (source.value === "parents") {
-      console.log("hello from parents");
+      // Create parent logic
+      console.log("Creating parent...");
+      // Example: const result = await apolloClient.mutate({
+      //   mutation: createParent,
+      //   variables: {
+      //     input: {
+      //       name: name.value,
+      //       email: email.value,
+      //       student: student.value,
+      //       phone: phone.value,
+      //       address: address.value
+      //     }
+      //   }
+      // });
     } else if (source.value === "subjects") {
-      console.log("hello from subjects");
+      // Create subject logic
+      console.log("Creating subject...");
+      // Example: const result = await apolloClient.mutate({
+      //   mutation: createSubject,
+      //   variables: {
+      //     input: {
+      //       name: name.value,
+      //       teachers: teachers.value
+      //     }
+      //   }
+      // });
     } else if (source.value === "classes") {
-      console.log("hello from classes");
+      await apolloClient.mutate({
+        mutation: createClass,
+        variables: {
+          input: {
+            name: name.value,
+            capacity: parseInt(capacity.value),
+            // supervisor: supervisor.value,  // FIXME: Add supervisor from the BE
+          },
+        },
+      });
+
+      await classStore.refreshClasses();
+      notificationStore.addNotification({
+        type: "success",
+        message: "Class created successfully!",
+      });
     } else if (source.value === "lessons") {
-      console.log("hello from lessons");
+      // Create lesson logic
+      console.log("Creating lesson...");
+      await apolloClient.mutate({
+        mutation: createLesson,
+        variables: {
+          input: {
+            subject: subject.value,
+            classId: selectedClass.value,
+            date: date.value,
+            startTime: startTime.value,
+            endTime: endTime.value,
+          },
+        },
+      });
+      notificationStore.addNotification({
+        type: "success",
+        message: "Lesson created successfully!",
+      });
     } else if (source.value === "exams") {
-      console.log("hello from exams");
+      // Create exam logic
+      console.log("Creating exam...");
+      await apolloClient.mutate({
+        mutation: createExam,
+        variables: {
+          input: {
+            subject: subject.value,
+            classes: classes.value,
+            teacher: teacher.value,
+            date: date.value,
+          },
+        },
+      });
+      notificationStore.addNotification({
+        type: "success",
+        message: "Exam created successfully!",
+      });
     } else if (source.value === "assignments") {
-      console.log("hello from assignments");
+      // Create assignment logic
+      console.log("Creating assignment...");
+      await apolloClient.mutate({
+        mutation: createAssignment,
+        variables: {
+          input: {
+            subject: subject.value,
+            classes: classes.value,
+            teacher: teacher.value,
+            dueDate: dueDate.value,
+          },
+        },
+      });
+      notificationStore.addNotification({
+        type: "success",
+        message: "Assignment created successfully!",
+      });
     } else if (source.value === "results") {
-      console.log("hello from results");
+      // Create result logic
+      console.log("Creating result...");
+      await apolloClient.mutate({
+        mutation: createResult,
+        variables: {
+          input: {
+            subject: subject.value,
+            student: student.value,
+            score: score.value,
+            classes: classes.value,
+            teacher: teacher.value,
+            date: date.value,
+          },
+        },
+      });
+      notificationStore.addNotification({
+        type: "success",
+        message: "Result created successfully!",
+      });
     } else if (source.value === "events") {
-      console.log("hello from events");
+      // Create event logic
+      console.log("Creating event...");
+      await apolloClient.mutate({
+        mutation: createEvent,
+        variables: {
+          data: {
+            title: title.value,
+            description: content.value,
+            classId: selectedClass.value || null,
+            location: location.value,
+            startTime: new Date(
+              `${date.value}T${startTime.value}`
+            ).toISOString(),
+            endTime: new Date(`${date.value}T${endTime.value}`).toISOString(),
+            type: "GENERAL",
+            visibility: "PUBLIC",
+            targetRoles: ["ADMIN", "TEACHER", "STUDENT", "PARENT"],
+          },
+        },
+      });
+      notificationStore.addNotification({
+        type: "success",
+        message: "Event created successfully!",
+      });
     } else if (source.value === "announcements") {
-      console.log("hello from announcements");
+      // Create announcement logic
+      console.log("Creating announcement...");
+      await apolloClient.mutate({
+        mutation: createAnnouncement,
+        variables: {
+          title: title.value,
+          content: content.value || "",
+          classId: selectedClass.value || null,
+          targetRoles: ["ADMIN", "TEACHER", "STUDENT", "PARENT"],
+        },
+      });
+      notificationStore.addNotification({
+        type: "success",
+        message: "Announcement created successfully!",
+      });
     }
+
+    // Close modal after successful creation
     modalStore.addModal = false;
   } catch (error) {
-    console.error(error);
+    notificationStore.addNotification({
+      type: "error",
+      message: `Error creating ${source.value}: ${error.message}`,
+    });
+    console.error("Error creating item:", error);
   }
 };
 </script>

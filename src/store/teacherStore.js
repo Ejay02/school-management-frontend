@@ -1,7 +1,6 @@
-
-import { defineStore } from "pinia";
-import { useApolloClient } from "@vue/apollo-composable";
 import { getAllTeachers, getTeacherById } from "@/graphql/queries";
+import { defineStore } from "pinia";
+import { apolloClient } from "../../apollo-client";
 
 export const useTeacherStore = defineStore("teacherStore", {
   state: () => ({
@@ -21,13 +20,12 @@ export const useTeacherStore = defineStore("teacherStore", {
     } = {}) {
       this.loading = true;
       try {
-        const client = useApolloClient().client;
         const paginationParams = { page, limit };
         if (search) paginationParams.search = search;
         if (sortBy) paginationParams.sortBy = sortBy;
         if (sortOrder) paginationParams.sortOrder = sortOrder;
 
-        const { data } = await client.query({
+        const { data } = await apolloClient.query({
           query: getAllTeachers,
           variables: { pagination: paginationParams },
         });
@@ -51,8 +49,7 @@ export const useTeacherStore = defineStore("teacherStore", {
     async fetchTeacherById(teacherId) {
       this.loading = true;
       try {
-        const client = useApolloClient().client;
-        const { data } = await client.query({
+        const { data } = await apolloClient.query({
           query: getTeacherById,
           variables: { teacherId },
         });

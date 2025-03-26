@@ -162,11 +162,11 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { updateToken } from "../../socket/socket";
-import { useUserStore } from "../../store/userStore";
 import { useMutation } from "@vue/apollo-composable";
+import { useUserStore } from "../../store/userStore";
 import { loginMutation } from "../../graphql/mutations";
-import { useNotificationStore } from "../../store/notification";
 import { useNavigation } from "../../composables/useNavigation";
+import { useNotificationStore } from "../../store/notification";
 
 const router = useRouter();
 const userStore = useUserStore();

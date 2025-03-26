@@ -1,6 +1,7 @@
-import { defineStore } from "pinia";
-import { useApolloClient } from "@vue/apollo-composable";
 import { getAllStudents, getStudentGenderStats } from "@/graphql/queries";
+import { useApolloClient } from "@vue/apollo-composable";
+import { defineStore } from "pinia";
+import { apolloClient } from "../../apollo-client";
 import { getStudentById } from "../graphql/queries";
 
 export const useStudentStore = defineStore("studentStore", {
@@ -31,13 +32,12 @@ export const useStudentStore = defineStore("studentStore", {
     } = {}) {
       this.loading = true;
       try {
-        const client = useApolloClient().client;
         const paginationParams = { page, limit };
         if (search) paginationParams.search = search;
         if (sortBy) paginationParams.sortBy = sortBy;
         if (sortOrder) paginationParams.sortOrder = sortOrder;
 
-        const { data } = await client.query({
+        const { data } = await apolloClient.query({
           query: getAllStudents,
           variables: { pagination: paginationParams },
         });
@@ -65,8 +65,8 @@ export const useStudentStore = defineStore("studentStore", {
     async fetchGenderStats({ classId = null } = {}) {
       this.loading = true;
       try {
-        const client = useApolloClient().client;
-        const { data } = await client.query({
+       
+        const { data } = await apolloClient.query({
           query: getStudentGenderStats,
           variables: { classId },
         });
@@ -81,8 +81,8 @@ export const useStudentStore = defineStore("studentStore", {
     async fetchStudentById(studentId) {
       this.loading = true;
       try {
-        const client = useApolloClient().client;
-        const { data } = await client.query({
+        
+        const { data } = await apolloClient.query({
           query: getStudentById,
           variables: { studentId },
         });

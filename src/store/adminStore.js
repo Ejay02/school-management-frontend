@@ -1,6 +1,6 @@
-import { defineStore } from "pinia";
-import { useApolloClient } from "@vue/apollo-composable";
 import { getAllAdminsQuery } from "@/graphql/queries";
+import { defineStore } from "pinia";
+import { apolloClient } from "../../apollo-client";
 
 export const useAdminStore = defineStore("adminStore", {
   state: () => ({
@@ -12,8 +12,7 @@ export const useAdminStore = defineStore("adminStore", {
     async fetchAdmins() {
       this.loading = true;
       try {
-        const client = useApolloClient().client;
-        const { data } = await client.query({ query: getAllAdminsQuery });
+        const { data } = await apolloClient.query({ query: getAllAdminsQuery });
         this.admins = data.getAllAdmins;
       } catch (error) {
         this.error = error;
