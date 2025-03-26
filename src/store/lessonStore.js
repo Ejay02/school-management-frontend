@@ -4,10 +4,13 @@ import { apolloClient } from "../../apollo-client";
 
 export const useLessonStore = defineStore("lessonStore", {
   state: () => ({
-    lessons: [],
+    allLessons: [], // Store all lessons
+    lessons: [], // Store paginated lessons
     loading: false,
     error: null,
     hasMore: true,
+    totalPages: 1,
+    totalCount: 0,
   }),
 
   actions: {
@@ -21,18 +24,24 @@ export const useLessonStore = defineStore("lessonStore", {
       this.loading = true;
 
       try {
-        const paginationParams = { page, limit };
-        if (search) paginationParams.search = search;
-        if (sortBy) paginationParams.sortBy = sortBy;
-        if (sortOrder) paginationParams.sortOrder = sortOrder;
+        // First fetch all lessons if we haven't already
+        if (this.allLessons.length === 0) {
+          const { data } = await apolloClient.query({
+            query: getAllLessons,
+            variables: { pagination: { page: 1, limit: 1000 } },
+          });
 
-        const { data } = await apolloClient.query({
-          query: getAllLessons,
-          variables: { pagination: paginationParams },
-        });
+          this.allLessons = data.getAllLessons;
+          this.totalCount = this.allLessons.length;
+          this.totalPages = Math.ceil(this.totalCount / limit);
+        }
 
-        this.lessons = data.getAllLessons;
-        this.hasMore = data.getAllLessons.length === limit;
+        // Handle pagination locally
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        this.lessons = this.allLessons.slice(start, end);
+        this.hasMore = end < this.totalCount;
+
       } catch (err) {
         this.error = err;
       } finally {

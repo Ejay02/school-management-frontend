@@ -5,10 +5,13 @@ import { getAllAssignments } from "../graphql/queries";
 
 export const useAssignmentStore = defineStore("assignmentStore", {
   state: () => ({
-    assignments: [],
+    allAssignments: [], // Store all assignments
+    assignments: [], // Store paginated assignments
     loading: false,
     error: null,
     hasMore: true,
+    totalPages: 1,
+    totalCount: 0,
   }),
 
   actions: {
@@ -22,18 +25,24 @@ export const useAssignmentStore = defineStore("assignmentStore", {
       this.loading = true;
 
       try {
-        const paginationParams = { page, limit };
-        if (search) paginationParams.search = search;
-        if (sortBy) paginationParams.sortBy = sortBy;
-        if (sortOrder) paginationParams.sortOrder = sortOrder;
+        // First fetch all assignments if we haven't already
+        if (this.allAssignments.length === 0) {
+          const { data } = await apolloClient.query({
+            query: getAllAssignments,
+            variables: { pagination: { page: 1, limit: 1000 } },
+          });
 
-        const { data } = await apolloClient.query({
-          query: getAllAssignments,
-          variables: { pagination: paginationParams },
-        });
+          this.allAssignments = data.getAllAssignments;
+          this.totalCount = this.allAssignments.length;
+          this.totalPages = Math.ceil(this.totalCount / limit);
+        }
 
-        this.assignments = data.getAllAssignments;
-        this.hasMore = data.getAllAssignments.length === limit;
+        // Handle pagination locally
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        this.assignments = this.allAssignments.slice(start, end);
+        this.hasMore = end < this.totalCount;
+
       } catch (err) {
         this.error = err;
       } finally {

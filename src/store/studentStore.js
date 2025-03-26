@@ -1,15 +1,16 @@
 import { getAllStudents, getStudentGenderStats } from "@/graphql/queries";
-import { useApolloClient } from "@vue/apollo-composable";
 import { defineStore } from "pinia";
 import { apolloClient } from "../../apollo-client";
 import { getStudentById } from "../graphql/queries";
 
 export const useStudentStore = defineStore("studentStore", {
   state: () => ({
-    students: [],
+    allStudents: [], // Store all students
+    students: [], // Store paginated students
     selectedStudent: null,
-
     hasMore: true,
+    totalPages: 1,
+    totalCount: 0,
     genderStats: {
       totalStudents: 0,
       maleCount: 0,
@@ -32,29 +33,33 @@ export const useStudentStore = defineStore("studentStore", {
     } = {}) {
       this.loading = true;
       try {
-        const paginationParams = { page, limit };
-        if (search) paginationParams.search = search;
-        if (sortBy) paginationParams.sortBy = sortBy;
-        if (sortOrder) paginationParams.sortOrder = sortOrder;
+        // First fetch all students if we haven't already
+        if (this.allStudents.length === 0) {
+          const { data } = await apolloClient.query({
+            query: getAllStudents,
+            variables: { pagination: { page: 1, limit: 1000 } },
+          });
 
-        const { data } = await apolloClient.query({
-          query: getAllStudents,
-          variables: { pagination: paginationParams },
-        });
+          this.allStudents = data.getAllStudents.map((student) => ({
+            ...student,
+            studentId: student.id,
+            photo: student.img,
+            parent: student.parent
+              ? `${student.parent.name} ${student.parent.surname}`
+              : "",
+            className: student.class ? student.class.name : "",
+          }));
+          
+          this.totalCount = this.allStudents.length;
+          this.totalPages = Math.ceil(this.totalCount / limit);
+        }
 
-        const fetchedStudents = data.getAllStudents.map((student) => ({
-          ...student,
-          studentId: student.id,
-          photo: student.img,
-          parent: student.parent
-            ? `${student.parent.name} ${student.parent.surname}`
-            : "",
-          className: student.class ? student.class.name : "",
-          // class: student.class ? student.class.name : "",
-        }));
+        // Handle pagination locally
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        this.students = this.allStudents.slice(start, end);
+        this.hasMore = end < this.totalCount;
 
-        this.students = fetchedStudents;
-        this.hasMore = fetchedStudents?.length === limit;
       } catch (error) {
         this.error = error;
       } finally {
@@ -65,7 +70,6 @@ export const useStudentStore = defineStore("studentStore", {
     async fetchGenderStats({ classId = null } = {}) {
       this.loading = true;
       try {
-       
         const { data } = await apolloClient.query({
           query: getStudentGenderStats,
           variables: { classId },
@@ -81,7 +85,6 @@ export const useStudentStore = defineStore("studentStore", {
     async fetchStudentById(studentId) {
       this.loading = true;
       try {
-        
         const { data } = await apolloClient.query({
           query: getStudentById,
           variables: { studentId },

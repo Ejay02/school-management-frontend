@@ -153,6 +153,7 @@
       <Pagination
         :currentPage="currentPage"
         :hasMore="attendanceStore.hasMore"
+        :totalPages="attendanceStore.totalPages"
         @update:page="handlePageChange"
       />
     </div>
@@ -162,7 +163,9 @@
       <!-- Class and date selectors -->
       <div class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label class="block text-sm text-gray-600 mb-1">Class</label>
+          <label for="class" class="block text-sm text-gray-600 mb-1"
+            >Class</label
+          >
 
           <select
             v-model="selectedClass"
@@ -180,7 +183,9 @@
         </div>
 
         <div>
-          <label class="block text-sm text-gray-600 mb-1">Lesson</label>
+          <label for="lesson" class="block text-sm text-gray-600 mb-1"
+            >Lesson</label
+          >
           <select
             v-model="selectedLesson"
             class="border rounded p-2 w-full focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
@@ -199,6 +204,7 @@
 
         <div>
           <label
+            for="date"
             class="block text-sm text-gray-600 mb-1 focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
             >Date</label
           >
@@ -309,6 +315,7 @@
           <Pagination
             :currentPage="currentPage"
             :hasMore="attendanceStore.hasMore"
+            :totalPages="attendanceStore.totalPages"
             @update:page="handlePageChange"
           />
         </div>
@@ -327,18 +334,18 @@
 </template>
 
 <script setup>
-import EmptyState from "../emptyState.vue";
-import ErrorScreen from "../errorScreen.vue";
-import LoadingScreen from "../loadingScreen.vue";
-import { useUserStore } from "../../store/userStore";
-import { ref, computed, watch, onMounted } from "vue";
-import { useStudentStore } from "../../store/studentStore";
+import { computed, onMounted, ref, watch } from "vue";
 import { useAttendanceStore } from "../../store/attendanceStore";
 import { useClassStore } from "../../store/classStore";
 import { useLessonStore } from "../../store/lessonStore";
-import { formatDate } from "../../utils/date.holidays";
-import Pagination from "../pagination.vue";
 import { useNotificationStore } from "../../store/notification";
+import { useStudentStore } from "../../store/studentStore";
+import { useUserStore } from "../../store/userStore";
+import { formatDate } from "../../utils/date.holidays";
+import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
+import LoadingScreen from "../loadingScreen.vue";
+import Pagination from "../pagination.vue";
 
 const userStore = useUserStore();
 const studentStore = useStudentStore();
@@ -353,11 +360,63 @@ const userHasAccess = computed(() =>
 );
 
 // Regular attendance view
+const limit = 10;
 const searchQuery = ref("");
 const filterStatus = ref("all");
 const currentPage = ref(1);
-const pageSize = ref(10);
-const limit = 10;
+const pageSize = 10;
+
+// Add computed property for filtered records
+const filteredRecords = computed(() => {
+  let records = attendanceStore.attendanceRecords;
+
+  // Apply search filter
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    records = records.filter(
+      (record) =>
+        record?.student?.name?.toLowerCase().includes(query) ||
+        record?.student?.surname?.toLowerCase().includes(query) ||
+        record?.class?.name?.toLowerCase().includes(query) ||
+        record?.lesson?.name?.toLowerCase().includes(query)
+    );
+  }
+
+  // Apply status filter
+  if (filterStatus.value !== "all") {
+    records = records.filter((record) =>
+      filterStatus.value === "present" ? record.present : !record.present
+    );
+  }
+
+  return records;
+});
+
+// Update paginatedRecords computed
+const paginatedRecords = computed(() => {
+  return filteredRecords.value;
+});
+
+// Update page change handler
+const handlePageChange = async (newPage) => {
+  currentPage.value = newPage;
+  await attendanceStore.fetchAttendance({
+    page: newPage,
+    limit: pageSize,
+    search: searchQuery.value,
+  });
+};
+
+// Add watcher for search and filter changes
+watch([searchQuery, filterStatus], () => {
+  currentPage.value = 1; // Reset to first page
+  handlePageChange(1);
+});
+
+// On component mount
+onMounted(async () => {
+  await handlePageChange(1);
+});
 
 // Mark attendance mode
 const markAttendanceMode = ref(false);
@@ -379,10 +438,6 @@ const students = computed(() => studentStore.students);
 watch(currentPage, (newPage) => {
   classStore.fetchClasses({ page: newPage, limit });
 });
-
-function handlePageChange(newPage) {
-  currentPage.value = newPage;
-}
 
 // Get lessons for selected class
 const filteredLessons = computed(() => {
@@ -430,12 +485,6 @@ const filteredAttendanceRecords = computed(() => {
   }
 
   return filtered;
-});
-
-// Paginated records
-const paginatedRecords = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value;
-  return filteredAttendanceRecords.value.slice(start, start + pageSize.value);
 });
 
 // Filter students for the mark attendance view

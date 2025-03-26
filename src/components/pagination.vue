@@ -7,7 +7,7 @@
     >
       Prev
     </button>
-    <span class="text-sm">Page {{ currentPage }}</span>
+    <span class="text-sm">Page {{ currentPage }} of {{ totalPages }}</span>
     <button
       :disabled="!hasMore"
       @click="changePage(currentPage + 1)"
@@ -27,6 +27,10 @@ const props = defineProps({
   hasMore: {
     type: Boolean,
     default: true,
+  },
+  totalPages: {
+    type: Number,
+    required: true,
   },
 });
 

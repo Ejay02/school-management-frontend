@@ -29,6 +29,7 @@
       <Pagination
         :currentPage="currentPage"
         :hasMore="assignmentStore?.hasMore"
+        :totalPages="assignmentStore.totalPages"
         @update:page="handlePageChange"
       />
     </div>

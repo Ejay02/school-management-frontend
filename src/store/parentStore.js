@@ -4,11 +4,14 @@ import { apolloClient } from "../../apollo-client";
 
 export const useParentStore = defineStore("parentStore", {
   state: () => ({
-    parents: [],
+    allParents: [], // Store all parents
+    parents: [], // Store paginated parents
     loading: false,
     error: null,
     hasMore: true,
     selectedParent: null,
+    totalPages: 1,
+    totalCount: 0,
   }),
   actions: {
     async fetchParents({
@@ -20,28 +23,32 @@ export const useParentStore = defineStore("parentStore", {
     } = {}) {
       this.loading = true;
       try {
-        const paginationParams = { page, limit };
-        if (search) paginationParams.search = search;
-        if (sortBy) paginationParams.sortBy = sortBy;
-        if (sortOrder) paginationParams.sortOrder = sortOrder;
+        // First fetch all parents if we haven't already
+        if (this.allParents.length === 0) {
+          const { data } = await apolloClient.query({
+            query: getAllParents,
+            variables: { pagination: { page: 1, limit: 1000 } },
+          });
 
-        const { data } = await apolloClient.query({
-          query: getAllParents,
-          variables: { pagination: paginationParams },
-        });
+          this.allParents = data.getAllParents.map((parent) => ({
+            ...parent,
+            parentId: parent.id,
+            photo: parent.img,
+            students: parent.students.map(
+              (student) => `${student.name} ${student.surname}`
+            ),
+          }));
+          
+          this.totalCount = this.allParents.length;
+          this.totalPages = Math.ceil(this.totalCount / limit);
+        }
 
-        const fetchedParents = data.getAllParents.map((parent) => ({
-          ...parent,
-          parentId: parent.id,
-          photo: parent.img,
-          students: parent.students.map(
-            (student) => `${student.name} ${student.surname}`
-          ),
-        }));
+        // Handle pagination locally
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        this.parents = this.allParents.slice(start, end);
+        this.hasMore = end < this.totalCount;
 
-        this.parents = fetchedParents;
-
-        this.haMore = fetchedParents.length === limit;
       } catch (error) {
         this.error = error;
       } finally {

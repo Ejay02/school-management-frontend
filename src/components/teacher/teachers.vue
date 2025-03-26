@@ -26,6 +26,7 @@
       <Pagination
         :currentPage="currentPage"
         :hasMore="teacherStore.hasMore"
+        :totalPages="teacherStore.totalPages"
         @update:page="handlePageChange"
       />
     </div>
@@ -36,12 +37,12 @@
 import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
 
-import EmptyState from "../emptyState.vue";
-import ErrorScreen from "../errorScreen.vue";
-import TeacherTable from "./teacherTable.vue";
-import LoadingScreen from "../loadingScreen.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useTeacherStore } from "../../store/teacherStore";
+import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
+import LoadingScreen from "../loadingScreen.vue";
+import TeacherTable from "./teacherTable.vue";
 
 const limit = 10;
 const currentPage = ref(1);

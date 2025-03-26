@@ -4,11 +4,14 @@ import { apolloClient } from "../../apollo-client";
 
 export const useTeacherStore = defineStore("teacherStore", {
   state: () => ({
-    teachers: [],
+    allTeachers: [], // Store all teachers
+    teachers: [], // Store paginated teachers
     loading: false,
     error: null,
-    hasMore: true, // indicates if there might be a next page
+    hasMore: true,
     selectedTeacher: null,
+    totalPages: 1,
+    totalCount: 0,
   }),
   actions: {
     async fetchTeachers({
@@ -20,25 +23,31 @@ export const useTeacherStore = defineStore("teacherStore", {
     } = {}) {
       this.loading = true;
       try {
-        const paginationParams = { page, limit };
-        if (search) paginationParams.search = search;
-        if (sortBy) paginationParams.sortBy = sortBy;
-        if (sortOrder) paginationParams.sortOrder = sortOrder;
+        // First fetch all teachers if we haven't already
+        if (this.allTeachers.length === 0) {
+          const { data } = await apolloClient.query({
+            query: getAllTeachers,
+            variables: { pagination: { page: 1, limit: 1000 } },
+          });
 
-        const { data } = await apolloClient.query({
-          query: getAllTeachers,
-          variables: { pagination: paginationParams },
-        });
+          this.allTeachers = data.getAllTeachers.map((teacher) => ({
+            ...teacher,
+            teacherId: teacher.id,
+            photo: teacher.img,
+            subjects: teacher.subjects.map((subject) => subject.name),
+            classes: teacher.classes || [],
+          }));
+          
+          this.totalCount = this.allTeachers.length;
+          this.totalPages = Math.ceil(this.totalCount / limit);
+        }
 
-        const fetchedTeachers = data.getAllTeachers.map((teacher) => ({
-          ...teacher,
-          teacherId: teacher.id,
-          photo: teacher.img,
-          subjects: teacher.subjects.map((subject) => subject.name),
-          classes: teacher.classes || [],
-        }));
-        this.teachers = fetchedTeachers;
-        this.hasMore = fetchedTeachers.length === limit;
+        // Handle pagination locally
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        this.teachers = this.allTeachers.slice(start, end);
+        this.hasMore = end < this.totalCount;
+
       } catch (error) {
         this.error = error;
       } finally {

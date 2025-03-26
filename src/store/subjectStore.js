@@ -4,10 +4,13 @@ import { getAllSubjects } from "../graphql/queries";
 
 export const useSubjectStore = defineStore("subjectStore", {
   state: () => ({
-    subjects: [],
+    allSubjects: [], // Store all subjects
+    subjects: [], // Store paginated subjects
     loading: false,
     error: null,
     hasMore: true,
+    totalPages: 1,
+    totalCount: 0,
   }),
 
   actions: {
@@ -21,18 +24,23 @@ export const useSubjectStore = defineStore("subjectStore", {
       this.loading = true;
 
       try {
-        const paginationParams = { page, limit };
-        if (search) paginationParams.search = search;
-        if (sortBy) paginationParams.sortBy = sortBy;
-        if (sortOrder) paginationParams.sortOrder = sortOrder;
+        // First fetch all subjects if we haven't already
+        if (this.allSubjects.length === 0) {
+          const { data } = await apolloClient.query({
+            query: getAllSubjects,
+            variables: { pagination: { page: 1, limit: 1000 } }, // Get all subjects
+          });
+          this.allSubjects = data.getAllSubjects;
+          this.totalCount = this.allSubjects.length;
+          this.totalPages = Math.ceil(this.totalCount / limit);
+        }
 
-        const { data } = await apolloClient.query({
-          query: getAllSubjects,
-          variables: { pagination: paginationParams },
-        });
+        // Calculate pagination locally
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        this.subjects = this.allSubjects.slice(start, end);
+        this.hasMore = end < this.totalCount;
 
-        this.subjects = data.getAllSubjects;
-        this.hasMore = data.getAllSubjects.length === limit;
       } catch (err) {
         this.error = err;
       } finally {

@@ -26,6 +26,7 @@
       <Pagination
         :currentPage="currentPage"
         :hasMore="classStore.hasMore"
+        :totalPages="classStore.totalPages"
         @update:page="handlePageChange"
       />
     </div>
@@ -44,10 +45,8 @@ import LoadingScreen from "../loadingScreen.vue";
 import ClassesTable from "./classesTable.vue";
 
 const limit = 10;
-const searchQuery = ref("");
-const filterStatus = ref("all");
+
 const currentPage = ref(1);
-const pageSize = ref(10);
 
 const classStore = useClassStore();
 const loading = computed(() => classStore.loading);

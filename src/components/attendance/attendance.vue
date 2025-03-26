@@ -8,7 +8,7 @@
         </h1>
         <div class="flex flex-col sm:flex-row gap-3">
           <div class="flex items-center gap-2">
-            <label class="text-sm text-gray-600">From:</label>
+            <label for="from" class="text-sm text-gray-600">From:</label>
             <input
               type="date"
               v-model="startDate"
@@ -17,7 +17,7 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <label class="text-sm text-gray-600">To:</label>
+            <label for="to" class="text-sm text-gray-600">To:</label>
             <input
               type="date"
               v-model="endDate"
@@ -57,19 +57,19 @@
 </template>
 
 <script setup>
+import { computed, onMounted, ref } from "vue";
 import {
   formatDateForInput,
   getFriday,
   getMonday,
 } from "../../utils/date.holidays";
 import ErrorScreen from "../errorScreen.vue";
-import { ref, computed, onMounted } from "vue";
 import LoadingScreen from "../loadingScreen.vue";
 
-import AttendanceTable from "./attendanceTable.vue";
-import AttendanceCard from "../cards/attendanceCard.vue";
 import { useAttendanceStore } from "../../store/attendanceStore";
+import AttendanceCard from "../cards/attendanceCard.vue";
 import AttendanceStatsOverviewCard from "./attendanceStatsOverviewCard.vue";
+import AttendanceTable from "./attendanceTable.vue";
 
 const attendanceStore = useAttendanceStore();
 
@@ -80,8 +80,14 @@ const stats = computed(() => attendanceStore.stats);
 const startDate = ref(formatDateForInput(getMonday(new Date())));
 const endDate = ref(formatDateForInput(getFriday(new Date())));
 
+// Move function outside onMounted
+const fetchAttendanceData = async () => {
+  await attendanceStore.fetchAttendanceData(startDate.value, endDate.value);
+  await attendanceStore.fetchAttendance({ page: 1, limit: 10 });
+};
+
 onMounted(() => {
-  attendanceStore.fetchAttendanceData(startDate.value, endDate.value);
+  fetchAttendanceData();
 });
 </script>
 

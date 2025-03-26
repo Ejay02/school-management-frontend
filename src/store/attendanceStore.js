@@ -11,10 +11,13 @@ export const useAttendanceStore = defineStore("attendanceStore", {
       absent: [],
       studentCount: 0,
     },
-    attendanceRecords: [],
+    allAttendanceRecords: [], // Store all attendance records
+    attendanceRecords: [], // Store paginated records
     loading: false,
     error: null,
     hasMore: true,
+    totalPages: 1,
+    totalCount: 0,
   }),
 
   actions: {
@@ -53,16 +56,49 @@ export const useAttendanceStore = defineStore("attendanceStore", {
       }
     },
 
-    async fetchAttendance() {
+    async fetchAttendance({
+      page = 1,
+      limit = 10,
+      search = "",
+      sortBy = "",
+      sortOrder = "",
+    } = {}) {
       this.loading = true;
       this.error = null;
       try {
-        const res = await apolloClient.query({
-          query: getAttendances,
-          fetchPolicy: "no-cache",
-        });
+        // First fetch all attendance records if we haven't already
+        if (this.allAttendanceRecords.length === 0) {
+          const res = await apolloClient.query({
+            query: getAttendances,
+            variables: { pagination: { page: 1, limit: 1000 } },
+            fetchPolicy: "no-cache",
+          });
 
-        this.attendanceRecords = res.data.getAttendances;
+          this.allAttendanceRecords = res.data.getAttendances;
+        }
+
+        // Apply search filter to all records
+        let filteredRecords = [...this.allAttendanceRecords];
+        if (search) {
+          const searchLower = search.toLowerCase();
+          filteredRecords = filteredRecords.filter(
+            (record) =>
+              record?.student?.name?.toLowerCase().includes(searchLower) ||
+              record?.student?.surname?.toLowerCase().includes(searchLower) ||
+              record?.class?.name?.toLowerCase().includes(searchLower) ||
+              record?.lesson?.name?.toLowerCase().includes(searchLower)
+          );
+        }
+
+        // Update total count based on filtered records
+        this.totalCount = filteredRecords.length;
+        this.totalPages = Math.ceil(this.totalCount / limit);
+
+        // Handle pagination
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        this.attendanceRecords = filteredRecords.slice(start, end);
+        this.hasMore = end < this.totalCount;
       } catch (error) {
         this.error = error.message || "Error fetching attendance stats";
       } finally {

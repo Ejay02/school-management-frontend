@@ -4,10 +4,13 @@ import { getAllClasses } from "../graphql/queries";
 
 export const useClassStore = defineStore("classStore", {
   state: () => ({
-    classes: [],
+    allClasses: [], // Store all classes
+    classes: [], // Store paginated classes
     loading: false,
     error: null,
     hasMore: true,
+    totalPages: 1,
+    totalCount: 0,
   }),
 
   actions: {
@@ -21,19 +24,24 @@ export const useClassStore = defineStore("classStore", {
       this.loading = true;
 
       try {
-        const paginationParams = { page, limit };
-        if (search) paginationParams.search = search;
-        if (sortBy) paginationParams.sortBy = sortBy;
-        if (sortOrder) paginationParams.sortOrder = sortOrder;
+        // First fetch all classes if we haven't already
+        if (this.allClasses.length === 0) {
+          const { data } = await apolloClient.query({
+            query: getAllClasses,
+            variables: { pagination: { page: 1, limit: 1000 } },
+            fetchPolicy: "network-only",
+          });
 
-        const { data } = await apolloClient.query({
-          query: getAllClasses,
-          variables: { pagination: paginationParams },
-          fetchPolicy: "network-only",
-        });
+          this.allClasses = data.getAllClasses;
+          this.totalCount = this.allClasses.length;
+          this.totalPages = Math.ceil(this.totalCount / limit);
+        }
 
-        this.classes = data.getAllClasses;
-        this.hasMore = data.getAllClasses.length >= Number(limit);
+        // Handle pagination locally
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        this.classes = this.allClasses.slice(start, end);
+        this.hasMore = end < this.totalCount;
       } catch (err) {
         this.error = err;
       } finally {
@@ -42,13 +50,14 @@ export const useClassStore = defineStore("classStore", {
     },
 
     addClass(newClass) {
-      // Add the new class to the beginning of the array
+      // Add the new class to both arrays
+      this.allClasses.unshift(newClass);
       this.classes.unshift(newClass);
     },
 
-    // Refresh classes after a new class is created
     async refreshClasses() {
-      // Reset to first page and fetch fresh data
+      // Reset allClasses to force a fresh fetch
+      this.allClasses = [];
       await this.fetchClasses();
     },
   },

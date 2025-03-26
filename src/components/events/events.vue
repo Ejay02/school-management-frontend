@@ -59,7 +59,12 @@
       </div>
 
       <!-- pagination -->
-      <Pagination />
+      <Pagination
+        :currentPage="currentPage"
+        :hasMore="eventStore?.hasMore"
+        :totalPages="eventStore.totalPages"
+        @update:page="handlePageChange"
+      />
     </div>
   </div>
 </template>
@@ -71,7 +76,7 @@ import Pagination from "../pagination.vue";
 import EventCard from "./eventCard.vue";
 import EventsTable from "./eventsTable.vue";
 
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useStorageSync } from "../../composables/useStorageSync";
 import { useEventStore } from "../../store/eventStore";
 import { useUserStore } from "../../store/userStore";
@@ -79,8 +84,19 @@ import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
 
+const limit = 10;
+const currentPage = ref(1);
+
 const eventStore = useEventStore();
 const userStore = useUserStore();
+
+watch(currentPage, (newPage) => {
+  eventStore.fetchEvents({ page: newPage, limit });
+});
+
+function handlePageChange(newPage) {
+  currentPage.value = newPage;
+}
 
 // Default view mode - could be set based on user role
 const viewMode = ref(
