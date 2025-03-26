@@ -33,6 +33,7 @@ export const useClassStore = defineStore("classStore", {
           });
 
           this.allClasses = data.getAllClasses;
+
           this.totalCount = this.allClasses.length;
           this.totalPages = Math.ceil(this.totalCount / limit);
         }

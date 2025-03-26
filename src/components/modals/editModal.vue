@@ -683,8 +683,8 @@
 </template>
 
 <script setup>
-import { classes } from "../../utils/data";
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { getClasses } from "../../utils/data";
 
 import { useModalStore } from "@/store/useModalStore";
 
@@ -694,6 +694,8 @@ const isModalVisible = ref(modalStore.editModal);
 const title = ref(modalStore.modalTitle);
 const source = ref(modalStore.source);
 const data = ref(modalStore.data);
+
+const classes = ref([]);
 
 const selectedClass = ref("");
 
@@ -705,7 +707,9 @@ const fullTeacherName = computed({
     if (!data?.value?.teacher?.name && !data?.value?.teacher?.surname) {
       return "NA";
     }
-    return `${data?.value?.teacher?.name || ""} ${data?.value?.teacher?.surname || ""}`.trim();
+    return `${data?.value?.teacher?.name || ""} ${
+      data?.value?.teacher?.surname || ""
+    }`.trim();
   },
   set(newValue) {
     // If NA is entered, set both name and surname to empty
@@ -716,7 +720,7 @@ const fullTeacherName = computed({
       }
       return;
     }
-    
+
     // Split the input value into parts
     const parts = newValue.split(" ");
     if (data.value && data.value.teacher) {
@@ -811,4 +815,8 @@ const handleEdit = async () => {
     console.error(error);
   }
 };
+
+onMounted(async () => {
+  classes.value = await getClasses();
+});
 </script>

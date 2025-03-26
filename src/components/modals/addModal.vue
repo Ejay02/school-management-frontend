@@ -126,7 +126,7 @@
               <select
                 v-model="selectedClass"
                 @change="handleClassChange"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer max-h-40 overflow-y-auto"
               >
                 <option value="" selected>No class</option>
                 <option
@@ -391,7 +391,7 @@
         <!-- lesson  -->
         <template v-else-if="source === 'lessons'">
           <div class="flex gap-2">
-            <div>
+            <div class="">
               <label
                 for="subjectName"
                 class="block text-sm font-medium text-gray-700 mb-1"
@@ -403,28 +403,14 @@
               />
             </div>
 
-            <div class="w-1/2">
-              <label
-                for="class"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Select a class</label
-              >
-              <select
-                v-model="selectedClass"
-                @change="handleClassChange"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              >
-                <option value="" selected>No class</option>
-                <option
-                  v-for="(name, index) in classes"
-                  :key="index"
-                  :value="name"
-                  class="cursor-pointer"
-                >
-                  {{ name }}
-                </option>
-              </select>
-            </div>
+            <Dropdown
+              class="w-1/2"
+              v-model="selectedClass"
+              label="Select Class"
+              :options="classes"
+              emptyLabel="Select a class"
+            />
+            <!--  -->
             <div class="w-1/2">
               <label
                 for="class"
@@ -506,28 +492,13 @@
             />
           </div>
           <div class="flex gap-2">
-            <div class="w-1/2">
-              <label
-                for="class"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Select a class</label
-              >
-              <select
-                v-model="selectedClass"
-                @change="handleClassChange"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              >
-                <option value="" selected>No class</option>
-                <option
-                  v-for="(name, index) in classes"
-                  :key="index"
-                  :value="name"
-                  class="cursor-pointer"
-                >
-                  {{ name }}
-                </option>
-              </select>
-            </div>
+            <Dropdown
+              class="w-1/2"
+              v-model="selectedClass"
+              label="Select Class"
+              :options="classes"
+              emptyLabel="Select a class"
+            />
             <div class="w-1/2">
               <label
                 for="teacher"
@@ -570,18 +541,13 @@
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
-          <div>
-            <label
-              for="class"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Class</label
-            >
-            <input
-              v-model="classes"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </div>
+          <Dropdown
+            class="w-full"
+            v-model="selectedClass"
+            label="Select Class"
+            :options="classes"
+            emptyLabel="Select a class"
+          />
           <div>
             <label
               for="teacher"
@@ -849,16 +815,17 @@
 
 <script setup>
 import { useModalStore } from "@/store/useModalStore";
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
 import {
   createAnnouncement,
   createClass,
   createEvent,
 } from "../../graphql/mutations";
-import { useNotificationStore } from "../../store/notification";
-import { classes } from "../../utils/data";
 import { useClassStore } from "../../store/classStore";
+import { useNotificationStore } from "../../store/notification";
+import { getClasses } from "../../utils/data";
+import Dropdown from "../dropdowns/dropdown.vue";
 
 const modalStore = useModalStore();
 const classStore = useClassStore();
@@ -875,11 +842,13 @@ const name = ref("");
 const email = ref("");
 const photo = ref("");
 const score = ref("");
+const classes = ref([]);
 const subject = ref("");
 const subjects = ref([]);
 const selectedClass = ref("");
 const phone = ref("");
 const student = ref("");
+
 const address = ref("");
 const date = ref("");
 const dueDate = ref("");
@@ -1122,4 +1091,8 @@ const handleAdd = async () => {
     console.error("Error creating item:", error);
   }
 };
+
+onMounted(async () => {
+  classes.value = await getClasses();
+});
 </script>

@@ -4,35 +4,13 @@
       <h2 class="text-xl font-bold text-gray-700">Score Distribution</h2>
 
       <!-- Class selection dropdown -->
-      <div class="relative">
-        <select
-          v-model="selectedClass"
-          @change="handleClassChange"
-          class="cursor-pointer appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-eduPurple focus:border-indigo-300"
-        >
-          <option
-            v-for="(name, index) in classes"
-            :key="index"
-            :value="name"
-            class="cursor-pointer"
-          >
-            {{ name }}
-          </option>
-        </select>
-        <div
-          class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700"
-        >
-          <svg
-            class="fill-current h-4 w-4"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-          >
-            <path
-              d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
-            />
-          </svg>
-        </div>
-      </div>
+      <Dropdown
+        class="w-48"
+        v-model="selectedClass"
+        label="Select Class"
+        :options="classes"
+        emptyLabel="Select a class"
+      />
     </div>
 
     <div class="bg-gray-200 p-6 rounded-lg shadow-lg">
@@ -96,12 +74,15 @@
 
 <script setup>
 import Chart from "chart.js/auto";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { useResultStore } from "../../store/resultStore";
+import { getClasses } from "../../utils/data";
+import Dropdown from "../dropdowns/dropdown.vue";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
-import { useResultStore } from "../../store/resultStore";
-import { ref, onMounted, watch, computed, nextTick } from "vue";
-import { classes } from "../../utils/data";
+
+const classes = ref([]);
 
 const chartCanvas = ref(null);
 let myChart = null;
@@ -300,6 +281,8 @@ const updateChart = () => {
 
 onMounted(async () => {
   await fetchData();
+
+  classes.value = await getClasses();
 });
 
 // Watch for data changes and update the chart accordingly

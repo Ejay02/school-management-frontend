@@ -160,6 +160,7 @@
 
     <!-- Mark Attendance Mode -->
     <div v-else>
+      <!-- TODO : FIXME use the dropdown instead of ⬇️ -->
       <!-- Class and date selectors -->
       <div class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
