@@ -12,7 +12,7 @@
         class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 w-full"
       >
         <h3 class="text-xl font-medium capitalize items-center text-center">
-          Add New {{ source }}
+          {{ modalTitle }}
         </h3>
       </div>
 
@@ -372,17 +372,14 @@
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
-          <div>
-            <label
-              for="teachers"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Teachers</label
-            >
-            <input
-              v-model="teachers"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </div>
+
+          <Dropdown
+            class="w-full"
+            v-model="selectedTeacherId"
+            label="Select Teacher"
+            :options="teacherNames"
+            emptyLabel="Select a teacher"
+          />
         </template>
 
         <!-- name, day, time, subject Id, classId -->
@@ -402,37 +399,28 @@
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
-
+            <!--  -->
             <Dropdown
               class="w-1/2"
               v-model="selectedClass"
               label="Select Class"
-              :options="classes"
+              :options="classOptions"
               emptyLabel="Select a class"
             />
             <!--  -->
-            <div class="w-1/2">
-              <label
-                for="class"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Select subject</label
-              >
-              <select
-                v-model="selectedClass"
-                @change="handleClassChange"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              >
-                <option value="" selected disabled>Select subject</option>
-                <option
-                  v-for="(name, index) in classes"
-                  :key="index"
-                  :value="name"
-                  class="cursor-pointer"
-                >
-                  {{ name }}
-                </option>
-              </select>
-            </div>
+            <CustomDropdown
+              class="w-1/2"
+              v-model="selectedSubject"
+              label="Select Subject"
+              :options="
+                filteredSubjects.map((subject) => ({
+                  value: subject.id,
+                  label: subject.name,
+                }))
+              "
+              placeholder="Select a subject"
+              :disabled="!selectedClass"
+            />
           </div>
 
           <!--  -->
@@ -814,8 +802,7 @@
 </template>
 
 <script setup>
-import { useModalStore } from "@/store/useModalStore";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
 import {
   createAnnouncement,
@@ -824,42 +811,84 @@ import {
 } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
-
+import { useSubjectStore } from "../../store/subjectStore";
+import { useTeacherStore } from "../../store/teacherStore";
+import { useModalStore } from "../../store/useModalStore";
+import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
 
 const modalStore = useModalStore();
 const classStore = useClassStore();
-const isModalVisible = ref(modalStore.addModal);
+const teacherStore = useTeacherStore();
+const subjectStore = useSubjectStore();
+const notificationStore = useNotificationStore();
 
-const title = ref("");
-const teacher = ref("");
-const teachers = ref([]);
-const studentId = ref("");
-const grade = ref("");
+const isModalVisible = ref(modalStore.editModal);
+
 const capacity = ref("");
 const supervisor = ref("");
 const name = ref("");
 const email = ref("");
-const photo = ref("");
+
 const score = ref("");
 const classes = ref([]);
+const selectedClass = ref("");
+const selectedClassId = ref(null);
+
 const subject = ref("");
 const subjects = ref([]);
-const selectedClass = ref("");
+const selectedSubject = ref("");
+
 const phone = ref("");
 const student = ref("");
 
 const address = ref("");
 const date = ref("");
 const dueDate = ref("");
-const birthday = ref("");
+
 const bloodGroup = ref("");
 
 const startTime = ref("");
 const endTime = ref("");
 const source = ref(modalStore.source);
 
-const notificationStore = useNotificationStore();
+const pluralToSingular = (word) => {
+  const transformations = {
+    teachers: "teacher",
+    classes: "class",
+    subjects: "subject",
+    lessons: "lesson",
+    exams: "exam",
+    assignments: "assignment",
+    results: "result",
+    events: "event",
+    announcements: "announcement",
+  };
+  return transformations[word] || word;
+};
+
+const modalTitle = computed(() => {
+  return `Add New ${pluralToSingular(source.value)}`;
+});
+
+const teacherNames = computed(() => {
+  return teacherStore.getTeacherNames?.map((teacher) => teacher.name) || [];
+});
+
+const classOptions = computed(() => {
+  return classStore.getClassNames?.map((classItem) => classItem.name) || [];
+});
+
+const getClassIdByName = (className) => {
+  const classItem = classStore.getClassNames.find((c) => c.name === className);
+  return classItem ? classItem.id : null;
+};
+
+const filteredSubjects = computed(() => {
+  if (!selectedClass.value) return [];
+  // Filter subjects by class ID if needed
+  return subjects.value;
+});
 
 // Watchers to sync with modal store
 watch(
@@ -970,8 +999,8 @@ const handleAdd = async () => {
         mutation: createLesson,
         variables: {
           input: {
-            subject: subject.value,
-            classId: selectedClass.value,
+            subject: selectedSubject.value,
+            classId: getClassIdByName(selectedClass.value),
             date: date.value,
             startTime: startTime.value,
             endTime: endTime.value,
@@ -1093,6 +1122,10 @@ const handleAdd = async () => {
 };
 
 onMounted(async () => {
-  classes.value = classStore.getClassNames;
+  await Promise.all([
+    classStore.fetchClasses(),
+    teacherStore.fetchTeachers(),
+    subjectStore.fetchSubjects(),
+  ]);
 });
 </script>

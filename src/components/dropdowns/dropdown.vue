@@ -10,7 +10,7 @@
       @click="toggleDropdown"
       class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md shadow-sm text-left"
     >
-      <span>{{ selectedValue || "Select a class" }}</span>
+      <span>{{ selectedValue || emptyLabel  }}</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="h-5 w-5 text-gray-400"

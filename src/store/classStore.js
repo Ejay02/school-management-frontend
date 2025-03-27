@@ -65,7 +65,10 @@ export const useClassStore = defineStore("classStore", {
 
   getters: {
     getClassNames: (state) => {
-      return state.allClasses.map((classItem) => classItem.name);
+      return state.allClasses.map((classItem) => ({
+        id: classItem.id,
+        name: classItem.name
+      }));
     },
   },
 });

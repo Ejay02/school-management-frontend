@@ -71,4 +71,12 @@ export const useTeacherStore = defineStore("teacherStore", {
       }
     },
   },
+  getters: {
+    getTeacherNames: (state) => {
+      return state.allTeachers.map(teacher => ({
+        id: teacher.id,
+        name: `${teacher.name} ${teacher.surname}`
+      }));
+    }
+  },
 });

@@ -33,8 +33,8 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
-import TableSearch from "../tableSearch.vue";
 import { useModalStore } from "../../store/useModalStore";
+import TableSearch from "../tableSearch.vue";
 
 const props = defineProps({
   txt: {
@@ -65,5 +65,3 @@ const showAddModal = (type) => {
   modalStore.source = type;
 };
 </script>
-
-
