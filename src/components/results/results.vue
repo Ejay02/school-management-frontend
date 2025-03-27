@@ -5,7 +5,7 @@
 
       <!-- Class selection dropdown -->
       <Dropdown
-        class="w-48"
+        class="w-56"
         v-model="selectedClass"
         label="Select Class"
         :options="classes"
@@ -75,8 +75,9 @@
 <script setup>
 import Chart from "chart.js/auto";
 import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { useClassStore } from "../../store/classStore";
 import { useResultStore } from "../../store/resultStore";
-import { getClasses } from "../../utils/data";
+
 import Dropdown from "../dropdowns/dropdown.vue";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
@@ -87,7 +88,9 @@ const classes = ref([]);
 const chartCanvas = ref(null);
 let myChart = null;
 
+const classStore = useClassStore();
 const resultStore = useResultStore();
+
 const loading = computed(() => resultStore.loading);
 const error = computed(() => resultStore.error);
 
@@ -282,7 +285,7 @@ const updateChart = () => {
 onMounted(async () => {
   await fetchData();
 
-  classes.value = await getClasses();
+  classes.value = classStore.getClassNames;
 });
 
 // Watch for data changes and update the chart accordingly

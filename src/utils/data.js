@@ -1,13 +1,3 @@
-import { useClassStore } from "../store/classStore";
-
-// export let role = "admin";
-
-export const getClasses = async () => {
-  const classStore = useClassStore();
-  await classStore.fetchClasses();
-  return classStore.allClasses.map((classItem) => classItem.name);
-};
-
 // YOU SHOULD CHANGE THE DATES OF THE EVENTS TO THE CURRENT DATE TO SEE THE EVENTS ON THE CALENDAR
 export const calendarEvents = [
   {

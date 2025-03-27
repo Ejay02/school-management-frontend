@@ -684,11 +684,13 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
-import { getClasses } from "../../utils/data";
 
 import { useModalStore } from "@/store/useModalStore";
+import { useClassStore } from "../../store/classStore";
 
 const modalStore = useModalStore();
+const classStore = useClassStore();
+
 const isModalVisible = ref(modalStore.editModal);
 
 const title = ref(modalStore.modalTitle);
@@ -817,6 +819,8 @@ const handleEdit = async () => {
 };
 
 onMounted(async () => {
-  classes.value = await getClasses();
+  
+
+  classes.value = classStore.getClassNames;
 });
 </script>

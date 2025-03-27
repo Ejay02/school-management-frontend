@@ -62,4 +62,10 @@ export const useClassStore = defineStore("classStore", {
       await this.fetchClasses();
     },
   },
+
+  getters: {
+    getClassNames: (state) => {
+      return state.allClasses.map((classItem) => classItem.name);
+    },
+  },
 });

@@ -164,19 +164,48 @@
       <!-- Class and date selectors -->
       <div class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
+          <CustomDropdown
+            v-model="selectedClass"
+            label="Select Class"
+            :options="
+              classes.map((cls) => ({ value: cls.id, label: cls.name }))
+            "
+            placeholder="Select a class"
+          />
+        </div>
+
+        <div>
+          <CustomDropdown
+            v-model="selectedLesson"
+            label="Select Lesson"
+            :options="
+              filteredLessons.map((lesson) => ({
+                value: lesson.id,
+                label: lesson.name,
+              }))
+            "
+            placeholder="Select a lesson"
+            :disabled="!selectedClass"
+          />
+        </div>
+
+        <!-- <div>
           <label for="class" class="block text-sm text-gray-600 mb-1"
             >Class</label
           >
 
+          
           <select
             v-model="selectedClass"
             class="border rounded p-2 w-full focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
+            style="max-height: 200px; overflow-y: auto"
           >
             <option value="">Select a class</option>
             <option
               v-for="class_ in classes"
               :key="class_.id"
               :value="class_.id"
+             
             >
               {{ class_.name }}
             </option>
@@ -201,7 +230,7 @@
               {{ lesson.name }}
             </option>
           </select>
-        </div>
+        </div> -->
 
         <div>
           <label
@@ -343,6 +372,7 @@ import { useNotificationStore } from "../../store/notification";
 import { useStudentStore } from "../../store/studentStore";
 import { useUserStore } from "../../store/userStore";
 import { formatDate } from "../../utils/date.holidays";
+import CustomDropdown from "../dropdowns/customDropdown.vue";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
@@ -366,6 +396,23 @@ const searchQuery = ref("");
 const filterStatus = ref("all");
 const currentPage = ref(1);
 const pageSize = 10;
+
+// Mark attendance mode
+const markAttendanceMode = ref(false);
+const selectedClass = ref("");
+const selectedLesson = ref("");
+const selectedDate = ref(new Date().toISOString().split("T")[0]); // Today's date
+const studentSearchQuery = ref("");
+const studentAttendance = ref({});
+const loadingStudents = ref(false);
+
+// Computed properties
+const loading = computed(() => attendanceStore.loading);
+const error = computed(() => attendanceStore.error);
+const attendanceRecords = computed(() => attendanceStore.attendanceRecords);
+const classes = computed(() => classStore.allClasses);
+const lessons = computed(() => lessonStore.lessons);
+const students = computed(() => studentStore.students);
 
 // Add computed property for filtered records
 const filteredRecords = computed(() => {
@@ -418,23 +465,6 @@ watch([searchQuery, filterStatus], () => {
 onMounted(async () => {
   await handlePageChange(1);
 });
-
-// Mark attendance mode
-const markAttendanceMode = ref(false);
-const selectedClass = ref("");
-const selectedLesson = ref("");
-const selectedDate = ref(new Date().toISOString().split("T")[0]); // Today's date
-const studentSearchQuery = ref("");
-const studentAttendance = ref({});
-const loadingStudents = ref(false);
-
-// Computed properties
-const loading = computed(() => attendanceStore.loading);
-const error = computed(() => attendanceStore.error);
-const attendanceRecords = computed(() => attendanceStore.attendanceRecords);
-const classes = computed(() => classStore.classes);
-const lessons = computed(() => lessonStore.lessons);
-const students = computed(() => studentStore.students);
 
 watch(currentPage, (newPage) => {
   classStore.fetchClasses({ page: newPage, limit });

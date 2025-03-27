@@ -824,7 +824,7 @@ import {
 } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
-import { getClasses } from "../../utils/data";
+
 import Dropdown from "../dropdowns/dropdown.vue";
 
 const modalStore = useModalStore();
@@ -1093,6 +1093,6 @@ const handleAdd = async () => {
 };
 
 onMounted(async () => {
-  classes.value = await getClasses();
+  classes.value = classStore.getClassNames;
 });
 </script>
