@@ -308,10 +308,14 @@ export const createExam = gql`
 export const createLesson = gql`
   mutation CreateLesson(
     $classId: String!
-    $input: CreateLessonInput!
+    $createLessonInput: CreateLessonInput!
     $subjectId: String!
   ) {
-    createLesson(input: $input, classId: $classId, subjectId: $subjectId) {
+    createLesson(
+      createLessonInput: $createLessonInput
+      classId: $classId
+      subjectId: $subjectId
+    ) {
       id
       name
       class {

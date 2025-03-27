@@ -14,6 +14,20 @@ export const useLessonStore = defineStore("lessonStore", {
   }),
 
   actions: {
+    // Reset lessons to force a fresh fetch
+    resetLessons() {
+      this.allLessons = [];
+      this.lessons = [];
+    },
+    
+    // Refresh lessons by forcing a new fetch
+    async refreshLessons(page = 1, limit = 10) {
+      // Reset the lessons array to force a fresh fetch
+      this.resetLessons();
+      // Fetch lessons again
+      await this.fetchLessons({ page, limit });
+    },
+    
     async fetchLessons({
       page = 1,
       limit = 10,
@@ -29,6 +43,7 @@ export const useLessonStore = defineStore("lessonStore", {
           const { data } = await apolloClient.query({
             query: getAllLessons,
             variables: { pagination: { page: 1, limit: 1000 } },
+            fetchPolicy: 'network-only', // Force a network request instead of using cache
           });
 
           this.allLessons = data.getAllLessons;

@@ -388,18 +388,34 @@
         <!-- lesson  -->
         <template v-else-if="source === 'lessons'">
           <div class="flex gap-2">
-            <div class="">
+            <div class="w-1/2">
               <label
                 for="subjectName"
                 class="block text-sm font-medium text-gray-700 mb-1"
                 >Subject Name</label
               >
               <input
-                v-model="subject"
+                v-model="name"
+                placeholder="subject name"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
-            <!--  -->
+
+            <div class="w-1/2">
+              <label
+                for="date"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Date</label
+              >
+              <input
+                type="date"
+                v-model="day"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
+          </div>
+          <!--  -->
+          <div class="flex gap-2">
             <Dropdown
               class="w-1/2"
               v-model="selectedClass"
@@ -408,37 +424,25 @@
               emptyLabel="Select a class"
             />
             <!--  -->
-            <CustomDropdown
-              class="w-1/2"
-              v-model="selectedSubject"
-              label="Select Subject"
-              :options="
-                filteredSubjects.map((subject) => ({
-                  value: subject.id,
-                  label: subject.name,
-                }))
-              "
-              placeholder="Select a subject"
-              :disabled="!selectedClass"
-            />
+            <div class="w-1/2">
+              <CustomDropdown
+                v-model="selectedSubject"
+                label="Select Subject"
+                :options="
+                  filteredSubjects.map((subject) => ({
+                    value: subject.id,
+                    label: subject.name,
+                  }))
+                "
+                placeholder="Select a subject"
+                :disabled="!selectedClass"
+              />
+            </div>
           </div>
 
           <!--  -->
           <div class="flex gap-2">
-            <div class="w-1/3">
-              <label
-                for="date"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Date</label
-              >
-              <input
-                type="date"
-                v-model="date"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-
-            <div class="w-1/3">
+            <div class="w-1/2">
               <label
                 for="startTime"
                 class="block text-sm font-medium text-gray-700 mb-1"
@@ -450,7 +454,7 @@
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
-            <div class="w-1/3">
+            <div class="w-1/2">
               <label
                 for="endTime"
                 class="block text-sm font-medium text-gray-700 mb-1"
@@ -786,12 +790,15 @@
           <button
             class="bg-white border border-gray-300 cursor-pointer text-gray-600 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
             @click="handleCancel"
+         
           >
             Cancel
           </button>
           <button
             class="hover:bg-purple-400 text-white py-2 px-4 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 transition-colors"
             @click="handleAdd"
+               :disabled="!isFormValid"
+    :class="{ 'opacity-50 cursor-not-allowed': !isFormValid }"
           >
             {{ handleAdd ? "Add" : "Adding ..." }}
           </button>
@@ -805,11 +812,13 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
 import {
-  createAnnouncement,
-  createClass,
-  createEvent,
+createAnnouncement,
+createClass,
+createEvent,
+createLesson,
 } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
+import { useLessonStore } from "../../store/lessonStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
@@ -821,6 +830,7 @@ const modalStore = useModalStore();
 const classStore = useClassStore();
 const teacherStore = useTeacherStore();
 const subjectStore = useSubjectStore();
+const lessonStore = useLessonStore();
 const notificationStore = useNotificationStore();
 
 const isModalVisible = ref(modalStore.editModal);
@@ -844,6 +854,7 @@ const student = ref("");
 
 const address = ref("");
 const date = ref("");
+const day = ref("");
 const dueDate = ref("");
 
 const bloodGroup = ref("");
@@ -886,8 +897,14 @@ const getClassIdByName = (className) => {
 
 const filteredSubjects = computed(() => {
   if (!selectedClass.value) return [];
-  // Filter subjects by class ID if needed
-  return subjects.value;
+
+  // Find the selected class object
+  const classObj = classStore.allClasses.find(
+    (c) => c.name === selectedClass.value
+  );
+
+  // Return the subjects from the selected class if available
+  return classObj?.subjects || [];
 });
 
 // Watchers to sync with modal store
@@ -910,6 +927,66 @@ const handleCancel = () => {
   modalStore.addModal = false;
   modalStore.modalId = null;
 };
+
+const isFormValid = computed(() => {
+  if (source.value === "teachers") {
+    return name.value && surname.value && phone.value;
+  } else if (source.value === "students") {
+    return (
+      name.value &&
+      surname.value &&
+      email.value &&
+      phone.value &&
+      selectedClass.value &&
+      password.value
+    );
+  } else if (source.value === "parents") {
+    return (
+      name.value && email.value && student.value && phone.value && address.value
+    );
+  } else if (source.value === "subjects") {
+    return name.value && selectedTeacherId.value;
+  } else if (source.value === "classes") {
+    return name.value && capacity.value;
+  } else if (source.value === "lessons") {
+    return (
+      name.value &&
+      day.value &&
+      selectedClass.value &&
+      selectedSubject.value &&
+      startTime.value &&
+      endTime.value
+    );
+  } else if (source.value === "exams") {
+    return subject.value && selectedClass.value && teacher.value && date.value;
+  } else if (source.value === "assignments") {
+    return (
+      subject.value && selectedClass.value && teacher.value && dueDate.value
+    );
+  } else if (source.value === "results") {
+    return (
+      subject.value &&
+      student.value &&
+      score.value &&
+      classes.value &&
+      teacher.value &&
+      date.value
+    );
+  } else if (source.value === "events") {
+    return (
+      title.value &&
+      content.value &&
+      date.value &&
+      startTime.value &&
+      endTime.value &&
+      location.value
+    );
+  } else if (source.value === "announcements") {
+    return title.value && content.value;
+  }
+
+  return false;
+});
 
 const handleAdd = async () => {
   try {
@@ -993,20 +1070,20 @@ const handleAdd = async () => {
         message: "Class created successfully!",
       });
     } else if (source.value === "lessons") {
-      // Create lesson logic
-      console.log("Creating lesson...");
       await apolloClient.mutate({
         mutation: createLesson,
         variables: {
-          input: {
-            subject: selectedSubject.value,
-            classId: getClassIdByName(selectedClass.value),
-            date: date.value,
+          classId: getClassIdByName(selectedClass.value),
+          subjectId: selectedSubject.value,
+          createLessonInput: {
+            name: name.value,
+            day: day.value,
             startTime: startTime.value,
             endTime: endTime.value,
           },
         },
       });
+      await lessonStore.refreshLessons();
       notificationStore.addNotification({
         type: "success",
         message: "Lesson created successfully!",
@@ -1117,7 +1194,6 @@ const handleAdd = async () => {
       type: "error",
       message: `Error creating ${source.value}: ${error.message}`,
     });
-    console.error("Error creating item:", error);
   }
 };
 
