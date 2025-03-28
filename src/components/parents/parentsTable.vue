@@ -80,7 +80,7 @@
             <button
               v-if="role.toLowerCase() === 'super_admin'"
               @click="showDelModal(item.id, item.name, 'parentList')"
-              class="group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
+              class="group relative w-6 h-6 flex items-center justify-center rounded-full"
             >
               <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
               <span
@@ -97,8 +97,8 @@
 </template>
 
 <script setup>
-import { useUserStore } from "../../store/userStore";
 import { useModalStore } from "../../store/useModalStore";
+import { useUserStore } from "../../store/userStore";
 
 const props = defineProps({
   columns: {

@@ -166,7 +166,7 @@
             <router-link :to="`/event/${event.id}`">
               <button
                 @click="handleMarkEventAsRead(event.id)"
-                class="group relative bg-eduSky text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
+                class="group relative text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
               >
                 <i class="fa-solid fa-arrow-right"></i>
                 <span
@@ -180,7 +180,7 @@
             <div class="flex items-center gap-2" v-if="isCreator">
               <button
                 @click="showDelModal(event.id, event.title, 'eventList')"
-                class="ml-2 group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
+                class="ml-2 group relative w-6 h-6 flex items-center justify-center rounded-full"
               >
                 <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
 

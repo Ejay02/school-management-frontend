@@ -53,14 +53,11 @@
         </td>
         <td>
           <div class="flex items-center gap-2 relative">
-            <router-link
-              :to="`/student/${item?.id}`"
-              class="group relative"
-            >
+            <router-link :to="`/student/${item?.id}`" class="group relative">
               <button
-                class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
+                class="group relative text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
               >
-                <i class="fa-regular fa-eye text-xs text-gray-500"></i>
+                <i class="fa-solid fa-arrow-right"></i>
               </button>
               <span
                 class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex"
@@ -89,7 +86,7 @@
             <button
               v-if="role.toLowerCase() === 'super_admin'"
               @click="showDelModal(item.id, item.name, 'studentList')"
-              class="group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
+              class="group relative w-6 h-6 flex items-center justify-center rounded-full"
             >
               <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
               <span
@@ -107,8 +104,8 @@
 
 <script setup>
 import { RouterLink } from "vue-router";
-import { useUserStore } from "../../store/userStore";
 import { useModalStore } from "../../store/useModalStore";
+import { useUserStore } from "../../store/userStore";
 
 const props = defineProps({
   columns: {

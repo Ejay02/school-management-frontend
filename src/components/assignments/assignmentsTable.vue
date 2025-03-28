@@ -36,7 +36,7 @@
               "
             >
               <button
-                class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
+                class="w-6 h-6 flex items-center justify-center rounded-full"
               >
                 <i class="fa-solid fa-pen-to-square text-xs text-gray-500"></i>
                 <span
@@ -54,7 +54,7 @@
                 role.toLowerCase() === 'teacher'
               "
               @click="showDelModal(item.id, item.subject, 'assignmentList')"
-              class="group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
+              class="group relative w-6 h-6 flex items-center justify-center rounded-full"
             >
               <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
               <span

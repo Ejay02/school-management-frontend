@@ -19,7 +19,7 @@
       <tr
         v-for="item in data"
         :key="item?.id"
-        class="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-eduSkyLight"
+        class=" border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-eduSkyLight"
       >
         <td class="flex items-center gap-4 p-2">
           <div class="flex">
@@ -70,11 +70,11 @@
         <td class="hidden md:table-cell">{{ item?.endTime }}</td>
 
         <td class="flex gap-3">
-          <div class="hidden md:table-cell">
+          <div class="">
             <router-link :to="`/event/${item.id}`">
               <button
                 @click="handleMarkEventAsRead(item.id)"
-                class="bg-eduSky group relative text-indigo-600 hover:bg-eduSkyLight px-2 py-1 rounded-md text-sm transition duration-300"
+                class=" group relative text-indigo-600 hover:bg-eduSkyLight px-2 py-1 rounded-md text-sm transition duration-300"
               >
                 <i class="fa-solid fa-arrow-right"></i>
                 <span
@@ -89,7 +89,7 @@
           <div class="flex items-center" v-if="isCreator">
             <button
               @click="showDelModal(item.id, item.title, 'eventList')"
-              class="ml-2 group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
+              class="ml-2 group relative w-6 h-6 flex items-center justify-center rounded-full "
             >
               <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
 

@@ -23,7 +23,7 @@
             <div class="text-xs text-gray-500">{{ item?.class?.name }}</div>
           </div>
         </td>
-      
+
         <td class="hidden md:table-cell">
           <template v-if="item?.teachers && item.teachers.length">
             <span
@@ -49,7 +49,7 @@
               @click="showEditModal(item.id, item.name, item, 'subjectList')"
             >
               <button
-                class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
+                class="w-6 h-6 flex items-center justify-center rounded-full"
               >
                 <i class="fa-solid fa-pen-to-square text-xs text-gray-500"></i>
                 <span
@@ -63,7 +63,7 @@
             <button
               v-if="role.toLowerCase() === 'super_admin'"
               @click="showDelModal(item.id, item.name, 'subjectList')"
-              class="group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
+              class="group relative w-6 h-6 flex items-center justify-center rounded-full"
             >
               <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
               <span
@@ -80,8 +80,8 @@
 </template>
 
 <script setup>
-import { useUserStore } from "../../store/userStore";
 import { useModalStore } from "../../store/useModalStore";
+import { useUserStore } from "../../store/userStore";
 
 const props = defineProps({
   columns: {

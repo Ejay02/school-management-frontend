@@ -358,7 +358,7 @@
           </div>
         </template>
 
-        <!-- TODO  create endpoint-->
+        <!-- -->
         <!-- subject list -->
         <template v-else-if="source === 'subjects'">
           <div>
@@ -373,18 +373,27 @@
             />
           </div>
 
-          <Dropdown
-            class="w-full"
-            v-model="selectedTeacherId"
-            label="Select Teacher"
-            :options="teacherNames"
-            emptyLabel="Select a teacher"
-          />
+          <div class="flex gap-2">
+            <Dropdown
+              class="w-1/2"
+              v-model="selectedTeacher"
+              label="Select Teacher"
+              :options="teacherNames"
+              emptyLabel="Select a teacher"
+            />
+
+            <Dropdown
+              class="w-1/2"
+              v-model="selectedClass"
+              label="Select Class"
+              :options="classOptions"
+              emptyLabel="Select a class"
+            />
+          </div>
         </template>
 
         <!-- name, day, time, subject Id, classId -->
 
-        <!-- TODO : add content for lesson, exam, add teacher for creating class -->
         <!-- lesson  -->
         <template v-else-if="source === 'lessons'">
           <div class="flex gap-2">
@@ -469,38 +478,53 @@
           </div>
         </template>
 
+        <!-- TODO implement markdown -->
         <!-- exam -->
         <template v-else-if="source === 'exams'">
           <div>
             <label
-              for="subject"
+              for="title"
               class="block text-sm font-medium text-gray-700 mb-1"
-              >Subject</label
+              >Title</label
             >
             <input
-              v-model="subject"
+              v-model="title"
               type="text"
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Content
+              <textarea
+                v-model="content"
+                rows="4"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
           <div class="flex gap-2">
             <Dropdown
               class="w-1/2"
               v-model="selectedClass"
               label="Select Class"
-              :options="classes"
+              :options="classOptions"
               emptyLabel="Select a class"
             />
+            <!--  -->
             <div class="w-1/2">
-              <label
-                for="teacher"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Teacher</label
-              >
-              <input
-                v-model="teacher"
-                type="text"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              <CustomDropdown
+                v-model="selectedSubject"
+                label="Select Subject"
+                :options="
+                  filteredSubjects.map((subject) => ({
+                    value: subject.id,
+                    label: subject.name,
+                  }))
+                "
+                placeholder="Select a subject"
+                :disabled="!selectedClass"
               />
             </div>
           </div>
@@ -516,6 +540,33 @@
               v-model="date"
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
+          </div>
+
+          <div class="flex gap-2">
+            <div class="w-1/2">
+              <label
+                for="startTime"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Start Time</label
+              >
+              <input
+                type="time"
+                v-model="startTime"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
+            <div class="w-1/2">
+              <label
+                for="endTime"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >End Time</label
+              >
+              <input
+                type="time"
+                v-model="endTime"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
           </div>
         </template>
 
@@ -790,15 +841,14 @@
           <button
             class="bg-white border border-gray-300 cursor-pointer text-gray-600 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
             @click="handleCancel"
-         
           >
             Cancel
           </button>
           <button
             class="hover:bg-purple-400 text-white py-2 px-4 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 transition-colors"
             @click="handleAdd"
-               :disabled="!isFormValid"
-    :class="{ 'opacity-50 cursor-not-allowed': !isFormValid }"
+            :disabled="!isFormValid"
+            :class="{ 'opacity-50 cursor-not-allowed': !isFormValid }"
           >
             {{ handleAdd ? "Add" : "Adding ..." }}
           </button>
@@ -812,10 +862,11 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
 import {
-createAnnouncement,
-createClass,
-createEvent,
-createLesson,
+  createAnnouncement,
+  createClass,
+  createEvent,
+  createExam,
+  createLesson,
 } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
 import { useLessonStore } from "../../store/lessonStore";
@@ -837,17 +888,23 @@ const isModalVisible = ref(modalStore.editModal);
 
 const capacity = ref("");
 const supervisor = ref("");
+
 const name = ref("");
+const title = ref("");
+
 const email = ref("");
 
 const score = ref("");
 const classes = ref([]);
 const selectedClass = ref("");
-const selectedClassId = ref(null);
 
 const subject = ref("");
 const subjects = ref([]);
 const selectedSubject = ref("");
+
+const selectedTeacher = ref("");
+
+const content = ref("");
 
 const phone = ref("");
 const student = ref("");
@@ -945,7 +1002,7 @@ const isFormValid = computed(() => {
       name.value && email.value && student.value && phone.value && address.value
     );
   } else if (source.value === "subjects") {
-    return name.value && selectedTeacherId.value;
+    return name.value && selectedTeacher.value && selectedClass.value;
   } else if (source.value === "classes") {
     return name.value && capacity.value;
   } else if (source.value === "lessons") {
@@ -958,7 +1015,15 @@ const isFormValid = computed(() => {
       endTime.value
     );
   } else if (source.value === "exams") {
-    return subject.value && selectedClass.value && teacher.value && date.value;
+    return (
+      title.value &&
+      date.value &&
+      selectedClass.value &&
+      selectedSubject.value &&
+      startTime.value &&
+      endTime.value &&
+      content.value
+    );
   } else if (source.value === "assignments") {
     return (
       subject.value && selectedClass.value && teacher.value && dueDate.value
@@ -1090,15 +1155,19 @@ const handleAdd = async () => {
       });
     } else if (source.value === "exams") {
       // Create exam logic
+      // FIXME: update the mutation, take out lesson add content, day etc
       console.log("Creating exam...");
       await apolloClient.mutate({
         mutation: createExam,
         variables: {
           input: {
-            subject: subject.value,
-            classes: classes.value,
-            teacher: teacher.value,
-            date: date.value,
+            classId: getClassIdByName(selectedClass.value),
+            subjectId: selectedSubject.value,
+            startTime: startTime.value,
+            endTime: endTime.value,
+            title: title.value,
+            date: day.value,
+            content: content.value,
           },
         },
       });

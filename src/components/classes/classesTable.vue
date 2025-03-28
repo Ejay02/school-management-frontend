@@ -23,8 +23,8 @@
           </div>
         </td>
 
-        <td class="hidden md:table-cell ">{{ item?.capacity }}</td>
-        <td class="hidden md:table-cell ">{{ item?.students?.length }}</td>
+        <td class="hidden md:table-cell">{{ item?.capacity }}</td>
+        <td class="hidden md:table-cell">{{ item?.students?.length }}</td>
         <td v-if="item.supervisor" class="hidden md:table-cell capitalize">
           {{ item?.supervisor?.name }} {{ item.supervisor?.surname }}
         </td>
@@ -45,7 +45,7 @@
               @click="showEditModal(item.id, item.title, item, 'classList')"
             >
               <button
-                class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
+                class="w-6 h-6 flex items-center justify-center rounded-full"
               >
                 <i class="fa-solid fa-pen-to-square text-xs text-gray-500"></i>
                 <span
@@ -59,7 +59,7 @@
             <button
               v-if="role.toLowerCase() === 'super_admin'"
               @click="showDelModal(item.id, item.name, 'classList')"
-              class="group relative w-6 h-6 flex items-center justify-center rounded-full bg-eduPurple"
+              class="group relative w-6 h-6 flex items-center justify-center rounded-full"
             >
               <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
               <span
@@ -76,8 +76,8 @@
 </template>
 
 <script setup>
-import { useUserStore } from "../../store/userStore";
 import { useModalStore } from "../../store/useModalStore";
+import { useUserStore } from "../../store/userStore";
 
 const props = defineProps({
   columns: {
