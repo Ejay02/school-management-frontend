@@ -10,36 +10,47 @@
     </div>
     <div class="mt-4 sm:mt-0 flex space-x-3">
       <!-- View tabs -->
-      <div class="inline-flex rounded-md shadow-sm" role="group">
-        <button
-          @click="$emit('view-change', 'main')"
-          class="px-4 py-2 text-sm font-medium border rounded-l-lg"
-          :class="
-            activeView === 'main'
-              ? 'bg-indigo-600 text-white border-indigo-600'
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-          "
+      <div
+        class="relative inline-flex w-48 h-12 bg-white rounded-full shadow-md overflow-hidden"
+        role="group"
+      >
+        <!-- Container for the toggle options -->
+        <div
+          class="flex w-full h-full items-center justify-between relative z-10"
         >
-          Main
-        </button>
-        <button
-          @click="$emit('view-change', 'archive')"
-          class="px-4 py-2 text-sm font-medium border-t border-b border-r rounded-r-lg"
-          :class="
-            activeView === 'archive'
-              ? 'bg-indigo-600 text-white border-indigo-600'
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-          "
-        >
-          Archive
-          <span
-            v-if="archivedCount"
-            class="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-200 text-gray-800"
+          <!-- Main Option -->
+          <button
+            @click="$emit('view-change', 'main')"
+            class="flex-1 h-full flex items-center justify-center text-sm font-medium transition-colors duration-300"
+            :class="activeView === 'main' ? 'text-white' : 'text-gray-700'"
           >
-            {{ archivedCount }}
-          </span>
-        </button>
+            Main
+          </button>
+
+          <!-- Archive Option -->
+          <button
+            @click="$emit('view-change', 'archive')"
+            class="flex-1 h-full flex items-center justify-center text-sm font-medium transition-colors duration-300"
+            :class="activeView === 'archive' ? 'text-white' : 'text-gray-700'"
+          >
+            Archive
+            <span
+              v-if="archivedCount"
+              class="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-200 text-gray-800"
+            >
+              {{ archivedCount }}
+            </span>
+          </button>
+        </div>
+
+        <!-- Sliding background for active state -->
+        <div
+          class="absolute top-1 left-1 w-1/2 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full transition-transform duration-300 ease-in-out"
+          :class="activeView === 'main' ? 'translate-x-0' : 'translate-x-full'"
+        ></div>
       </div>
+
+      <!--  -->
 
       <div v-if="canCreateAnnouncement && activeView === 'main'">
         <button
@@ -55,8 +66,8 @@
 
 <script setup>
 import { computed } from "vue";
-import { useUserStore } from "../../store/userStore";
 import { useAnnouncementStore } from "../../store/announcementStore";
+import { useUserStore } from "../../store/userStore";
 
 const props = defineProps({
   activeView: {

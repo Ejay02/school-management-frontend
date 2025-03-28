@@ -246,12 +246,12 @@
                 Invoice #
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                class="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
                 Date
               </th>
               <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                class="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
                 Description
               </th>
@@ -266,7 +266,7 @@
                 Status
               </th>
               <th
-                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                class="hidden md:table-cell px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
                 Download
               </th>
@@ -279,16 +279,16 @@
               >
                 {{ payment.id }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ payment.date }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ payment.description }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                 ${{ payment.amount }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="px-6 py-4 whitespace-nowrap ">
                 <!--   px-2 py-1 text-xs font-medium text-gray-600 " -->
                 <span
                   class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset"
@@ -308,7 +308,7 @@
                 </span>
               </td>
               <td
-                class="px-14 py-4 whitespace-nowrap text-right text-sm font-medium"
+                class="hidden md:table-cell px-14 py-4 whitespace-nowrap text-right text-sm font-medium"
               >
                 <a
                   :href="payment.downloadUrl"
@@ -353,7 +353,7 @@
 
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-500"
+                <label for="expiryDate" class="block text-sm font-medium text-gray-500"
                   >Expiry Date</label
                 >
                 <input
@@ -365,7 +365,7 @@
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-500"
+                <label for="cvc" class="block text-sm font-medium text-gray-500"
                   >CVC</label
                 >
                 <input
@@ -378,7 +378,7 @@
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-500"
+              <label for="name" class="block text-sm font-medium text-gray-500"
                 >Name on Card</label
               >
               <input
@@ -413,10 +413,10 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
 import { loadStripe } from "@stripe/stripe-js";
-import Pagination from "../pagination.vue";
+import { ref } from "vue";
 import EmptyState from "../emptyState.vue";
+import Pagination from "../pagination.vue";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 

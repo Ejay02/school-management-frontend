@@ -4,31 +4,42 @@
       <!-- top -->
       <div class="border-b p-4 flex items-center justify-between">
         <!-- View toggle buttons -->
-        <fieldset class="inline-flex rounded-md shadow-sm justify-end">
+        <div
+          class="relative inline-flex w-48 h-12 bg-white rounded-full shadow-md overflow-hidden"
+        >
+          <!-- Hidden legend for accessibility -->
           <legend class="sr-only">View mode selection</legend>
-          <button
-            @click="viewMode = 'cards'"
-            :class="[
-              'px-1 py-1 text-sm font-medium rounded-l-lg border border-r-0',
-              viewMode === 'cards'
-                ? ' bg-gradient-to-r from-indigo-600 to-purple-600  text-white border-eduPurple'
-                : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300',
-            ]"
+
+          <!-- Container for the toggle options -->
+          <div
+            class="flex w-full h-full items-center justify-between relative z-10"
           >
-            <i class="fas fa-th-large mr-1"></i> Cards
-          </button>
-          <button
-            @click="viewMode = 'list'"
-            :class="[
-              'px-1 py-0 text-sm font-medium rounded-r-lg border',
-              viewMode === 'list'
-                ? ' bg-gradient-to-r from-indigo-600 to-purple-600  text-white border-eduPurple'
-                : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300',
-            ]"
-          >
-            <i class="fas fa-list mr-1"></i> List
-          </button>
-        </fieldset>
+            <!-- Cards Option -->
+            <button
+              @click="viewMode = 'cards'"
+              class="flex-1 h-full flex items-center justify-center text-sm font-medium transition-colors duration-300"
+              :class="viewMode === 'cards' ? 'text-white' : 'text-gray-700'"
+            >
+              <i class="fas fa-th-large mr-1"></i> Cards
+            </button>
+
+            <!-- List Option -->
+            <button
+              @click="viewMode = 'list'"
+              class="flex-1 h-full flex items-center justify-center text-sm font-medium transition-colors duration-300"
+              :class="viewMode === 'list' ? 'text-white' : 'text-gray-700'"
+            >
+              <i class="fas fa-list mr-1"></i> List
+            </button>
+          </div>
+
+          <!-- Sliding background for active state -->
+          <div
+            class="absolute top-1 left-1 w-1/2 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full transition-transform duration-300 ease-in-out"
+            :class="viewMode === 'cards' ? 'translate-x-0' : 'translate-x-full'"
+          ></div>
+        </div>
+        <!--  -->
 
         <TopList :txt="' '" />
       </div>
