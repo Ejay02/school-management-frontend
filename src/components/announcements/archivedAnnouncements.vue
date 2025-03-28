@@ -109,7 +109,7 @@
               {{ announcement.title }}
             </h3>
             <div
-              class="mt-2 text-sm text-gray-600"
+              class="mt-2 text-sm text-gray-600 line-clamp-2"
               v-html="announcement.content"
             ></div>
           </router-link>

@@ -54,7 +54,7 @@
 
       <div v-if="canCreateAnnouncement && activeView === 'main'">
         <button
-          @click="$emit('create-announcement')"
+          @click="showAddModal(`${url}`)"
           class="bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-2 rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           New Announcement
@@ -65,8 +65,10 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import { useAnnouncementStore } from "../../store/announcementStore";
+import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
 
 const props = defineProps({
@@ -80,8 +82,29 @@ const props = defineProps({
   },
 });
 
+const route = useRoute();
+
+const url = ref("");
+
+const extractUrlPath = () => {
+  // Use a regex to match the last word after the final slash
+  const match = route.path.match(/\/([^/]+)$/);
+  url.value = match ? match[1].toLowerCase() : "";
+};
+
+// Extract URL path when component is mounted
+onMounted(extractUrlPath);
+
 const emit = defineEmits(["view-change", "create-announcement"]);
 
+const showAddModal = (type) => {
+  modalStore.addModal = true;
+  // modalStore.modalId = id;
+  // modalStore.modalTitle = title;
+  modalStore.source = type;
+};
+
+const modalStore = useModalStore();
 const userStore = useUserStore();
 const announcementStore = useAnnouncementStore();
 
