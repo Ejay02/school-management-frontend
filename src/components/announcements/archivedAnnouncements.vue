@@ -165,13 +165,14 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import { socket } from "../../socket/socket";
 import { useAnnouncementStore } from "../../store/announcementStore";
 import { useUserStore } from "../../store/userStore";
 import { formatDate } from "../../utils/date.holidays";
+import { availableTargetRoles } from "../../utils/utility";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
-import { socket } from "../../socket/socket";
 
 const announcementStore = useAnnouncementStore();
 const userStore = useUserStore();
@@ -218,13 +219,6 @@ const isAdminOrTeacher = computed(() => {
   const role = userStore.userInfo?.role?.toLowerCase();
   return role === "admin" || role === "teacher" || role === "super_admin";
 });
-
-const availableTargetRoles = computed(() => [
-  { value: "STUDENT", label: "Students" },
-  { value: "TEACHER", label: "Teachers" },
-  { value: "PARENT", label: "Parents" },
-  { value: "ADMIN", label: "Admins" },
-]);
 
 const filteredArchivedAnnouncements = computed(() => {
   let filtered = archivedAnnouncements.value || [];

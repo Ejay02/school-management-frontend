@@ -8,7 +8,7 @@
         class="w-56"
         v-model="selectedClass"
         label="Select Class"
-        :options="classes"
+         :options="classOptions"
         emptyLabel="Select a class"
       />
     </div>
@@ -97,6 +97,10 @@ const error = computed(() => resultStore.error);
 const generatingDummy = ref(false);
 
 const selectedClass = ref("Primary 1");
+
+const classOptions = computed(() => {
+  return classStore.getClassNames?.map((classItem) => classItem.name) || [];
+});
 
 // Default empty distribution
 const defaultDistribution = {

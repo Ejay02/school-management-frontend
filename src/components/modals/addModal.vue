@@ -584,11 +584,24 @@
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Content
+              <textarea
+                v-model="content"
+                rows="4"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
+          </div>
+
           <Dropdown
-            class="w-full"
+            class=""
             v-model="selectedClass"
             label="Select Class"
-            :options="classes"
+            :options="teacherClasses"
             emptyLabel="Select a class"
           />
           <div>
@@ -598,9 +611,10 @@
               >Teacher</label
             >
             <input
-              v-model="teacher"
+              v-model="currentTeacherName"
               type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              readonly
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-not-allowed"
             />
           </div>
           <div>
@@ -724,39 +738,106 @@
           </div>
 
           <div class="flex gap-2">
-            <div class="">
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Select a class[Optional]
-                <select
-                  v-model="selectedClass"
-                  @change="handleClassChange"
-                  class="mt-1 border rounded p-2 w-full focus:outline-none focus:ring-0 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
-                >
-                  <option value="" selected>No class</option>
-                  <option
-                    v-for="(name, index) in classes"
-                    :key="index"
-                    :value="name"
-                    class="cursor-pointer"
-                  >
-                    {{ name }}
-                  </option>
-                </select>
-              </label>
-            </div>
-
-            <div>
+            <Dropdown
+              class="w-1/2"
+              v-model="selectedClass"
+              label="Select Class [Optional]"
+              :options="classOptions"
+              emptyLabel="Select a class"
+            />
+            <!--here  start !! -->
+            <!-- Replace the existing CustomDropdown for target audience with a multi-select version -->
+            <div class="w-1/2">
               <label
-                for="location"
+                for="targetRoles"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Location</label
+                >Target Audience [Optional]</label
               >
-              <input
-                type="text"
-                v-model="location"
-                class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+
+              <!-- Selected roles tags -->
+              <div
+                v-if="selectedTargetRoles.length > 0"
+                class="flex flex-wrap gap-1 mb-2"
+              >
+                <div
+                  v-for="role in selectedTargetRoles"
+                  :key="role.value"
+                  class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-md flex items-center"
+                >
+                  {{ role.label }}
+                  <button
+                    @click="removeTargetRole(role)"
+                    class="ml-1 text-indigo-500 hover:text-indigo-700"
+                  >
+                    <span class="text-xs">×</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Dropdown for selecting roles -->
+              <div class="relative">
+                <button
+                  @click="toggleTargetRolesDropdown"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-left focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                >
+                  <span v-if="selectedTargetRoles.length === 0"
+                    >Select audience</span
+                  >
+                  <span v-else>{{ selectedTargetRoles.length }} selected</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-gray-400 absolute right-2 top-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+
+                <!-- Dropdown menu -->
+                <div
+                  v-if="isTargetRolesDropdownOpen"
+                  class="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto"
+                >
+                  <!-- Select All option -->
+                  <div
+                    @click="selectAllTargetRoles"
+                    class="px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100 cursor-pointer"
+                  >
+                    Select All
+                  </div>
+
+                  <!-- Individual role options -->
+                  <div
+                    v-for="role in availableTargetRoles"
+                    :key="role.value"
+                    @click="toggleTargetRole(role)"
+                    class="px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100 cursor-pointer flex items-center"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="isTargetRoleSelected(role)"
+                      class="mr-2"
+                      @click.stop
+                    />
+                    {{ role.label }}
+                  </div>
+                </div>
+              </div>
             </div>
+            <!-- <div class="w-1/2">
+              <CustomDropdown
+                v-model="selectedTargetRole"
+                label="Target Audience [Optional]"
+                :options="availableTargetRoles"
+                placeholder="Select audience "
+              />
+            </div> -->
+            <!--  -->
           </div>
 
           <div class="flex gap-2">
@@ -795,6 +876,60 @@
                 type="time"
                 v-model="endTime"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
+          </div>
+
+          <!-- ROLES: ADMIN,PARENT,STUDENT, TEACHER,SUPER_ADMIN -->
+          <!-- Visibility: PUBLIC , PRIVATe -->
+          <!-- status SCHEDULED -->
+          <div class="flex gap-2">
+            <div class="w-1/3">
+              <label
+                for="eventStatus"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Status</label
+              >
+              <input
+                v-model="eventStatus"
+                type="text"
+                readonly
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-not-allowed"
+              />
+            </div>
+            <div class="w-1/3">
+              <CustomDropdown
+                v-if="haveAccess"
+                v-model="eventVisibility"
+                label="Visibility"
+                :options="eventVisibilityOptions"
+                placeholder="Select visibility"
+              />
+              <div v-else>
+                <label
+                  for="privateVisibility"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Status</label
+                >
+                <input
+                  v-model="privateVisibility"
+                  type="text"
+                  readonly
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-not-allowed"
+                />
+              </div>
+            </div>
+
+            <div class="w-1/3">
+              <label
+                for="location"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Location</label
+              >
+              <input
+                type="text"
+                v-model="location"
+                class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
           </div>
@@ -874,6 +1009,11 @@ import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
 import { useModalStore } from "../../store/useModalStore";
+import { useUserStore } from "../../store/userStore";
+import {
+  availableTargetRoles,
+  eventVisibilityOptions,
+} from "../../utils/utility.js";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
 
@@ -883,6 +1023,8 @@ const teacherStore = useTeacherStore();
 const subjectStore = useSubjectStore();
 const lessonStore = useLessonStore();
 const notificationStore = useNotificationStore();
+
+const userStore = useUserStore();
 
 const isModalVisible = ref(modalStore.editModal);
 
@@ -920,6 +1062,84 @@ const startTime = ref("");
 const endTime = ref("");
 const source = ref(modalStore.source);
 
+const eventStatus = ref("SCHEDULED"); // Default to SCHEDULED
+const eventVisibility = ref("PUBLIC"); // Default to PUBLIC
+const privateVisibility = ref("PRIVATE"); // Default to PUBLIC
+const selectedTargetRole = ref(""); // No default, user must select
+const location = ref("");
+
+const role = computed(() => userStore.currentRole.toLowerCase());
+
+const haveAccess = computed(() => {
+  const allowedRoles = ["admin", "super_admin", "teacher"];
+  return allowedRoles.includes(role.value);
+});
+
+const selectedTargetRoles = ref([]);
+const isTargetRolesDropdownOpen = ref(false);
+
+const toggleTargetRolesDropdown = () => {
+  isTargetRolesDropdownOpen.value = !isTargetRolesDropdownOpen.value;
+};
+
+const isTargetRoleSelected = (role) => {
+  return selectedTargetRoles.value.some((r) => r.value === role.value);
+};
+
+const toggleTargetRole = (role) => {
+  if (isTargetRoleSelected(role)) {
+    removeTargetRole(role);
+  } else {
+    selectedTargetRoles.value.push(role);
+  }
+};
+
+const removeTargetRole = (role) => {
+  selectedTargetRoles.value = selectedTargetRoles.value.filter(
+    (r) => r.value !== role.value
+  );
+};
+
+const selectAllTargetRoles = () => {
+  selectedTargetRoles.value = [...availableTargetRoles];
+};
+
+const currentTeacher = computed(() => {
+  // Get the current user from user store
+  const currentUser = userStore.userInfo;
+
+  // If user is not a teacher, return null
+  if (!currentUser || currentUser.role !== "TEACHER") {
+    return null;
+  }
+
+  // Find the teacher in the teacher store that matches the current user ID
+  const teacher = teacherStore.allTeachers.find(
+    (t) => t.userId === currentUser.id || t.id === currentUser.id
+  );
+
+  if (teacher) {
+    return teacher;
+  }
+
+  return null;
+});
+
+const currentTeacherName = computed(() => {
+  if (currentTeacher.value) {
+    return `${currentTeacher.value.name} ${currentTeacher.value.surname}`;
+  }
+  return "Only Teachers can create assignments";
+});
+
+const teacherClasses = computed(() => {
+  if (!currentTeacher.value || !currentTeacher.value.classes) {
+    return [];
+  }
+
+  return currentTeacher.value.classes.map((classItem) => classItem.name);
+});
+
 const pluralToSingular = (word) => {
   const transformations = {
     teachers: "teacher",
@@ -943,7 +1163,17 @@ const teacherNames = computed(() => {
   return teacherStore.getTeacherNames?.map((teacher) => teacher.name) || [];
 });
 
+// const classOptions = computed(() => {
+//   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
+// });
+
 const classOptions = computed(() => {
+  // If we're in the assignments section and have a current teacher, show only their classes
+  if (source.value === "assignments" && currentTeacher.value) {
+    return teacherClasses.value;
+  }
+
+  // Otherwise, show all classes (for other sections)
   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
 });
 
@@ -1026,7 +1256,11 @@ const isFormValid = computed(() => {
     );
   } else if (source.value === "assignments") {
     return (
-      subject.value && selectedClass.value && teacher.value && dueDate.value
+      subject.value &&
+      content.value &&
+      selectedClass.value &&
+      teacher.value &&
+      dueDate.value
     );
   } else if (source.value === "results") {
     return (
@@ -1272,5 +1506,16 @@ onMounted(async () => {
     teacherStore.fetchTeachers(),
     subjectStore.fetchSubjects(),
   ]);
+});
+
+onMounted(() => {
+  document.addEventListener("click", (e) => {
+    if (isTargetRolesDropdownOpen.value) {
+      const dropdown = document.querySelector(".target-roles-dropdown");
+      if (dropdown && !dropdown.contains(e.target)) {
+        isTargetRolesDropdownOpen.value = false;
+      }
+    }
+  });
 });
 </script>

@@ -211,6 +211,7 @@ import { formatDate } from "../../utils/date.holidays";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
+import { availableTargetRoles } from "../../utils/utility";
 
 defineEmits(["edit-announcement"]);
 
@@ -274,12 +275,7 @@ const filteredAnnouncements = computed(() => {
   return filtered;
 });
 
-const availableTargetRoles = computed(() => [
-  { value: "STUDENT", label: "Students" },
-  { value: "TEACHER", label: "Teachers" },
-  { value: "PARENT", label: "Parents" },
-  { value: "ADMIN", label: "Admins" },
-]);
+
 
 const isAdminOrTeacher = computed(() => {
   const role = userStore.userInfo?.role?.toLowerCase();
