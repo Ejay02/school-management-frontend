@@ -745,34 +745,13 @@
               :options="classOptions"
               emptyLabel="Select a class"
             />
-            <!--here  start !! -->
-            <!-- Replace the existing CustomDropdown for target audience with a multi-select version -->
+
             <div class="w-1/2">
               <label
                 for="targetRoles"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Target Audience [Optional]</label
-              >
-
-              <!-- Selected roles tags -->
-              <div
-                v-if="selectedTargetRoles.length > 0"
-                class="flex flex-wrap gap-1 mb-2"
-              >
-                <div
-                  v-for="role in selectedTargetRoles"
-                  :key="role.value"
-                  class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-md flex items-center"
-                >
-                  {{ role.label }}
-                  <button
-                    @click="removeTargetRole(role)"
-                    class="ml-1 text-indigo-500 hover:text-indigo-700"
-                  >
-                    <span class="text-xs">×</span>
-                  </button>
-                </div>
-              </div>
+                >Target Audience
+              </label>
 
               <!-- Dropdown for selecting roles -->
               <div class="relative">
@@ -828,15 +807,28 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Selected roles tags - moved to bottom -->
+              <div
+                v-if="selectedTargetRoles.length > 0"
+                class="flex flex-wrap gap-1 mt-2"
+              >
+                <div
+                  v-for="role in selectedTargetRoles"
+                  :key="role.value"
+                  class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-md flex items-center"
+                >
+                  {{ role.label }}
+                  <button
+                    @click="removeTargetRole(role)"
+                    class="ml-1 text-indigo-500 hover:text-indigo-700"
+                  >
+                    <span class="text-xs">×</span>
+                  </button>
+                </div>
+              </div>
             </div>
-            <!-- <div class="w-1/2">
-              <CustomDropdown
-                v-model="selectedTargetRole"
-                label="Target Audience [Optional]"
-                :options="availableTargetRoles"
-                placeholder="Select audience "
-              />
-            </div> -->
+
             <!--  -->
           </div>
 
@@ -880,9 +872,6 @@
             </div>
           </div>
 
-          <!-- ROLES: ADMIN,PARENT,STUDENT, TEACHER,SUPER_ADMIN -->
-          <!-- Visibility: PUBLIC , PRIVATe -->
-          <!-- status SCHEDULED -->
           <div class="flex gap-2">
             <div class="w-1/3">
               <label
@@ -1062,10 +1051,10 @@ const startTime = ref("");
 const endTime = ref("");
 const source = ref(modalStore.source);
 
-const eventStatus = ref("SCHEDULED"); // Default to SCHEDULED
-const eventVisibility = ref("PUBLIC"); // Default to PUBLIC
-const privateVisibility = ref("PRIVATE"); // Default to PUBLIC
-const selectedTargetRole = ref(""); // No default, user must select
+const eventStatus = ref("SCHEDULED");
+const eventVisibility = ref("PUBLIC");
+const privateVisibility = ref("PRIVATE");
+
 const location = ref("");
 
 const role = computed(() => userStore.currentRole.toLowerCase());
@@ -1162,10 +1151,6 @@ const modalTitle = computed(() => {
 const teacherNames = computed(() => {
   return teacherStore.getTeacherNames?.map((teacher) => teacher.name) || [];
 });
-
-// const classOptions = computed(() => {
-//   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
-// });
 
 const classOptions = computed(() => {
   // If we're in the assignments section and have a current teacher, show only their classes
@@ -1278,6 +1263,7 @@ const isFormValid = computed(() => {
       date.value &&
       startTime.value &&
       endTime.value &&
+      (eventVisibility.value || privateVisibility.value) &&
       location.value
     );
   } else if (source.value === "announcements") {
@@ -1456,15 +1442,22 @@ const handleAdd = async () => {
           data: {
             title: title.value,
             description: content.value,
-            classId: selectedClass.value || null,
+            classId: selectedClass.value
+              ? getClassIdByName(selectedClass.value)
+              : null,
             location: location.value,
             startTime: new Date(
               `${date.value}T${startTime.value}`
             ).toISOString(),
             endTime: new Date(`${date.value}T${endTime.value}`).toISOString(),
-            type: "GENERAL",
-            visibility: "PUBLIC",
-            targetRoles: ["ADMIN", "TEACHER", "STUDENT", "PARENT"],
+            status: "SCHEDULED",
+            visibility: haveAccess.value
+              ? eventVisibility.value
+              : privateVisibility.value,
+            targetRoles:
+              selectedTargetRoles.value.length > 0
+                ? selectedTargetRoles.value.map((role) => role.value)
+                : ["ADMIN", "TEACHER", "STUDENT", "PARENT"],
           },
         },
       });
