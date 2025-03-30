@@ -136,9 +136,14 @@
                 <button
                   v-if="!announcementStore.isAnnouncementRead(announcement.id)"
                   @click="markAsRead(announcement.id)"
-                  class="text-indigo-600 hover:text-indigo-400 text-sm font-medium transform transition-all hover:scale-105"
+                  class="group relative text-indigo-600 hover:text-indigo-400 text-sm font-medium transform transition-all hover:scale-105"
                 >
-                  Mark as Read
+                  <i class="fa-solid fa-check-double"></i>
+                  <span
+                    class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  >
+                    Mark as Read
+                  </span>
                 </button>
 
                 <button
@@ -203,18 +208,18 @@
 import { useApolloClient } from "@vue/apollo-composable";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useStorageSync } from "../../composables/useStorageSync";
+import { useApolloClient } from "@vue/apollo-composable";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { useStorageSync } from "../../composables/useStorageSync";
 import { socket } from "../../socket/socket";
 import { useAnnouncementStore } from "../../store/announcementStore";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
 import { formatDate } from "../../utils/date.holidays";
+import { availableTargetRoles } from "../../utils/utility";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
-import { availableTargetRoles } from "../../utils/utility";
-
-defineEmits(["edit-announcement"]);
-
 const modalStore = useModalStore();
 
 const showDelModal = (id, title, type) => {
@@ -274,8 +279,6 @@ const filteredAnnouncements = computed(() => {
 
   return filtered;
 });
-
-
 
 const isAdminOrTeacher = computed(() => {
   const role = userStore.userInfo?.role?.toLowerCase();
