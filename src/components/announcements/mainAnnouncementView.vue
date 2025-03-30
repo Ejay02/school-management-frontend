@@ -208,9 +208,6 @@
 import { useApolloClient } from "@vue/apollo-composable";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useStorageSync } from "../../composables/useStorageSync";
-import { useApolloClient } from "@vue/apollo-composable";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
-import { useStorageSync } from "../../composables/useStorageSync";
 import { socket } from "../../socket/socket";
 import { useAnnouncementStore } from "../../store/announcementStore";
 import { useModalStore } from "../../store/useModalStore";
@@ -220,6 +217,9 @@ import { availableTargetRoles } from "../../utils/utility";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
+
+defineEmits(["edit-announcement"]);
+
 const modalStore = useModalStore();
 
 const showDelModal = (id, title, type) => {
