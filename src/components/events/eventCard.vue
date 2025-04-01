@@ -61,8 +61,8 @@
           {{ event.title }}
         </h2>
 
-        <div class="text-gray-600 mb-4">
-          <p class="line-clamp-3">{{ event.description }}</p>
+        <div class="text-gray-500 mb-4">
+          <p class="line-clamp-2 prose max-w-none font-serif text-lg">{{ event.description }}</p>
         </div>
 
         <div class="space-y-2">

@@ -234,7 +234,7 @@
               <div
                 class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all h-full"
               >
-                <p class="text-gray-700 whitespace-pre-line leading-relaxed">
+                <p class="text-gray-700 whitespace-pre-line leading-relaxed prose max-w-none font-serif text-lg">
                   {{ event?.description || "No description provided." }}
                 </p>
               </div>
