@@ -174,8 +174,8 @@ export const createAnnouncement = gql`
   mutation createAnnouncement(
     $title: String!
     $content: String!
-    $classId: String!
-    $targetRoles: [Role!]!
+    $classId: String
+    $targetRoles: [String!]!
   ) {
     createAnnouncement(
       title: $title

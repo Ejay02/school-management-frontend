@@ -938,25 +938,112 @@
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Class</label
-            >
-            <input
-              v-model="classes"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+              >Content
+              <textarea
+                v-model="content"
+                rows="4"
+                type="text"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Date</label
-            >
-            <input
-              type="date"
-              v-model="date"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+
+          <div class="flex gap-2">
+            <Dropdown
+              class="w-1/2"
+              v-model="selectedClass"
+              label="Select Class [Optional]"
+              :options="classOptions"
+              emptyLabel="Select a class"
             />
+
+            <div class="w-1/2">
+              <label
+                for="targetRoles"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Target Audience
+              </label>
+
+              <!-- Dropdown for selecting roles -->
+              <div class="relative">
+                <button
+                  @click="toggleTargetRolesDropdown"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-left focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                >
+                  <span v-if="selectedTargetRoles.length === 0"
+                    >Select audience</span
+                  >
+                  <span v-else>{{ selectedTargetRoles.length }} selected</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-gray-400 absolute right-2 top-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+
+                <!-- Dropdown menu -->
+                <div
+                  v-if="isTargetRolesDropdownOpen"
+                  class="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto"
+                >
+                  <!-- Select All option -->
+                  <div
+                    @click="selectAllTargetRoles"
+                    class="px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100 cursor-pointer"
+                  >
+                    Select All
+                  </div>
+
+                  <!-- Individual role options -->
+                  <div
+                    v-for="role in availableTargetRoles"
+                    :key="role.value"
+                    @click="toggleTargetRole(role)"
+                    class="px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100 cursor-pointer flex items-center"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="isTargetRoleSelected(role)"
+                      class="mr-2"
+                      @click.stop
+                    />
+                    {{ role.label }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selected roles tags - moved to bottom -->
+              <div
+                v-if="selectedTargetRoles.length > 0"
+                class="flex flex-wrap gap-1 mt-2"
+              >
+                <div
+                  v-for="role in selectedTargetRoles"
+                  :key="role.value"
+                  class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-md flex items-center"
+                >
+                  {{ role.label }}
+                  <button
+                    @click="removeTargetRole(role)"
+                    class="ml-1 text-indigo-500 hover:text-indigo-700"
+                  >
+                    <span class="text-xs">×</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!--  -->
           </div>
         </template>
 
@@ -1267,7 +1354,7 @@ const isFormValid = computed(() => {
       location.value
     );
   } else if (source.value === "announcements") {
-    return title.value && content.value;
+    return title.value && content.value && selectedTargetRoles.value.length > 0;
   }
 
   return false;
@@ -1435,7 +1522,6 @@ const handleAdd = async () => {
       });
     } else if (source.value === "events") {
       // Create event logic
-      console.log("Creating event...");
       await apolloClient.mutate({
         mutation: createEvent,
         variables: {
@@ -1467,14 +1553,20 @@ const handleAdd = async () => {
       });
     } else if (source.value === "announcements") {
       // Create announcement logic
-      console.log("Creating announcement...");
+
       await apolloClient.mutate({
         mutation: createAnnouncement,
         variables: {
           title: title.value,
           content: content.value || "",
-          classId: selectedClass.value || null,
-          targetRoles: ["ADMIN", "TEACHER", "STUDENT", "PARENT"],
+          classId: selectedClass.value
+            ? getClassIdByName(selectedClass.value)
+            : null,
+          // classId: selectedClass.value || null,
+          targetRoles:
+            selectedTargetRoles.value.length > 0
+              ? selectedTargetRoles.value.map((role) => role.value)
+              : ["ADMIN", "TEACHER", "STUDENT", "PARENT"],
         },
       });
       notificationStore.addNotification({
