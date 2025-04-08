@@ -61,7 +61,9 @@ onMounted(extractUrlPath);
 
 const handleAddClick = () => {
   if (url.value === "exams") {
-    router.push("/dashboard/exams/new");
+    router.push("/dashboard/exam/new");
+  } else if (url.value === "assignments") {
+    router.push("/dashboard/assignment/new");
   } else {
     modalStore.addModal = true;
     modalStore.source = url.value;

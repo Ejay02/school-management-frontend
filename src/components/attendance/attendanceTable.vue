@@ -160,7 +160,6 @@
 
     <!-- Mark Attendance Mode -->
     <div v-else>
-      <!-- TODO : FIXME use the dropdown instead of ⬇️ -->
       <!-- Class and date selectors -->
       <div class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
@@ -188,49 +187,6 @@
             :disabled="!selectedClass"
           />
         </div>
-
-        <!-- <div>
-          <label for="class" class="block text-sm text-gray-600 mb-1"
-            >Class</label
-          >
-
-          
-          <select
-            v-model="selectedClass"
-            class="border rounded p-2 w-full focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
-            style="max-height: 200px; overflow-y: auto"
-          >
-            <option value="">Select a class</option>
-            <option
-              v-for="class_ in classes"
-              :key="class_.id"
-              :value="class_.id"
-             
-            >
-              {{ class_.name }}
-            </option>
-          </select>
-        </div>
-
-        <div>
-          <label for="lesson" class="block text-sm text-gray-600 mb-1"
-            >Lesson</label
-          >
-          <select
-            v-model="selectedLesson"
-            class="border rounded p-2 w-full focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
-            :disabled="!selectedClass"
-          >
-            <option value="">Select a lesson</option>
-            <option
-              v-for="lesson in filteredLessons"
-              :key="lesson.id"
-              :value="lesson.id"
-            >
-              {{ lesson.name }}
-            </option>
-          </select>
-        </div> -->
 
         <div>
           <label

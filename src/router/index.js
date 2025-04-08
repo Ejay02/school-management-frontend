@@ -1,45 +1,45 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useUserStore } from "../store/userStore";
 
-import Home from "../views/home.vue";
+import NotFound from "../components/notFound.vue";
 import Login from "../views/auth/login.vue";
 import Signup from "../views/auth/signup.vue";
-import NotFound from "../components/notFound.vue";
-import Dashboard from "../views/layout/dashboard.vue";
+import Home from "../views/home.vue";
 import AdminLayout from "../views/layout/adminLayout.vue";
+import Dashboard from "../views/layout/dashboard.vue";
 import ParentLayout from "../views/layout/parentLayout.vue";
-import TeacherLayout from "../views/layout/teacherLayout.vue";
 import StudentLayout from "../views/layout/studentLayout.vue";
+import TeacherLayout from "../views/layout/teacherLayout.vue";
 
-import Settings from "../views/settings.vue";
-import Exams from "../components/exams/exams.vue";
-import Events from "../components/events/events.vue";
+import Announcements from "../components/announcements/announcements.vue";
+import AnnouncementView from "../components/announcements/announcementView.vue";
+import Assignments from "../components/assignments/assignments.vue";
+import Attendance from "../components/attendance/attendance.vue";
 import Classes from "../components/classes/classes.vue";
+import Events from "../components/events/events.vue";
+import EventView from "../components/events/eventView.vue";
+import ExamForm from "../components/exams/examForm.vue";
+import Exams from "../components/exams/exams.vue";
+import Lessons from "../components/lessons/lessons.vue";
+import Messages from "../components/messages/messages.vue";
 import Parents from "../components/parents/parents.vue";
 import Results from "../components/results/results.vue";
-import Lessons from "../components/lessons/lessons.vue";
-import Teachers from "../components/teacher/teachers.vue";
-import Subjects from "../components/subjects/subjects.vue";
+import BillingSetting from "../components/settingsComponents/billingSetting.vue";
+import IntegrationSetting from "../components/settingsComponents/integrationSetting.vue";
+import NotificationSetting from "../components/settingsComponents/notificationSetting.vue";
+import ProfileSetting from "../components/settingsComponents/profileSetting.vue";
+import TeamSetting from "../components/settingsComponents/teamSetting.vue";
 import Students from "../components/students/students.vue";
-import TeacherView from "../components/teacher/teacherView.vue";
 import StudentView from "../components/students/studentView.vue";
-import Assignments from "../components/assignments/assignments.vue";
-import Announcements from "../components/announcements/announcements.vue";
-import Messages from "../components/messages/messages.vue";
+import Subjects from "../components/subjects/subjects.vue";
+import Teachers from "../components/teacher/teachers.vue";
+import TeacherView from "../components/teacher/teacherView.vue";
+import About from "../views/infoPages/about.vue";
+import Academics from "../views/infoPages/academics.vue";
 import Admissions from "../views/infoPages/admissions.vue";
 import Calender from "../views/infoPages/calender.vue";
 import Contact from "../views/infoPages/contact.vue";
-import Academics from "../views/infoPages/academics.vue";
-import About from "../views/infoPages/about.vue";
-import ProfileSetting from "../components/settingsComponents/profileSetting.vue";
-import NotificationSetting from "../components/settingsComponents/notificationSetting.vue";
-import BillingSetting from "../components/settingsComponents/billingSetting.vue";
-import TeamSetting from "../components/settingsComponents/teamSetting.vue";
-import IntegrationSetting from "../components/settingsComponents/integrationSetting.vue";
-import Attendance from "../components/attendance/attendance.vue";
-import EventView from "../components/events/eventView.vue";
-import AnnouncementView from "../components/announcements/announcementView.vue";
-import ExamForm from "../components/exams/examForm.vue";
+import Settings from "../views/settings.vue";
 
 const publicRoutes = [
   "Home",
@@ -170,21 +170,34 @@ const routes = [
         component: Exams,
       },
       {
-        path: "exams/new",
+        path: "exam/new",
         name: "CreateExam",
         component: ExamForm,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true },
       },
       {
-        path: "exams/:id/edit",
+        path: "exam/:id/edit",
         name: "EditExam",
         component: ExamForm,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true },
       },
       {
         path: "/assignments",
         name: "Assignments",
         component: Assignments,
+      },
+
+      {
+        path: "assignment/new",
+        name: "CreateAssignment",
+        component: () => import("../components/assignments/assignmentForm.vue"),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: "assignment/:id/edit",
+        name: "EditAssignment",
+        component: () => import("../components/assignments/assignmentForm.vue"),
+        meta: { requiresAuth: true },
       },
       {
         path: "/results",

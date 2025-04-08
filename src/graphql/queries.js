@@ -369,8 +369,49 @@ export const getExamById = gql`
 `;
 
 export const getAllAssignments = gql`
-  query getAllAssignments($pagination: PaginationInput) {
-    getAllAssignments(params: $pagination) {
+  query getAllAssignments($params: PaginationInput) {
+    getAllAssignments(params: $params) {
+      id
+      title
+      startDate
+      dueDate
+      description
+      instructions
+      content
+      questions {
+        id
+        type
+        content
+        options
+        correctAnswer
+        points
+      }
+      createdAt
+      lesson {
+        id
+        name
+      }
+      teacher {
+        id
+        name
+        surname
+      }
+      class {
+        id
+        name
+      }
+
+      subject {
+        id
+        name
+      }
+    }
+  }
+`;
+
+export const getAssignmentById = gql`
+  query getAssignmentById($assignmentId: String!) {
+    getAssignmentById(assignmentId: $assignmentId) {
       id
       title
       startDate

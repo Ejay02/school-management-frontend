@@ -386,8 +386,8 @@ export const createLesson = gql`
 `;
 
 export const createAssignment = gql`
-  mutation CreateAssignment($input: CreateAssignmentInput!) {
-    createAssignment(input: $input) {
+  mutation CreateAssignment($createAssignmentInput: CreateAssignmentInput!) {
+    createAssignment(createAssignmentInput: $createAssignmentInput) {
       id
       title
       startDate
@@ -419,3 +419,42 @@ export const createAssignment = gql`
     }
   }
 `;
+
+export const editAssignment = gql`
+  mutation editAssignment( $assignmentId: String!, $editAssignmentInput: EditAssignmentInput!) {
+    editAssignment(assignmentId:$assignmentId, editAssignmentInput: $editAssignmentInput){
+      id
+    title
+    startDate
+    dueDate
+    description
+    instructions
+    content
+    questions {
+      id
+      type
+      content
+      options
+      correctAnswer
+      points
+      
+    }
+    subject {
+      id
+      name
+    }
+    class {
+      id
+      name
+    }
+    teacher {
+      id
+      name
+    }
+    lesson {
+      id
+      name
+    }
+    }
+  }
+`
