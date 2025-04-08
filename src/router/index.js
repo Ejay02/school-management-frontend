@@ -39,6 +39,7 @@ import IntegrationSetting from "../components/settingsComponents/integrationSett
 import Attendance from "../components/attendance/attendance.vue";
 import EventView from "../components/events/eventView.vue";
 import AnnouncementView from "../components/announcements/announcementView.vue";
+import ExamForm from "../components/exams/examForm.vue";
 
 const publicRoutes = [
   "Home",
@@ -167,6 +168,18 @@ const routes = [
         path: "/exams",
         name: "Exams",
         component: Exams,
+      },
+      {
+        path: "exams/new",
+        name: "CreateExam",
+        component: ExamForm,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: "exams/:id/edit",
+        name: "EditExam",
+        component: ExamForm,
+        meta: { requiresAuth: true }
       },
       {
         path: "/assignments",

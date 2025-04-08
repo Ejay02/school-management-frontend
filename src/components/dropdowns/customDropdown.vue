@@ -3,11 +3,11 @@
     <label :for="id" class="block text-sm text-gray-600 mb-1">
       {{ label }}
     </label>
-    
+
     <button
       :id="id"
       @click="toggleDropdown"
-      class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md shadow-sm text-left focus:outline-none focus:ring-0 focus:border-eduPurple"
+      class="w-full flex items-center justify-between px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm text-left focus:outline-none focus:ring-0"
     >
       <span>{{ selectedValue || placeholder }}</span>
       <svg
@@ -44,38 +44,41 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed, ref } from "vue";
 
 const props = defineProps({
   modelValue: {
     type: [String, Number],
-    default: ''
+    default: "",
   },
   label: {
     type: String,
-    default: ''
+    default: "",
   },
   options: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   placeholder: {
     type: String,
-    default: 'Select an option'
+    default: "Select an option",
   },
   id: {
     type: String,
-    default: () => `custom-dropdown-${Math.random().toString(36).substring(2, 9)}`
-  }
+    default: () =>
+      `custom-dropdown-${Math.random().toString(36).substring(2, 9)}`,
+  },
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(["update:modelValue"]);
 
 const isOpen = ref(false);
 
 const selectedValue = computed(() => {
-  const selectedOption = props.options.find(option => option.value === props.modelValue);
-  return selectedOption ? selectedOption.label : '';
+  const selectedOption = props.options.find(
+    (option) => option.value === props.modelValue
+  );
+  return selectedOption ? selectedOption.label : "";
 });
 
 function toggleDropdown() {
@@ -83,7 +86,7 @@ function toggleDropdown() {
 }
 
 function selectOption(option) {
-  emit('update:modelValue', option.value);
+  emit("update:modelValue", option.value);
   isOpen.value = false;
 }
 </script>

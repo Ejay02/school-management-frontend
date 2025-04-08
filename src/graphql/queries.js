@@ -227,7 +227,7 @@ export const getAllSubjects = gql`
         id
         name
       }
-      class{
+      class {
         id
         name
       }
@@ -300,18 +300,68 @@ export const getAllExams = gql`
       startTime
       endTime
       createdAt
-      lesson {
-        name
+      date
+      description
+      instructions
+      content
+      questions {
+        id
+        type
+        content
+        options
+        correctAnswer
+        points
       }
       teacher {
+        id
         name
         surname
       }
       class {
+        id
         name
       }
 
       subject {
+        id
+        name
+      }
+    }
+  }
+`;
+
+export const getExamById = gql`
+  query getExamById($examId: String!) {
+    getExamById(examId: $examId) {
+      id
+      title
+      startTime
+      endTime
+      createdAt
+      date
+      description
+      instructions
+      content
+      questions {
+        id
+        type
+        content
+        options
+        correctAnswer
+        points
+      }
+      teacher {
+        id
+        name
+        surname
+      }
+      class {
+        id
+        name
+      }
+
+      subject {
+        id
         name
       }
     }
@@ -323,19 +373,36 @@ export const getAllAssignments = gql`
     getAllAssignments(params: $pagination) {
       id
       title
+      startDate
+      dueDate
+      description
+      instructions
+      content
+      questions {
+        id
+        type
+        content
+        options
+        correctAnswer
+        points
+      }
       createdAt
       lesson {
+        id
         name
       }
       teacher {
+        id
         name
         surname
       }
       class {
+        id
         name
       }
 
       subject {
+        id
         name
       }
     }

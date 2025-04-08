@@ -279,6 +279,18 @@ export const createExam = gql`
     createExam(input: $input) {
       id
       title
+      date
+      description
+      instructions
+      content
+      questions {
+        id
+        type
+        content
+        options
+        correctAnswer
+        points
+      }
       class {
         id
         name
@@ -292,14 +304,46 @@ export const createExam = gql`
       classId
       startTime
       endTime
-      lesson {
+
+      teacher {
+        id
+        name
+        surname
+      }
+    }
+  }
+`;
+
+export const updateExam = gql`
+  mutation updateExam($examId: String!, $input: UpdateExamInput!) {
+    updateExam(examId: $examId, input: $input) {
+      id
+      title
+      startTime
+      endTime
+      date
+      description
+      instructions
+      content
+      questions {
+        id
+        type
+        content
+        options
+        correctAnswer
+        points
+      }
+      subject {
+        id
+        name
+      }
+      class {
         id
         name
       }
       teacher {
         id
         name
-        surname
       }
     }
   }
@@ -346,6 +390,19 @@ export const createAssignment = gql`
     createAssignment(input: $input) {
       id
       title
+      startDate
+      dueDate
+      description
+      instructions
+      content
+      questions {
+        id
+        type
+        content
+        options
+        correctAnswer
+        points
+      }
       lesson {
         id
         name
@@ -358,7 +415,7 @@ export const createAssignment = gql`
         name
         surname
       }
-      dueDate
+    
     }
   }
 `;

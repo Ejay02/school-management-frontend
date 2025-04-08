@@ -344,21 +344,19 @@
             </div>
           </div>
 
-          <!-- TODO  add supervison on the BE-->
+          <!-- TODO  extract the id properly-->
           <div>
-            <label
-              for="supervisor"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Supervisor</label
-            >
-            <input
-              v-model="supervisor"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+            <Dropdown
+              class=""
+              v-model="selectedTeacher"
+              label="Select Teacher"
+              :options="teacherNames"
+              emptyLabel="Select a teacher"
             />
           </div>
         </template>
 
-        <!-- -->
+        <!-- DONE ON THE BE FIX HERE-->
         <!-- subject list -->
         <template v-else-if="source === 'subjects'">
           <div>
@@ -392,9 +390,10 @@
           </div>
         </template>
 
-        <!-- name, day, time, subject Id, classId -->
+        <!-- -->
 
         <!-- lesson  -->
+        <!-- TODO : ADD DAY -->
         <template v-else-if="source === 'lessons'">
           <div class="flex gap-2">
             <div class="w-1/2">
@@ -478,97 +477,7 @@
           </div>
         </template>
 
-        <!-- TODO implement markdown -->
         <!-- exam -->
-        <template v-else-if="source === 'exams'">
-          <div>
-            <label
-              for="title"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Title</label
-            >
-            <input
-              v-model="title"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Content
-              <textarea
-                v-model="content"
-                rows="4"
-                type="text"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </label>
-          </div>
-          <div class="flex gap-2">
-            <Dropdown
-              class="w-1/2"
-              v-model="selectedClass"
-              label="Select Class"
-              :options="classOptions"
-              emptyLabel="Select a class"
-            />
-            <!--  -->
-            <div class="w-1/2">
-              <CustomDropdown
-                v-model="selectedSubject"
-                label="Select Subject"
-                :options="
-                  filteredSubjects.map((subject) => ({
-                    value: subject.id,
-                    label: subject.name,
-                  }))
-                "
-                placeholder="Select a subject"
-                :disabled="!selectedClass"
-              />
-            </div>
-          </div>
-          <!--  -->
-          <div>
-            <label
-              for="date"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Date</label
-            >
-            <input
-              type="date"
-              v-model="date"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </div>
-
-          <div class="flex gap-2">
-            <div class="w-1/2">
-              <label
-                for="startTime"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Start Time</label
-              >
-              <input
-                type="time"
-                v-model="startTime"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-            <div class="w-1/2">
-              <label
-                for="endTime"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >End Time</label
-              >
-              <input
-                type="time"
-                v-model="endTime"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-          </div>
-        </template>
 
         <!-- assignment -->
         <template v-else-if="source === 'assignments'">
@@ -1070,13 +979,13 @@
 </template>
 
 <script setup>
+import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import { computed, onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
 import {
   createAnnouncement,
   createClass,
   createEvent,
-  createExam,
   createLesson,
 } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
@@ -1316,16 +1225,6 @@ const isFormValid = computed(() => {
       startTime.value &&
       endTime.value
     );
-  } else if (source.value === "exams") {
-    return (
-      title.value &&
-      date.value &&
-      selectedClass.value &&
-      selectedSubject.value &&
-      startTime.value &&
-      endTime.value &&
-      content.value
-    );
   } else if (source.value === "assignments") {
     return (
       subject.value &&
@@ -1431,6 +1330,7 @@ const handleAdd = async () => {
           input: {
             name: name.value,
             capacity: parseInt(capacity.value),
+            superviorId: selectedTeacher.value,
             // supervisor: supervisor.value,  // FIXME: Add supervisor from the BE
           },
         },
@@ -1459,28 +1359,6 @@ const handleAdd = async () => {
       notificationStore.addNotification({
         type: "success",
         message: "Lesson created successfully!",
-      });
-    } else if (source.value === "exams") {
-      // Create exam logic
-      // FIXME: update the mutation, take out lesson add content, day etc
-      console.log("Creating exam...");
-      await apolloClient.mutate({
-        mutation: createExam,
-        variables: {
-          input: {
-            classId: getClassIdByName(selectedClass.value),
-            subjectId: selectedSubject.value,
-            startTime: startTime.value,
-            endTime: endTime.value,
-            title: title.value,
-            date: day.value,
-            content: content.value,
-          },
-        },
-      });
-      notificationStore.addNotification({
-        type: "success",
-        message: "Exam created successfully!",
       });
     } else if (source.value === "assignments") {
       // Create assignment logic
