@@ -359,6 +359,7 @@ import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
+import  {questionTypes} from "../../utils/utility";
 
 const route = useRoute();
 const router = useRouter();
@@ -391,14 +392,7 @@ const classOptions = computed(() => {
   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
 });
 
-// Question types
-const questionTypes = [
-  "MCQ",
-  "ESSAY",
-  "SHORT_ANSWER",
-  "TRUE_FALSE",
-  "MATCHING",
-];
+
 
 // Computed properties
 const isEditing = computed(() => route.params.id !== undefined);
@@ -518,7 +512,7 @@ const handleSubmit = async () => {
 
     router.push("/exams");
   } catch (error) {
-    console.error("Error saving exam:", error);
+   
     notificationStore.addNotification({
       type: "error",
       message: "Failed to save exam: " + error.message,
@@ -552,7 +546,6 @@ onMounted(async () => {
       startTime.value = exam.startTime;
       endTime.value = exam.endTime;
     } catch (error) {
-      console.error("Error loading exam:", error);
       notificationStore.addNotification({
         type: "error",
         message: "Failed to load exam",

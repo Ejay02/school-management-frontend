@@ -28,3 +28,13 @@ export const eventStatusOptions = [
   { value: "CANCELLED", label: "Cancelled" },
   { value: "COMPLETED", label: "Completed" },
 ];
+
+
+
+export const questionTypes = [
+  "MCQ",
+  "ESSAY",
+  "SHORT_ANSWER",
+  "TRUE_FALSE",
+  "MATCHING",
+];
