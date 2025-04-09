@@ -362,6 +362,40 @@ export const createLesson = gql`
     ) {
       id
       name
+      day
+      content
+      description
+      class {
+        id
+        name
+        students {
+          id
+          name
+          surname
+        }
+      }
+
+      classId
+      startTime
+      endTime
+
+      teacher {
+        id
+        name
+        surname
+      }
+    }
+  }
+`;
+
+export const editLesson = gql`
+  mutation EditLesson($lessonId: String!, $editLessonInput: EditLessonInput!) {
+    editLesson(lessonId: $lessonId, editLessonInput: $editLessonInput) {
+      id
+      name
+      day
+      content
+      description
       class {
         id
         name
@@ -473,7 +507,7 @@ export const createSubject = gql`
         name
         surname
       }
-      class{
+      class {
         id
         name
       }

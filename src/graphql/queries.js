@@ -274,6 +274,9 @@ export const getAllLessons = gql`
     getAllLessons(params: $pagination) {
       id
       name
+      day
+      content
+      description
       teacher {
         id
         name
@@ -283,7 +286,31 @@ export const getAllLessons = gql`
         id
         name
       }
+      subject {
+        id
+        name
+      }
+    }
+  }
+`;
 
+export const getLessonById = gql`
+  query getLessonById($id: String!) {
+    getLessonById(id: $id) {
+      id
+      name
+      day
+      content
+      description
+      teacher {
+        id
+        name
+        surname
+      }
+      class {
+        id
+        name
+      }
       subject {
         id
         name

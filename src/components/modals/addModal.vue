@@ -392,91 +392,6 @@
 
         <!-- -->
 
-        <!-- lesson  -->
-        <!-- TODO : ADD DAY -->
-        <template v-else-if="source === 'lessons'">
-          <div class="flex gap-2">
-            <div class="w-1/2">
-              <label
-                for="subjectName"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Subject Name</label
-              >
-              <input
-                v-model="name"
-                placeholder="subject name"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-
-            <div class="w-1/2">
-              <label
-                for="date"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Date</label
-              >
-              <input
-                type="date"
-                v-model="day"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-          </div>
-          <!--  -->
-          <div class="flex gap-2">
-            <Dropdown
-              class="w-1/2"
-              v-model="selectedClass"
-              label="Select Class"
-              :options="classOptions"
-              emptyLabel="Select a class"
-            />
-            <!--  -->
-            <div class="w-1/2">
-              <CustomDropdown
-                v-model="selectedSubject"
-                label="Select Subject"
-                :options="
-                  filteredSubjects.map((subject) => ({
-                    value: subject.id,
-                    label: subject.name,
-                  }))
-                "
-                placeholder="Select a subject"
-                :disabled="!selectedClass"
-              />
-            </div>
-          </div>
-
-          <!--  -->
-          <div class="flex gap-2">
-            <div class="w-1/2">
-              <label
-                for="startTime"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Start Time</label
-              >
-              <input
-                type="time"
-                v-model="startTime"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-            <div class="w-1/2">
-              <label
-                for="endTime"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >End Time</label
-              >
-              <input
-                type="time"
-                v-model="endTime"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-          </div>
-        </template>
-
         <!-- result -->
         <template v-else-if="source === 'results'">
           <div>
@@ -923,7 +838,6 @@ import {
   createAnnouncement,
   createClass,
   createEvent,
-  createLesson,
   createSubject,
 } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
@@ -975,8 +889,7 @@ const student = ref("");
 
 const address = ref("");
 const date = ref("");
-const day = ref("");
-const dueDate = ref("");
+
 
 const bloodGroup = ref("");
 
@@ -1160,15 +1073,6 @@ const isFormValid = computed(() => {
     return name.value && selectedTeacher.value && selectedClass.value;
   } else if (source.value === "classes") {
     return name.value && capacity.value;
-  } else if (source.value === "lessons") {
-    return (
-      name.value &&
-      day.value &&
-      selectedClass.value &&
-      selectedSubject.value &&
-      startTime.value &&
-      endTime.value
-    );
   } else if (source.value === "results") {
     return (
       subject.value &&
@@ -1280,25 +1184,6 @@ const handleAdd = async () => {
       notificationStore.addNotification({
         type: "success",
         message: "Class created successfully!",
-      });
-    } else if (source.value === "lessons") {
-      await apolloClient.mutate({
-        mutation: createLesson,
-        variables: {
-          classId: getClassIdByName(selectedClass.value),
-          subjectId: selectedSubject.value,
-          createLessonInput: {
-            name: name.value,
-            day: day.value,
-            startTime: startTime.value,
-            endTime: endTime.value,
-          },
-        },
-      });
-      await lessonStore.refreshLessons();
-      notificationStore.addNotification({
-        type: "success",
-        message: "Lesson created successfully!",
       });
     } else if (source.value === "results") {
       // Create result logic

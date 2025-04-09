@@ -35,7 +35,6 @@
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useModalStore } from "../../store/useModalStore";
-import { useUserStore } from "../../store/userStore";
 import TableSearch from "../tableSearch.vue";
 
 const props = defineProps({
@@ -46,7 +45,6 @@ const props = defineProps({
 });
 
 const modalStore = useModalStore();
-
 
 const router = useRouter();
 const route = useRoute();
@@ -67,11 +65,11 @@ const handleAddClick = () => {
     router.push("/dashboard/exam/new");
   } else if (url.value === "assignments") {
     router.push("/dashboard/assignment/new");
+  } else if (url.value === "lessons") {
+    router.push("dashboard/lesson/new");
   } else {
     modalStore.addModal = true;
     modalStore.source = url.value;
   }
 };
-
-
 </script>

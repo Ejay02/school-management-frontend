@@ -165,6 +165,18 @@ const routes = [
         component: Lessons,
       },
       {
+        path: "lesson/new",
+        name: "AddLesson",
+        component: () => import("../components/lessons/lessonForm.vue"),
+        meta: { requiresAuth: true, },
+      },
+      {
+        path: "lesson/edit/:id",
+        name: "EditLesson",
+        component: () => import("../components/lessons/lessonForm.vue"),
+        meta: { requiresAuth: true, },
+      },
+      {
         path: "/exams",
         name: "Exams",
         component: Exams,
