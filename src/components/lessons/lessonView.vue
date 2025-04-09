@@ -316,9 +316,8 @@
 
           <!-- Action Buttons -->
           <div class="flex flex-wrap gap-3 mt-10">
-            <!-- v-if="isTeacher"
-              -->
             <button
+              v-if="canEditLesson"
               @click="editLesson"
               class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all font-medium flex items-center justify-center"
             >
@@ -369,8 +368,9 @@
 import { computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useNavigation } from "../../composables/useNavigation";
+import { useTeacherAccessCheck } from "../../composables/useTeacherAccessCheck";
 import { useLessonStore } from "../../store/lessonStore";
-import { useUserStore } from "../../store/userStore";
+
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
 
@@ -379,17 +379,14 @@ const router = useRouter();
 const lessonId = route.params.id;
 
 const lessonStore = useLessonStore();
-const userStore = useUserStore();
+
 const { goBack } = useNavigation();
 
 const lesson = computed(() => lessonStore.selectedLesson);
 const loading = computed(() => lessonStore.loading);
 const error = computed(() => lessonStore.error);
 
-// Check if current user is a teacher (for edit permissions)
-const isTeacher = computed(() => {
-  return userStore.userInfo?.role === "TEACHER";
-});
+const { isTeacher, userId, isAssignedToSelection } = useTeacherAccessCheck();
 
 const formatTime = (timeString) => {
   if (!timeString) return "";
@@ -469,6 +466,17 @@ ${
     URL.revokeObjectURL(url);
   }, 100);
 };
+
+const canEditLesson = computed(() => {
+  if (!lesson.value) return false;
+
+  // Use the lesson data to check if the teacher has access
+  return isAssignedToSelection(
+    lesson.value.class?.name,
+    lesson.value.subject?.id,
+    lesson.value.id
+  );
+});
 
 onMounted(async () => {
   await lessonStore.fetchLessonById(lessonId);

@@ -104,7 +104,7 @@
               <textarea
                 v-model="description"
                 rows="2"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               ></textarea>
             </div>
 
@@ -168,11 +168,14 @@ import { useSubjectStore } from "../../store/subjectStore";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
 
+
 const route = useRoute();
 const router = useRouter();
 const classStore = useClassStore();
 const subjectStore = useSubjectStore();
 const notificationStore = useNotificationStore();
+
+
 
 // Form fields
 const title = ref("");
@@ -183,6 +186,8 @@ const selectedSubject = ref("");
 const day = ref("Monday");
 const startTime = ref("");
 const endTime = ref("");
+
+
 
 const isEditing = computed(() => route.params.id !== undefined);
 

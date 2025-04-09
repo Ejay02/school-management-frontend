@@ -838,7 +838,6 @@ import {
   createSubject,
 } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
-import { useLessonStore } from "../../store/lessonStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
@@ -855,7 +854,7 @@ const modalStore = useModalStore();
 const classStore = useClassStore();
 const teacherStore = useTeacherStore();
 const subjectStore = useSubjectStore();
-const lessonStore = useLessonStore();
+
 const notificationStore = useNotificationStore();
 
 const userStore = useUserStore();
@@ -875,7 +874,6 @@ const selectedClass = ref("");
 
 const subject = ref("");
 const subjects = ref([]);
-const selectedSubject = ref("");
 
 const selectedTeacher = ref("");
 
@@ -886,7 +884,6 @@ const student = ref("");
 
 const address = ref("");
 const date = ref("");
-
 
 const bloodGroup = ref("");
 
@@ -957,13 +954,6 @@ const currentTeacher = computed(() => {
   return null;
 });
 
-const currentTeacherName = computed(() => {
-  if (currentTeacher.value) {
-    return `${currentTeacher.value.name} ${currentTeacher.value.surname}`;
-  }
-  return "Only Teachers can create assignments";
-});
-
 const teacherClasses = computed(() => {
   if (!currentTeacher.value || !currentTeacher.value.classes) {
     return [];
@@ -1016,18 +1006,6 @@ const getClassIdByName = (className) => {
   const classItem = classStore.getClassNames.find((c) => c.name === className);
   return classItem ? classItem.id : null;
 };
-
-const filteredSubjects = computed(() => {
-  if (!selectedClass.value) return [];
-
-  // Find the selected class object
-  const classObj = classStore.allClasses.find(
-    (c) => c.name === selectedClass.value
-  );
-
-  // Return the subjects from the selected class if available
-  return classObj?.subjects || [];
-});
 
 // Watchers to sync with modal store
 watch(

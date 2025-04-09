@@ -37,7 +37,7 @@ export const useTeacherStore = defineStore("teacherStore", {
             subjects: teacher.subjects.map((subject) => subject.name),
             classes: teacher.classes || [],
           }));
-          
+
           this.totalCount = this.allTeachers.length;
           this.totalPages = Math.ceil(this.totalCount / limit);
         }
@@ -47,7 +47,6 @@ export const useTeacherStore = defineStore("teacherStore", {
         const end = start + limit;
         this.teachers = this.allTeachers.slice(start, end);
         this.hasMore = end < this.totalCount;
-
       } catch (error) {
         this.error = error;
       } finally {
@@ -73,10 +72,27 @@ export const useTeacherStore = defineStore("teacherStore", {
   },
   getters: {
     getTeacherNames: (state) => {
-      return state.allTeachers.map(teacher => ({
+      return state.allTeachers.map((teacher) => ({
         id: teacher.id,
-        name: `${teacher.name} ${teacher.surname}`
+        name: `${teacher.name} ${teacher.surname}`,
       }));
-    }
+    },
+
+    isTeacherAssigned: (state) => (teacherId, classObj, subject, lesson) => {
+      if (!teacherId) return false;
+
+      // Check if teacher is supervisor of class
+      const isClassSupervisor = classObj?.supervisorId === teacherId;
+
+      // Check if teacher is assigned to subject
+      const isSubjectTeacher = subject?.teachers?.some(
+        (t) => t.id === teacherId
+      );
+
+      // Check if teacher is assigned to lesson
+      const isLessonTeacher = lesson?.teacherId === teacherId;
+
+      return isClassSupervisor || isSubjectTeacher || isLessonTeacher;
+    },
   },
 });

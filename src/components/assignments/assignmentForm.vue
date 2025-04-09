@@ -2,8 +2,27 @@
   <div class="container mx-auto rounded border border-gray-300 p-2 w-full">
     <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-md">
       <div
-        class="bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors text-white p-6 rounded-t-lg"
+        class="flex gap-2 bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors text-white p-6 rounded-t-lg"
       >
+        <button
+          @click="$router.back()"
+          class="top-4 left-4 bg-white/20 backdrop-blur-sm p-2 rounded-full text-white hover:bg-white/30 transition-all animate-bounce-once"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+        </button>
         <h1 class="text-2xl font-bold">
           {{ isEditing ? "Edit Assignment" : "Create New Assignment" }}
         </h1>
@@ -372,7 +391,7 @@
             {{ isEditing ? "Update" : "Create" }} Assignment
           </button>
         </div>
-         <div
+        <div
           v-if="!isTeacher && !isAssignedTeacher"
           class="text-red-500 text-sm text-end"
         >
@@ -397,7 +416,9 @@ import { useSubjectStore } from "../../store/subjectStore";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
 
+import { useTeacherAccessCheck } from "../../composables/useTeacherAccessCheck";
 import { useLessonStore } from "../../store/lessonStore";
+import { useTeacherStore } from "../../store/teacherStore";
 import { useUserStore } from "../../store/userStore";
 import { questionTypes } from "../../utils/utility";
 
@@ -407,8 +428,10 @@ const userStore = useUserStore();
 const classStore = useClassStore();
 const subjectStore = useSubjectStore();
 const lessonStore = useLessonStore();
+const teacherStore = useTeacherStore();
 const notificationStore = useNotificationStore();
 
+const { isTeacher, userId, isAssignedToSelection } = useTeacherAccessCheck();
 
 const title = ref("");
 const description = ref("");
@@ -419,34 +442,13 @@ const selectedClass = ref("");
 const selectedSubject = ref("");
 const selectedLesson = ref("");
 
-const userId = userStore.userInfo?.id;
-
-
-const isTeacher = userStore.userInfo?.role === "TEACHER";
-
-const isAssignedTeacher = computed(() => {
-  if (!isTeacher) return false;
-
-  // Get selected class and subject
-  const classObj = classStore.allClasses.find(
-    (c) => c.name === selectedClass.value
-  );
-  const subject = subjectStore.subjects.find(
-    (s) => s.id === selectedSubject.value
-  );
-  const lesson = lessonStore.lessons.find((l) => l.id === selectedLesson.value);
-
-  // Check if teacher is supervisor of class
-  const isClassSupervisor = classObj?.supervisorId === userId;
-
-  // Check if teacher is assigned to subject
-  const isSubjectTeacher = subject?.teachers?.some((t) => t.id === userId);
-
-  // Check if teacher is assigned to lesson
-  const isLessonTeacher = lesson?.teacherId === userId;
-
-  return isClassSupervisor || isSubjectTeacher || isLessonTeacher;
-});
+const isAssignedTeacher = computed(() =>
+  isAssignedToSelection(
+    selectedClass.value,
+    selectedSubject.value,
+    selectedLesson.value
+  )
+);
 
 const classOptions = computed(() => {
   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
@@ -559,7 +561,7 @@ const handleSubmit = async () => {
       subjectId: selectedSubject.value,
       lessonId: selectedLesson.value,
       questions: questions.value.map((q) => ({
-        questionType: q.type, // Changed from 'type' to 'questionType'
+        questionType: q.type,
         content: q.content,
         options: q.options,
         correctAnswer: q.correctAnswer,

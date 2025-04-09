@@ -2,8 +2,29 @@
   <div class="container mx-auto rounded border border-gray-300 p-2 w-full">
     <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-md">
       <div
-        class="bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors text-white p-6 rounded-t-lg"
+        class="flex gap-2 bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors text-white p-6 rounded-t-lg"
       >
+        <!--  -->
+        <button
+           @click="$router.back()"
+          class="top-4 left-4 bg-white/20 backdrop-blur-sm p-2 rounded-full text-white hover:bg-white/30 transition-all animate-bounce-once"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+        </button>
+        <!--  -->
         <h1 class="text-2xl font-bold">
           {{ isEditing ? "Edit Exam" : "Create New Exam" }}
         </h1>
@@ -363,10 +384,10 @@ import { getExamById } from "../../graphql/queries";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
+import { useUserStore } from "../../store/userStore";
 import { questionTypes } from "../../utils/utility";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
-import { useUserStore } from "../../store/userStore";
 
 const route = useRoute();
 const router = useRouter();
