@@ -109,7 +109,7 @@
             </div>
 
             <!-- Content -->
-            <div class="h-[200px] ">
+            <div class="h-[200px]">
               <label
                 for="quill"
                 class="block text-sm font-medium text-gray-700 mb-1"
@@ -157,7 +157,7 @@
 
 <script setup>
 import { QuillEditor } from "@vueup/vue-quill";
-import { computed, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { apolloClient } from "../../../apollo-client";
 import { createLesson, editLesson } from "../../graphql/mutations";
@@ -221,10 +221,13 @@ const getClassIdByName = (className) => {
 
 const handleSubmit = async () => {
   try {
+    const formattedContent = content.value || "";
+    const formattedDescription = description.value || "";
+
     const lessonData = {
       name: title.value,
-      description: description.value,
-      content: content.value,
+      description: formattedDescription,
+      content: formattedContent,
       day: day.value,
       startTime: startTime.value,
       endTime: endTime.value,
@@ -288,8 +291,17 @@ onMounted(async () => {
       day.value = lesson.day;
       startTime.value = lesson.startTime;
       endTime.value = lesson.endTime;
-      selectedClass.value = classStore.getClassNameById(lesson.classId);
-      selectedSubject.value = lesson.subjectId;
+
+      if (lesson.class && lesson.class.name) {
+        selectedClass.value = lesson.class.name;
+      }
+      // Wait for the next tick to ensure filteredSubjects is updated
+      await nextTick();
+
+      // Set subject ID directly from the response
+      if (lesson.subject && lesson.subject.id) {
+        selectedSubject.value = lesson.subject.id;
+      }
     } catch (error) {
       notificationStore.addNotification({
         type: "error",

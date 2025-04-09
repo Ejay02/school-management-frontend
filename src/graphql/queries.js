@@ -277,6 +277,8 @@ export const getAllLessons = gql`
       day
       content
       description
+      startTime
+      endTime
       teacher {
         id
         name
@@ -302,6 +304,8 @@ export const getLessonById = gql`
       day
       content
       description
+      startTime
+      endTime
       teacher {
         id
         name

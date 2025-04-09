@@ -356,7 +356,6 @@
           </div>
         </template>
 
-        <!-- DONE ON THE BE FIX HERE-->
         <!-- subject list -->
         <template v-else-if="source === 'subjects'">
           <div>
@@ -389,8 +388,6 @@
             />
           </div>
         </template>
-
-        <!-- -->
 
         <!-- result -->
         <template v-else-if="source === 'results'">

@@ -164,17 +164,24 @@ const routes = [
         name: "Lessons",
         component: Lessons,
       },
+
+      {
+        path: "/lesson/:id",
+        name: "lesson-view",
+        component: () => import("../components/lessons/lessonView.vue"),
+        meta: { requiresAuth: true },
+      },
       {
         path: "lesson/new",
         name: "AddLesson",
         component: () => import("../components/lessons/lessonForm.vue"),
-        meta: { requiresAuth: true, },
+        meta: { requiresAuth: true },
       },
       {
         path: "lesson/edit/:id",
         name: "EditLesson",
         component: () => import("../components/lessons/lessonForm.vue"),
-        meta: { requiresAuth: true, },
+        meta: { requiresAuth: true },
       },
       {
         path: "/exams",
