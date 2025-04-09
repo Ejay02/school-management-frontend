@@ -358,6 +358,7 @@
           >
             Cancel
           </button>
+
           <button
             @click="handleSubmit"
             class="px-4 py-2 rounded-md transition-colors duration-200"
@@ -370,6 +371,13 @@
           >
             {{ isEditing ? "Update" : "Create" }} Assignment
           </button>
+        </div>
+         <div
+          v-if="!isTeacher && !isAssignedTeacher"
+          class="text-red-500 text-sm text-end"
+        >
+          ** You can only create assignments for classes/subjects/lessons you're
+          assigned to.
         </div>
       </div>
     </div>
@@ -390,16 +398,18 @@ import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
 
 import { useLessonStore } from "../../store/lessonStore";
+import { useUserStore } from "../../store/userStore";
 import { questionTypes } from "../../utils/utility";
 
 const route = useRoute();
 const router = useRouter();
+const userStore = useUserStore();
 const classStore = useClassStore();
 const subjectStore = useSubjectStore();
 const lessonStore = useLessonStore();
 const notificationStore = useNotificationStore();
 
-// Form fields
+
 const title = ref("");
 const description = ref("");
 const instructions = ref("");
@@ -409,8 +419,34 @@ const selectedClass = ref("");
 const selectedSubject = ref("");
 const selectedLesson = ref("");
 
-const classes = computed(() => classStore.allClasses);
-const lessons = computed(() => lessonStore.lessons);
+const userId = userStore.userInfo?.id;
+
+
+const isTeacher = userStore.userInfo?.role === "TEACHER";
+
+const isAssignedTeacher = computed(() => {
+  if (!isTeacher) return false;
+
+  // Get selected class and subject
+  const classObj = classStore.allClasses.find(
+    (c) => c.name === selectedClass.value
+  );
+  const subject = subjectStore.subjects.find(
+    (s) => s.id === selectedSubject.value
+  );
+  const lesson = lessonStore.lessons.find((l) => l.id === selectedLesson.value);
+
+  // Check if teacher is supervisor of class
+  const isClassSupervisor = classObj?.supervisorId === userId;
+
+  // Check if teacher is assigned to subject
+  const isSubjectTeacher = subject?.teachers?.some((t) => t.id === userId);
+
+  // Check if teacher is assigned to lesson
+  const isLessonTeacher = lesson?.teacherId === userId;
+
+  return isClassSupervisor || isSubjectTeacher || isLessonTeacher;
+});
 
 const classOptions = computed(() => {
   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
@@ -432,7 +468,6 @@ const filteredSubjects = computed(() => {
   return classObj?.subjects || [];
 });
 
-// Add to refs
 const questions = ref([
   {
     type: "MCQ",
@@ -442,9 +477,9 @@ const questions = ref([
     points: 5,
   },
 ]);
+
 const additionalQuestions = computed(() => questions.value.slice(1));
 
-// Add methods
 const addQuestion = () => {
   questions.value.push({
     type: "MCQ",
@@ -501,7 +536,7 @@ const isFormValid = computed(() => {
     return hasContent && hasPoints && question.correctAnswer.trim();
   });
 
-  return basicFieldsValid && questionsValid;
+  return basicFieldsValid && questionsValid && isAssignedTeacher.value;
 });
 
 const getClassIdByName = (className) => {
@@ -588,7 +623,7 @@ onMounted(async () => {
 });
 </script>
 
-<style>
+<style scoped>
 .ql-editor {
   min-height: 120px;
   max-height: 300px;

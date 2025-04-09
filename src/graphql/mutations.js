@@ -415,46 +415,68 @@ export const createAssignment = gql`
         name
         surname
       }
-    
     }
   }
 `;
 
 export const editAssignment = gql`
-  mutation editAssignment( $assignmentId: String!, $editAssignmentInput: EditAssignmentInput!) {
-    editAssignment(assignmentId:$assignmentId, editAssignmentInput: $editAssignmentInput){
+  mutation editAssignment(
+    $assignmentId: String!
+    $editAssignmentInput: EditAssignmentInput!
+  ) {
+    editAssignment(
+      assignmentId: $assignmentId
+      editAssignmentInput: $editAssignmentInput
+    ) {
       id
-    title
-    startDate
-    dueDate
-    description
-    instructions
-    content
-    questions {
-      id
-      type
+      title
+      startDate
+      dueDate
+      description
+      instructions
       content
-      options
-      correctAnswer
-      points
-      
-    }
-    subject {
-      id
-      name
-    }
-    class {
-      id
-      name
-    }
-    teacher {
-      id
-      name
-    }
-    lesson {
-      id
-      name
-    }
+      questions {
+        id
+        type
+        content
+        options
+        correctAnswer
+        points
+      }
+      subject {
+        id
+        name
+      }
+      class {
+        id
+        name
+      }
+      teacher {
+        id
+        name
+      }
+      lesson {
+        id
+        name
+      }
     }
   }
-`
+`;
+
+export const createSubject = gql`
+  mutation CreateSubject($input: CreateSubjectInput!) {
+    createSubject(input: $input) {
+      id
+      name
+      teachers {
+        id
+        name
+        surname
+      }
+      class{
+        id
+        name
+      }
+    }
+  }
+`;

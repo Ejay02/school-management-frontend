@@ -342,6 +342,12 @@
             {{ isEditing ? "Update" : "Create" }} Exam
           </button>
         </div>
+        <div
+          v-if="!isTeacher && !isAssignedTeacher"
+          class="text-red-500 text-sm text-end"
+        >
+          ** You can only create exams for classes/subjects you're assigned to.
+        </div>
       </div>
     </div>
   </div>
@@ -357,17 +363,18 @@ import { getExamById } from "../../graphql/queries";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
+import { questionTypes } from "../../utils/utility";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
-import  {questionTypes} from "../../utils/utility";
+import { useUserStore } from "../../store/userStore";
 
 const route = useRoute();
 const router = useRouter();
+const userStore = useUserStore();
 const classStore = useClassStore();
 const subjectStore = useSubjectStore();
 const notificationStore = useNotificationStore();
 
-// Form fields
 const title = ref("");
 const description = ref("");
 const instructions = ref("");
@@ -392,9 +399,6 @@ const classOptions = computed(() => {
   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
 });
 
-
-
-// Computed properties
 const isEditing = computed(() => route.params.id !== undefined);
 
 const filteredSubjects = computed(() => {
@@ -409,7 +413,31 @@ const filteredSubjects = computed(() => {
   return classObj?.subjects || [];
 });
 
-// Update the isFormValid computed property
+const userId = userStore.userInfo?.id;
+
+const isTeacher = userStore.userInfo?.role === "TEACHER";
+console.log("isTeacher:", isTeacher);
+
+const isAssignedTeacher = computed(() => {
+  if (!isTeacher) return false;
+
+  // Get selected class and subject
+  const classObj = classStore.allClasses.find(
+    (c) => c.name === selectedClass.value
+  );
+  const subject = subjectStore.subjects.find(
+    (s) => s.id === selectedSubject.value
+  );
+
+  // Check if teacher is supervisor of class
+  const isClassSupervisor = classObj?.supervisorId === userId;
+
+  // Check if teacher is assigned to subject
+  const isSubjectTeacher = subject?.teachers?.some((t) => t.id === userId);
+
+  return isClassSupervisor || isSubjectTeacher;
+});
+
 const isFormValid = computed(() => {
   // Basic form validation
   const basicFieldsValid =
@@ -439,7 +467,7 @@ const isFormValid = computed(() => {
     return hasContent && hasPoints && question.correctAnswer;
   });
 
-  return basicFieldsValid && questionsValid;
+  return basicFieldsValid && questionsValid && isAssignedTeacher.value;
 });
 
 const addQuestion = () => {
@@ -448,7 +476,7 @@ const addQuestion = () => {
     content: "",
     options: [""],
     correctAnswer: "",
-    points: 1,
+    points: 5,
   });
 };
 
@@ -512,7 +540,6 @@ const handleSubmit = async () => {
 
     router.push("/exams");
   } catch (error) {
-   
     notificationStore.addNotification({
       type: "error",
       message: "Failed to save exam: " + error.message,
@@ -555,7 +582,7 @@ onMounted(async () => {
 });
 </script>
 
-<style>
+<style scoped>
 /* Added styles for Quill editor responsiveness */
 .ql-editor {
   min-height: 120px;

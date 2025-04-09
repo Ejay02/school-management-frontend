@@ -477,69 +477,6 @@
           </div>
         </template>
 
-        <!-- exam -->
-
-        <!-- assignment -->
-        <template v-else-if="source === 'assignments'">
-          <div>
-            <label
-              for="subject"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Subject</label
-            >
-            <input
-              v-model="subject"
-              type="text"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Content
-              <textarea
-                v-model="content"
-                rows="4"
-                type="text"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </label>
-          </div>
-
-          <Dropdown
-            class=""
-            v-model="selectedClass"
-            label="Select Class"
-            :options="teacherClasses"
-            emptyLabel="Select a class"
-          />
-          <div>
-            <label
-              for="teacher"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Teacher</label
-            >
-            <input
-              v-model="currentTeacherName"
-              type="text"
-              readonly
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-not-allowed"
-            />
-          </div>
-          <div>
-            <label
-              for="dueDate"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Due Date</label
-            >
-            <input
-              type="date"
-              v-model="dueDate"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </div>
-        </template>
-
         <!-- result -->
         <template v-else-if="source === 'results'">
           <div>
@@ -987,6 +924,7 @@ import {
   createClass,
   createEvent,
   createLesson,
+  createSubject,
 } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
 import { useLessonStore } from "../../store/lessonStore";
@@ -1014,7 +952,6 @@ const userStore = useUserStore();
 const isModalVisible = ref(modalStore.editModal);
 
 const capacity = ref("");
-const supervisor = ref("");
 
 const name = ref("");
 const title = ref("");
@@ -1148,6 +1085,13 @@ const teacherNames = computed(() => {
   return teacherStore.getTeacherNames?.map((teacher) => teacher.name) || [];
 });
 
+const getTeacherIdByName = (teacherName) => {
+  const teacher = teacherStore.allTeachers.find(
+    (t) => `${t.name} ${t.surname}` === teacherName
+  );
+  return teacher?.id || null;
+};
+
 const classOptions = computed(() => {
   // If we're in the assignments section and have a current teacher, show only their classes
   if (source.value === "assignments" && currentTeacher.value) {
@@ -1224,14 +1168,6 @@ const isFormValid = computed(() => {
       selectedSubject.value &&
       startTime.value &&
       endTime.value
-    );
-  } else if (source.value === "assignments") {
-    return (
-      subject.value &&
-      content.value &&
-      selectedClass.value &&
-      teacher.value &&
-      dueDate.value
     );
   } else if (source.value === "results") {
     return (
@@ -1312,17 +1248,22 @@ const handleAdd = async () => {
       //   }
       // });
     } else if (source.value === "subjects") {
-      // Create subject logic
-      console.log("Creating subject...");
-      // Example: const result = await apolloClient.mutate({
-      //   mutation: createSubject,
-      //   variables: {
-      //     input: {
-      //       name: name.value,
-      //       teachers: teachers.value
-      //     }
-      //   }
-      // });
+      await apolloClient.mutate({
+        mutation: createSubject,
+        variables: {
+          input: {
+            name: name.value,
+            classId: getClassIdByName(selectedClass.value),
+            teacherId: getTeacherIdByName(selectedTeacher.value),
+          },
+        },
+      });
+
+      await subjectStore.refreshSubjects();
+      notificationStore.addNotification({
+        type: "success",
+        message: "Subject created successfully!",
+      });
     } else if (source.value === "classes") {
       await apolloClient.mutate({
         mutation: createClass,
@@ -1330,8 +1271,7 @@ const handleAdd = async () => {
           input: {
             name: name.value,
             capacity: parseInt(capacity.value),
-            superviorId: selectedTeacher.value,
-            // supervisor: supervisor.value,  // FIXME: Add supervisor from the BE
+            supervisorId: getTeacherIdByName(selectedTeacher.value),
           },
         },
       });
@@ -1359,24 +1299,6 @@ const handleAdd = async () => {
       notificationStore.addNotification({
         type: "success",
         message: "Lesson created successfully!",
-      });
-    } else if (source.value === "assignments") {
-      // Create assignment logic
-      console.log("Creating assignment...");
-      await apolloClient.mutate({
-        mutation: createAssignment,
-        variables: {
-          input: {
-            subject: subject.value,
-            classes: classes.value,
-            teacher: teacher.value,
-            dueDate: dueDate.value,
-          },
-        },
-      });
-      notificationStore.addNotification({
-        type: "success",
-        message: "Assignment created successfully!",
       });
     } else if (source.value === "results") {
       // Create result logic

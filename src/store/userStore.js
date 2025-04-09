@@ -1,9 +1,8 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
+import { getUserById } from "../graphql/queries";
 import { menuItems } from "../utils";
 import { useNotificationStore } from "./notification";
-import { useApolloClient, useQuery } from "@vue/apollo-composable";
-import { getUserById } from "../graphql/queries";
 
 export const useUserStore = defineStore("user", () => {
   // Initialize state from localStorage if available
@@ -112,19 +111,19 @@ export const useUserStore = defineStore("user", () => {
 
   const findUserById = async (id, apolloClient) => {
     if (!id) return null;
-  
+
     // Check cache first
     if (userCache.value[id]) {
       return userCache.value[id];
     }
-  
+
     try {
       const { data } = await apolloClient.query({
         query: getUserById,
         variables: { id },
         fetchPolicy: "network-only",
       });
-  
+
       if (data?.getUserById) {
         userCache.value[id] = data.getUserById;
         return data.getUserById;

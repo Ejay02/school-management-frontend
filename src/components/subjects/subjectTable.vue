@@ -29,10 +29,10 @@
             <span
               v-for="(teacher, idx) in item.teachers"
               :key="teacher.id"
-              class="teacher-tag"
+              class="teacher-tag capitalize"
             >
               {{ teacher.name
-              }}<span v-if="idx < item.teachers.length - 1">, </span>
+              }} {{teacher?.surname}}<span v-if="idx < item.teachers.length - 1">, </span>
             </span>
           </template>
           <template v-else>

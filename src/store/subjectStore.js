@@ -29,6 +29,7 @@ export const useSubjectStore = defineStore("subjectStore", {
           const { data } = await apolloClient.query({
             query: getAllSubjects,
             variables: { pagination: { page: 1, limit: 1000 } }, // Get all subjects
+            fetchPolicy: "network-only",
           });
           this.allSubjects = data.getAllSubjects;
           this.totalCount = this.allSubjects.length;
@@ -40,12 +41,16 @@ export const useSubjectStore = defineStore("subjectStore", {
         const end = start + limit;
         this.subjects = this.allSubjects.slice(start, end);
         this.hasMore = end < this.totalCount;
-
       } catch (err) {
         this.error = err;
       } finally {
         this.loading = false;
       }
+    },
+
+    async refreshSubjects() {
+      this.allSubjects = [];
+      await this.fetchSubjects();
     },
   },
 });
