@@ -449,6 +449,15 @@ export const editLesson = gql`
   }
 `;
 
+export const deleteLesson = gql`
+  mutation deleteLesson($lessonId: String!) {
+    deleteLesson(lessonId: $lessonId) {
+      message
+      success
+    }
+  }
+`;
+
 export const createAssignment = gql`
   mutation CreateAssignment($createAssignmentInput: CreateAssignmentInput!) {
     createAssignment(createAssignmentInput: $createAssignmentInput) {

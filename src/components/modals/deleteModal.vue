@@ -61,14 +61,16 @@
 import { useModalStore } from "@/store/useModalStore";
 import { ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
-import { deleteClass, deleteSubject } from "../../graphql/mutations";
+import { deleteClass, deleteLesson, deleteSubject } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
+import { useLessonStore } from "../../store/lessonStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 
 const modalStore = useModalStore();
 const classStore = useClassStore();
 const subjectStore = useSubjectStore();
+const lessonStore = useLessonStore();
 
 const notificationStore = useNotificationStore();
 
@@ -140,7 +142,18 @@ const handleDelete = async () => {
         message: "Subject deleted successfully",
       });
     } else if (source.value === "lessonList") {
-      console.log("hello from lessons");
+      await apolloClient.mutate({
+        mutation: deleteLesson,
+        variables: {
+          lessonId: modalStore.modalId,
+        },
+      });
+
+      await lessonStore.refreshLessons();
+      notificationStore.addNotification({
+        type: "success",
+        message: "Lesson deleted successfully",
+      });
     } else if (source.value === "examList") {
       console.log("hello from exams");
     } else if (source.value === "assignmentList") {

@@ -163,19 +163,18 @@ import { apolloClient } from "../../../apollo-client";
 import { createLesson, editLesson } from "../../graphql/mutations";
 import { getLessonById } from "../../graphql/queries";
 import { useClassStore } from "../../store/classStore";
+import { useLessonStore } from "../../store/lessonStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
 
-
 const route = useRoute();
 const router = useRouter();
 const classStore = useClassStore();
+const lessonStore = useLessonStore();
 const subjectStore = useSubjectStore();
 const notificationStore = useNotificationStore();
-
-
 
 // Form fields
 const title = ref("");
@@ -186,8 +185,6 @@ const selectedSubject = ref("");
 const day = ref("Monday");
 const startTime = ref("");
 const endTime = ref("");
-
-
 
 const isEditing = computed(() => route.params.id !== undefined);
 
@@ -246,6 +243,7 @@ const handleSubmit = async () => {
           editLessonInput: lessonData,
         },
       });
+      await lessonStore.refreshLessons();
       notificationStore.addNotification({
         type: "success",
         message: "Lesson updated successfully!",
@@ -259,6 +257,7 @@ const handleSubmit = async () => {
           createLessonInput: lessonData,
         },
       });
+      await lessonStore.refreshLessons();
       notificationStore.addNotification({
         type: "success",
         message: "Lesson created successfully!",

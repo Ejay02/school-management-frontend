@@ -326,7 +326,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1"
               >Subject Name
               <input
-                 v-model="subjectName"
+                v-model="subjectName"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </label>
@@ -348,50 +348,6 @@
               :options="classOptions"
               emptyLabel="Select a class"
             />
-          </div>
-        </template>
-
-        <!-- lesson -->
-        <template v-else-if="source === 'lessonList'">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Lesson
-
-              <input
-                v-model="data.name"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </label>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Subject
-
-              <input
-                v-model="data.subject.name"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </label>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Class
-              <input
-                v-model="data.class.name"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </label>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Teacher
-
-              <input
-                v-model="fullTeacherName"
-                class="capitalize mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </label>
           </div>
         </template>
 
@@ -687,13 +643,13 @@ import { computed, onMounted, ref, watch } from "vue";
 
 import { useModalStore } from "@/store/useModalStore";
 import { apolloClient } from "../../../apollo-client";
+import { useTeacherAccessCheck } from "../../composables/useTeacherAccessCheck";
 import { updateClass, updateSubject } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
 import Dropdown from "../dropdowns/dropdown.vue";
-import { useTeacherAccessCheck } from "../../composables/useTeacherAccessCheck";
 
 const modalStore = useModalStore();
 const classStore = useClassStore();
@@ -722,8 +678,6 @@ const classCapacity = ref("");
 const transformedData = ref({});
 
 const { isTeacher, userId, isAssignedToSelection } = useTeacherAccessCheck();
-
-
 
 const fullTeacherName = computed({
   get() {
@@ -833,8 +787,6 @@ const handleEdit = async () => {
         type: "success",
         message: "Subject updated successfully",
       });
-    } else if (source.value === "lessonList") {
-      console.log("hello from lessons");
     } else if (source.value === "examList") {
       console.log("hello from exams");
     } else if (source.value === "assignmentList") {
