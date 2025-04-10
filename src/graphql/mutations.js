@@ -158,6 +158,31 @@ export const createEvent = gql`
   }
 `;
 
+export const updateEvent = gql`
+  mutation updateEvent($eventId: String!, $input: EditEventInput!) {
+    updateEvent(eventId: $eventId, input: $input) {
+      id
+      title
+      description
+      class {
+        id
+        name
+      }
+      classId
+      creatorId
+      startTime
+      endTime
+      type
+      location
+      status
+      visibility
+      targetRoles
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 export const markEventAsRead = gql`
   mutation markEventAsRead($eventId: String!) {
     markEventAsRead(eventId: $eventId)
@@ -375,6 +400,15 @@ export const updateExam = gql`
         id
         name
       }
+    }
+  }
+`;
+
+export const deleteExam = gql`
+  mutation deleteExam($examId: String!) {
+    deleteExam(examId: $examId) {
+      message
+      success
     }
   }
 `;

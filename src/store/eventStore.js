@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { apolloClient } from "../../apollo-client";
-import { deleteEvent, markEventAsRead } from "../graphql/mutations";
+import { markEventAsRead } from "../graphql/mutations";
 import { getEventById, getEvents } from "../graphql/queries";
 import { getData, setData } from "../utils/localStorageHelpers";
 
@@ -82,68 +82,6 @@ export const useEventStore = defineStore("eventStore", {
       }
     },
 
-    // Update updateEvent to handle both arrays
-    updateEvent(updatedEvent) {
-      const index = this.allEvents.findIndex(
-        (event) => event.id === updatedEvent.id
-      );
-      if (index !== -1) {
-        this.allEvents.splice(index, 1, updatedEvent);
-        
-        const paginatedIndex = this.events.findIndex(
-          (event) => event.id === updatedEvent.id
-        );
-        if (paginatedIndex !== -1) {
-          this.events.splice(paginatedIndex, 1, updatedEvent);
-        }
-        
-        if (this.selectedEvent && this.selectedEvent.id === updatedEvent.id) {
-          this.selectedEvent = updatedEvent;
-        }
-        return true;
-      }
-      return false;
-    },
-
-    // Update deleteEvent to handle both arrays
-    async deleteEvent(eventId) {
-      this.loading = true;
-      this.error = null;
-
-      try {
-        const result = await apolloClient.mutate({
-          mutation: deleteEvent,
-          variables: { id: eventId },
-        });
-
-        if (result.data.deleteEvent) {
-          this.allEvents = this.allEvents.filter((event) => event.id !== eventId);
-          this.events = this.events.filter((event) => event.id !== eventId);
-          this.totalCount = this.allEvents.length;
-
-          if (this.selectedEvent && this.selectedEvent.id === eventId) {
-            this.selectedEvent = null;
-          }
-
-          this.newEventMarkers = this.newEventMarkers.filter(
-            (marker) => marker.id !== eventId
-          );
-          setData(STORAGE_KEY, this.newEventMarkers);
-
-          this.readEvents = this.readEvents.filter((id) => id !== eventId);
-          setData(READ_EVENTS_KEY, this.readEvents);
-
-          return true;
-        }
-        return false;
-      } catch (error) {
-        this.error = error.message || "Error deleting event";
-        throw error;
-      } finally {
-        this.loading = false;
-      }
-    },
-
     async fetchEventById(id) {
       this.loading = true;
       this.error = null;
@@ -184,65 +122,6 @@ export const useEventStore = defineStore("eventStore", {
         }
       }
       return true;
-    },
-
-    async deleteEvent(eventId) {
-      this.loading = true;
-      this.error = null;
-
-      try {
-        const result = await apolloClient.mutate({
-          mutation: deleteEvent,
-          variables: { id: eventId },
-        });
-
-        if (result.data.deleteEvent) {
-          // Update local state by removing the deleted event
-          this.events = this.events.filter((event) => event.id !== eventId);
-
-          // If the deleted event is the selected event, clear the selection
-          if (this.selectedEvent && this.selectedEvent.id === eventId) {
-            this.selectedEvent = null;
-          }
-
-          // Remove from newEventMarkers if present
-          this.newEventMarkers = this.newEventMarkers.filter(
-            (marker) => marker.id !== eventId
-          );
-          setData(STORAGE_KEY, this.newEventMarkers);
-
-          // Remove from readEvents if present
-          this.readEvents = this.readEvents.filter((id) => id !== eventId);
-          setData(READ_EVENTS_KEY, this.readEvents);
-
-          return true;
-        }
-        return false;
-      } catch (error) {
-        this.error = error.message || "Error deleting event";
-        throw error;
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    addNewEvent(event) {
-      // Check if the event already exists in the events array
-      const exists = this.events.some((e) => e.id === event.id);
-      if (!exists) {
-        // Add the event to the beginning of the events array
-        this.events.unshift(event);
-
-        // Check if the event is already marked as new
-        const alreadyNew = this.newEventMarkers.some(
-          (marker) => marker.id === event.id
-        );
-        if (!alreadyNew) {
-          const newEntry = { id: event.id, addedAt: Date.now() };
-          this.newEventMarkers.push(newEntry);
-          setData(STORAGE_KEY, this.newEventMarkers);
-        }
-      }
     },
 
     isNewEvent(eventId) {

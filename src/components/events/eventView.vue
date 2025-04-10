@@ -234,7 +234,9 @@
               <div
                 class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all h-full"
               >
-                <p class="text-gray-700 whitespace-pre-line leading-relaxed prose max-w-none font-serif text-lg">
+                <p
+                  class="text-gray-700 whitespace-pre-line leading-relaxed prose max-w-none font-serif text-lg"
+                >
                   {{ event?.description || "No description provided." }}
                 </p>
               </div>
@@ -476,17 +478,17 @@
 </template>
 
 <script setup>
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
-import { ref, computed, onMounted, watch } from "vue";
 
-import { useUserStore } from "../../store/userStore";
-import { useEventStore } from "../../store/eventStore";
-import { formatTargetRoles } from "../../utils/utility";
 import { useApolloClient } from "@vue/apollo-composable";
-import { formatEventDate, formatTime } from "../../utils/date.holidays";
 import { useNavigation } from "../../composables/useNavigation";
+import { useEventStore } from "../../store/eventStore";
+import { useUserStore } from "../../store/userStore";
+import { formatEventDate, formatTime } from "../../utils/date.holidays";
+import { formatTargetRoles } from "../../utils/utility";
 
 const route = useRoute();
 const router = useRouter();

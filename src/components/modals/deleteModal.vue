@@ -60,9 +60,16 @@
 <script setup>
 import { useModalStore } from "@/store/useModalStore";
 import { ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import { apolloClient } from "../../../apollo-client";
-import { deleteClass, deleteLesson, deleteSubject } from "../../graphql/mutations";
+import {
+  deleteClass,
+  deleteEvent,
+  deleteLesson,
+  deleteSubject,
+} from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
+import { useEventStore } from "../../store/eventStore";
 import { useLessonStore } from "../../store/lessonStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
@@ -71,6 +78,9 @@ const modalStore = useModalStore();
 const classStore = useClassStore();
 const subjectStore = useSubjectStore();
 const lessonStore = useLessonStore();
+
+const eventStore = useEventStore();
+const router = useRouter();
 
 const notificationStore = useNotificationStore();
 
@@ -156,12 +166,30 @@ const handleDelete = async () => {
       });
     } else if (source.value === "examList") {
       console.log("hello from exams");
+      // TODO
     } else if (source.value === "assignmentList") {
       console.log("hello from assignments");
     } else if (source.value === "resultList") {
       console.log("hello from results");
     } else if (source.value === "eventList") {
-      console.log("hello from events");
+      await apolloClient.mutate({
+        mutation: deleteEvent,
+        variables: {
+          eventId: modalStore.modalId,
+        },
+      });
+
+      await eventStore.refreshEvents();
+
+      notificationStore.addNotification({
+        type: "success",
+        message: "Event deleted successfully",
+      });
+
+      // If we're on the event view page, redirect to events list
+      if (router.currentRoute.value.name === "EventView") {
+        router.push("/events");
+      }
     } else if (source.value === "announcementList") {
       console.log("hello from announcements");
     }

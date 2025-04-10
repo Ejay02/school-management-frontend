@@ -48,5 +48,20 @@ export const useExamStore = defineStore("examStore", {
         this.loading = false;
       }
     },
+
+    resetExams() {
+      this.allExams = [];
+      this.exams = [];
+    },
+
+    async refreshExams(page = 1, limit = 10) {
+      // Reset the exams array to force a fresh fetch
+      this.resetExams();
+      // Clear Apollo cache for this query
+      await apolloClient.cache.evict({ fieldName: "getAllExams" });
+      await apolloClient.cache.gc();
+      // Fetch exams again
+      await this.fetchExams({ page, limit });
+    },
   },
 });

@@ -235,6 +235,11 @@ const routes = [
         component: EventView,
       },
       {
+        path: "/events/edit/:id",
+        name: "EditEvent",
+        component: () => import("../components/events/eventForm.vue"),
+      },
+      {
         path: "/messages",
         name: "Messages",
         component: Messages,
