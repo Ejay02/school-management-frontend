@@ -6,7 +6,7 @@
       >
         <!--  -->
         <button
-           @click="$router.back()"
+          @click="$router.back()"
           class="top-4 left-4 bg-white/20 backdrop-blur-sm p-2 rounded-full text-white hover:bg-white/30 transition-all animate-bounce-once"
         >
           <svg
@@ -437,7 +437,6 @@ const filteredSubjects = computed(() => {
 const userId = userStore.userInfo?.id;
 
 const isTeacher = userStore.userInfo?.role === "TEACHER";
-console.log("isTeacher:", isTeacher);
 
 const isAssignedTeacher = computed(() => {
   if (!isTeacher) return false;

@@ -191,10 +191,17 @@ onMounted(async () => {
 
   socket.on("deleteEvent", (data) => {
     if (data && data.eventId) {
-      // Update the store by removing the deleted event
+      // Update both the events and allEvents arrays
       eventStore.events = eventStore.events.filter(
         (event) => event.id !== data.eventId
       );
+
+      eventStore.allEvents = eventStore.allEvents.filter(
+        (event) => event.id !== data.eventId
+      );
+      // Update total count and pages
+      eventStore.totalCount = eventStore.allEvents.length;
+      eventStore.totalPages = Math.ceil(eventStore.totalCount / limit);
     }
   });
 

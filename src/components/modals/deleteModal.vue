@@ -179,7 +179,7 @@ const handleDelete = async () => {
         },
       });
 
-      await eventStore.refreshEvents();
+      await eventStore.fetchEvents();
 
       notificationStore.addNotification({
         type: "success",

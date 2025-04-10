@@ -92,7 +92,10 @@
 
           <!-- Target Audience -->
           <div>
-            <label for="targetAudience" class="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              for="targetAudience"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
               Target Audience <span class="text-red-500">*</span>
             </label>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -171,21 +174,6 @@
                   Parents
                 </label>
               </div>
-              <div class="flex items-center">
-                <input
-                  id="target-none"
-                  v-model="targetRoles"
-                  type="checkbox"
-                  value="NONE"
-                  class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label
-                  for="target-none"
-                  class="ml-2 block text-sm text-gray-700"
-                >
-                  None
-                </label>
-              </div>
             </div>
           </div>
 
@@ -211,6 +199,49 @@
                 {{ classItem.name }}
               </option>
             </select>
+          </div>
+
+          <!-- Visibility -->
+          <div>
+            <label
+              for="visibility"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Visibility <span class="text-red-500">*</span>
+            </label>
+            <div class="flex items-center space-x-4">
+              <div class="flex items-center">
+                <input
+                  id="visibility-public"
+                  v-model="visibility"
+                  type="radio"
+                  value="PUBLIC"
+                  :disabled="isStudent"
+                  class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                />
+                <label
+                  for="visibility-public"
+                  class="ml-2 block text-sm text-gray-700"
+                >
+                  Public
+                </label>
+              </div>
+              <div class="flex items-center">
+                <input
+                  id="visibility-private"
+                  v-model="visibility"
+                  type="radio"
+                  value="PRIVATE"
+                  class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                />
+                <label
+                  for="visibility-private"
+                  class="ml-2 block text-sm text-gray-700"
+                >
+                  Private
+                </label>
+              </div>
+            </div>
           </div>
 
           <!-- Description -->
@@ -279,17 +310,19 @@ import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { apolloClient } from "../../../apollo-client";
 import { useNavigation } from "../../composables/useNavigation";
-import { createEvent, updateEvent } from "../../graphql/mutations";
+import { updateEvent } from "../../graphql/mutations";
 import { getEventById } from "../../graphql/queries";
 import { useClassStore } from "../../store/classStore";
 import { useEventStore } from "../../store/eventStore";
 import { useNotificationStore } from "../../store/notification";
+import { useUserStore } from "../../store/userStore";
 
 const route = useRoute();
 const router = useRouter();
 const notificationStore = useNotificationStore();
 const eventStore = useEventStore();
 const classStore = useClassStore();
+const userStore = useUserStore();
 const { goBack } = useNavigation();
 
 // Form data
@@ -301,6 +334,7 @@ const location = ref("");
 const description = ref("");
 const targetRoles = ref([]);
 const selectedClass = ref("");
+const visibility = ref("PUBLIC"); // Add visibility ref with default value
 const loading = ref(false);
 const event = ref(null);
 
@@ -308,12 +342,20 @@ const event = ref(null);
 const isEditing = computed(() => !!route.params.id);
 const eventId = computed(() => route.params.id);
 const classes = computed(() => classStore.classes);
+const isStudent = computed(
+  () => userStore.userInfo.role.toLowerCase() === "STUDENT"
+);
 
 // Fetch classes and event data if editing
 onMounted(async () => {
   loading.value = true;
 
   try {
+    // Set default visibility based on user role
+    if (isStudent.value) {
+      visibility.value = "PRIVATE";
+    }
+
     // Fetch classes for dropdown
     if (classStore.classes.length === 0) {
       await classStore.fetchClasses();
@@ -344,7 +386,6 @@ const fetchEventDetails = async () => {
 
     if (cachedEvent) {
       event.value = cachedEvent;
-      console.log("Using cached event:", event.value);
     } else {
       // If not in store, fetch from API
       const { data } = await apolloClient.query({
@@ -354,7 +395,6 @@ const fetchEventDetails = async () => {
       });
 
       event.value = data.getEventById;
-      console.log("Fetched event from API:", event.value);
     }
 
     // Populate form with event data
@@ -363,45 +403,40 @@ const fetchEventDetails = async () => {
       location.value = event.value.location || "";
       description.value = event.value.description || "";
 
-      // Format date from event.date (YYYY-MM-DD)
-      if (event.value.date) {
+      // Format date from startTime instead of event.date
+      // This ensures we use the correct date from the timestamp
+      if (event.value.startTime) {
+        const eventDate = new Date(event.value.startTime);
+        date.value = eventDate.toISOString().split("T")[0];
+      } else if (event.value.date) {
+        // Fallback to event.date if startTime is not available
         const eventDate = new Date(event.value.date);
         date.value = eventDate.toISOString().split("T")[0];
       }
 
       // Handle start and end times from startTime and endTime fields
       if (event.value.startTime) {
-        // If it's a full ISO date string, extract just the time part
-        if (event.value.startTime.includes("T")) {
-          const startDate = new Date(event.value.startTime);
-          startTime.value = `${startDate
-            .getHours()
-            .toString()
-            .padStart(2, "0")}:${startDate
-            .getMinutes()
-            .toString()
-            .padStart(2, "0")}`;
-        } else {
-          // If it's already in HH:MM format
-          startTime.value = event.value.startTime.substring(0, 5);
-        }
+        // Extract just the time part
+        const startDate = new Date(event.value.startTime);
+        startTime.value = `${startDate
+          .getHours()
+          .toString()
+          .padStart(2, "0")}:${startDate
+          .getMinutes()
+          .toString()
+          .padStart(2, "0")}`;
       }
 
       if (event.value.endTime) {
-        // If it's a full ISO date string, extract just the time part
-        if (event.value.endTime.includes("T")) {
-          const endDate = new Date(event.value.endTime);
-          endTime.value = `${endDate
-            .getHours()
-            .toString()
-            .padStart(2, "0")}:${endDate
-            .getMinutes()
-            .toString()
-            .padStart(2, "0")}`;
-        } else {
-          // If it's already in HH:MM format
-          endTime.value = event.value.endTime.substring(0, 5);
-        }
+        // Extract just the time part
+        const endDate = new Date(event.value.endTime);
+        endTime.value = `${endDate
+          .getHours()
+          .toString()
+          .padStart(2, "0")}:${endDate
+          .getMinutes()
+          .toString()
+          .padStart(2, "0")}`;
       }
 
       // Handle target roles - ensure it's an array
@@ -423,15 +458,9 @@ const fetchEventDetails = async () => {
       // Handle class selection
       selectedClass.value = event.value.classId || "";
 
-      console.log("Form populated with values:", {
-        title: title.value,
-        date: date.value,
-        startTime: startTime.value,
-        endTime: endTime.value,
-        location: location.value,
-        targetRoles: targetRoles.value,
-        selectedClass: selectedClass.value,
-      });
+      // Set visibility
+      visibility.value =
+        event.value.visibility || (isStudent.value ? "PRIVATE" : "PUBLIC");
     }
   } catch (error) {
     notificationStore.addNotification({
@@ -447,85 +476,42 @@ const handleSubmit = async () => {
   loading.value = true;
 
   try {
-    // Validate form
-    if (
-      !title.value ||
-      !date.value ||
-      !startTime.value ||
-      !location.value ||
-      !description.value
-    ) {
-      throw new Error("Please fill in all required fields");
-    }
+    // Format date and time into ISO strings for startTime and endTime
+    const dateStr = date.value; // YYYY-MM-DD
+    const startTimeStr = startTime.value; // HH:MM
+    const endTimeStr = endTime.value || startTime.value; // Use startTime as fallback
 
-    if (targetRoles.value.length === 0) {
-      throw new Error("Please select at least one target audience");
-    }
+    // Create ISO datetime strings by combining date and time
+    const startDateTime = new Date(`${dateStr}T${startTimeStr}`);
+    const endDateTime = new Date(`${dateStr}T${endTimeStr}`);
 
-    // Create event data object
+    // Event data for update
     const eventData = {
       title: title.value,
-      date: date.value, // YYYY-MM-DD format
-      startTime: startTime.value, // HH:MM format
-      endTime: endTime.value || startTime.value, // Use startTime as fallback
       location: location.value,
       description: description.value,
+      startTime: startDateTime.toISOString(),
+      endTime: endDateTime.toISOString(),
       targetRoles: targetRoles.value,
       classId: selectedClass.value || null,
+      visibility: visibility.value,
     };
 
-    console.log("Submitting event data:", eventData);
+    await apolloClient.mutate({
+      mutation: updateEvent,
+      variables: {
+        eventId: eventId.value,
+        input: eventData,
+      },
+    });
 
-    let result;
+    notificationStore.addNotification({
+      type: "success",
+      message: "Event updated successfully!",
+    });
 
-    if (isEditing.value) {
-      // Update existing event
-      const { data } = await apolloClient.mutate({
-        mutation: updateEvent,
-        variables: {
-          eventId: eventId.value,
-          updateEventInput: eventData,
-        },
-      });
-
-      result = data.updateEvent;
-
-      // Update the event in the store
-      eventStore.updateEvent(result);
-
-      notificationStore.addNotification({
-        type: "success",
-        message: "Event updated successfully!",
-      });
-    } else {
-      // Create new event
-      const { data } = await apolloClient.mutate({
-        mutation: createEvent,
-        variables: {
-          createEventInput: eventData,
-        },
-      });
-
-      result = data.createEvent;
-
-      // Add the new event to the store
-      eventStore.addNewEvent(result);
-
-      notificationStore.addNotification({
-        type: "success",
-        message: "Event created successfully!",
-      });
-    }
-
-    // Refresh events in the store
-    await eventStore.refreshEvents();
-
-    // Navigate back to events list or event view
-    if (isEditing.value) {
-      router.push(`/event/${eventId.value}`);
-    } else {
-      router.push("/events");
-    }
+    // Navigate back to event view
+    router.push(`/event/${eventId.value}`);
   } catch (error) {
     notificationStore.addNotification({
       type: "error",
