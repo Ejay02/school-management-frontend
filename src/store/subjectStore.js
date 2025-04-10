@@ -49,8 +49,23 @@ export const useSubjectStore = defineStore("subjectStore", {
     },
 
     async refreshSubjects() {
+      // Clear the Apollo cache for getAllSubjects query
+      await apolloClient.cache.evict({ fieldName: "getAllSubjects" });
+      await apolloClient.cache.gc();
       this.allSubjects = [];
       await this.fetchSubjects();
+    },
+
+    // Method to delete a subject from local state
+    removeSubjectFromState(subjectId) {
+      this.allSubjects = this.allSubjects.filter(
+        (subject) => subject.id !== subjectId
+      );
+      this.subjects = this.subjects.filter(
+        (subject) => subject.id !== subjectId
+      );
+      this.totalCount = this.allSubjects.length;
+      this.totalPages = Math.ceil(this.totalCount / this.limit || 10);
     },
   },
 });
