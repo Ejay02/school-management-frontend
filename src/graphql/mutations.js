@@ -274,6 +274,36 @@ export const createClass = gql`
   }
 `;
 
+export const updateClass = gql`
+  mutation UpdateClass($classId: String!, $input: UpdateClassInput!) {
+    updateClass(classId: $classId, input: $input) {
+      id
+      name
+      capacity
+      supervisor {
+        id
+        name
+        surname
+      }
+      supervisorId
+      students {
+        id
+        name
+        surname
+      }
+    }
+  }
+`;
+
+export const deleteClass = gql`
+  mutation deleteClass($classId: String!) {
+    deleteClass(classId: $classId) {
+      success
+      message
+    }
+  }
+`;
+
 export const createExam = gql`
   mutation CreateExam($input: CreateExamInput!) {
     createExam(input: $input) {

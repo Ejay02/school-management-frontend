@@ -339,6 +339,9 @@
               >
               <input
                 v-model="capacity"
+                type="number"
+                max="30"
+                min="10"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </div>
@@ -832,10 +835,10 @@ import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import { computed, onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
 import {
-  createAnnouncement,
-  createClass,
-  createEvent,
-  createSubject,
+createAnnouncement,
+createClass,
+createEvent,
+createSubject,
 } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
@@ -844,8 +847,8 @@ import { useTeacherStore } from "../../store/teacherStore";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
 import {
-  availableTargetRoles,
-  eventVisibilityOptions,
+availableTargetRoles,
+eventVisibilityOptions,
 } from "../../utils/utility.js";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";

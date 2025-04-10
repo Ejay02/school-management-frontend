@@ -286,6 +286,40 @@
           </label>
         </template>
 
+        <!-- class list -->
+        <template v-else-if="source === 'classList'">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Class Name
+              <input
+                v-model="className"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </label>
+          </div>
+
+          <div class="flex gap-2 w-full">
+            <div class="w-1/2">
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Capacity
+                <input
+                 v-model="classCapacity"
+                  type="number"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
+            </div>
+            <div class="w-1/2">
+              <Dropdown
+                v-model="selectedTeacher"
+                label="Select Supervisor"
+                :options="teacherNames"
+                emptyLabel="Select a supervisor"
+              />
+            </div>
+          </div>
+        </template>
+
         <!-- subject list -->
         <template v-else-if="source === 'subjectList'">
           <div>
@@ -303,49 +337,6 @@
               >Teachers
               <input
                 v-model="data.teachers"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </label>
-          </div>
-        </template>
-
-        <!-- class list -->
-        <template v-else-if="source === 'classList'">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Class Name
-              <input
-                v-model="data.name"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </label>
-          </div>
-
-          <div class="flex gap-2">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Capacity
-                <input
-                  v-model="data.capacity"
-                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-                />
-              </label>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Grade
-                <input
-                  v-model="data.grade"
-                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-                />
-              </label>
-            </div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Supervisor
-              <input
-                v-model="data.supervisor"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </label>
@@ -687,10 +678,19 @@
 import { computed, onMounted, ref, watch } from "vue";
 
 import { useModalStore } from "@/store/useModalStore";
+import { apolloClient } from "../../../apollo-client";
+import { updateClass } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
+import { useNotificationStore } from "../../store/notification";
+import { useTeacherStore } from "../../store/teacherStore";
+import Dropdown from "../dropdowns/dropdown.vue";
 
 const modalStore = useModalStore();
 const classStore = useClassStore();
+const teacherStore = useTeacherStore();
+const notificationStore = useNotificationStore();
+
+const teachers = computed(() => teacherStore.allTeachers);
 
 const isModalVisible = ref(modalStore.editModal);
 
@@ -701,6 +701,10 @@ const data = ref(modalStore.data);
 const classes = ref([]);
 
 const selectedClass = ref("");
+
+const className = ref("");
+const classCapacity = ref("");
+const selectedTeacher = ref("");
 
 const transformedData = ref({});
 
@@ -733,17 +737,29 @@ const fullTeacherName = computed({
   },
 });
 
-// watch(
-//   data,
-//   (newValue) => {
-//     const transformed = {};
-//     newValue.forEach((item) => {
-//       transformed[item.label.toLowerCase().replace(/\s+/g, "")] = item.value;
-//     });
-//     transformedData.value = transformed;
-//   },
-//   { immediate: true }
-// );
+const teacherNames = computed(() => {
+  return teacherStore.getTeacherNames?.map((teacher) => teacher.name) || [];
+});
+
+const getTeacherIdByName = (teacherName) => {
+  const teacher = teacherStore.allTeachers.find(
+    (t) => `${t.name} ${t.surname}` === teacherName
+  );
+  return teacher?.id || null;
+};
+
+watch(
+  () => data.value,
+  (newVal) => {
+    if (newVal && newVal.supervisor) {
+      selectedTeacher.value =
+        `${newVal.supervisor.name} ${newVal.supervisor.surname}`.trim();
+    } else {
+      selectedTeacher.value = "";
+    }
+  },
+  { immediate: true }
+);
 
 // Watchers to sync with modal store
 watch(
@@ -786,20 +802,58 @@ const handleCancel = () => {
   modalStore.modalId = null;
 };
 
+// Update the watch to properly initialize the class data
+watch(
+  () => data.value,
+  (newVal) => {
+    if (newVal) {
+      if (source.value === 'classList') {
+        className.value = newVal.name || "";
+        classCapacity.value = newVal.capacity || "";
+        if (newVal.supervisor) {
+          selectedTeacher.value = `${newVal.supervisor.name} ${newVal.supervisor.surname}`.trim();
+        } else {
+          selectedTeacher.value = "";
+        }
+      }
+    }
+  },
+  { immediate: true }
+);
+
+// Update the handleEdit function to use the refs
 const handleEdit = async () => {
   try {
     if (source.value === "teacherList") {
       console.log("hello from teachers");
     } else if (source.value === "teacherCard") {
       console.log("hello from teacherCard");
-    } else if (source.value === "studentList") {
-      console.log("hello from students");
     } else if (source.value === "parentList") {
       console.log("hello from parents");
+    } else if (source.value === "studentList") {
+      console.log("hello from students");
+    } else if (source.value === "classList") {
+    
+      await apolloClient.mutate({
+        mutation: updateClass,
+        variables: {
+          classId: modalStore.modalId,
+          input: {
+            name: className.value,
+            capacity: parseInt(classCapacity.value),
+            supervisorId: getTeacherIdByName(selectedTeacher.value),
+          },
+        },
+      });
+      
+      await classStore.refreshClasses();
+
+      notificationStore.addNotification({
+        type: "success",
+        message: "Class updated successfully",
+      });
     } else if (source.value === "subjectList") {
       console.log("hello from subjects");
-    } else if (source.value === "classList") {
-      console.log("hello from classes");
     } else if (source.value === "lessonList") {
       console.log("hello from lessons");
     } else if (source.value === "examList") {
@@ -815,13 +869,18 @@ const handleEdit = async () => {
     }
     modalStore.editModal = false;
   } catch (error) {
-    console.error(error);
+    notificationStore.addNotification({
+      type: "error",
+      message: `Error creating ${source.value}: ${error.message}`,
+    });
   }
 };
 
 onMounted(async () => {
-  
-
   classes.value = classStore.getClassNames;
+
+  if (teachers.value.length === 0) {
+    await teacherStore.fetchTeachers();
+  }
 });
 </script>

@@ -6,9 +6,11 @@
       @click.self="handleCancel"
       :key="isModalVisible"
     >
-      <div class="bg-white p-6 rounded-md w-[450px] h-auto min-h-[180px] mt-4 shadow-md">
+      <div
+        class="bg-white p-6 rounded-md w-[450px] h-auto min-h-[180px] mt-4 shadow-md"
+      >
         <!--  -->
-      
+
         <div class="flex items-center">
           <!-- Icon (using an inline SVG for the exclamation triangle) -->
           <svg
@@ -56,10 +58,17 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-
 import { useModalStore } from "@/store/useModalStore";
+import { ref, watch } from "vue";
+import { apolloClient } from "../../../apollo-client";
+import { deleteClass } from "../../graphql/mutations";
+import { useClassStore } from "../../store/classStore";
+import { useNotificationStore } from "../../store/notification";
+
 const modalStore = useModalStore();
+const classStore = useClassStore();
+const notificationStore = useNotificationStore();
+
 const isModalVisible = ref(modalStore.deleteModal);
 
 const title = ref(modalStore.modalTitle);
@@ -96,32 +105,44 @@ const handleDelete = async () => {
   try {
     if (source.value === "teacherList") {
       console.log("hello from teachers");
-    } else if (source.value === "studentList") {
-      console.log("hello from students");
-    } else if (source.value === "subjectList") {
-      console.log("hello from subjects");
-    } else if (source.value === "resultList") {
-      console.log("hello from results");
     } else if (source.value === "parentList") {
       console.log("hello from parents");
+    } else if (source.value === "studentList") {
+      console.log("hello from students");
+    } else if (source.value === "classList") {
+      await apolloClient.mutate({
+        mutation: deleteClass,
+        variables: {
+          classId: modalStore.modalId,
+        },
+      });
+      await classStore.refreshClasses();
+
+      notificationStore.addNotification({
+        type: "success",
+        message: "Class deleted successfully",
+      });
+    } else if (source.value === "subjectList") {
+      console.log("hello from subjects");
     } else if (source.value === "lessonList") {
       console.log("hello from lessons");
     } else if (source.value === "examList") {
       console.log("hello from exams");
-    } else if (source.value === "eventList") {
-      console.log("hello from events");
-    } else if (source.value === "classList") {
-      console.log("hello from classes");
     } else if (source.value === "assignmentList") {
       console.log("hello from assignments");
+    } else if (source.value === "resultList") {
+      console.log("hello from results");
+    } else if (source.value === "eventList") {
+      console.log("hello from events");
     } else if (source.value === "announcementList") {
       console.log("hello from announcements");
-    } else if (source.value === "announcementList") {
-      console.log("hello from announcement");
     }
     modalStore.deleteModal = false;
   } catch (error) {
-    notify("Error completing action", "error");
+    notificationStore.addNotification({
+      type: "error",
+      message: `Error deleting ${title.value}: ${error.message}`,
+    });
   }
 };
 </script>

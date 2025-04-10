@@ -22,7 +22,6 @@
     <menu class="m-2 text-sm">
       <ul v-for="menuItem in filteredMenuItems" :key="menuItem?.title" class="">
         <li v-for="item in menuItem?.items" :key="item?.label" class="mb-2">
-          <!-- :to="item?.href || '/'" -->
           <router-link
             :to="
               item?.label === 'Home'
@@ -31,7 +30,8 @@
                   }`
                 : item?.href || '/'
             "
-            activeClass="bg-eduPurpleLight text-purple-600"
+            active-class="bg-eduPurpleLight text-purple-600"
+            :class="isLinkActive(item?.href) ? 'bg-eduPurpleLight text-purple-600' : ''"
             class="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-eduSkyLight text-sm"
           >
             <img :src="item?.icon" :alt="item?.label" class="w-5 h-5" />
@@ -45,12 +45,55 @@
 
 <script setup>
 import { useUserStore } from "../store/userStore";
-
 import { storeToRefs } from "pinia";
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
 const userStore = useUserStore();
-
 const { filteredMenuItems, currentRole } = storeToRefs(userStore);
+
+// Function to check if a link should be active based on current route
+const isLinkActive = (href) => {
+  if (!href) return false;
+  
+  // Extract the base path from href (e.g., '/lessons' from '/lessons')
+  const basePath = href.split('/').filter(Boolean)[0];
+  
+  // Extract the current path from route
+  const currentPath = route.path.split('/').filter(Boolean);
+  
+  // Special case for dashboard paths
+  if (currentPath[0] === 'dashboard') {
+    // For paths like /dashboard/lesson/new, we need to check the second segment
+    if (currentPath.length > 1) {
+      const dashboardSubpath = currentPath[1];
+      
+      // Check for singular/plural matches
+      return (
+        basePath === dashboardSubpath ||
+        (basePath === 'lessons' && dashboardSubpath === 'lesson') ||
+        (basePath === 'assignments' && dashboardSubpath === 'assignment') ||
+        (basePath === 'exams' && dashboardSubpath === 'exam') ||
+        (basePath === 'announcements' && dashboardSubpath === 'announcement') ||
+        (basePath === 'events' && dashboardSubpath === 'event') ||
+        (basePath === 'teachers' && dashboardSubpath === 'teacher') ||
+        (basePath === 'students' && dashboardSubpath === 'student')
+      );
+    }
+  }
+  
+  // For non-dashboard paths
+  return (
+    currentPath[0] === basePath ||
+    (basePath === 'lessons' && currentPath[0] === 'lesson') ||
+    (basePath === 'assignments' && currentPath[0] === 'assignment') ||
+    (basePath === 'exams' && currentPath[0] === 'exam') ||
+    (basePath === 'announcements' && currentPath[0] === 'announcement') ||
+    (basePath === 'events' && currentPath[0] === 'event') ||
+    (basePath === 'teachers' && currentPath[0] === 'teacher') ||
+    (basePath === 'students' && currentPath[0] === 'student')
+  );
+};
 </script>
 
 <style scoped></style>
