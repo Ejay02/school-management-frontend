@@ -303,7 +303,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-1"
                 >Capacity
                 <input
-                 v-model="classCapacity"
+                  v-model="classCapacity"
                   type="number"
                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
                 />
@@ -331,15 +331,23 @@
               />
             </label>
           </div>
-          <!-- {{data}} -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Teachers
-              <input
-                v-model="data.teachers"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </label>
+
+          <div class="flex gap-2">
+            <Dropdown
+              class="w-1/2"
+              v-model="selectedTeacher"
+              label="Select Teacher"
+              :options="teacherNames"
+              emptyLabel="Select a teacher"
+            />
+
+            <Dropdown
+              class="w-1/2"
+              v-model="selectedClass"
+              label="Select Class"
+              :options="classOptions"
+              emptyLabel="Select a class"
+            />
           </div>
         </template>
 
@@ -679,15 +687,18 @@ import { computed, onMounted, ref, watch } from "vue";
 
 import { useModalStore } from "@/store/useModalStore";
 import { apolloClient } from "../../../apollo-client";
-import { updateClass } from "../../graphql/mutations";
+import { updateClass, updateSubject } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
+import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
 import Dropdown from "../dropdowns/dropdown.vue";
 
 const modalStore = useModalStore();
 const classStore = useClassStore();
 const teacherStore = useTeacherStore();
+const subjectStore = useSubjectStore();
+
 const notificationStore = useNotificationStore();
 
 const teachers = computed(() => teacherStore.allTeachers);
@@ -700,11 +711,12 @@ const data = ref(modalStore.data);
 
 const classes = ref([]);
 
+const subjectName = ref("");
 const selectedClass = ref("");
+const selectedTeacher = ref("");
 
 const className = ref("");
 const classCapacity = ref("");
-const selectedTeacher = ref("");
 
 const transformedData = ref({});
 
@@ -746,6 +758,96 @@ const getTeacherIdByName = (teacherName) => {
     (t) => `${t.name} ${t.surname}` === teacherName
   );
   return teacher?.id || null;
+};
+
+const classOptions = computed(() => {
+  return classStore.getClassNames || [];
+});
+
+// Helper function to format source title
+const formatSourceTitle = (src) => {
+  // Remove 'List' and capitalize first letter
+  return src.replace("List", "").charAt(0).toUpperCase() + src.slice(1, -4);
+};
+
+const handleCancel = () => {
+  modalStore.editModal = false;
+  modalStore.modalId = null;
+};
+
+const getClassIdByName = (className) => {
+  const classObj = classStore.allClasses.find((c) => c.name === className);
+  return classObj?.id || null;
+};
+
+// Update the handleEdit function to use the refs
+const handleEdit = async () => {
+  try {
+    if (source.value === "teacherList") {
+      console.log("hello from teachers");
+    } else if (source.value === "teacherCard") {
+      console.log("hello from teacherCard");
+    } else if (source.value === "parentList") {
+      console.log("hello from parents");
+    } else if (source.value === "studentList") {
+      console.log("hello from students");
+    } else if (source.value === "classList") {
+      await apolloClient.mutate({
+        mutation: updateClass,
+        variables: {
+          classId: modalStore.modalId,
+          input: {
+            name: className.value,
+            capacity: parseInt(classCapacity.value),
+            supervisorId: getTeacherIdByName(selectedTeacher.value),
+          },
+        },
+      });
+
+      await classStore.refreshClasses();
+
+      notificationStore.addNotification({
+        type: "success",
+        message: "Class updated successfully",
+      });
+    } else if (source.value === "subjectList") {
+      await apolloClient.mutate({
+        mutation: updateSubject,
+        variables: {
+          subjectId: modalStore.modalId,
+          input: {
+            name: subjectName.value,
+            classId: getClassIdByName(selectedClass.value),
+            teacherId: getTeacherIdByName(selectedTeacher.value),
+          },
+        },
+      });
+
+      await subjectStore.refreshSubjects();
+      notificationStore.addNotification({
+        type: "success",
+        message: "Subject updated successfully",
+      });
+    } else if (source.value === "lessonList") {
+      console.log("hello from lessons");
+    } else if (source.value === "examList") {
+      console.log("hello from exams");
+    } else if (source.value === "assignmentList") {
+      console.log("hello from assignments");
+    } else if (source.value === "resultList") {
+      console.log("hello from results");
+    } else if (source.value === "eventList") {
+      console.log("hello from events");
+    } else if (source.value === "announcementList") {
+      console.log("hello from announcements");
+    }
+    modalStore.editModal = false;
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: `Error creating ${source.value}: ${error.message}`,
+    });
+  }
 };
 
 watch(
@@ -791,90 +893,34 @@ watch(
   }
 );
 
-// Helper function to format source title
-const formatSourceTitle = (src) => {
-  // Remove 'List' and capitalize first letter
-  return src.replace("List", "").charAt(0).toUpperCase() + src.slice(1, -4);
-};
-
-const handleCancel = () => {
-  modalStore.editModal = false;
-  modalStore.modalId = null;
-};
-
 // Update the watch to properly initialize the class data
 watch(
   () => data.value,
   (newVal) => {
     if (newVal) {
-      if (source.value === 'classList') {
+      if (source.value === "classList") {
         className.value = newVal.name || "";
         classCapacity.value = newVal.capacity || "";
         if (newVal.supervisor) {
-          selectedTeacher.value = `${newVal.supervisor.name} ${newVal.supervisor.surname}`.trim();
+          selectedTeacher.value =
+            `${newVal.supervisor.name} ${newVal.supervisor.surname}`.trim();
         } else {
           selectedTeacher.value = "";
+        }
+      } else if (source.value === "subjectList") {
+        subjectName.value = newVal.name || "";
+        if (newVal.class) {
+          selectedClass.value = newVal.class.name || "";
+        }
+        if (newVal.teachers && newVal.teachers.length > 0) {
+          const teacher = newVal.teachers[0];
+          selectedTeacher.value = `${teacher.name} ${teacher.surname}`.trim();
         }
       }
     }
   },
   { immediate: true }
 );
-
-// Update the handleEdit function to use the refs
-const handleEdit = async () => {
-  try {
-    if (source.value === "teacherList") {
-      console.log("hello from teachers");
-    } else if (source.value === "teacherCard") {
-      console.log("hello from teacherCard");
-    } else if (source.value === "parentList") {
-      console.log("hello from parents");
-    } else if (source.value === "studentList") {
-      console.log("hello from students");
-    } else if (source.value === "classList") {
-    
-      await apolloClient.mutate({
-        mutation: updateClass,
-        variables: {
-          classId: modalStore.modalId,
-          input: {
-            name: className.value,
-            capacity: parseInt(classCapacity.value),
-            supervisorId: getTeacherIdByName(selectedTeacher.value),
-          },
-        },
-      });
-      
-      await classStore.refreshClasses();
-
-      notificationStore.addNotification({
-        type: "success",
-        message: "Class updated successfully",
-      });
-    } else if (source.value === "subjectList") {
-      console.log("hello from subjects");
-    } else if (source.value === "lessonList") {
-      console.log("hello from lessons");
-    } else if (source.value === "examList") {
-      console.log("hello from exams");
-    } else if (source.value === "assignmentList") {
-      console.log("hello from assignments");
-    } else if (source.value === "resultList") {
-      console.log("hello from results");
-    } else if (source.value === "eventList") {
-      console.log("hello from events");
-    } else if (source.value === "announcementList") {
-      console.log("hello from announcements");
-    }
-    modalStore.editModal = false;
-  } catch (error) {
-    notificationStore.addNotification({
-      type: "error",
-      message: `Error creating ${source.value}: ${error.message}`,
-    });
-  }
-};
 
 onMounted(async () => {
   classes.value = classStore.getClassNames;

@@ -544,3 +544,30 @@ export const createSubject = gql`
     }
   }
 `;
+
+export const updateSubject = gql`
+  mutation updateSubject($subjectId: String!, $input: UpdateSubjectInput!) {
+    updateSubject(subjectId: $subjectId, input: $input) {
+      id
+      name
+      teachers {
+        id
+        name
+        surname
+      }
+      class {
+        id
+        name
+      }
+    }
+  }
+`;
+
+export const deleteSubject = gql`
+  mutation deleteSubject($subjectId: String!) {
+    deleteSubject(subjectId: $subjectId) {
+      success
+      message
+    }
+  }
+`;
