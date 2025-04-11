@@ -808,21 +808,29 @@
           </div>
         </template>
 
-        <!-- buttons -->
+              <!-- buttons -->
         <div class="flex justify-end gap-2 mt-4">
           <button
-            class="bg-white border border-gray-300 cursor-pointer text-gray-600 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
+            class="bg-white border border-gray-300 cursor-pointer text-gray-600 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             @click="handleCancel"
+            :disabled="isLoading"
           >
             Cancel
           </button>
           <button
-            class="hover:bg-purple-400 text-white py-2 px-4 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 transition-colors"
+            class="hover:bg-purple-400 text-white py-2 px-4 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
             @click="handleAdd"
-            :disabled="!isFormValid"
-            :class="{ 'opacity-50 cursor-not-allowed': !isFormValid }"
+            :disabled="!isFormValid || isLoading"
+            :class="{ 'opacity-50 cursor-not-allowed': !isFormValid || isLoading }"
           >
-            {{ handleAdd ? "Add" : "Adding ..." }}
+            <span v-if="!isLoading">Add</span>
+            <div v-else class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Adding...
+            </div>
           </button>
         </div>
       </div>
@@ -852,6 +860,10 @@ eventVisibilityOptions,
 } from "../../utils/utility.js";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
+
+
+const isLoading = ref(false);
+
 
 const modalStore = useModalStore();
 const classStore = useClassStore();
@@ -1027,6 +1039,7 @@ watch(
 );
 
 const handleCancel = () => {
+   if (isLoading.value) return;
   modalStore.addModal = false;
   modalStore.modalId = null;
 };
@@ -1078,7 +1091,11 @@ const isFormValid = computed(() => {
 });
 
 const handleAdd = async () => {
+   if (!isFormValid.value) return;
+
   try {
+    isLoading.value = true;
+
     if (source.value === "teachers") {
       // Create teacher logic
       console.log("Creating teacher...");
@@ -1243,8 +1260,10 @@ const handleAdd = async () => {
   } catch (error) {
     notificationStore.addNotification({
       type: "error",
-      message: `Error creating ${source.value}: ${error.message}`,
+      message: `Error creating ${pluralToSingular(source.value)}: ${error.message}`,
     });
+  }finally {
+    isLoading.value = false;
   }
 };
 

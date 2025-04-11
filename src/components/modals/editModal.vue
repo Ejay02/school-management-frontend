@@ -586,51 +586,122 @@
               />
             </label>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Target Roles
-              <input
-                type="text"
-                v-model="data.targetRole"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </label>
-          </div>
-          <div class="">
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Select a class[Optional]
-              <select
-                v-model="selectedClass"
-                @change="handleClassChange"
-                class="border rounded p-2 w-full focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
-              >
-                <option value="" selected>No class</option>
-                <option
-                  v-for="(name, index) in classes"
-                  :key="index"
-                  :value="name"
-                  class="cursor-pointer"
+          <div class="flex gap-2">
+           <div class="w-1/2">
+              <label
+                for="targetRoles"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Target Audience
+              </label>
+
+              <!-- Dropdown for selecting roles -->
+              <div class="relative">
+                <button
+                  @click="toggleTargetRolesDropdown"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-left focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
                 >
-                  {{ name }}
-                </option>
-              </select>
-            </label>
+                  <span v-if="selectedTargetRoles.length === 0"
+                    >Select audience</span
+                  >
+                  <span v-else>{{ selectedTargetRoles.length }} selected</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-gray-400 absolute right-2 top-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+
+                <!-- Dropdown menu -->
+                <div
+                  v-if="isTargetRolesDropdownOpen"
+                  class="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto"
+                >
+                  <!-- Select All option -->
+                  <div
+                    @click="selectAllTargetRoles"
+                    class="px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100 cursor-pointer"
+                  >
+                    Select All
+                  </div>
+
+                  <!-- Individual role options -->
+                  <div
+                    v-for="role in availableTargetRoles"
+                    :key="role.value"
+                    @click="toggleTargetRole(role)"
+                    class="px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100 cursor-pointer flex items-center"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="isTargetRoleSelected(role)"
+                      class="mr-2"
+                      @click.stop
+                    />
+                    {{ role.label }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selected roles tags - moved to bottom -->
+              <div
+                v-if="selectedTargetRoles.length > 0"
+                class="flex flex-wrap gap-1 mt-2"
+              >
+                <div
+                  v-for="role in selectedTargetRoles"
+                  :key="role.value"
+                  class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-md flex items-center"
+                >
+                  {{ role.label }}
+                  <button
+                    @click="removeTargetRole(role)"
+                    class="ml-1 text-indigo-500 hover:text-indigo-700"
+                  >
+                    <span class="text-xs">×</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          
+            <Dropdown
+              class="w-1/2"
+              v-model="selectedClass"
+              label="Select Class"
+              :options="classOptions"
+              emptyLabel="Select a class"
+            />
           </div>
         </template>
 
         <!-- buttons -->
-        <div class="flex justify-end gap-2 mt-4">
+               <div class="flex justify-end gap-2 mt-4">
           <button
             class="bg-white border border-gray-300 cursor-pointer text-gray-600 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
             @click="handleCancel"
+            :disabled="isLoading"
           >
             Cancel
           </button>
           <button
-            class="hover:bg-purple-400 text-white py-2 px-4 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 transition-colors"
+            class="hover:bg-purple-400 text-white py-2 px-4 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
             @click="handleEdit"
+            :disabled="isLoading"
           >
-            {{ handleEdit ? "Edit" : "Editing ..." }}
+            <span v-if="!isLoading">Edit</span>
+            <div v-else class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Editing...
+            </div>
           </button>
         </div>
       </div>
@@ -657,6 +728,8 @@ const teacherStore = useTeacherStore();
 const subjectStore = useSubjectStore();
 
 const notificationStore = useNotificationStore();
+
+const isLoading = ref(false);
 
 const teachers = computed(() => teacherStore.allTeachers);
 
@@ -730,6 +803,7 @@ const formatSourceTitle = (src) => {
 };
 
 const handleCancel = () => {
+  if (isLoading.value) return; 
   modalStore.editModal = false;
   modalStore.modalId = null;
 };
@@ -742,6 +816,8 @@ const getClassIdByName = (className) => {
 // Update the handleEdit function to use the refs
 const handleEdit = async () => {
   try {
+     isLoading.value = true;
+    
     if (source.value === "teacherList") {
       console.log("hello from teachers");
     } else if (source.value === "teacherCard") {
@@ -804,6 +880,8 @@ const handleEdit = async () => {
       type: "error",
       message: `Error creating ${source.value}: ${error.message}`,
     });
+  } finally {
+    isLoading.value = false;
   }
 };
 

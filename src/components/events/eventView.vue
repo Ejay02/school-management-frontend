@@ -12,7 +12,7 @@
         >
           <!-- Back arrow button -->
           <button
-            @click="goBack"
+            @click="router.push('/events')"
             class="absolute top-4 left-4 bg-white/20 backdrop-blur-sm p-2 rounded-full text-white hover:bg-white/30 transition-all animate-bounce-once"
           >
             <svg
