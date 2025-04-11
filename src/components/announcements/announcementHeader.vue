@@ -10,46 +10,44 @@
     </div>
     <div class="mt-4 sm:mt-0 flex space-x-3">
       <!-- View tabs -->
-      <div
-        class="relative inline-flex w-48 h-12 bg-white rounded-full shadow-md overflow-hidden"
-        is="fieldset"
-        aria-label="View selection tabs"
+     <div
+  class="relative inline-flex w-48 h-12 bg-white rounded-full shadow-md overflow-hidden"
+  is="fieldset"
+  aria-label="View selection tabs"
+>
+  <!-- Container for the toggle options -->
+  <div class="flex w-full h-full items-center justify-between relative z-10">
+    <!-- Main Option -->
+    <button
+      @click="$emit('view-change', 'main')"
+      class="flex-1 h-full flex items-center justify-center text-xs font-medium transition-colors duration-300"
+      :class="activeView === 'main' ? 'text-white' : 'text-gray-700'"
+    >
+      Main
+    </button>
+
+    <!-- Archive Option -->
+    <button
+      @click="$emit('view-change', 'archive')"
+      class="flex-1 h-full flex items-center justify-center text-xs font-medium transition-colors duration-300"
+      :class="activeView === 'archive' ? 'text-white' : 'text-gray-700'"
+    >
+      Archive
+      <span
+        v-if="archivedCount"
+        class="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-200 text-gray-800"
       >
-        <!-- Container for the toggle options -->
-        <div
-          class="flex w-full h-full items-center justify-between relative z-10"
-        >
-          <!-- Main Option -->
-          <button
-            @click="$emit('view-change', 'main')"
-            class="flex-1 h-full flex items-center justify-center text-xs font-medium transition-colors duration-300"
-            :class="activeView === 'main' ? 'text-white' : 'text-gray-700'"
-          >
-            Main
-          </button>
+        {{ archivedCount }}
+      </span>
+    </button>
+  </div>
 
-          <!-- Archive Option -->
-          <button
-            @click="$emit('view-change', 'archive')"
-            class="flex-1 h-full flex items-center justify-center text-xs font-medium transition-colors duration-300"
-            :class="activeView === 'archive' ? 'text-white' : 'text-gray-700'"
-          >
-            Archive
-            <span
-              v-if="archivedCount"
-              class="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-200 text-gray-800"
-            >
-              {{ archivedCount }}
-            </span>
-          </button>
-        </div>
-
-        <!-- Sliding background for active state -->
-        <div
-          class="absolute top-1 left-1 w-1/2 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full transition-transform duration-300 ease-in-out"
-          :class="activeView === 'main' ? 'translate-x-0' : 'translate-x-full'"
-        ></div>
-      </div>
+  <!-- Sliding background for active state -->
+  <div
+    class="absolute top-1 left-1 w-1/2 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full transition-transform duration-300 ease-in-out"
+    :class="activeView === 'main' ? 'translate-x-0' : 'translate-x-[calc(100%-0.5rem)]'"
+  ></div>
+</div>
 
       <!--  -->
 

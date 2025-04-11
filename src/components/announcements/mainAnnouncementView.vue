@@ -3,7 +3,7 @@
     <div v-if="loading" class="flex justify-center items-center py-8">
       <LoadingScreen message="Loading announcements..." />
     </div>
-    <div v-else-if="error" class="flex justify-center items-center py-8">
+    <div v-else-if="error" class="  w-full">
       <ErrorScreen :message="error" />
     </div>
     <div v-else>

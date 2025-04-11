@@ -36,7 +36,11 @@
           <!-- Sliding background for active state -->
           <div
             class="absolute top-1 left-1 w-1/2 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full transition-transform duration-300 ease-in-out"
-            :class="viewMode === 'cards' ? 'translate-x-0' : 'translate-x-full'"
+            :class="
+              viewMode === 'cards'
+                ? 'translate-x-0'
+                : 'translate-x-[calc(100%-0.5rem)]'
+            "
           ></div>
         </div>
         <!--  -->
@@ -209,9 +213,14 @@ onMounted(async () => {
     if (data && data.event && data.event.id) {
       // Update the event in both arrays using the store method
       eventStore.updateEvent(data.event);
-      
+
       // If we're on the event's page, force a refresh of the current page
-      if (currentPage.value === Math.ceil(eventStore.events.findIndex(e => e.id === data.event.id) / limit)) {
+      if (
+        currentPage.value ===
+        Math.ceil(
+          eventStore.events.findIndex((e) => e.id === data.event.id) / limit
+        )
+      ) {
         eventStore.fetchEvents({ page: currentPage.value, limit });
       }
     }
