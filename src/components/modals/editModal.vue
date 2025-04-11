@@ -507,61 +507,7 @@
           </div>
         </template>
 
-        <!-- event -->
-        <template v-else-if="source === 'eventList'">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Title
-              <input
-                type="text"
-                v-model="data.title"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </label>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Class
-              <input
-                v-model="data.class"
-                type="text"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </label>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Date
-              <input
-                type="date"
-                v-model="data.date"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </label>
-          </div>
-          <div class="flex gap-2">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Start Time
-                <input
-                  type="datetime"
-                  v-model="data.startTime"
-                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-                />
-              </label>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >End Time
-                <input
-                  type="datetime"
-                  v-model="data.endTime"
-                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-                />
-              </label>
-            </div>
-          </div>
-        </template>
+      
 
         <!-- announcement -->
         <template v-else-if="source === 'announcementList'">
@@ -570,7 +516,7 @@
               >Title
               <input
                 type="text"
-                v-model="data.title"
+                v-model="announcementTitle"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </label>
@@ -579,7 +525,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1"
               >Content
               <textarea
-                v-model="data.content"
+                v-model="content"
                 rows="4"
                 type="text"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
@@ -587,7 +533,7 @@
             </label>
           </div>
           <div class="flex gap-2">
-           <div class="w-1/2">
+            <div class="w-1/2">
               <label
                 for="targetRoles"
                 class="block text-sm font-medium text-gray-700 mb-1"
@@ -669,7 +615,7 @@
                 </div>
               </div>
             </div>
-          
+
             <Dropdown
               class="w-1/2"
               v-model="selectedClass"
@@ -681,7 +627,7 @@
         </template>
 
         <!-- buttons -->
-               <div class="flex justify-end gap-2 mt-4">
+        <div class="flex justify-end gap-2 mt-4">
           <button
             class="bg-white border border-gray-300 cursor-pointer text-gray-600 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
             @click="handleCancel"
@@ -696,9 +642,25 @@
           >
             <span v-if="!isLoading">Edit</span>
             <div v-else class="flex items-center">
-              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <svg
+                class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
               Editing...
             </div>
@@ -715,15 +677,20 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useModalStore } from "@/store/useModalStore";
 import { apolloClient } from "../../../apollo-client";
 import { useTeacherAccessCheck } from "../../composables/useTeacherAccessCheck";
-import { updateClass, updateSubject } from "../../graphql/mutations";
+import {
+  editAnnouncement,
+  updateClass,
+  updateSubject,
+} from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
-import {availableTargetRoles} from "../../utils/utility"
+import { availableTargetRoles } from "../../utils/utility";
 import Dropdown from "../dropdowns/dropdown.vue";
 
 const modalStore = useModalStore();
+
 const classStore = useClassStore();
 const teacherStore = useTeacherStore();
 const subjectStore = useSubjectStore();
@@ -748,6 +715,8 @@ const selectedTargetRoles = ref([]);
 const subjectName = ref("");
 const selectedClass = ref("");
 const selectedTeacher = ref("");
+const announcementTitle = ref("");
+const content = ref("");
 
 const className = ref("");
 const classCapacity = ref("");
@@ -761,7 +730,9 @@ const toggleTargetRolesDropdown = () => {
 };
 
 const toggleTargetRole = (role) => {
-  const index = selectedTargetRoles.value.findIndex(r => r.value === role.value);
+  const index = selectedTargetRoles.value.findIndex(
+    (r) => r.value === role.value
+  );
   if (index === -1) {
     selectedTargetRoles.value.push(role);
   } else {
@@ -770,19 +741,21 @@ const toggleTargetRole = (role) => {
 };
 
 const isTargetRoleSelected = (role) => {
-  return selectedTargetRoles.value.some(r => r.value === role.value);
+  return selectedTargetRoles.value.some((r) => r.value === role.value);
 };
 
 const selectAllTargetRoles = () => {
-  if (selectedTargetRoles.value.length === availableTargetRoles.value.length) {
+  if (selectedTargetRoles.value.length === availableTargetRoles.length) {
     selectedTargetRoles.value = [];
   } else {
-    selectedTargetRoles.value = [...availableTargetRoles.value];
+    selectedTargetRoles.value = [...availableTargetRoles];
   }
 };
 
 const removeTargetRole = (role) => {
-  const index = selectedTargetRoles.value.findIndex(r => r.value === role.value);
+  const index = selectedTargetRoles.value.findIndex(
+    (r) => r.value === role.value
+  );
   if (index !== -1) {
     selectedTargetRoles.value.splice(index, 1);
   }
@@ -839,7 +812,7 @@ const formatSourceTitle = (src) => {
 };
 
 const handleCancel = () => {
-  if (isLoading.value) return; 
+  if (isLoading.value) return;
   modalStore.editModal = false;
   modalStore.modalId = null;
 };
@@ -852,8 +825,8 @@ const getClassIdByName = (className) => {
 // Update the handleEdit function to use the refs
 const handleEdit = async () => {
   try {
-     isLoading.value = true;
-    
+    isLoading.value = true;
+
     if (source.value === "teacherList") {
       console.log("hello from teachers");
     } else if (source.value === "teacherCard") {
@@ -905,10 +878,23 @@ const handleEdit = async () => {
       console.log("hello from assignments");
     } else if (source.value === "resultList") {
       console.log("hello from results");
-    } else if (source.value === "eventList") {
-      console.log("hello from events");
+  
     } else if (source.value === "announcementList") {
-      console.log("hello from announcements");
+      await apolloClient.mutate({
+        mutation: editAnnouncement,
+        variables: {
+          announcementId: modalStore.modalId,
+          title: announcementTitle.value,
+          content: content.value,
+          targetRoles: selectedTargetRoles.value.map((role) => role.value),
+          classId: getClassIdByName(selectedClass.value),
+        },
+      });
+
+      notificationStore.addNotification({
+        type: "success",
+        message: "Announcement updated successfully",
+      });
     }
     modalStore.editModal = false;
   } catch (error) {
@@ -921,12 +907,11 @@ const handleEdit = async () => {
   }
 };
 
-// Add this watch to initialize selectedTargetRoles from data
 watch(
   () => data.value?.targetRoles,
   (newVal) => {
-    if (newVal && availableTargetRoles.value) {
-      selectedTargetRoles.value = availableTargetRoles.value.filter(role => 
+    if (newVal && availableTargetRoles) {
+      selectedTargetRoles.value = availableTargetRoles.filter((role) =>
         newVal.includes(role.value)
       );
     }
@@ -999,6 +984,19 @@ watch(
         if (newVal.teachers && newVal.teachers.length > 0) {
           const teacher = newVal.teachers[0];
           selectedTeacher.value = `${teacher.name} ${teacher.surname}`.trim();
+        }
+      } else if (source.value === "announcementList") {
+        // Initialize selected class if it exists in the data
+         announcementTitle.value = newVal.title || "";
+         content.value = newVal.content || "";
+        if (newVal.class) {
+          selectedClass.value = newVal.class.name || "";
+        }
+        // Initialize target roles if they exist in the data
+        if (newVal.targetRoles) {
+          selectedTargetRoles.value = availableTargetRoles.filter((role) =>
+            newVal.targetRoles.includes(role.value)
+          );
         }
       }
     }

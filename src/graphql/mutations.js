@@ -241,7 +241,7 @@ export const editAnnouncement = gql`
       id
       title
       content
-      updatedAt
+     createdAt
       classId
       targetRoles
     }
