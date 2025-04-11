@@ -92,18 +92,23 @@ import {
   deleteEvent,
   deleteLesson,
   deleteSubject,
+    globalAnnouncementDelete,
+  personalAnnouncementDelete
 } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
 import { useEventStore } from "../../store/eventStore";
 import { useLessonStore } from "../../store/lessonStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
+import { useAnnouncementStore } from "../../store/announcementStore";
+import { useUserStore } from "../../store/userStore";
 
 const modalStore = useModalStore();
 const classStore = useClassStore();
 const subjectStore = useSubjectStore();
 const lessonStore = useLessonStore();
-
+const userStore = useUserStore(); 
+const announcementStore = useAnnouncementStore(); 
 const eventStore = useEventStore();
 const router = useRouter();
 
@@ -221,7 +226,38 @@ const handleDelete = async () => {
         router.push("/events");
       }
     } else if (source.value === "announcementList") {
-      console.log("hello from announcements");
+      const announcement = modalStore.data;
+      const currentUserId = userStore.userInfo?.id;
+      const userRole = userStore.userInfo?.role?.toLowerCase();
+      
+      // Check if user is creator or admin (can perform global delete)
+      const isCreator = announcement.creatorId === currentUserId;
+      const isAdmin = userRole === "admin" || userRole === "super_admin";
+      
+      if (isCreator || isAdmin) {
+        // Global delete - removes for everyone
+        await apolloClient.mutate({
+          mutation: globalAnnouncementDelete,
+          variables: {
+            announcementId: modalStore.modalId,
+          },
+        });
+        notificationStore.addNotification({
+          type: "success",
+          message: "Announcement deleted for everyone",
+        });  } else {
+        // Personal delete - removes only for current user
+        await apolloClient.mutate({
+          mutation: personalAnnouncementDelete,
+          variables: {
+            announcementId: modalStore.modalId,
+          },
+        });
+        notificationStore.addNotification({
+          type: "success",
+          message: "Announcement removed from your inbox",
+        });
+      }
     }
     modalStore.deleteModal = false;
   } catch (error) {

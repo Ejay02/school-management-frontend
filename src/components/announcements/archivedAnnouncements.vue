@@ -144,15 +144,21 @@
                 </span>
               </button>
               <button
-                @click="permanentlyDeleteAnnouncement(announcement.id)"
+                @click="
+                  showDelModal(
+                    announcement.id,
+                    announcement.title,
+                    'personalAnnouncementDelete',
+                    announcement
+                  )
+                "
                 class="group relative text-red-600 hover:text-red-800 text-sm font-medium"
               >
-                <!-- Delete Permanently -->
                 <i class="fa-solid fa-trash-can"></i>
                 <span
                   class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                 >
-                  Delete
+                  Delete from Inbox
                 </span>
               </button>
             </div>
@@ -173,13 +179,24 @@ import { availableTargetRoles } from "../../utils/utility";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
+import { useModalStore } from '@/store/useModalStore';
 
-const announcementStore = useAnnouncementStore();
 const userStore = useUserStore();
+const modalStore = useModalStore();
+const announcementStore = useAnnouncementStore();
+
 const archiveSearchQuery = ref("");
 
 const loading = computed(() => announcementStore.loading);
 const error = computed(() => announcementStore.error);
+
+const showDelModal = (id, title, type, data) => {
+  modalStore.deleteModal = true;
+  modalStore.modalId = id;
+  modalStore.modalTitle = title;
+  modalStore.source = type; // This will be 'personalAnnouncementDelete'
+  modalStore.data = data;
+};
 
 const archivedAnnouncements = computed(
   () => announcementStore.archivedAnnouncements

@@ -12,7 +12,8 @@
       <!-- View tabs -->
       <div
         class="relative inline-flex w-48 h-12 bg-white rounded-full shadow-md overflow-hidden"
-        role="group"
+        is="fieldset"
+        aria-label="View selection tabs"
       >
         <!-- Container for the toggle options -->
         <div
@@ -21,7 +22,7 @@
           <!-- Main Option -->
           <button
             @click="$emit('view-change', 'main')"
-            class="flex-1 h-full flex items-center justify-center text-sm font-medium transition-colors duration-300"
+            class="flex-1 h-full flex items-center justify-center text-xs font-medium transition-colors duration-300"
             :class="activeView === 'main' ? 'text-white' : 'text-gray-700'"
           >
             Main
@@ -30,7 +31,7 @@
           <!-- Archive Option -->
           <button
             @click="$emit('view-change', 'archive')"
-            class="flex-1 h-full flex items-center justify-center text-sm font-medium transition-colors duration-300"
+            class="flex-1 h-full flex items-center justify-center text-xs font-medium transition-colors duration-300"
             :class="activeView === 'archive' ? 'text-white' : 'text-gray-700'"
           >
             Archive
@@ -55,9 +56,9 @@
       <div v-if="canCreateAnnouncement && activeView === 'main'">
         <button
           @click="showAddModal(`${url}`)"
-          class="bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-2 rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          class="mt-2 bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-2 rounded-md shadow-sm text-xs font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
-          New Announcement
+          + New Announcement
         </button>
       </div>
     </div>

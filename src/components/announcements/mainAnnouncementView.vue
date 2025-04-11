@@ -117,7 +117,7 @@
                 {{ announcement.title }}
               </h3>
               <div
-                class="mt-2  text-gray-500 line-clamp-2 prose max-w-none font-serif text-lg"
+                class="mt-2 text-gray-500 line-clamp-2 prose max-w-none font-serif text-lg"
                 v-html="announcement.content"
               ></div>
             </router-link>
@@ -165,13 +165,16 @@
                     Edit
                   </span>
                 </button>
+
+                <!-- Delete button - only for admins/creators -->
                 <button
-                  v-if="canDeleteAnnouncement(announcement)"
-                  @click="
+                  v-if="isCreatorOrAdmin(announcement)"
+                  @click.stop="
                     showDelModal(
                       announcement.id,
                       announcement.title,
-                      'announcementList'
+                      'announcementList',
+                      announcement
                     )
                   "
                   class="group relative text-red-600 hover:text-red-400 text-sm font-medium transform transition-all hover:scale-105"
@@ -180,9 +183,11 @@
                   <span
                     class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                   >
-                    Delete
+                    Delete Globally
                   </span>
                 </button>
+
+                <!-- Archive button - for everyone else -->
                 <button
                   v-else
                   @click="archiveAnnouncement(announcement)"
@@ -218,15 +223,14 @@ import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
 
-defineEmits(["edit-announcement"]);
-
 const modalStore = useModalStore();
 
-const showDelModal = (id, title, type) => {
+const showDelModal = (id, title, type, data) => {
   modalStore.deleteModal = true;
   modalStore.modalId = id;
   modalStore.modalTitle = title;
   modalStore.source = type;
+  modalStore.data = data;
 };
 
 const showEditModal = (id, title, data, type) => {
@@ -284,6 +288,16 @@ const isAdminOrTeacher = computed(() => {
   const role = userStore.userInfo?.role?.toLowerCase();
   return role === "admin" || role === "teacher" || role === "super_admin";
 });
+
+const isCreatorOrAdmin = (announcement) => {
+  const userId = userStore.userInfo?.id;
+  const userRole = userStore.userInfo?.role?.toLowerCase();
+  return (
+    userRole === "admin" ||
+    userRole === "super_admin" ||
+    announcement.creatorId === userId
+  );
+};
 
 const canEditAnnouncement = (announcement) => {
   const userId = userStore.userInfo?.id;
@@ -370,6 +384,14 @@ const setupSocketConnection = () => {
   });
 };
 
+useStorageSync("readAnnouncements", (newReadAnnouncements) => {
+  announcementStore.readAnnouncements = newReadAnnouncements || [];
+});
+
+watch(announcements, async () => {
+  await announcementStore.fetchCreatorDetails(apolloClient);
+});
+
 // Lifecycle hooks
 onMounted(async () => {
   await announcementStore.fetchAnnouncements();
@@ -385,14 +407,5 @@ onUnmounted(() => {
   socket.off("announcementArchived");
   socket.off("announcementDeleted");
   socket.off("announcementArchiveStatus");
-});
-
-// Update watch
-watch(announcements, async () => {
-  await announcementStore.fetchCreatorDetails(apolloClient);
-});
-
-useStorageSync("readAnnouncements", (newReadAnnouncements) => {
-  announcementStore.readAnnouncements = newReadAnnouncements || [];
 });
 </script>
