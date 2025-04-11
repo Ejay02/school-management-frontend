@@ -157,19 +157,24 @@ export const useEventStore = defineStore("eventStore", {
     },
 
     updateEvent(updatedEvent) {
-      const index = this.events.findIndex(
-        (event) => event.id === updatedEvent.id
-      );
-      if (index !== -1) {
-        // Replace the event with the updated version
-        this.events.splice(index, 1, updatedEvent);
-        // If the updated event is the selected event, update it too
-        if (this.selectedEvent && this.selectedEvent.id === updatedEvent.id) {
-          this.selectedEvent = updatedEvent;
-        }
-        return true;
+      // Update events array
+      const eventsIndex = this.events.findIndex(event => event.id === updatedEvent.id);
+      if (eventsIndex !== -1) {
+        this.events.splice(eventsIndex, 1, updatedEvent);
       }
-      return false;
-    },
+
+      // Update allEvents array
+      const allEventsIndex = this.allEvents.findIndex(event => event.id === updatedEvent.id);
+      if (allEventsIndex !== -1) {
+        this.allEvents.splice(allEventsIndex, 1, updatedEvent);
+      }
+
+      // If the updated event is the selected event, update it too
+      if (this.selectedEvent && this.selectedEvent.id === updatedEvent.id) {
+        this.selectedEvent = updatedEvent;
+      }
+
+      return eventsIndex !== -1 || allEventsIndex !== -1;
+    }
   },
 });
