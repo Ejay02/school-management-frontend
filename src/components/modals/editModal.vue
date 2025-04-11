@@ -720,6 +720,7 @@ import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
+import {availableTargetRoles} from "../../utils/utility"
 import Dropdown from "../dropdowns/dropdown.vue";
 
 const modalStore = useModalStore();
@@ -741,6 +742,9 @@ const data = ref(modalStore.data);
 
 const classes = ref([]);
 
+const isTargetRolesDropdownOpen = ref(false);
+const selectedTargetRoles = ref([]);
+
 const subjectName = ref("");
 const selectedClass = ref("");
 const selectedTeacher = ref("");
@@ -751,6 +755,38 @@ const classCapacity = ref("");
 const transformedData = ref({});
 
 const { isTeacher, userId, isAssignedToSelection } = useTeacherAccessCheck();
+
+const toggleTargetRolesDropdown = () => {
+  isTargetRolesDropdownOpen.value = !isTargetRolesDropdownOpen.value;
+};
+
+const toggleTargetRole = (role) => {
+  const index = selectedTargetRoles.value.findIndex(r => r.value === role.value);
+  if (index === -1) {
+    selectedTargetRoles.value.push(role);
+  } else {
+    selectedTargetRoles.value.splice(index, 1);
+  }
+};
+
+const isTargetRoleSelected = (role) => {
+  return selectedTargetRoles.value.some(r => r.value === role.value);
+};
+
+const selectAllTargetRoles = () => {
+  if (selectedTargetRoles.value.length === availableTargetRoles.value.length) {
+    selectedTargetRoles.value = [];
+  } else {
+    selectedTargetRoles.value = [...availableTargetRoles.value];
+  }
+};
+
+const removeTargetRole = (role) => {
+  const index = selectedTargetRoles.value.findIndex(r => r.value === role.value);
+  if (index !== -1) {
+    selectedTargetRoles.value.splice(index, 1);
+  }
+};
 
 const fullTeacherName = computed({
   get() {
@@ -884,6 +920,19 @@ const handleEdit = async () => {
     isLoading.value = false;
   }
 };
+
+// Add this watch to initialize selectedTargetRoles from data
+watch(
+  () => data.value?.targetRoles,
+  (newVal) => {
+    if (newVal && availableTargetRoles.value) {
+      selectedTargetRoles.value = availableTargetRoles.value.filter(role => 
+        newVal.includes(role.value)
+      );
+    }
+  },
+  { immediate: true }
+);
 
 watch(
   () => data.value,
