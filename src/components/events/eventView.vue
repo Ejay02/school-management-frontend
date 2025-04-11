@@ -478,7 +478,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch, onUnmounted } from 'vue';
 import { useRoute, useRouter } from "vue-router";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
@@ -489,6 +489,7 @@ import { useEventStore } from "../../store/eventStore";
 import { useUserStore } from "../../store/userStore";
 import { formatEventDate, formatTime } from "../../utils/date.holidays";
 import { formatTargetRoles } from "../../utils/utility";
+import { socket } from "../../socket/socket";
 
 const route = useRoute();
 const router = useRouter();
@@ -559,6 +560,13 @@ const editEvent = () => {
   router.push(`/events/edit/${eventId}`);
 };
 
+// Watch for changes in creatorId (in case event loading happens after component mount)
+watch(creatorId, (newVal) => {
+  if (newVal) {
+    fetchCreator();
+  }
+});
+
 onMounted(() => {
   eventStore.fetchEventById(eventId);
 
@@ -567,10 +575,25 @@ onMounted(() => {
   }
 });
 
-// Watch for changes in creatorId (in case event loading happens after component mount)
-watch(creatorId, (newVal) => {
-  if (newVal) {
+onMounted(() => {
+  eventStore.fetchEventById(eventId);
+
+  if (event.value?.creatorId) {
     fetchCreator();
   }
+
+  // Add socket listener for event updates
+  socket.on("eventUpdated", (data) => {
+    if (data && data.event && data.event.id === eventId) {
+      eventStore.fetchEventById(eventId); // Refresh the current event
+    }
+  });
 });
+
+onUnmounted(() => {
+  // Clean up socket listener
+  socket.off("eventUpdated");
+});
+
+
 </script>

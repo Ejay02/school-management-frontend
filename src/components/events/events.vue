@@ -207,12 +207,12 @@ onMounted(async () => {
 
   socket.on("eventUpdated", (data) => {
     if (data && data.event && data.event.id) {
-      // Find and update the event in the store
-      const index = eventStore.events.findIndex(
-        (event) => event.id === data.event.id
-      );
-      if (index !== -1) {
-        eventStore.events[index] = data.event;
+      // Update the event in both arrays using the store method
+      eventStore.updateEvent(data.event);
+      
+      // If we're on the event's page, force a refresh of the current page
+      if (currentPage.value === Math.ceil(eventStore.events.findIndex(e => e.id === data.event.id) / limit)) {
+        eventStore.fetchEvents({ page: currentPage.value, limit });
       }
     }
   });

@@ -29,7 +29,7 @@ export const useClassStore = defineStore("classStore", {
           const { data } = await apolloClient.query({
             query: getAllClasses,
             variables: { pagination: { page: 1, limit: 1000 } },
-            fetchPolicy: "cache-and-network",
+            fetchPolicy: "network-only",
           });
 
           this.allClasses = data.getAllClasses;

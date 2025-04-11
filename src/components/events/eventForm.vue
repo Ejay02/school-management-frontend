@@ -346,36 +346,6 @@ const isStudent = computed(
   () => userStore.userInfo.role.toLowerCase() === "STUDENT"
 );
 
-// Fetch classes and event data if editing
-onMounted(async () => {
-  loading.value = true;
-
-  try {
-    // Set default visibility based on user role
-    if (isStudent.value) {
-      visibility.value = "PRIVATE";
-    }
-
-    // Fetch classes for dropdown
-    if (classStore.classes.length === 0) {
-      await classStore.fetchClasses();
-    }
-
-    // If editing, fetch event details
-    if (isEditing.value) {
-      await fetchEventDetails();
-    }
-  } catch (error) {
-    notificationStore.addNotification({
-      type: "error",
-      message: `Error initializing form: ${error.message}`,
-    });
-    console.error("Error initializing form:", error);
-  } finally {
-    loading.value = false;
-  }
-});
-
 // Fetch event details if editing
 const fetchEventDetails = async () => {
   try {
@@ -467,7 +437,6 @@ const fetchEventDetails = async () => {
       type: "error",
       message: `Error fetching event: ${error.message}`,
     });
-    console.error("Error fetching event:", error);
   }
 };
 
@@ -510,8 +479,9 @@ const handleSubmit = async () => {
       message: "Event updated successfully!",
     });
 
+    await eventStore.fetchEvents();
     // Navigate back to event view
-    router.push(`/event/${eventId.value}`);
+    router.push(`/events`);
   } catch (error) {
     notificationStore.addNotification({
       type: "error",
@@ -522,4 +492,34 @@ const handleSubmit = async () => {
     loading.value = false;
   }
 };
+
+// Fetch classes and event data if editing
+onMounted(async () => {
+  loading.value = true;
+
+  try {
+    // Set default visibility based on user role
+    if (isStudent.value) {
+      visibility.value = "PRIVATE";
+    }
+
+    // Fetch classes for dropdown
+    if (classStore.classes.length === 0) {
+      await classStore.fetchClasses();
+    }
+
+    // If editing, fetch event details
+    if (isEditing.value) {
+      await fetchEventDetails();
+    }
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: `Error initializing form: ${error.message}`,
+    });
+    console.error("Error initializing form:", error);
+  } finally {
+    loading.value = false;
+  }
+});
 </script>
