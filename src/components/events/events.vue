@@ -210,19 +210,12 @@ onMounted(async () => {
   });
 
   socket.on("eventUpdated", (data) => {
-    if (data && data.event && data.event.id) {
-      // Update the event in both arrays using the store method
-      eventStore.updateEvent(data.event);
-
-      // If we're on the event's page, force a refresh of the current page
-      if (
-        currentPage.value ===
-        Math.ceil(
-          eventStore.events.findIndex((e) => e.id === data.event.id) / limit
-        )
-      ) {
-        eventStore.fetchEvents({ page: currentPage.value, limit });
-      }
+    if (data && data.event) {
+      // Force a complete refresh of the events data
+      eventStore.allEvents = [];
+      
+      // This will trigger a complete refetch from the API
+      eventStore.fetchEvents({ page: currentPage.value, limit });
     }
   });
 });

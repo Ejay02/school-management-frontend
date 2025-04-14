@@ -18,7 +18,7 @@
               <label
                 for="title"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Title</label
+                >Title <span class='text-red-500'>*</span></label
               >
               <input
                 v-model="title"
@@ -32,14 +32,14 @@
               <Dropdown
                 class="w-1/2"
                 v-model="selectedClass"
-                label="Select Class"
+                label="Select Class <span class='text-red-500'>*</span>"
                 :options="classOptions"
                 emptyLabel="Select a class"
               />
               <CustomDropdown
                 class="w-1/2"
                 v-model="selectedSubject"
-                label="Select Subject"
+                label="Select Subject <span class='text-red-500'>*</span>"
                 :options="filteredSubjects"
                 placeholder="Select a subject"
                 :disabled="!selectedClass"
@@ -52,7 +52,7 @@
                 <label
                   for="day"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Day</label
+                  >Day <span class='text-red-500'>*</span></label
                 >
                 <select
                   v-model="day"
@@ -69,7 +69,7 @@
                 <label
                   for="startTime"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Start Time</label
+                  >Start Time <span class='text-red-500'>*</span></label
                 >
                 <input
                   type="time"
@@ -81,7 +81,7 @@
                 <label
                   for="endTime"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >End Time</label
+                  >End Time <span class='text-red-500'>*</span></label
                 >
                 <input
                   type="time"
@@ -99,7 +99,7 @@
               <label
                 for="description"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Description</label
+                >Description <span class='text-red-500'>*</span></label
               >
               <textarea
                 v-model="description"
@@ -113,7 +113,7 @@
               <label
                 for="quill"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Content</label
+                >Content <span class='text-red-500'>*</span></label
               >
               <div class="h-[calc(100%-28px)]">
                 <QuillEditor

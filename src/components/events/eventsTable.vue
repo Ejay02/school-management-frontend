@@ -50,13 +50,13 @@
                   </div>
                 </div>
               </span>
-             
             </div>
             <!--  -->
             <div class="flex">
-            <div class="font-semibold">{{ item?.title }}</div>
-             <span
-                v-if="eventStore.isNewEvent(item.id)"
+              <div class="font-semibold">{{ item?.title }}</div>
+              <span
+                v-if="eventStore.isNewEvent(item?.id) &&
+                !eventStore.isEventRead(item?.id)"
                 class="ml-2 inline-block px-2 py-1 text-xs font-semibold text-orange-600 bg-orange-100 border border-orange-600 rounded"
               >
                 New
@@ -127,13 +127,12 @@ const props = defineProps({
 });
 
 const userStore = useUserStore();
+const modalStore = useModalStore();
 const eventStore = useEventStore();
 
 const isCreator = computed(
   () => props.data[0].creatorId === userStore.userInfo.id
 );
-
-const modalStore = useModalStore();
 
 const showDelModal = (id, title, type) => {
   modalStore.deleteModal = true;

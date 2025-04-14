@@ -50,7 +50,7 @@ export const useAnnouncementStore = defineStore("announcement", {
               sortOrder: "DESC",
             },
           },
-          fetchPolicy: "no-cache",
+          fetchPolicy: "network-only",
         });
 
         this.announcements = res.data.getAllAnnouncements;
@@ -293,5 +293,19 @@ export const useAnnouncementStore = defineStore("announcement", {
     isAnnouncementRead(announcementId) {
       return this.readAnnouncements.includes(announcementId);
     },
+
+  async refetchAll() {
+      try {
+          await Promise.all([
+              this.fetchAnnouncements(),
+              this.fetchArchivedAnnouncements()
+          ]);
+          await this.fetchCreatorDetails(apolloClient);
+      } catch (error) {
+          this.error = error.message;
+          throw error;
+      }
+  },
+
   },
 });

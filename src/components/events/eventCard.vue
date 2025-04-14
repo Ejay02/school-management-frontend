@@ -34,8 +34,8 @@
 
             <span
               v-if="
-                eventStore.isNewEvent(event.id) &&
-                !eventStore.isEventRead(event.id)
+                eventStore.isNewEvent(event?.id) &&
+                !eventStore.isEventRead(event?.id)
               "
               class="ml-2 inline-block px-2 py-1 text-xs font-semibold text-orange-600 bg-orange-100 border border-orange-600 rounded"
             >

@@ -41,7 +41,7 @@ export const useEventStore = defineStore("eventStore", {
               params: {},
               filter: {},
             },
-            fetchPolicy: "no-cache",
+            fetchPolicy: "network-only",
           });
 
           this.allEvents = res.data.getEvents;
@@ -124,6 +124,26 @@ export const useEventStore = defineStore("eventStore", {
       return true;
     },
 
+    async refetchAll() {
+      try {
+          // Clear all cached data
+          this.allEvents = [];
+          this.events = [];
+          this.selectedEvent = null;
+          
+          // Fetch fresh data
+          await this.fetchEvents();
+          
+          // Clean up any expired markers
+          this.cleanupNewEventMarkers();
+          
+          return this.events;
+      } catch (error) {
+          this.error = error.message;
+          throw error;
+      }
+  },
+
     isNewEvent(eventId) {
       // Look for the event marker and check if it's within the 1-hour window
       const marker = this.newEventMarkers.find((m) => m.id === eventId);
@@ -155,26 +175,5 @@ export const useEventStore = defineStore("eventStore", {
 
       return now >= startTime && now <= endTime;
     },
-
-    updateEvent(updatedEvent) {
-      // Update events array
-      const eventsIndex = this.events.findIndex(event => event.id === updatedEvent.id);
-      if (eventsIndex !== -1) {
-        this.events.splice(eventsIndex, 1, updatedEvent);
-      }
-
-      // Update allEvents array
-      const allEventsIndex = this.allEvents.findIndex(event => event.id === updatedEvent.id);
-      if (allEventsIndex !== -1) {
-        this.allEvents.splice(allEventsIndex, 1, updatedEvent);
-      }
-
-      // If the updated event is the selected event, update it too
-      if (this.selectedEvent && this.selectedEvent.id === updatedEvent.id) {
-        this.selectedEvent = updatedEvent;
-      }
-
-      return eventsIndex !== -1 || allEventsIndex !== -1;
-    }
   },
 });

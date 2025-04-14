@@ -39,7 +39,7 @@
               <label
                 for="title"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Title</label
+                >Title <span class="text-red-500">*</span></label
               >
               <input
                 v-model="title"
@@ -53,14 +53,14 @@
               <Dropdown
                 class="w-1/2"
                 v-model="selectedClass"
-                label="Select Class"
+                label="Select Class <span class='text-red-500'>*</span>"
                 :options="classOptions"
                 emptyLabel="Select a class"
               />
               <CustomDropdown
                 class="w-1/2"
                 v-model="selectedSubject"
-                label="Select Subject"
+                label="Select Subject <span class='text-red-500'>*</span>"
                 :options="
                   filteredSubjects.map((subject) => ({
                     value: subject.id,
@@ -78,7 +78,7 @@
                 <label
                   for="date"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Date</label
+                  >Date <span class="text-red-500">*</span></label
                 >
                 <input
                   type="date"
@@ -90,7 +90,7 @@
                 <label
                   for="startTime"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Start Time</label
+                  >Start Time <span class="text-red-500">*</span></label
                 >
                 <input
                   type="time"
@@ -102,7 +102,7 @@
                 <label
                   for="endTime"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >End Time</label
+                  >End Time <span class="text-red-500">*</span></label
                 >
                 <input
                   type="time"
@@ -115,7 +115,9 @@
             <!-- Questions Section -->
             <div class="space-y-4">
               <div class="flex justify-between items-center">
-                <h3 class="text-lg font-medium">Questions</h3>
+                <h3 class="text-lg font-medium">
+                  Questions <span class="text-red-500">*</span>
+                </h3>
               </div>
 
               <!-- Default Question -->
@@ -138,9 +140,9 @@
                 <div class="space-y-4">
                   <div>
                     <label
-                      for="questionText"
+                      for="questionText "
                       class="block text-sm font-medium text-gray-700 mb-1"
-                      >Question Text</label
+                      >Question Text <span class="text-red-500">*</span></label
                     >
                     <QuillEditor
                       v-model:content="questions[0].content"
@@ -157,7 +159,7 @@
                         for="questionPoints"
                         class="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        Question Points
+                        Question Points <span class='text-red-500'>*</span>
                         <span class="text-xs text-gray-500">(min: 5)</span>
                       </label>
                       <input
@@ -203,7 +205,7 @@
                     <label
                       for="correctAnswer"
                       class="block text-sm font-medium text-gray-700 mb-1"
-                      >Correct Answer
+                      >Correct Answer <span class='text-red-500'>*</span>
                       <span class="text-xs text-gray-500 ml-1"
                         >(Only visible to teachers)</span
                       ></label
@@ -252,7 +254,7 @@
                     <label
                       for="questionText"
                       class="block text-sm font-medium text-gray-700 mb-1"
-                      >Question Text</label
+                      >Question Text <span class='text-red-500'>*</span></label
                     >
                     <QuillEditor
                       v-model:content="question.content"
@@ -269,7 +271,7 @@
                         for="questionPoints"
                         class="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        Question Points
+                        Question Points <span class='text-red-500'>*</span>
                         <span class="text-xs text-gray-500">(min: 5)</span>
                       </label>
                       <input
@@ -315,7 +317,7 @@
                     <label
                       for="correctAnswer"
                       class="block text-sm font-medium text-gray-700 mb-1"
-                      >Correct Answer
+                      >Correct Answer <span class='text-red-500'>*</span>
                       <span class="text-xs text-gray-500 ml-1"
                         >(Only visible to teachers)</span
                       >

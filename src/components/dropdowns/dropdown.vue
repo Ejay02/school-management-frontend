@@ -1,16 +1,16 @@
 <template>
-  <div class="relative ">
+  <div class="relative">
     <label :for="id" class="block text-sm font-medium text-gray-700 mb-1">
-      {{ label }}
+      <span v-html="label"></span>
     </label>
 
     <!-- Dropdown Button -->
     <button
       :id="id"
       @click="toggleDropdown"
-      class="w-full flex items-center justify-between px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500  rounded-md shadow-sm text-left"
+      class="w-full flex items-center justify-between px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm text-left"
     >
-      <span>{{ selectedValue || emptyLabel  }}</span>
+      <span>{{ selectedValue || emptyLabel }}</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="h-5 w-5 text-gray-400"

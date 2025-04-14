@@ -687,6 +687,8 @@ import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
 import { availableTargetRoles } from "../../utils/utility";
+import { useAnnouncementStore } from "../../store/announcementStore";
+
 import Dropdown from "../dropdowns/dropdown.vue";
 
 const modalStore = useModalStore();
@@ -694,6 +696,8 @@ const modalStore = useModalStore();
 const classStore = useClassStore();
 const teacherStore = useTeacherStore();
 const subjectStore = useSubjectStore();
+
+const announcementStore = useAnnouncementStore();
 
 const notificationStore = useNotificationStore();
 
@@ -890,6 +894,8 @@ const handleEdit = async () => {
           classId: getClassIdByName(selectedClass.value),
         },
       });
+
+      await announcementStore.refetchAll();
 
       notificationStore.addNotification({
         type: "success",

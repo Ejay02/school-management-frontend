@@ -474,12 +474,13 @@ const handleSubmit = async () => {
       },
     });
 
+await eventStore.refetchAll();
+
     notificationStore.addNotification({
       type: "success",
       message: "Event updated successfully!",
     });
 
-    await eventStore.fetchEvents();
     // Navigate back to event view
     router.push(`/events`);
   } catch (error) {
@@ -487,7 +488,6 @@ const handleSubmit = async () => {
       type: "error",
       message: `Error saving event: ${error.message}`,
     });
-    console.error("Error saving event:", error);
   } finally {
     loading.value = false;
   }

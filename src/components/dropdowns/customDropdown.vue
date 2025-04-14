@@ -1,7 +1,7 @@
 <template>
   <div class="relative">
     <label :for="id" class="block text-sm text-gray-600 mb-1">
-      {{ label }}
+      <span v-html="label"></span>
     </label>
 
     <button

@@ -25,7 +25,7 @@
               <label
                 for="name"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Name</label
+                >Name <span class="text-red-500">*</span></label
               >
               <input
                 v-model="name"
@@ -37,7 +37,7 @@
               <label
                 for="surname"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Surname</label
+                >Surname<span class="text-red-500">*</span></label
               >
               <input
                 v-model="surname"
@@ -53,7 +53,7 @@
               <label
                 for="username"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Username</label
+                >Username <span class="text-red-500">*</span></label
               >
               <input
                 v-model="username"
@@ -160,7 +160,7 @@
               <label
                 for="name"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Name</label
+                >Name <span class="text-red-500">*</span></label
               >
               <input
                 v-model="name"
@@ -171,7 +171,7 @@
               <label
                 for="surname"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Surname</label
+                >Surname <span class="text-red-500">*</span></label
               >
               <input
                 v-model="surname"
@@ -188,7 +188,7 @@
                 required
                 type="email"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >eMail</label
+                >eMail <span class="text-red-500">*</span></label
               >
               <input
                 v-model="email"
@@ -236,7 +236,7 @@
               <label
                 for="parentId"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Parent Id</label
+                >Parent Id <span class="text-red-500">*</span></label
               >
               <input
                 v-model="parentId"
@@ -260,22 +260,35 @@
 
         <!-- parent list -->
         <template v-if="source === 'parents'">
-          <div>
-            <label
-              for="parentName"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Name</label
-            >
-            <input
-              v-model="name"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
+          <div class="flex gap-2">
+            <div class="w-1/2">
+              <label
+                for="name"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Name <span class="text-red-500">*</span></label
+              >
+              <input
+                v-model="name"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
+            <div class="w-1/2">
+              <label
+                for="surname"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Surname <span class="text-red-500">*</span></label
+              >
+              <input
+                v-model="surname"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
           </div>
           <div>
             <label
               for="email"
               class="block text-sm font-medium text-gray-700 mb-1"
-              >Email</label
+              >Email <span class="text-red-500">*</span></label
             >
             <input
               v-model="email"
@@ -323,7 +336,7 @@
               <label
                 for="className"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Class Name</label
+                >Class Name <span class="text-red-500">*</span></label
               >
               <input
                 v-model="name"
@@ -335,7 +348,7 @@
               <label
                 for="capacity"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Capacity</label
+                >Capacity <span class="text-red-500">*</span></label
               >
               <input
                 v-model="capacity"
@@ -347,12 +360,11 @@
             </div>
           </div>
 
-          <!-- TODO  extract the id properly-->
           <div>
             <Dropdown
               class=""
               v-model="selectedTeacher"
-              label="Select Teacher"
+              label="Select Teacher <span class='text-red-500'>*</span>"
               :options="teacherNames"
               emptyLabel="Select a teacher"
             />
@@ -365,7 +377,7 @@
             <label
               for="subjectName"
               class="block text-sm font-medium text-gray-700 mb-1"
-              >Subject Name</label
+              >Subject Name <span class='text-red-500'>*</span></label
             >
             <input
               v-model="name"
@@ -377,7 +389,7 @@
             <Dropdown
               class="w-1/2"
               v-model="selectedTeacher"
-              label="Select Teacher"
+              label="Select Teacher <span class='text-red-500'>*</span>"
               :options="teacherNames"
               emptyLabel="Select a teacher"
             />
@@ -385,7 +397,7 @@
             <Dropdown
               class="w-1/2"
               v-model="selectedClass"
-              label="Select Class"
+              label="Select Class <span class='text-red-500'>*</span>"
               :options="classOptions"
               emptyLabel="Select a class"
             />
@@ -478,7 +490,7 @@
             <label
               for="title"
               class="block text-sm font-medium text-gray-700 mb-1"
-              >Title</label
+              >Title <span class='text-red-500'>*</span></label
             >
             <input
               type="text"
@@ -488,7 +500,7 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Content
+              >Content <span class='text-red-500'>*</span>
               <textarea
                 v-model="content"
                 rows="4"
@@ -502,7 +514,7 @@
             <Dropdown
               class="w-1/2"
               v-model="selectedClass"
-              label="Select Class [Optional]"
+              label="Select Class "
               :options="classOptions"
               emptyLabel="Select a class"
             />
@@ -511,7 +523,7 @@
               <label
                 for="targetRoles"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Target Audience
+                >Target Audience <span class='text-red-500'>*</span>
               </label>
 
               <!-- Dropdown for selecting roles -->
@@ -598,7 +610,7 @@
               <label
                 for="date"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Date</label
+                >Date <span class='text-red-500'>*</span></label
               >
               <input
                 type="date"
@@ -611,7 +623,7 @@
               <label
                 for="startTime"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Start Time</label
+                >Start Time <span class='text-red-500'>*</span></label
               >
               <input
                 type="time"
@@ -623,7 +635,7 @@
               <label
                 for="endTime"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >End Time</label
+                >End Time <span class='text-red-500'>*</span></label
               >
               <input
                 type="time"
@@ -674,7 +686,7 @@
               <label
                 for="location"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Location</label
+                >Location <span class='text-red-500'>*</span></label
               >
               <input
                 type="text"
@@ -691,7 +703,7 @@
             <label
               for="title"
               class="block text-sm font-medium text-gray-700 mb-1"
-              >Title</label
+              >Title <span class='text-red-500'>*</span></label
             >
             <input
               type="text"
@@ -702,7 +714,7 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Content
+              >Content <span class='text-red-500'>*</span>
               <textarea
                 v-model="content"
                 rows="4"
@@ -716,7 +728,7 @@
             <Dropdown
               class="w-1/2"
               v-model="selectedClass"
-              label="Select Class [Optional]"
+              label="Select Class"
               :options="classOptions"
               emptyLabel="Select a class"
             />
@@ -725,7 +737,7 @@
               <label
                 for="targetRoles"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Target Audience
+                >Target Audience <span class='text-red-500'>*</span>
               </label>
 
               <!-- Dropdown for selecting roles -->
@@ -808,7 +820,7 @@
           </div>
         </template>
 
-              <!-- buttons -->
+        <!-- buttons -->
         <div class="flex justify-end gap-2 mt-4">
           <button
             class="bg-white border border-gray-300 cursor-pointer text-gray-600 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
@@ -821,13 +833,31 @@
             class="hover:bg-purple-400 text-white py-2 px-4 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
             @click="handleAdd"
             :disabled="!isFormValid || isLoading"
-            :class="{ 'opacity-50 cursor-not-allowed': !isFormValid || isLoading }"
+            :class="{
+              'opacity-50 cursor-not-allowed': !isFormValid || isLoading,
+            }"
           >
             <span v-if="!isLoading">Add</span>
             <div v-else class="flex items-center">
-              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <svg
+                class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
               Adding...
             </div>
@@ -843,10 +873,10 @@ import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import { computed, onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
 import {
-createAnnouncement,
-createClass,
-createEvent,
-createSubject,
+  createAnnouncement,
+  createClass,
+  createEvent,
+  createSubject,
 } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
@@ -855,15 +885,13 @@ import { useTeacherStore } from "../../store/teacherStore";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
 import {
-availableTargetRoles,
-eventVisibilityOptions,
+  availableTargetRoles,
+  eventVisibilityOptions,
 } from "../../utils/utility.js";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
 
-
 const isLoading = ref(false);
-
 
 const modalStore = useModalStore();
 const classStore = useClassStore();
@@ -1039,7 +1067,7 @@ watch(
 );
 
 const handleCancel = () => {
-   if (isLoading.value) return;
+  if (isLoading.value) return;
   modalStore.addModal = false;
   modalStore.modalId = null;
 };
@@ -1091,7 +1119,7 @@ const isFormValid = computed(() => {
 });
 
 const handleAdd = async () => {
-   if (!isFormValid.value) return;
+  if (!isFormValid.value) return;
 
   try {
     isLoading.value = true;
@@ -1260,9 +1288,11 @@ const handleAdd = async () => {
   } catch (error) {
     notificationStore.addNotification({
       type: "error",
-      message: `Error creating ${pluralToSingular(source.value)}: ${error.message}`,
+      message: `Error creating ${pluralToSingular(source.value)}: ${
+        error.message
+      }`,
     });
-  }finally {
+  } finally {
     isLoading.value = false;
   }
 };
