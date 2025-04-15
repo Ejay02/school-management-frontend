@@ -13,18 +13,18 @@
       <div
         v-for="integration in integrations"
         :key="integration.id"
-        class="bg-gray-100 rounded-lg shadow p-6 border border-gray-200"
+        class="bg-gray-100 rounded-lg shadow p-4 sm:p-6 border border-gray-200"
       >
-        <div class="flex items-start justify-between">
-          <div class="flex items-center space-x-4">
-            <div class="">
+        <div class="flex flex-col sm:flex-row items-start justify-between">
+          <div class="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 w-full">
+            <div class="flex justify-center w-full sm:w-auto">
               <img
                 :src="integration.icon"
                 alt="Integration Logo"
-                class="w-28 h-28"
+                class="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28"
               />
             </div>
-            <div>
+            <div class="text-center sm:text-left">
               <h3 class="text-lg font-medium text-gray-600">
                 {{ integration.name }}
               </h3>
@@ -35,9 +35,9 @@
           </div>
         </div>
 
-        <div class="mt-6">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2">
+        <div class="mt-4 sm:mt-6">
+          <div class="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
+            <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
               <span
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ring-1 ring-inset"
                 :class="getStatusColor(integration.status)"
@@ -49,7 +49,7 @@
               </span>
             </div>
 
-            <div class="flex space-x-2">
+            <div class="flex flex-wrap justify-center sm:justify-end gap-2">
               <button
                 v-if="integration.status === 'connected'"
                 @click="refreshIntegration(integration.id)"

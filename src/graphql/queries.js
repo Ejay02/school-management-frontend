@@ -704,3 +704,26 @@ export const getUnreadAnnouncementsCount = gql`
     getUnreadAnnouncementsCount
   }
 `;
+
+export const getAllAdminUsers = gql`
+  query getAllAdminUsers {
+    getAllAdminUsers {
+      admins {
+        id
+        img
+        username
+        email
+        role
+      }
+      teachers {
+        id
+        img
+        username
+        name
+        surname
+        email
+        role
+      }
+    }
+  }
+`;

@@ -255,7 +255,7 @@ export const editAnnouncement = gql`
       id
       title
       content
-     createdAt
+      createdAt
       classId
       targetRoles
     }
@@ -625,6 +625,18 @@ export const deleteSubject = gql`
     deleteSubject(subjectId: $subjectId) {
       success
       message
+    }
+  }
+`;
+
+export const assignAdminRole = gql`
+  mutation assignAdminRole($role: String!, $targetId: String!) {
+    assignAdminRole(role: $role, targetId: $targetId) {
+      id
+     email
+     img
+     role
+     username
     }
   }
 `;

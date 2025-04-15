@@ -100,7 +100,7 @@ import { useEventStore } from "../../store/eventStore";
 import { useLessonStore } from "../../store/lessonStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
-import { useAnnouncementStore } from "../../store/announcementStore";
+
 import { useUserStore } from "../../store/userStore";
 
 const modalStore = useModalStore();
@@ -108,7 +108,7 @@ const classStore = useClassStore();
 const subjectStore = useSubjectStore();
 const lessonStore = useLessonStore();
 const userStore = useUserStore(); 
-const announcementStore = useAnnouncementStore(); 
+
 const eventStore = useEventStore();
 const router = useRouter();
 

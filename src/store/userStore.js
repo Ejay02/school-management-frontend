@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import { getUserById } from "../graphql/queries";
+import { getAllAdminUsers, getUserById } from "../graphql/queries";
 import { menuItems } from "../utils";
 import { useNotificationStore } from "./notification";
 
@@ -33,6 +33,14 @@ export const useUserStore = defineStore("user", () => {
   const notificationStore = useNotificationStore();
 
   const userCache = ref({});
+  const loading = ref(false);
+  const error = ref(null);
+
+  const allUsers = ref({ admins: [], teachers: [] });
+  const paginatedUsers = ref({ admins: [], teachers: [] });
+  const totalPages = ref(1);
+  const hasMore = ref(false);
+  const totalCount = ref(0);
 
   // Updated setUser to handle persistence and refresh token
   const setUser = (user) => {
@@ -71,7 +79,6 @@ export const useUserStore = defineStore("user", () => {
         type: "warning",
         message: `Invalid role specified: ${role}`,
       });
-      // console.error("Invalid role specified");
     }
   };
 
@@ -117,6 +124,9 @@ export const useUserStore = defineStore("user", () => {
       return userCache.value[id];
     }
 
+    loading.value = true;
+    error.value = null;
+
     try {
       const { data } = await apolloClient.query({
         query: getUserById,
@@ -130,19 +140,99 @@ export const useUserStore = defineStore("user", () => {
       }
       return null;
     } catch (error) {
-      console.warn(`Failed to fetch user details for ID ${id}:`, error);
+      notificationStore.addNotification({
+        type: "error",
+        message: `Failed to fetch user details for ID ${id}:`,
+        error,
+      });
+
       return null;
+    } finally {
+      loading.value = false;
     }
   };
 
+  const fetchAdminUsers = async (
+    apolloClient,
+    { page = 1, limit = 10 } = {}
+  ) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      if (
+        allUsers.value.admins.length === 0 &&
+        allUsers.value.teachers.length === 0
+      ) {
+        const { data } = await apolloClient.query({
+          query: getAllAdminUsers,
+          fetchPolicy: "network-only",
+        });
+
+        if (data?.getAllAdminUsers) {
+          allUsers.value = {
+            admins: data.getAllAdminUsers.admins || [],
+            teachers: data.getAllAdminUsers.teachers || [],
+          };
+
+          totalCount.value =
+            allUsers.value.admins.length + allUsers.value.teachers.length;
+          totalPages.value = Math.ceil(totalCount.value / limit);
+        }
+      }
+      const allCombined = [
+        ...allUsers.value.admins,
+        ...allUsers.value.teachers,
+      ];
+      const start = (page - 1) * limit;
+      const end = start + limit;
+      const paginatedCombined = allCombined.slice(start, end);
+
+      // Set hasMore flag
+      hasMore.value = end < totalCount.value;
+
+      return {
+        admins: paginatedCombined.filter(
+          (user) => user.role === "ADMIN" || user.role === "admin"
+        ),
+        teachers: paginatedCombined.filter(
+          (user) => user.role === "TEACHER" || user.role === "teacher"
+        ),
+        totalPages: totalPages.value,
+        hasMore: hasMore.value,
+      };
+      // return { admins: [], teachers: [] };
+    } catch (error) {
+      notificationStore.addNotification({
+        type: "error",
+        message: "Failed to fetch admin users",
+      });
+      return { admins: [], teachers: [] };
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const refreshUsers = async (apolloClient, paginationOptions) => {
+    // Reset users to force a fresh fetch
+    allUsers.value = { admins: [], teachers: [] };
+    return await fetchAdminUsers(apolloClient, paginationOptions);
+  };
+
   return {
+    error,
     setUser,
     setRole,
+    loading,
     clearUser,
+    totalPages,
+    hasMore,
+    totalCount,
     userInfo,
     hasAccess,
     currentRole,
+    refreshUsers,
     findUserById,
+    fetchAdminUsers,
     filteredMenuItems,
   };
 });

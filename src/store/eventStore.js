@@ -126,23 +126,23 @@ export const useEventStore = defineStore("eventStore", {
 
     async refetchAll() {
       try {
-          // Clear all cached data
-          this.allEvents = [];
-          this.events = [];
-          this.selectedEvent = null;
-          
-          // Fetch fresh data
-          await this.fetchEvents();
-          
-          // Clean up any expired markers
-          this.cleanupNewEventMarkers();
-          
-          return this.events;
+        // Clear all cached data
+        this.allEvents = [];
+        this.events = [];
+        this.selectedEvent = null;
+
+        // Fetch fresh data
+        await this.fetchEvents();
+
+        // Clean up any expired markers
+        this.cleanupNewEventMarkers();
+
+        return this.events;
       } catch (error) {
-          this.error = error.message;
-          throw error;
+        this.error = error.message;
+        throw error;
       }
-  },
+    },
 
     isNewEvent(eventId) {
       // Look for the event marker and check if it's within the 1-hour window
