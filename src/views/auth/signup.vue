@@ -57,15 +57,15 @@
           <div class="flex gap-4">
             <div class="flex-1">
               <label
-                for="firstName"
+                for="name"
                 class="text-indigo-600 block text-sm/6 font-medium"
                 >Name</label
               >
               <div class="mt-1">
                 <input
                   type="text"
-                  v-model="formData.firstName"
-                  id="firstName"
+                  v-model="formData.name"
+                  id="name"
                   autofocus
                   placeholder="Jane"
                   required
@@ -76,15 +76,15 @@
 
             <div class="flex-1">
               <label
-                for="lastName"
+                for="surname"
                 class="block text-sm/6 font-medium text-indigo-600"
                 >Surname</label
               >
               <div class="mt-1">
                 <input
                   type="text"
-                  v-model="formData.lastName"
-                  id="lastName"
+                  v-model="formData.surname"
+                  id="surname"
                   placeholder="Bond"
                   required
                   class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurpleLight sm:text-sm/6"
@@ -212,6 +212,7 @@
             </div>
           </div>
 
+          <!-- btn -->
           <div>
             <button
               :disabled="!isFormValid || isLoading"
@@ -261,7 +262,7 @@
     <div class="right hidden lg:block lg:w-1/2">
       <img
         src="/kimberly-farmer-lUaaKCUANVI-unsplash.jpg"
-        alt="Background Image"
+        alt="Background picture"
         class="h-full w-full object-cover"
       />
     </div>
@@ -269,18 +270,19 @@
 </template>
 
 <script setup>
-import {
-  adminSignupMutation,
-  teacherSignupMutation,
-  studentSignupMutation,
-  parentSignupMutation,
-} from "../../graphql/mutations";
-import { useRouter } from "vue-router";
-import { useUserStore } from "../../store/userStore";
-import { ref, reactive, watch, computed } from "vue";
-import { useNotificationStore } from "../../store/notification";
 import { useMutation } from "@vue/apollo-composable";
+import { computed, reactive, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import { useNavigation } from "../../composables/useNavigation";
+import {
+adminSignupMutation,
+parentSignupMutation,
+studentSignupMutation,
+teacherSignupMutation,
+} from "../../graphql/mutations";
+import { useNotificationStore } from "../../store/notification";
+import { useUserStore } from "../../store/userStore";
+import { availableTargetRoles } from "../../utils/utility";
 
 const router = useRouter();
 const showPassword = ref(false);
@@ -307,8 +309,8 @@ const defaultClasses = {
 };
 
 const formData = reactive({
-  firstName: "",
-  lastName: "",
+  name: "",
+  surname: "",
   username: "",
   email: "",
   password: "",
@@ -316,29 +318,25 @@ const formData = reactive({
   selectedClass: "",
 });
 
-const Roles = {
-  ADMIN: "ADMIN",
-  SUPER_ADMIN: "SUPER_ADMIN",
-  TEACHER: "TEACHER",
-  STUDENT: "STUDENT",
-  PARENT: "PARENT",
-};
+const Roles = Object.fromEntries(
+  availableTargetRoles.map(role => [role.label.toUpperCase().replace('S', ''), role.value])
+);
 
 const isFormValid = computed(() => {
   if (!selectedRole.value) return false;
 
   const commonFieldsFilled =
-    formData.value.firstName &&
-    formData.value.lastName &&
-    formData.value.username &&
-    formData.value.email &&
-    formData.value.password;
+    formData.name &&
+    formData.surname &&
+    formData.username &&
+    formData.email &&
+    formData.password;
 
   if (selectedRole.value === "student") {
     return (
       commonFieldsFilled &&
-      formData.value.parentId &&
-      formData.value.selectedClass
+      formData.parentId &&
+      formData.selectedClass
     );
   }
 
@@ -356,12 +354,7 @@ const { mutate: studentSignup, loading: studentLoading } = useMutation(
 const { mutate: parentSignup, loading: parentLoading } =
   useMutation(parentSignupMutation);
 
-watch(
-  [adminLoading, teacherLoading, studentLoading, parentLoading],
-  ([admin, teacher, student, parent]) => {
-    isLoading.value = admin || teacher || student || parent;
-  }
-);
+
 
 const handleSubmit = async () => {
   if (!isFormValid.value || isLoading.value) return;
@@ -370,8 +363,8 @@ const handleSubmit = async () => {
     // Prepare base input
     const baseInput = {
       username: formData.username,
-      name: formData.firstName,
-      surname: formData.lastName,
+      name: formData.name,
+      surname: formData.surname,
       password: formData.password,
       email: formData.email,
     };
@@ -440,7 +433,7 @@ const handleSubmit = async () => {
 
     notificationStore.addNotification({
       type: "success",
-      message: `Welcome ${userData?.name}.toUpperCase()!`,
+      message: `Welcome ${userData?.username}!`,
     });
   } catch (error) {
     notificationStore.addNotification({
@@ -449,6 +442,13 @@ const handleSubmit = async () => {
     });
   }
 };
+
+watch(
+  [adminLoading, teacherLoading, studentLoading, parentLoading],
+  ([admin, teacher, student, parent]) => {
+    isLoading.value = admin || teacher || student || parent;
+  }
+);
 </script>
 
 <style scoped></style>

@@ -202,9 +202,10 @@ export const useUserStore = defineStore("user", () => {
       };
       // return { admins: [], teachers: [] };
     } catch (error) {
+      console.log('error:', error)
       notificationStore.addNotification({
         type: "error",
-        message: "Failed to fetch admin users",
+        message: `${error.message}`,
       });
       return { admins: [], teachers: [] };
     } finally {

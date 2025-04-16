@@ -101,28 +101,26 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed, watch } from 'vue';
+import { computed, onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
+import { assignAdminRole } from "../../graphql/mutations";
+import { useNotificationStore } from "../../store/notification";
+import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
+import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
-import EmptyState from "../emptyState.vue";
 import Pagination from "../pagination.vue";
-import { useModalStore } from "../../store/useModalStore";
+
+const userStore = useUserStore();
+const modalStore = useModalStore();
+const notificationStore = useNotificationStore();
 
 const users = ref([]);
 const limit = 10;
 const currentPage = ref(1);
-
-const userStore = useUserStore();
-const modalStore = useModalStore();
 const loading = computed(() => userStore.loading);
 const error = computed(() => userStore.error);
-
-// Watch for page changes
-watch(currentPage, (newPage) => {
-  fetchUsers(newPage);
-});
 
 const handlePageChange = (newPage) => {
   currentPage.value = newPage;
@@ -135,17 +133,54 @@ const showDelModal = (id, title, type) => {
   modalStore.source = type;
 };
 
-const updateUserRole = (userId, newRole) => {
-  console.log(`Updating user ${userId} role to ${newRole}`);
-  // Here you would implement the actual role update logic
-  // For example, calling a mutation to update the user's role in the database
+const updateUserRole = async (userId, newRole) => {
+  try {
+    userStore.loading = true;
+
+    const uppercaseRole = newRole.toUpperCase();
+
+    // Call the mutation to update the user's role
+    const { data } = await apolloClient.mutate({
+      mutation: assignAdminRole,
+      variables: {
+        role: uppercaseRole,
+        targetId: userId,
+      },
+    });
+
+    if (data && data.assignAdminRole) {
+      notificationStore.addNotification({
+        type: "success",
+        message: `Role updated successfully`,
+      });
+
+      // Update the user's role in the local state
+      const updatedUser = users.value.find((user) => user.id === userId);
+      if (updatedUser) {
+        updatedUser.role = newRole;
+      }
+
+      await userStore.refreshUsers(apolloClient, {
+        page: currentPage.value,
+        limit,
+      });
+    }
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: `Failed to update user role: ${error.message}`,
+    });
+  } finally {
+    // Reset loading state
+    userStore.loading = false;
+  }
 };
 
 const fetchUsers = async (page = 1) => {
   try {
-    const { admins, teachers } = await userStore.fetchAdminUsers(apolloClient, { 
-      page, 
-      limit 
+    const { admins, teachers } = await userStore.fetchAdminUsers(apolloClient, {
+      page,
+      limit,
     });
 
     // Format admin users
@@ -180,18 +215,25 @@ const fetchUsers = async (page = 1) => {
 
     // Combine both arrays
     let combinedUsers = [...formattedAdmins, ...formattedTeachers];
-    
+
     // Check if current user is in the list
-    const currentUserInList = combinedUsers.some(user => user.id === userStore.userInfo.id);
-    
+    const currentUserInList = combinedUsers.some(
+      (user) => user.id === userStore.userInfo.id
+    );
+
     // If current user is not in the list, fetch them separately and add to the list
     if (!currentUserInList && userStore.userInfo.id) {
       try {
-        const currentUser = await userStore.findUserById(userStore.userInfo.id, apolloClient);
+        const currentUser = await userStore.findUserById(
+          userStore.userInfo.id,
+          apolloClient
+        );
         if (currentUser) {
-          const name = currentUser.name || currentUser.username?.split(" ")[0] || "";
-          const surname = currentUser.surname || currentUser.username?.split(" ")[1] || "";
-          
+          const name =
+            currentUser.name || currentUser.username?.split(" ")[0] || "";
+          const surname =
+            currentUser.surname || currentUser.username?.split(" ")[1] || "";
+
           combinedUsers.push({
             id: currentUser.id,
             name: currentUser.username || `${name} ${surname}`.trim(),
@@ -206,13 +248,19 @@ const fetchUsers = async (page = 1) => {
         console.error("Failed to fetch current user:", err);
       }
     }
-    
+
     users.value = combinedUsers;
   } catch (err) {
-    console.error("Failed to fetch users:", err);
-    error.value = "Failed to load users. Please try again later.";
+    notificationStore.addNotification({
+      type: "error",
+      message: `Failed to load users. Please try again later.: ${err.message}`,
+    });
   }
 };
+
+watch(currentPage, (newPage) => {
+  fetchUsers(newPage);
+});
 
 onMounted(() => {
   fetchUsers(currentPage.value);
