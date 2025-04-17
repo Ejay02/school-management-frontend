@@ -37,7 +37,7 @@ export const useUserStore = defineStore("user", () => {
   const error = ref(null);
 
   const allUsers = ref({ admins: [], teachers: [] });
-  const paginatedUsers = ref({ admins: [], teachers: [] });
+  // const paginatedUsers = ref({ admins: [], teachers: [] });
   const totalPages = ref(1);
   const hasMore = ref(false);
   const totalCount = ref(0);
@@ -200,9 +200,7 @@ export const useUserStore = defineStore("user", () => {
         totalPages: totalPages.value,
         hasMore: hasMore.value,
       };
-      // return { admins: [], teachers: [] };
     } catch (error) {
-      console.log('error:', error)
       notificationStore.addNotification({
         type: "error",
         message: `${error.message}`,

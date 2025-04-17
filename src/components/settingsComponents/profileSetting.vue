@@ -10,11 +10,20 @@
           class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6"
         >
           <div class="relative">
+            <!-- Use profile preview or user's image from userStore -->
             <img
-              :src="profilePreview || user.profileImage"
+              v-if="profilePreview || userStore?.userInfo?.img"
+              :src="profilePreview || userStore?.userInfo?.img"
               class="h-32 w-32 rounded-full object-cover border-2 border-white shadow-lg"
-              alt="Profile image"
+              alt="Profile avatar"
             />
+            <!-- Fallback to initials if no image is available -->
+            <div
+              v-else
+              class="h-32 w-32 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200 text-2xl"
+            >
+              {{ capitalizedName[0] }}{{ capitalizedSurname[0] }}
+            </div>
             <button
               type="button"
               @click="$refs.fileInput.click()"
@@ -45,24 +54,26 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label
-                  for="firstname"
+                  for="name"
                   class="block text-sm font-medium text-gray-500"
                   >First Name</label
                 >
                 <input
                   type="text"
-                  v-model="formData.firstName"
+                  v-model="formData.name"
                   required
                   class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-500"
+                <label
+                  for="surname"
+                  class="block text-sm font-medium text-gray-500"
                   >Last Name</label
                 >
                 <input
                   type="text"
-                  v-model="formData.lastName"
+                  v-model="formData.surname"
                   required
                   class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                 />
@@ -72,7 +83,9 @@
             <!-- Username and DOB Fields -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="">
-                <label class="block text-sm font-medium text-gray-500"
+                <label
+                  for="username"
+                  class="block text-sm font-medium text-gray-500"
                   >Username</label
                 >
                 <input
@@ -84,7 +97,7 @@
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-500"
+                <label for="dob" class="block text-sm font-medium text-gray-500"
                   >Date of Birth</label
                 >
                 <input
@@ -113,24 +126,36 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import { computed, reactive, ref } from "vue";
+import { useUserStore } from "../../store/userStore";
+import { apolloClient } from "../../../apollo-client";
+import { useNotificationStore } from "../../store/notification";
 
-const user = {
-  name: "John Doe",
-  username: "johndoe",
-  dob: "1990-01-01",
-  profileImage:
-    "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-  emailNotifications: true,
-  pushNotifications: false,
+const userStore = useUserStore();
+const notificationStore = useNotificationStore();
+
+// Helper function to capitalize first letter
+const capitalize = (str) => {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
+const capitalizedName = computed(() => capitalize(userStore.userInfo.name));
+const capitalizedSurname = computed(() =>
+  capitalize(userStore.userInfo.surname)
+);
+
+// Initialize form data with user info from store
 const formData = reactive({
-  name: user.name,
-  username: user.username,
-  dob: user.dob,
-  emailNotifications: user.emailNotifications,
-  pushNotifications: user.pushNotifications,
+  name: userStore.userInfo.name || "",
+  surname: userStore.userInfo.surname || "",
+  username:
+    userStore.userInfo.username ||
+    userStore.userInfo.email?.split("@")[0] ||
+    "",
+  dob: userStore.userInfo.dob || "",
+  emailNotifications: true,
+  pushNotifications: false,
 });
 
 const profilePreview = ref(null);
@@ -139,6 +164,15 @@ const fileInput = ref(null);
 const handleImageChange = (event) => {
   const file = event.target.files[0];
   if (file) {
+    // Check file size (1MB max)
+    if (file.size > 1024 * 1024) {
+      notificationStore.addNotification({
+        type: "error",
+        message: "File size exceeds 1MB limit",
+      });
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       profilePreview.value = e.target.result;
@@ -150,13 +184,35 @@ const handleImageChange = (event) => {
 const saveSettings = async () => {
   try {
     console.log("Saving settings:", {
-      ...formData,
+      name: formData.name,
+      surname: formData.surname,
+      username: formData.username,
+      dob: formData.dob,
       profileImage: profilePreview.value,
     });
-    alert("Settings saved successfully!");
+
+    // Update local user store (this is a placeholder - )
+    userStore.setUser({
+      ...userStore.userInfo,
+      name: formData.name,
+      surname: formData.surname,
+      username: formData.username,
+      dob: formData.dob,
+      img: profilePreview.value || userStore.userInfo.img,
+      userId: userStore.userInfo.id,
+    });
+
+    await userStore.refreshUsers(apolloClient, {});
+
+    notificationStore.addNotification({
+      type: "success",
+      message: "Profile updated successfully!",
+    });
   } catch (error) {
-    console.error("Error saving settings:", error);
-    alert("Error saving settings. Please try again.");
+    notificationStore.addNotification({
+      type: "error",
+      message: `Error saving settings. Please try again. ${error.message}`,
+    });
   }
 };
 </script>

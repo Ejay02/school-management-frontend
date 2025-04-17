@@ -29,8 +29,8 @@
               v-else
               class="w-10 h-10 rounded-full mr-3 bg-eduPurple flex items-center justify-center font-bold"
             >
-              {{ item?.name[0].toUpperCase()
-              }}{{ item?.surname[0].toUpperCase() }}
+              {{ item?.name[0]?.toUpperCase() || 'N'
+              }}{{ item?.surname[0].toUpperCase() || 'A' }}
             </div>
           </div>
 

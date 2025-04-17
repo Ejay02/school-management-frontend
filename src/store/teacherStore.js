@@ -13,6 +13,8 @@ export const useTeacherStore = defineStore("teacherStore", {
     totalPages: 1,
     totalCount: 0,
   }),
+
+
   actions: {
     async fetchTeachers({
       page = 1,
@@ -32,10 +34,10 @@ export const useTeacherStore = defineStore("teacherStore", {
 
           this.allTeachers = data.getAllTeachers.map((teacher) => ({
             ...teacher,
-            teacherId: teacher.id,
-            photo: teacher.img,
-            subjects: teacher.subjects.map((subject) => subject.name),
-            classes: teacher.classes || [],
+            teacherId: teacher?.id,
+            photo: teacher?.img,
+            subjects: teacher?.subjects.map((subject) => subject.name),
+            classes: teacher?.classes || [],
           }));
 
           this.totalCount = this.allTeachers.length;
@@ -48,6 +50,7 @@ export const useTeacherStore = defineStore("teacherStore", {
         this.teachers = this.allTeachers.slice(start, end);
         this.hasMore = end < this.totalCount;
       } catch (error) {
+        console.log('error:', error)
         this.error = error;
       } finally {
         this.loading = false;
