@@ -3,7 +3,7 @@
     <div v-if="loading" class="flex justify-center items-center py-8">
       <LoadingScreen message="Loading announcements..." />
     </div>
-    <div v-else-if="error" class="  w-full">
+    <div v-else-if="error" class="w-full">
       <ErrorScreen :message="error" />
     </div>
     <div v-else>
@@ -64,7 +64,7 @@
       <!-- Announcements list -->
       <div v-else class="space-y-4 border-t pt-4">
         <div
-          v-for="announcement in filteredAnnouncements"
+          v-for="announcement in displayedAnnouncements"
           :key="announcement.id"
           class="bg-white rounded-lg shadow-sm overflow-hidden transform transition-all hover:scale-105 hover:shadow-xl"
           :class="{
@@ -205,6 +205,16 @@
           </div>
         </div>
       </div>
+
+      <!-- Loading indicator for infinite scroll -->
+      <div v-if="isLoadingMore" class="flex justify-center items-center py-4">
+        <div
+          class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"
+        ></div>
+      </div>
+
+      <!-- Intersection observer target element -->
+      <div ref="loadMoreTrigger" class="h-4"></div>
     </div>
   </div>
 </template>
@@ -382,7 +392,7 @@ const setupSocketConnection = () => {
       }
     }
   });
-};
+}
 
 useStorageSync("readAnnouncements", (newReadAnnouncements) => {
   announcementStore.readAnnouncements = newReadAnnouncements || [];
@@ -398,6 +408,83 @@ onMounted(async () => {
   await announcementStore.fetchCreatorDetails(apolloClient);
 
   setupSocketConnection();
+
+  // Setup infinite scroll after component is mounted
+  const cleanupObserver = setupInfiniteScroll();
+
+  // Cleanup observer on component unmount
+  onUnmounted(() => {
+    if (cleanupObserver) cleanupObserver();
+
+    socket.off("newAnnouncement");
+    socket.off("announcementDeleted");
+    socket.off("readStatus");
+    socket.off("announcementArchived");
+    socket.off("announcementDeleted");
+    socket.off("announcementArchiveStatus");
+  });
+});
+
+// Infinite scroll variables
+const pageSize = 5;
+const currentPage = ref(1);
+const isLoadingMore = ref(false);
+const loadMoreTrigger = ref(null);
+
+// Computed property for displayed announcements
+const displayedAnnouncements = computed(() => {
+  const endIndex = currentPage.value * pageSize;
+  return filteredAnnouncements.value.slice(0, endIndex);
+});
+
+// Function to load more announcements
+const loadMoreAnnouncements = async () => {
+  if (isLoadingMore.value) return;
+
+  if (displayedAnnouncements.value.length >= filteredAnnouncements.value.length) {
+    return; // All announcements are already displayed
+  }
+
+  isLoadingMore.value = true;
+
+  // Simulate loading delay (remove in production if not needed)
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  currentPage.value++;
+  isLoadingMore.value = false;
+};
+
+// Setup intersection observer for infinite scroll
+const setupInfiniteScroll = () => {
+  if (!loadMoreTrigger.value) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        loadMoreAnnouncements();
+      }
+    },
+    { threshold: 0.1 }
+  );
+
+  observer.observe(loadMoreTrigger.value);
+
+  // Cleanup function
+  return () => {
+    if (loadMoreTrigger.value) {
+      observer.unobserve(loadMoreTrigger.value);
+    }
+  };
+};
+
+// Reset pagination when filters change
+watch([searchQuery, selectedCategory, selectedTargetRole], () => {
+  currentPage.value = 1;
+});
+
+// Reset pagination when announcements data changes
+watch(announcements, () => {
+  currentPage.value = 1;
 });
 
 onUnmounted(() => {

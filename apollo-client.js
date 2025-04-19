@@ -52,6 +52,12 @@ const authLink = setContext((_, { headers }) => {
 
 const httpLink = createHttpLink({
   uri: `${import.meta.env.VITE_API_URL}/graphql`,
+    // Enable file uploads by setting these options
+    includeExtensions: true,
+    credentials: 'same-origin',
+    headers: {
+      'Apollo-Require-Preflight': 'true'
+    }
 });
 
 const cache = new InMemoryCache();

@@ -507,8 +507,6 @@
           </div>
         </template>
 
-      
-
         <!-- announcement -->
         <template v-else-if="source === 'announcementList'">
           <div>

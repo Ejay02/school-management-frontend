@@ -640,3 +640,69 @@ export const assignAdminRole = gql`
     }
   }
 `;
+
+
+
+export const updateAdminProfile = gql`
+  mutation UpdateAdminProfile($input: UpdateProfileInput!) {
+    updateAdminProfile(input: $input) {
+      id
+      name
+      surname
+      username
+      img
+      email
+      dateOfBirth
+    }
+  }
+`;
+
+export const updateTeacherProfile = gql`
+  mutation UpdateTeacherProfile($input: UpdateProfileInput!) {
+    updateTeacherProfile(input: $input) {
+      id
+      name
+      surname
+      username
+      email
+      address
+      bloodType
+      dateOfBirth
+      phone
+      img
+      sex
+    }
+  }
+`;
+
+export const updateStudentProfile = gql`
+  mutation UpdateStudentProfile($input: UpdateProfileInput!) {
+    updateStudentProfile(input: $input) {
+      id
+      name
+      surname
+      email
+      address
+      bloodType
+      dateOfBirth
+      img
+      phone
+      sex
+    }
+  }
+`;
+
+export const updateParentProfile = gql`
+  mutation UpdateParentProfile($input: UpdateProfileInput!) {
+    updateParentProfile(input: $input) {
+      id
+      name
+      surname
+      email
+      img
+      dateOfBirth
+    }
+  }
+`;
+
+

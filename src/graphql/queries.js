@@ -32,6 +32,7 @@ export const getAllAdminsQuery = gql`
       email
       role
       img
+      dateOfBirth
     }
   }
 `;
@@ -48,6 +49,7 @@ export const getAllTeachers = gql`
       address
       img
       phone
+      dateOfBirth
       subjects {
         id
         name
@@ -67,6 +69,7 @@ export const getAllStudents = gql`
       email
       phone
       address
+      dateOfBirth
       img
       sex
       parent {
@@ -104,6 +107,7 @@ export const getAllParents = gql`
       email
       role
       address
+      dateOfBirth
       phone
       img
       students {

@@ -377,7 +377,7 @@
             <label
               for="subjectName"
               class="block text-sm font-medium text-gray-700 mb-1"
-              >Subject Name <span class='text-red-500'>*</span></label
+              >Subject Name <span class="text-red-500">*</span></label
             >
             <input
               v-model="name"
@@ -490,7 +490,7 @@
             <label
               for="title"
               class="block text-sm font-medium text-gray-700 mb-1"
-              >Title <span class='text-red-500'>*</span></label
+              >Title <span class="text-red-500">*</span></label
             >
             <input
               type="text"
@@ -500,7 +500,7 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Content <span class='text-red-500'>*</span>
+              >Content <span class="text-red-500">*</span>
               <textarea
                 v-model="content"
                 rows="4"
@@ -523,7 +523,7 @@
               <label
                 for="targetRoles"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Target Audience <span class='text-red-500'>*</span>
+                >Target Audience <span class="text-red-500">*</span>
               </label>
 
               <!-- Dropdown for selecting roles -->
@@ -610,7 +610,7 @@
               <label
                 for="date"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Date <span class='text-red-500'>*</span></label
+                >Date <span class="text-red-500">*</span></label
               >
               <input
                 type="date"
@@ -623,7 +623,7 @@
               <label
                 for="startTime"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Start Time <span class='text-red-500'>*</span></label
+                >Start Time <span class="text-red-500">*</span></label
               >
               <input
                 type="time"
@@ -635,7 +635,7 @@
               <label
                 for="endTime"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >End Time <span class='text-red-500'>*</span></label
+                >End Time <span class="text-red-500">*</span></label
               >
               <input
                 type="time"
@@ -686,7 +686,7 @@
               <label
                 for="location"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Location <span class='text-red-500'>*</span></label
+                >Location <span class="text-red-500">*</span></label
               >
               <input
                 type="text"
@@ -703,7 +703,7 @@
             <label
               for="title"
               class="block text-sm font-medium text-gray-700 mb-1"
-              >Title <span class='text-red-500'>*</span></label
+              >Title <span class="text-red-500">*</span></label
             >
             <input
               type="text"
@@ -714,7 +714,7 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Content <span class='text-red-500'>*</span>
+              >Content <span class="text-red-500">*</span>
               <textarea
                 v-model="content"
                 rows="4"
@@ -737,7 +737,7 @@
               <label
                 for="targetRoles"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Target Audience <span class='text-red-500'>*</span>
+                >Target Audience <span class="text-red-500">*</span>
               </label>
 
               <!-- Dropdown for selecting roles -->
@@ -873,20 +873,22 @@ import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import { computed, onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
 import {
-  createAnnouncement,
-  createClass,
-  createEvent,
-  createSubject,
+createAnnouncement,
+createClass,
+createEvent,
+createSubject,
 } from "../../graphql/mutations";
+import { useAnnouncementStore } from "../../store/announcementStore";
 import { useClassStore } from "../../store/classStore";
+import { useEventStore } from "../../store/eventStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
 import {
-  availableTargetRoles,
-  eventVisibilityOptions,
+availableTargetRoles,
+eventVisibilityOptions,
 } from "../../utils/utility.js";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
@@ -896,8 +898,9 @@ const isLoading = ref(false);
 const modalStore = useModalStore();
 const classStore = useClassStore();
 const teacherStore = useTeacherStore();
+const eventStore = useEventStore()
 const subjectStore = useSubjectStore();
-
+const announcementStore = useAnnouncementStore();
 const notificationStore = useNotificationStore();
 
 const userStore = useUserStore();
@@ -941,14 +944,13 @@ const privateVisibility = ref("PRIVATE");
 const location = ref("");
 
 const role = computed(() => userStore.currentRole.toLowerCase());
+const selectedTargetRoles = ref([]);
+const isTargetRolesDropdownOpen = ref(false);
 
 const haveAccess = computed(() => {
   const allowedRoles = ["admin", "super_admin", "teacher"];
   return allowedRoles.includes(role.value);
 });
-
-const selectedTargetRoles = ref([]);
-const isTargetRolesDropdownOpen = ref(false);
 
 const toggleTargetRolesDropdown = () => {
   isTargetRolesDropdownOpen.value = !isTargetRolesDropdownOpen.value;
@@ -1049,22 +1051,6 @@ const getClassIdByName = (className) => {
   const classItem = classStore.getClassNames.find((c) => c.name === className);
   return classItem ? classItem.id : null;
 };
-
-// Watchers to sync with modal store
-watch(
-  () => modalStore.addModal,
-  (newVal) => {
-    isModalVisible.value = newVal;
-  },
-  { immediate: true }
-);
-
-watch(
-  () => modalStore.source,
-  (newVal) => {
-    source.value = newVal;
-  }
-);
 
 const handleCancel = () => {
   if (isLoading.value) return;
@@ -1209,8 +1195,6 @@ const handleAdd = async () => {
         message: "Class created successfully!",
       });
     } else if (source.value === "results") {
-      // Create result logic
-      console.log("Creating result...");
       await apolloClient.mutate({
         mutation: createResult,
         variables: {
@@ -1229,7 +1213,6 @@ const handleAdd = async () => {
         message: "Result created successfully!",
       });
     } else if (source.value === "events") {
-      // Create event logic
       await apolloClient.mutate({
         mutation: createEvent,
         variables: {
@@ -1255,12 +1238,14 @@ const handleAdd = async () => {
           },
         },
       });
+
+      await eventStore.refetchAll();
+
       notificationStore.addNotification({
         type: "success",
         message: "Event created successfully!",
       });
     } else if (source.value === "announcements") {
-      // Create announcement logic
 
       await apolloClient.mutate({
         mutation: createAnnouncement,
@@ -1277,6 +1262,9 @@ const handleAdd = async () => {
               : ["ADMIN", "TEACHER", "STUDENT", "PARENT"],
         },
       });
+
+      await announcementStore.refetchAll();
+
       notificationStore.addNotification({
         type: "success",
         message: "Announcement created successfully!",
@@ -1296,6 +1284,22 @@ const handleAdd = async () => {
     isLoading.value = false;
   }
 };
+
+// Watchers to sync with modal store
+watch(
+  () => modalStore.addModal,
+  (newVal) => {
+    isModalVisible.value = newVal;
+  },
+  { immediate: true }
+);
+
+watch(
+  () => modalStore.source,
+  (newVal) => {
+    source.value = newVal;
+  }
+);
 
 onMounted(async () => {
   await Promise.all([

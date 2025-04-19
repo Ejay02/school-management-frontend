@@ -97,11 +97,11 @@
                 />
               </div>
               <div>
-                <label for="dob" class="block text-sm font-medium text-gray-500"
+                <label for="dateOfBirth" class="block text-sm font-medium text-gray-500"
                   >Date of Birth</label
                 >
                 <input
-                  v-model="formData.dob"
+                  v-model="formData.dateOfBirth"
                   type="date"
                   required
                   class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
@@ -127,9 +127,16 @@
 
 <script setup>
 import { computed, reactive, ref } from "vue";
-import { useUserStore } from "../../store/userStore";
 import { apolloClient } from "../../../apollo-client";
+import {
+  updateAdminProfile,
+  updateParentProfile,
+  updateStudentProfile,
+  updateTeacherProfile,
+} from "../../graphql/mutations";
 import { useNotificationStore } from "../../store/notification";
+
+import { useUserStore } from "../../store/userStore";
 
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
@@ -153,13 +160,15 @@ const formData = reactive({
     userStore.userInfo.username ||
     userStore.userInfo.email?.split("@")[0] ||
     "",
-  dob: userStore.userInfo.dob || "",
+  dateOfBirth: userStore.userInfo.dateOfBirth || "",
   emailNotifications: true,
   pushNotifications: false,
 });
 
 const profilePreview = ref(null);
 const fileInput = ref(null);
+const imageFile = ref(null);
+const imageBase64 = ref(null);
 
 const handleImageChange = (event) => {
   const file = event.target.files[0];
@@ -173,48 +182,102 @@ const handleImageChange = (event) => {
       return;
     }
 
+    imageFile.value = file;
     const reader = new FileReader();
     reader.onload = (e) => {
       profilePreview.value = e.target.result;
+      imageBase64.value = e.target.result;
     };
     reader.readAsDataURL(file);
   }
 };
 
+// Get the appropriate mutation based on user role
+const getProfileMutation = () => {
+  const role = userStore.currentRole.toLowerCase();
+
+  if (role === "admin" || role === "super_admin") {
+    return updateAdminProfile;
+  } else if (role === "teacher") {
+    return updateTeacherProfile;
+  } else if (role === "student") {
+    return updateStudentProfile;
+  } else if (role === "parent") {
+    return updateParentProfile;
+  }
+
+  throw new Error(`No profile update mutation available for role: ${role}`);
+};
+
+// Prepare form data for upload
+const prepareFormData = () => {
+  // Prepare the input object
+  const input = {
+    name: formData.name,
+    surname: formData.surname,
+    username: formData.username,
+    dateOfBirth: formData.dateOfBirth,
+  };
+
+  // If an image file is selected, add the base64 string to the input
+  if (imageBase64.value) {
+    input.img = imageBase64.value;
+  }
+
+  return input;
+};
+
 const saveSettings = async () => {
   try {
-    console.log("Saving settings:", {
-      name: formData.name,
-      surname: formData.surname,
-      username: formData.username,
-      dob: formData.dob,
-      profileImage: profilePreview.value,
+    loading.value = true;
+
+    // Get the appropriate mutation based on user role
+    const mutation = getProfileMutation();
+
+    // Prepare the input data including image as base64 string
+    const input = prepareFormData();
+
+    // Execute the GraphQL mutation with the base64 string
+    const { data } = await apolloClient.mutate({
+      mutation,
+      variables: { input },
     });
 
-    // Update local user store (this is a placeholder - )
-    userStore.setUser({
-      ...userStore.userInfo,
-      name: formData.name,
-      surname: formData.surname,
-      username: formData.username,
-      dob: formData.dob,
-      img: profilePreview.value || userStore.userInfo.img,
-      userId: userStore.userInfo.id,
-    });
+    // Extract the response data based on the mutation type
+    let userData;
+    if (
+      userStore.currentRole.toLowerCase() === "admin" ||
+      userStore.currentRole.toLowerCase() === "super_admin"
+    ) {
+      userData = data.updateAdminProfile;
+    } else if (userStore.currentRole.toLowerCase() === "teacher") {
+      userData = data.updateTeacherProfile;
+    } else if (userStore.currentRole.toLowerCase() === "student") {
+      userData = data.updateStudentProfile;
+    } else if (userStore.currentRole.toLowerCase() === "parent") {
+      userData = data.updateParentProfile;
+    }
 
-    await userStore.refreshUsers(apolloClient, {});
+    // Update local user store with the returned data
+    if (userData) {
+      userStore.updateUserProfile(userData);
 
-    notificationStore.addNotification({
-      type: "success",
-      message: "Profile updated successfully!",
-    });
+      notificationStore.addNotification({
+        type: "success",
+        message: "Profile updated successfully!",
+      });
+    }
   } catch (error) {
     notificationStore.addNotification({
       type: "error",
-      message: `Error saving settings. Please try again. ${error.message}`,
+      message: `Error saving settings: ${error.message}`,
     });
+  } finally {
+    loading.value = false;
   }
 };
+
+const loading = ref(false);
 </script>
 
 <style scoped></style>

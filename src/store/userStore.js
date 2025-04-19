@@ -57,6 +57,8 @@ export const useUserStore = defineStore("user", () => {
       token: user.token,
       refreshToken: user.refreshToken,
       img: user.img,
+      username: user.username,
+      dateOfBirth: user.dateOfBirth,
     };
 
     userInfo.value = userData;
@@ -64,6 +66,21 @@ export const useUserStore = defineStore("user", () => {
 
     // Persist to localStorage
     localStorage.setItem("userInfo", JSON.stringify(userData));
+  };
+
+  // New method to update user profile after mutation
+  const updateUserProfile = (userData) => {
+    // Preserve existing data that might not be returned from the API
+    const updatedUserData = {
+      ...userInfo.value,
+      ...userData,
+      userId: userInfo.value.id, // Ensure userId is preserved
+      role: userInfo.value.role, // Preserve role
+      token: userInfo.value.token, // Preserve token
+      refreshToken: userInfo.value.refreshToken, // Preserve refreshToken
+    };
+
+    setUser(updatedUserData);
   };
 
   const setRole = (role) => {
@@ -233,5 +250,6 @@ export const useUserStore = defineStore("user", () => {
     findUserById,
     fetchAdminUsers,
     filteredMenuItems,
+    updateUserProfile, // Add the new method to the returned object
   };
 });
