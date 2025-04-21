@@ -41,9 +41,10 @@
           </div>
           <!-- File type text moved to center vertically -->
           <div
-            class="text-center font-semibold text-gray-600 text-xs flex items-center"
+            class="text-center font-semibold text-gray-600 text-xs flex flex-col items-center"
           >
-            <span>JPG, GIF or PNG. 1MB max.</span>
+            <span>JPG, GIF or PNG</span>
+            <span>1MB max <span class="text-red-500">*</span></span>
           </div>
         </div>
 
@@ -97,7 +98,9 @@
                 />
               </div>
               <div>
-                <label for="dateOfBirth" class="block text-sm font-medium text-gray-500"
+                <label
+                  for="dateOfBirth"
+                  class="block text-sm font-medium text-gray-500"
                   >Date of Birth</label
                 >
                 <input
@@ -116,9 +119,33 @@
       <div class="flex justify-end mt-4 border-t border-gray-200">
         <button
           type="submit"
-          class="mt-4 px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+          class="mt-4 px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+          :disabled="loading"
         >
-          Save Changes
+          <span v-if="!loading">Save Changes</span>
+          <div v-else class="flex items-center">
+            <svg
+              class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            Saving...
+          </div>
         </button>
       </div>
     </form>
@@ -126,7 +153,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { apolloClient } from "../../../apollo-client";
 import {
   updateAdminProfile,
@@ -135,11 +162,11 @@ import {
   updateTeacherProfile,
 } from "../../graphql/mutations";
 import { useNotificationStore } from "../../store/notification";
-
 import { useUserStore } from "../../store/userStore";
 
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
+const loading = ref(false);
 
 // Helper function to capitalize first letter
 const capitalize = (str) => {
@@ -152,6 +179,18 @@ const capitalizedSurname = computed(() =>
   capitalize(userStore.userInfo.surname)
 );
 
+// Format date to YYYY-MM-DD for input[type="date"]
+const formatDateForInput = (dateString) => {
+  if (!dateString) return "";
+
+  // Try to parse the date
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return ""; // Invalid date
+
+  // Format as YYYY-MM-DD
+  return date.toISOString().split("T")[0];
+};
+
 // Initialize form data with user info from store
 const formData = reactive({
   name: userStore.userInfo.name || "",
@@ -160,9 +199,15 @@ const formData = reactive({
     userStore.userInfo.username ||
     userStore.userInfo.email?.split("@")[0] ||
     "",
-  dateOfBirth: userStore.userInfo.dateOfBirth || "",
+  dateOfBirth: formatDateForInput(userStore.userInfo.dateOfBirth) || "",
   emailNotifications: true,
   pushNotifications: false,
+});
+
+// Ensure date is properly formatted when component mounts
+onMounted(() => {
+  // Re-format the date in case it wasn't properly formatted initially
+  formData.dateOfBirth = formatDateForInput(userStore.userInfo.dateOfBirth);
 });
 
 const profilePreview = ref(null);
@@ -192,22 +237,36 @@ const handleImageChange = (event) => {
   }
 };
 
-// Get the appropriate mutation based on user role
-const getProfileMutation = () => {
+// Helper function to handle role-specific operations
+const getRoleSpecificData = (operation, data = null) => {
   const role = userStore.currentRole.toLowerCase();
-
+  
   if (role === "admin" || role === "super_admin") {
-    return updateAdminProfile;
+    return operation === "mutation" 
+      ? updateAdminProfile 
+      : data?.updateAdminProfile;
   } else if (role === "teacher") {
-    return updateTeacherProfile;
+    return operation === "mutation" 
+      ? updateTeacherProfile 
+      : data?.updateTeacherProfile;
   } else if (role === "student") {
-    return updateStudentProfile;
+    return operation === "mutation" 
+      ? updateStudentProfile 
+      : data?.updateStudentProfile;
   } else if (role === "parent") {
-    return updateParentProfile;
+    return operation === "mutation" 
+      ? updateParentProfile 
+      : data?.updateParentProfile;
   }
-
-  throw new Error(`No profile update mutation available for role: ${role}`);
+  
+  if (operation === "mutation") {
+    throw new Error(`No profile update mutation available for role: ${role}`);
+  }
+  return null;
 };
+
+
+const getProfileMutation = () => getRoleSpecificData("mutation");
 
 // Prepare form data for upload
 const prepareFormData = () => {
@@ -244,19 +303,7 @@ const saveSettings = async () => {
     });
 
     // Extract the response data based on the mutation type
-    let userData;
-    if (
-      userStore.currentRole.toLowerCase() === "admin" ||
-      userStore.currentRole.toLowerCase() === "super_admin"
-    ) {
-      userData = data.updateAdminProfile;
-    } else if (userStore.currentRole.toLowerCase() === "teacher") {
-      userData = data.updateTeacherProfile;
-    } else if (userStore.currentRole.toLowerCase() === "student") {
-      userData = data.updateStudentProfile;
-    } else if (userStore.currentRole.toLowerCase() === "parent") {
-      userData = data.updateParentProfile;
-    }
+    const userData = getRoleSpecificData("response", data);
 
     // Update local user store with the returned data
     if (userData) {
@@ -276,8 +323,6 @@ const saveSettings = async () => {
     loading.value = false;
   }
 };
-
-const loading = ref(false);
 </script>
 
 <style scoped></style>
