@@ -192,7 +192,7 @@ const fetchUsers = async (page = 1) => {
         name: admin.username || `${name} ${surname}`.trim(),
         email: admin.email,
         role: "admin",
-        avatar: admin.img || null,
+        avatar: admin.image || null,
         firstName: name,
         lastName: surname,
       };
@@ -207,7 +207,7 @@ const fetchUsers = async (page = 1) => {
         name: `${name} ${surname}`.trim() || teacher.username,
         email: teacher.email,
         role: "teacher",
-        avatar: teacher.img || null,
+        avatar: teacher.image || null,
         firstName: name,
         lastName: surname,
       };
@@ -239,7 +239,7 @@ const fetchUsers = async (page = 1) => {
             name: currentUser.username || `${name} ${surname}`.trim(),
             email: currentUser.email,
             role: currentUser.role?.toLowerCase() || userStore.currentRole,
-            avatar: currentUser.img || null,
+            avatar: currentUser.image || null,
             firstName: name,
             lastName: surname,
           });

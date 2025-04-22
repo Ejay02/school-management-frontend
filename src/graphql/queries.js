@@ -30,8 +30,10 @@ export const getAllAdminsQuery = gql`
       id
       username
       email
+      name
+      surname
       role
-      img
+      image
       dateOfBirth
     }
   }
@@ -47,7 +49,7 @@ export const getAllTeachers = gql`
       email
       role
       address
-      img
+      image
       phone
       dateOfBirth
       subjects {
@@ -70,7 +72,7 @@ export const getAllStudents = gql`
       phone
       address
       dateOfBirth
-      img
+      image
       sex
       parent {
         name
@@ -109,13 +111,13 @@ export const getAllParents = gql`
       address
       dateOfBirth
       phone
-      img
+      image
       students {
         id
         username
         name
         surname
-        img
+        image
       }
     }
   }
@@ -171,7 +173,7 @@ export const getTeacherById = gql`
       email
       phone
       address
-      img
+      image
       bloodType
       sex
       createdAt
@@ -202,7 +204,7 @@ export const getStudentById = gql`
       email
       phone
       address
-      img
+      image
       bloodType
       sex
       createdAt
@@ -621,7 +623,8 @@ export const getUserById = gql`
         # name
         # surname
         email
-        img
+        image
+        dateOfBirth
         adminRole: role
       }
       ... on Student {
@@ -630,8 +633,9 @@ export const getUserById = gql`
         username
         name
         surname
+        dateOfBirth
         email
-        img
+        image
         studentRole: role
       }
       ... on Parent {
@@ -640,7 +644,7 @@ export const getUserById = gql`
         name
         surname
         email
-        img
+        image
         parentRole: role
         students {
           id
@@ -654,7 +658,7 @@ export const getUserById = gql`
         name
         surname
         email
-        img
+        image
         teacherRole: role
       }
     }
@@ -714,15 +718,19 @@ export const getAllAdminUsers = gql`
     getAllAdminUsers {
       admins {
         id
-        img
+        image
         username
         email
         role
+        dateOfBirth
+        name
+        surname
       }
       teachers {
         id
-        img
+        image
         username
+        dateOfBirth
         name
         surname
         email

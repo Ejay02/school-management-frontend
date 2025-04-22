@@ -105,15 +105,15 @@ const currentPage = ref(1);
 const eventStore = useEventStore();
 const userStore = useUserStore();
 
-watch(currentPage, (newPage) => {
-  eventStore.fetchEvents({ page: newPage, limit });
+useStorageSync("readEvents", (newReadEvents) => {
+  eventStore.readEvents = newReadEvents || [];
 });
 
 function handlePageChange(newPage) {
   currentPage.value = newPage;
 }
 
-// Default view mode - could be set based on user role
+
 const viewMode = ref(
   userStore.currentRole === "ADMIN" || userStore.currentRole === "TEACHER"
     ? "list"
@@ -147,8 +147,8 @@ const columns = [
     class: "hidden md:table-cell",
   },
   {
-    header: "Actions",
-    accessor: "action",
+    header: "",
+    accessor: "",
   },
 ];
 
@@ -182,6 +182,10 @@ const formatTimeOnly = (dateString) => {
   });
 };
 
+watch(currentPage, (newPage) => {
+  eventStore.fetchEvents({ page: newPage, limit });
+});
+
 onMounted(async () => {
   await eventStore.fetchEvents();
 
@@ -213,7 +217,7 @@ onMounted(async () => {
     if (data && data.event) {
       // Force a complete refresh of the events data
       eventStore.allEvents = [];
-      
+
       // This will trigger a complete refetch from the API
       eventStore.fetchEvents({ page: currentPage.value, limit });
     }
@@ -225,9 +229,5 @@ onUnmounted(() => {
   socket.off("eventCreated");
   socket.off("deleteEvent");
   socket.off("eventUpdated");
-});
-
-useStorageSync("readEvents", (newReadEvents) => {
-  eventStore.readEvents = newReadEvents || [];
 });
 </script>

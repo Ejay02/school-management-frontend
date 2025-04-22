@@ -263,6 +263,12 @@ const { client: apolloClient } = useApolloClient();
 const loading = computed(() => announcementStore.loading);
 const error = computed(() => announcementStore.error);
 
+// Infinite scroll variables
+const pageSize = 5;
+const currentPage = ref(1);
+const isLoadingMore = ref(false);
+const loadMoreTrigger = ref(null);
+
 const announcements = computed(() => {
   return announcementStore.announcements || [];
 });
@@ -398,38 +404,9 @@ useStorageSync("readAnnouncements", (newReadAnnouncements) => {
   announcementStore.readAnnouncements = newReadAnnouncements || [];
 });
 
-watch(announcements, async () => {
-  await announcementStore.fetchCreatorDetails(apolloClient);
-});
 
-// Lifecycle hooks
-onMounted(async () => {
-  await announcementStore.fetchAnnouncements();
-  await announcementStore.fetchCreatorDetails(apolloClient);
 
-  setupSocketConnection();
 
-  // Setup infinite scroll after component is mounted
-  const cleanupObserver = setupInfiniteScroll();
-
-  // Cleanup observer on component unmount
-  onUnmounted(() => {
-    if (cleanupObserver) cleanupObserver();
-
-    socket.off("newAnnouncement");
-    socket.off("announcementDeleted");
-    socket.off("readStatus");
-    socket.off("announcementArchived");
-    socket.off("announcementDeleted");
-    socket.off("announcementArchiveStatus");
-  });
-});
-
-// Infinite scroll variables
-const pageSize = 5;
-const currentPage = ref(1);
-const isLoadingMore = ref(false);
-const loadMoreTrigger = ref(null);
 
 // Computed property for displayed announcements
 const displayedAnnouncements = computed(() => {
@@ -485,6 +462,33 @@ watch([searchQuery, selectedCategory, selectedTargetRole], () => {
 // Reset pagination when announcements data changes
 watch(announcements, () => {
   currentPage.value = 1;
+});
+
+watch(announcements, async () => {
+  await announcementStore.fetchCreatorDetails(apolloClient);
+});
+
+// Lifecycle hooks
+onMounted(async () => {
+  await announcementStore.fetchAnnouncements();
+  await announcementStore.fetchCreatorDetails(apolloClient);
+
+  setupSocketConnection();
+
+  // Setup infinite scroll after component is mounted
+  const cleanupObserver = setupInfiniteScroll();
+
+  // Cleanup observer on component unmount
+  onUnmounted(() => {
+    if (cleanupObserver) cleanupObserver();
+
+    socket.off("newAnnouncement");
+    socket.off("announcementDeleted");
+    socket.off("readStatus");
+    socket.off("announcementArchived");
+    socket.off("announcementDeleted");
+    socket.off("announcementArchiveStatus");
+  });
 });
 
 onUnmounted(() => {

@@ -87,8 +87,8 @@
         <div class="" @click="toggleDropdown">
           <div class="mr-4 relative">
             <img
-              v-if="userStore?.userInfo?.img"
-              :src="userStore?.userInfo?.img"
+              v-if="userStore?.userInfo?.image"
+              :src="userStore?.userInfo?.image"
               :alt="`${capitalizedName} avatar`"
               class="w-16 h-16 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
             />
@@ -109,13 +109,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
+import { useAnnouncementStore } from "../store/announcementStore";
+import { useNotificationStore } from "../store/notification";
 import { useUserStore } from "../store/userStore";
 import ProfileDropdown from "./dropdown/profileDropdown.vue";
-import { useNotificationStore } from "../store/notification";
-import { useAnnouncementStore } from "../store/announcementStore";
 
 const userStore = useUserStore();
+
 const notificationStore = useNotificationStore();
 const announcementStore = useAnnouncementStore();
 

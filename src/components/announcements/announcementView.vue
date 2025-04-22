@@ -73,8 +73,8 @@
             <div class="flex items-center space-x-3">
               <div class="">
                 <img
-                  v-if="creator?.img"
-                  :src="creator?.img"
+                  v-if="creator?.image"
+                  :src="creator?.image"
                   class="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
                   alt="Creator avatar"
                 />

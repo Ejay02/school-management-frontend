@@ -12,8 +12,8 @@
           <div class="relative">
             <!-- Use profile preview or user's image from userStore -->
             <img
-              v-if="profilePreview || userStore?.userInfo?.img"
-              :src="profilePreview || userStore?.userInfo?.img"
+              v-if="profilePreview || userStore?.userInfo?.image"
+              :src="profilePreview || userStore?.userInfo?.image"
               class="h-32 w-32 rounded-full object-cover border-2 border-white shadow-lg"
               alt="Profile avatar"
             />
@@ -168,6 +168,11 @@ const userStore = useUserStore();
 const notificationStore = useNotificationStore();
 const loading = ref(false);
 
+const profilePreview = ref(null);
+const fileInput = ref(null);
+const imageFile = ref(null);
+const imageBase64 = ref(null);
+
 // Helper function to capitalize first letter
 const capitalize = (str) => {
   if (!str) return "";
@@ -204,16 +209,9 @@ const formData = reactive({
   pushNotifications: false,
 });
 
-// Ensure date is properly formatted when component mounts
-onMounted(() => {
-  // Re-format the date in case it wasn't properly formatted initially
-  formData.dateOfBirth = formatDateForInput(userStore.userInfo.dateOfBirth);
-});
 
-const profilePreview = ref(null);
-const fileInput = ref(null);
-const imageFile = ref(null);
-const imageBase64 = ref(null);
+
+
 
 const handleImageChange = (event) => {
   const file = event.target.files[0];
@@ -280,7 +278,7 @@ const prepareFormData = () => {
 
   // If an image file is selected, add the base64 string to the input
   if (imageBase64.value) {
-    input.img = imageBase64.value;
+    input.image = imageBase64.value;
   }
 
   return input;
@@ -323,6 +321,12 @@ const saveSettings = async () => {
     loading.value = false;
   }
 };
+
+// Ensure date is properly formatted when component mounts
+onMounted(() => {
+  // Re-format the date in case it wasn't properly formatted initially
+  formData.dateOfBirth = formatDateForInput(userStore.userInfo.dateOfBirth);
+});
 </script>
 
 <style scoped></style>

@@ -26,6 +26,8 @@ export const adminSignupMutation = gql`
       username
       name
       surname
+      dateOfBirth
+      image
     }
   }
 `;
@@ -42,6 +44,8 @@ export const teacherSignupMutation = gql`
       username
       name
       surname
+      image
+      dateOfBirth
     }
   }
 `;
@@ -58,6 +62,8 @@ export const studentSignupMutation = gql`
       username
       name
       surname
+      dateOfBirth
+      image
     }
   }
 `;
@@ -74,6 +80,8 @@ export const parentSignupMutation = gql`
       username
       name
       surname
+      dateOfBirth
+      image
     }
   }
 `;
@@ -89,6 +97,8 @@ export const loginMutation = gql`
       username
       name
       surname
+      dateOfBirth
+      image
     }
   }
 `;
@@ -634,7 +644,7 @@ export const assignAdminRole = gql`
     assignAdminRole(role: $role, targetId: $targetId) {
       id
      email
-     img
+     image
      role
      username
     }
@@ -650,7 +660,7 @@ export const updateAdminProfile = gql`
       name
       surname
       username
-      img
+      image
       email
       dateOfBirth
     }
@@ -669,7 +679,7 @@ export const updateTeacherProfile = gql`
       bloodType
       dateOfBirth
       phone
-      img
+      image
       sex
     }
   }
@@ -685,7 +695,7 @@ export const updateStudentProfile = gql`
       address
       bloodType
       dateOfBirth
-      img
+      image
       phone
       sex
     }
@@ -699,10 +709,28 @@ export const updateParentProfile = gql`
       name
       surname
       email
-      img
+      image
       dateOfBirth
     }
   }
 `;
 
+export const cancelEvent = gql`
+  mutation cancelEvent($id: String!, $reason: String!) {
+    cancelEvent(id: $id, reason: $reason) {
+      id
+      title
+      startTime
+      endTime
+      status
+      description
+      classId
+      class{
+        id
+        name
+      }
+      targetRoles
+    }
+  }
+`
 

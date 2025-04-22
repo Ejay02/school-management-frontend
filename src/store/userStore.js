@@ -22,7 +22,8 @@ export const useUserStore = defineStore("user", () => {
           phone: "",
           token: "",
           refreshToken: "",
-          img: "",
+          image: "",
+          dateOfBirth: "",
         };
   };
 
@@ -37,7 +38,7 @@ export const useUserStore = defineStore("user", () => {
   const error = ref(null);
 
   const allUsers = ref({ admins: [], teachers: [] });
-  // const paginatedUsers = ref({ admins: [], teachers: [] });
+
   const totalPages = ref(1);
   const hasMore = ref(false);
   const totalCount = ref(0);
@@ -56,7 +57,7 @@ export const useUserStore = defineStore("user", () => {
       phone: user.phone,
       token: user.token,
       refreshToken: user.refreshToken,
-      img: user.img,
+      image: user.image,
       username: user.username,
       dateOfBirth: user.dateOfBirth,
     };

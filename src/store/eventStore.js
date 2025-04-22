@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { apolloClient } from "../../apollo-client";
-import { markEventAsRead } from "../graphql/mutations";
+import { cancelEvent, markEventAsRead } from "../graphql/mutations";
 import { getEventById, getEvents } from "../graphql/queries";
 import { getData, setData } from "../utils/localStorageHelpers";
 
@@ -141,6 +141,49 @@ export const useEventStore = defineStore("eventStore", {
       } catch (error) {
         this.error = error.message;
         throw error;
+      }
+    },
+
+    async cancelEvent(eventId, reason) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const result = await apolloClient.mutate({
+          mutation: cancelEvent,
+          variables: {
+            id: eventId,
+            reason: reason,
+          },
+        });
+
+        // Update the event in our local state
+        if (result.data.cancelEvent) {
+          // Update in allEvents array
+          const eventIndex = this.allEvents.findIndex((e) => e.id === eventId);
+          if (eventIndex !== -1) {
+            this.allEvents[eventIndex] = result.data.cancelEvent;
+          }
+
+          // Update in events array (paginated)
+          const paginatedIndex = this.events.findIndex((e) => e.id === eventId);
+          if (paginatedIndex !== -1) {
+            this.events[paginatedIndex] = result.data.cancelEvent;
+          }
+
+          // Update selected event if it's the one being cancelled
+          if (this.selectedEvent && this.selectedEvent.id === eventId) {
+            this.selectedEvent = result.data.cancelEvent;
+          }
+
+          return result.data.cancelEvent;
+        }
+        return null;
+      } catch (error) {
+        this.error = error.message || "Error cancelling event";
+        throw error;
+      } finally {
+        this.loading = false;
       }
     },
 

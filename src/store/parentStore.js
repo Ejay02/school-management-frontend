@@ -33,7 +33,7 @@ export const useParentStore = defineStore("parentStore", {
           this.allParents = data.getAllParents.map((parent) => ({
             ...parent,
             parentId: parent.id,
-            photo: parent.img,
+            photo: parent.image,
             students: parent.students.map(
               (student) => `${student.name} ${student.surname}`
             ),

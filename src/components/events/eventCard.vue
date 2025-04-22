@@ -178,9 +178,23 @@
             </router-link>
             <!--  -->
             <div class="flex items-center gap-2" v-if="isCreator">
+              <!-- Cancel -->
+              <button
+                @click="handleCancelEvent(event.id, event.title)"
+                class="group relative w-6 h-6 flex items-center justify-center rounded-full"
+                v-if="event.status === 'SCHEDULED'"
+              >
+                <i class="fa-solid fa-ban text-orange-600 text-xs"></i>
+                <span
+                  class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                >
+                  Cancel Event
+                </span>
+              </button>
+              
               <button
                 @click="showDelModal(event.id, event.title, 'eventList')"
-                class="ml-2 group relative w-6 h-6 flex items-center justify-center rounded-full"
+                class=" group relative w-6 h-6 flex items-center justify-center rounded-full"
               >
                 <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
 
@@ -230,5 +244,14 @@ const showDelModal = (id, title, type) => {
 
 const handleMarkEventAsRead = async (eventId) => {
   await eventStore.markEventAsRead(eventId);
+};
+
+
+const handleCancelEvent = (eventId, eventTitle) => {
+  modalStore.cancelModal = true; 
+  modalStore.modalId = eventId;
+  modalStore.modalTitle = eventTitle;
+  modalStore.modalMessage = `Are you sure you want to cancel the event "${eventTitle}"?`;
+  modalStore.confirmAction = 'cancelEvent';
 };
 </script>

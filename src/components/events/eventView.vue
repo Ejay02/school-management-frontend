@@ -271,8 +271,8 @@
                   <div class="flex items-center">
                     <div class="mr-4 relative">
                       <img
-                        v-if="creator?.img"
-                        :src="creator?.img"
+                        v-if="creator?.image"
+                        :src="creator?.image"
                         :alt="`${creator?.username}`"
                         class="w-16 h-16 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
                       />

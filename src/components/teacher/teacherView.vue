@@ -12,7 +12,7 @@
         <LeftSingleView
           :heading="`${teacherName}'s Schedule`"
           :infoCards="teacherInfoCards"
-          :profileImage="teacher?.img || ''"
+          :profileImage="teacher?.image || ''"
           :name="teacherName"
           :surname="teacher?.surname || ''"
           :description="teacher?.description || 'No description available.'"

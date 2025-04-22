@@ -9,8 +9,8 @@
     >
       <div class="relative">
         <img
-          v-if="userStore?.userInfo?.img"
-          :src="userStore?.userInfo?.img"
+          v-if="userStore?.userInfo?.image"
+          :src="userStore?.userInfo?.image"
           :alt="`${capitalizedName} image`"
           class="w-12 h-12 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
         />

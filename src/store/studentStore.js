@@ -43,7 +43,7 @@ export const useStudentStore = defineStore("studentStore", {
           this.allStudents = data.getAllStudents.map((student) => ({
             ...student,
             studentId: student.id,
-            photo: student.img,
+            photo: student.image,
             parent: student.parent
               ? `${student.parent.name} ${student.parent.surname}`
               : "",
