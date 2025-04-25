@@ -29,13 +29,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
+import { useAnnouncementStore } from "../../store/announcementStore";
+import { useNotificationStore } from "../../store/notification";
 import { useUserStore } from "../../store/userStore";
 import AnnouncementHeader from "./announcementHeader.vue";
-import MainAnnouncementView from "./mainAnnouncementView.vue";
-import { useNotificationStore } from "../../store/notification";
 import ArchivedAnnouncements from "./archivedAnnouncements.vue";
-import { useAnnouncementStore } from "../../store/announcementStore";
+import MainAnnouncementView from "./mainAnnouncementView.vue";
 
 const userStore = useUserStore();
 const announcementStore = useAnnouncementStore();
@@ -70,9 +70,16 @@ const handleViewChange = async (newView) => {
   activeView.value = newView;
 
   try {
-    // Always fetch all announcements when changing views
-    await announcementStore.fetchAnnouncements();
-    await announcementStore.fetchArchivedAnnouncements();
+    // Clear existing announcements before fetching new ones
+    announcementStore.announcements = [];
+    announcementStore.archivedAnnouncements = [];
+
+    // Fetch appropriate announcements based on the view
+    if (newView === "main") {
+      await announcementStore.fetchAnnouncements();
+    } else {
+      await announcementStore.fetchArchivedAnnouncements();
+    }
   } catch (error) {
     notificationStore.addNotification({
       type: "error",

@@ -225,15 +225,15 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useStorageSync } from "../../composables/useStorageSync";
 import { socket } from "../../socket/socket";
 import { useAnnouncementStore } from "../../store/announcementStore";
+import { useNotificationStore } from "../../store/notification";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
 import { formatDate } from "../../utils/date.holidays";
+import { setupInfiniteScroll } from "../../utils/scroll";
 import { availableTargetRoles } from "../../utils/utility";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
-
-const modalStore = useModalStore();
 
 const showDelModal = (id, title, type, data) => {
   modalStore.deleteModal = true;
@@ -251,8 +251,10 @@ const showEditModal = (id, title, data, type) => {
   modalStore.source = type;
 };
 
+const modalStore = useModalStore();
 const userStore = useUserStore();
 const announcementStore = useAnnouncementStore();
+const notificationStore = useNotificationStore();
 
 const searchQuery = ref("");
 const selectedCategory = ref("");
@@ -325,13 +327,14 @@ const canEditAnnouncement = (announcement) => {
   );
 };
 
-const canDeleteAnnouncement = canEditAnnouncement;
-
 const markAsRead = async (id) => {
   try {
     await announcementStore.markAsRead(id);
   } catch (error) {
-    console.error("Failed to mark as read:", error);
+    notificationStore.addNotification({
+      type: "error",
+      message: `Failed to mark as read:", ${error.message}`,
+    });
   }
 };
 
@@ -339,7 +342,11 @@ const archiveAnnouncement = async (announcement) => {
   try {
     await announcementStore.archiveAnnouncement(announcement.id);
   } catch (error) {
-    console.error("Failed to archive:", error);
+    
+     notificationStore.addNotification({
+      type: "error",
+      message: `Failed to archive:", ${error.message}`,
+    });
   }
 };
 
@@ -398,15 +405,11 @@ const setupSocketConnection = () => {
       }
     }
   });
-}
+};
 
 useStorageSync("readAnnouncements", (newReadAnnouncements) => {
   announcementStore.readAnnouncements = newReadAnnouncements || [];
 });
-
-
-
-
 
 // Computed property for displayed announcements
 const displayedAnnouncements = computed(() => {
@@ -418,41 +421,27 @@ const displayedAnnouncements = computed(() => {
 const loadMoreAnnouncements = async () => {
   if (isLoadingMore.value) return;
 
-  if (displayedAnnouncements.value.length >= filteredAnnouncements.value.length) {
+  if (
+    displayedAnnouncements.value.length >= filteredAnnouncements.value.length
+  ) {
     return; // All announcements are already displayed
   }
 
   isLoadingMore.value = true;
 
-  // Simulate loading delay (remove in production if not needed)
-  await new Promise(resolve => setTimeout(resolve, 500));
+  // Add a small delay to ensure the loading spinner is visible ✨ UI
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
   currentPage.value++;
   isLoadingMore.value = false;
 };
 
 // Setup intersection observer for infinite scroll
-const setupInfiniteScroll = () => {
-  if (!loadMoreTrigger.value) return;
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      if (entries[0].isIntersecting) {
-        loadMoreAnnouncements();
-      }
-    },
-    { threshold: 0.1 }
-  );
-
-  observer.observe(loadMoreTrigger.value);
-
-  // Cleanup function
-  return () => {
-    if (loadMoreTrigger.value) {
-      observer.unobserve(loadMoreTrigger.value);
-    }
-  };
-};
+const { setupObserver, cleanup } = setupInfiniteScroll(
+  loadMoreAnnouncements,
+  loadMoreTrigger,
+  { threshold: 0.1 }
+);
 
 // Reset pagination when filters change
 watch([searchQuery, selectedCategory, selectedTargetRole], () => {
@@ -475,23 +464,12 @@ onMounted(async () => {
 
   setupSocketConnection();
 
-  // Setup infinite scroll after component is mounted
-  const cleanupObserver = setupInfiniteScroll();
-
-  // Cleanup observer on component unmount
-  onUnmounted(() => {
-    if (cleanupObserver) cleanupObserver();
-
-    socket.off("newAnnouncement");
-    socket.off("announcementDeleted");
-    socket.off("readStatus");
-    socket.off("announcementArchived");
-    socket.off("announcementDeleted");
-    socket.off("announcementArchiveStatus");
-  });
+  setupObserver();
 });
 
 onUnmounted(() => {
+  cleanup();
+
   socket.off("newAnnouncement");
   socket.off("announcementDeleted");
   socket.off("readStatus");

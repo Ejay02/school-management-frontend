@@ -63,7 +63,7 @@
 
       <div v-else class="space-y-4 mt-2">
         <div
-          v-for="announcement in archivedAnnouncements"
+          v-for="announcement in displayedArchivedAnnouncements"
           :key="announcement.id"
           class="bg-white rounded-lg shadow-sm overflow-hidden transition-all hover:shadow-md border-l-4 border-gray-300"
         >
@@ -129,7 +129,7 @@
                       }}</span
                     >
                   </small>
-                  <!-- Posted by {{ formatCreatorRole(announcement.creatorRole) }} -->
+
                   <span v-if="announcement.class"
                     >({{ announcement.class.name }})</span
                   >
@@ -172,6 +172,16 @@
           </div>
         </div>
       </div>
+
+      <!-- Loading indicator for infinite scroll -->
+      <div v-if="isLoadingMore" class="flex justify-center items-center py-4">
+        <div
+          class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"
+        ></div>
+      </div>
+
+      <!-- Intersection observer target element -->
+      <div ref="loadMoreTrigger" class="h-4"></div>
     </div>
   </div>
 </template>
@@ -187,6 +197,15 @@ import { availableTargetRoles } from "../../utils/utility";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
+import { setupInfiniteScroll } from "../../utils/scroll";
+
+const showDelModal = (id, title, type, data) => {
+  modalStore.deleteModal = true;
+  modalStore.modalId = id;
+  modalStore.modalTitle = title;
+  modalStore.source = type; // This will be 'personalAnnouncementDelete'
+  modalStore.data = data;
+};
 
 const userStore = useUserStore();
 const modalStore = useModalStore();
@@ -197,44 +216,18 @@ const archiveSearchQuery = ref("");
 const loading = computed(() => announcementStore.loading);
 const error = computed(() => announcementStore.error);
 
-const showDelModal = (id, title, type, data) => {
-  modalStore.deleteModal = true;
-  modalStore.modalId = id;
-  modalStore.modalTitle = title;
-  modalStore.source = type; // This will be 'personalAnnouncementDelete'
-  modalStore.data = data;
-};
+const pageSize = 5;
+const currentPage = ref(1);
+const isLoadingMore = ref(false);
+const loadMoreTrigger = ref(null);
 
 const archivedAnnouncements = computed(
   () => announcementStore.archivedAnnouncements
 );
 
-const formatCreatorRole = (role) => {
-  if (!role) return "Unknown";
-  return role.toLowerCase().replace("_", " ");
-};
-
 const formatTargetRoles = (roles) => {
   return roles.map((role) => role.toLowerCase()).join(", ");
 };
-
-onMounted(async () => {
-  await announcementStore.fetchArchivedAnnouncements();
-
-  socket.on("announcementDeleted", (data) => {
-    if (data && data.announcementId) {
-      // Remove announcement from archived list
-      announcementStore.archivedAnnouncements =
-        announcementStore.archivedAnnouncements.filter(
-          (announcement) => announcement.id !== data.announcementId
-        );
-    }
-  });
-});
-
-onUnmounted(() => {
-  socket.off("announcementDeleted");
-});
 
 const selectedCategory = ref("");
 const selectedTargetRole = ref("");
@@ -269,5 +262,53 @@ const filteredArchivedAnnouncements = computed(() => {
   }
 
   return filtered;
+});
+
+const displayedArchivedAnnouncements = computed(() => {
+  const endIndex = currentPage.value * pageSize;
+  return filteredArchivedAnnouncements.value.slice(0, endIndex);
+});
+
+
+const loadMoreArchivedAnnouncements = async () => {
+  if (isLoadingMore.value) return;
+
+  if (displayedArchivedAnnouncements.value.length >= filteredArchivedAnnouncements.value.length) {
+    return;
+  }
+
+  isLoadingMore.value = true;
+  await new Promise(resolve => setTimeout(resolve, 500));
+  currentPage.value++;
+  isLoadingMore.value = false;
+};
+
+
+const { setupObserver, cleanup } = setupInfiniteScroll(
+  loadMoreArchivedAnnouncements,
+  loadMoreTrigger,
+  { threshold: 0.1 }
+);
+
+onMounted(async () => {
+  await announcementStore.fetchArchivedAnnouncements();
+
+  setupObserver();
+
+  socket.on("announcementDeleted", (data) => {
+    if (data && data.announcementId) {
+      // Remove announcement from archived list
+      announcementStore.archivedAnnouncements =
+        announcementStore.archivedAnnouncements.filter(
+          (announcement) => announcement.id !== data.announcementId
+        );
+    }
+  });
+});
+
+onUnmounted(() => {
+  cleanup();
+
+  socket.off("announcementDeleted");
 });
 </script>
