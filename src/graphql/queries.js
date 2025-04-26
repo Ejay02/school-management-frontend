@@ -739,3 +739,50 @@ export const getAllAdminUsers = gql`
     }
   }
 `;
+
+export const getFeeStructure = gql`
+  query getFeeStructure($feeStructureId: String!) {
+    getFeeStructure(feeStructureId: $feeStructureId) {
+      id
+      academicYear
+      term
+      type
+      totalAmount
+      components {
+        id
+        name
+        description
+        amount
+      }
+    }
+  }
+`;
+
+export const getMyInvoices = gql`
+  query getMyInvoices($params: PaginationInput) {
+    getMyInvoices(params: $params) {
+      id
+      invoiceNumber
+      totalAmount
+      paidAmount
+      dueDate
+      status
+      createdAt
+      feeStructure {
+        id
+        academicYear
+        term
+        type
+        totalAmount
+      }
+      payments {
+        id
+        amount
+        status
+        createdAt
+      }
+    }
+  }
+`;
+
+

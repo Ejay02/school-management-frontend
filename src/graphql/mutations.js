@@ -643,15 +643,13 @@ export const assignAdminRole = gql`
   mutation assignAdminRole($role: String!, $targetId: String!) {
     assignAdminRole(role: $role, targetId: $targetId) {
       id
-     email
-     image
-     role
-     username
+      email
+      image
+      role
+      username
     }
   }
 `;
-
-
 
 export const updateAdminProfile = gql`
   mutation UpdateAdminProfile($input: UpdateProfileInput!) {
@@ -725,12 +723,62 @@ export const cancelEvent = gql`
       status
       description
       classId
-      class{
+      class {
         id
         name
       }
       targetRoles
     }
   }
-`
+`;
 
+export const createFeeStructure = gql`
+  mutation createFeeStructure($input: CreateFeeStructureInput!) {
+    createFeeStructure(input: $input) {
+      id
+      academicYear
+      term
+      type
+      totalAmount
+      components {
+        id
+        name
+        description
+        amount
+      }
+    }
+  }
+`;
+
+export const generateInvoice = gql`
+  mutation generateInvoice($feeStructureId: String!) {
+    generateInvoice(feeStructureId: $feeStructureId) {
+      id
+      invoiceNumber
+      totalAmount
+      paidAmount
+      dueDate
+      status
+      createdAt
+      feeStructure {
+        id
+        academicYear
+        term
+        type
+        totalAmount
+      }
+      payments {
+        id
+        amount
+        status
+        createdAt
+      }
+    }
+  }
+`;
+
+export const initiatePayment = gql`
+  mutation initiatePayment($invoiceId: String!, $amount: Float!) {
+    initiatePayment(invoiceId: $invoiceId, amount: $amount)
+  }
+`;
