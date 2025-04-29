@@ -13,14 +13,14 @@
       />
 
       <div class="" v-else>
-        <div class="flex justify-between mb-4">
-          <div class="flex space-x-2">
-            <div class="relative">
+        <div class="flex flex-col sm:flex-row justify-between mb-4 gap-3">
+          <div class="flex flex-wrap gap-2">
+            <div class="relative w-full sm:w-auto">
               <input
                 type="text"
                 v-model="searchQuery"
                 placeholder="Search fee structures..."
-                class="pl-10 pr-4 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                class="pl-10 pr-4 block w-full h-[42px] px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
               <div class="absolute left-3 top-2.5 text-gray-400">
                 <i class="fas fa-search"></i>
@@ -28,7 +28,7 @@
             </div>
             <select
               v-model="academicYearFilter"
-              class="block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              class="block h-[42px] w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             >
               <option value="">All Academic Years</option>
               <option value="2023-2024">2023-2024</option>
@@ -36,7 +36,7 @@
             </select>
             <select
               v-model="termFilter"
-              class="block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              class="block h-[42px] w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             >
               <option value="">All Terms</option>
               <option value="First">First Term</option>
@@ -48,37 +48,37 @@
           <!--  -->
           <button
             @click="showCreateFeeModal"
-            class="bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-2 rounded-md shadow-sm text-xs font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            class="w-full sm:w-auto h-[42px] bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-2 rounded-md shadow-sm text-xs font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             + Create Fee Structure
           </button>
         </div>
-        <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Academic Year
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell"
                 >
                   Term
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell"
                 >
                   Type
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Total Amount
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Actions
                 </th>
@@ -86,7 +86,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-if="loading">
-                <td colspan="5" class="px-6 py-4 text-center">
+                <td colspan="5" class="px-4 sm:px-6 py-4 text-center">
                   <div class="flex justify-center">
                     <div
                       class="animate-spin rounded-full h-6 w-6 border-b-2 border-eduPurple"
@@ -95,7 +95,7 @@
                 </td>
               </tr>
               <tr v-else-if="filteredFeeStructures.length === 0">
-                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                <td colspan="5" class="px-4 sm:px-6 py-4 text-center text-gray-500">
                   No fee structures found
                 </td>
               </tr>
@@ -104,47 +104,48 @@
                 :key="fee.id"
                 class="hover:bg-gray-50"
               >
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm">
                   {{ fee.academicYear }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">{{ fee.term }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">{{ fee.type }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden sm:table-cell">
+                  {{ fee.term }}
+                </td>
+                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell">
+                  {{ fee.type }}
+                </td>
+                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm">
                   <span class="font-medium"
                     >₦{{ formatCurrency(fee.totalAmount) }}</span
                   >
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                  <button
-                    @click="viewFeeDetails(fee)"
-                    class="text-indigo-600 hover:text-indigo-900 mr-3"
-                  >
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  <button
-                    @click="editFeeStructure(fee)"
-                    class="text-blue-600 hover:text-blue-900 mr-3"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button
-                    @click="confirmDeleteFee(fee)"
-                    class="text-red-600 hover:text-red-900"
-                  >
-                    <i class="fas fa-trash"></i>
-                  </button>
+                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm">
+                  <div class="flex space-x-2">
+                    <button
+                      @click="viewFeeDetails(fee)"
+                      class="text-indigo-600 hover:text-indigo-900"
+                    >
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button
+                      @click="editFeeStructure(fee)"
+                      class="text-blue-600 hover:text-blue-900"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button
+                      @click="confirmDeleteFee(fee)"
+                      class="text-red-600 hover:text-red-900"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
         <!-- Pagination -->
-          <!-- :currentPage="currentPage"
-          :hasMore="feeStore.hasMore"
-          :totalPages="feeStore.totalPages"
-          @update:page="handlePageChange" -->
-        <Pagination
-        />
+        <Pagination />
         <!-- <div class="flex justify-between items-center mt-4">
           <div class="text-sm text-gray-700">
             Showing <span class="font-medium">{{ paginationStart }}</span> to
@@ -181,197 +182,17 @@
       </div>
     </div>
 
-    <!-- Create/Edit Fee Structure Modal -->
-    <!-- <div
-      v-if="showCreateFeeModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    >
-      <div
-        class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-      >
-        <div class="p-6 border-b">
-          <h2 class="text-xl font-bold text-gray-800">
-            {{ editingFee ? "Edit Fee Structure" : "Create Fee Structure" }}
-          </h2>
-        </div>
-        <div class="p-6">
-          <form @submit.prevent="saveFeeStructure">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label
-                  for="academicYear"
-                  class="block text-sm font-medium text-gray-700 mb-1"
-                  >Academic Year</label
-                >
-                <select
-                  v-model="feeForm.academicYear"
-                  required
-                  class="w-full border rounded-lg px-3 py-2 focus:ring-eduPurple focus:border-eduPurple"
-                >
-                  <option value="2023-2024">2023-2024</option>
-                  <option value="2024-2025">2024-2025</option>
-                </select>
-              </div>
-              <div>
-                <label
-                  for="term"
-                  class="block text-sm font-medium text-gray-700 mb-1"
-                  >Term</label
-                >
-                <select
-                  v-model="feeForm.term"
-                  required
-                  class="w-full border rounded-lg px-3 py-2 focus:ring-eduPurple focus:border-eduPurple"
-                >
-                  <option value="First">First Term</option>
-                  <option value="Second">Second Term</option>
-                  <option value="Third">Third Term</option>
-                </select>
-              </div>
-              <div>
-                <label
-                  for="feeType"
-                  class="block text-sm font-medium text-gray-700 mb-1"
-                  >Fee Type</label
-                >
-                <select
-                  v-model="feeForm.type"
-                  required
-                  class="w-full border rounded-lg px-3 py-2 focus:ring-eduPurple focus:border-eduPurple"
-                >
-                  <option value="Tuition">Tuition</option>
-                  <option value="Development">Development Levy</option>
-                  <option value="Uniform">Uniform</option>
-                  <option value="Books">Books</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label
-                  for="class"
-                  class="block text-sm font-medium text-gray-700 mb-1"
-                  >Class</label
-                >
-                <select
-                  v-model="feeForm.classId"
-                  required
-                  class="w-full border rounded-lg px-3 py-2 focus:ring-eduPurple focus:border-eduPurple"
-                >
-                  <option v-for="cls in classes" :key="cls.id" :value="cls.id">
-                    {{ cls.name }}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="mb-4">
-              <h3 class="text-lg font-medium text-gray-800 mb-2">
-                Fee Components
-              </h3>
-              <div
-                v-for="(component, index) in feeForm.components"
-                :key="index"
-                class="mb-4 p-4 border rounded-lg"
-              >
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label
-                      for="name"
-                      class="block text-sm font-medium text-gray-700 mb-1"
-                      >Name</label
-                    >
-                    <input
-                      type="text"
-                      v-model="component.name"
-                      required
-                      class="w-full border rounded-lg px-3 py-2 focus:ring-eduPurple focus:border-eduPurple"
-                      placeholder="e.g. Tuition Fee"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      for="description"
-                      class="block text-sm font-medium text-gray-700 mb-1"
-                      >Description</label
-                    >
-                    <input
-                      type="text"
-                      v-model="component.description"
-                      class="w-full border rounded-lg px-3 py-2 focus:ring-eduPurple focus:border-eduPurple"
-                      placeholder="e.g. Basic tuition fee"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      for="amount"
-                      class="block text-sm font-medium text-gray-700 mb-1"
-                      >Amount (₦)</label
-                    >
-                    <input
-                      type="number"
-                      v-model.number="component.amount"
-                      required
-                      min="0"
-                      class="w-full border rounded-lg px-3 py-2 focus:ring-eduPurple focus:border-eduPurple"
-                    />
-                  </div>
-                </div>
-                <button
-                  v-if="feeForm.components.length > 1"
-                  @click="feeForm.components.splice(index, 1)"
-                  type="button"
-                  class="mt-2 text-red-600 hover:text-red-800 text-sm"
-                >
-                  <i class="fas fa-trash mr-1"></i> Remove Component
-                </button>
-              </div>
-              <button
-                @click="
-                  feeForm.components.push({
-                    name: '',
-                    description: '',
-                    amount: 0,
-                  })
-                "
-                type="button"
-                class="mt-2 text-eduPurple hover:text-purple-700 text-sm"
-              >
-                <i class="fas fa-plus mr-1"></i> Add Component
-              </button>
-            </div>
-
-            <div class="flex justify-between items-center mt-6">
-              <button
-                type="button"
-                @click="showCreateFeeModal = false"
-                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 bg-eduPurple text-white rounded-lg hover:bg-purple-700"
-              >
-                {{ editingFee ? "Update" : "Create" }} Fee Structure
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div> -->
-
     <!-- View Fee Details Modal -->
-
     <div
       v-if="showFeeDetailsModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
     >
       <div
-        class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
       >
         <!-- Modal Header -->
-        <div class="p-6 border-b flex justify-between items-center">
-          <h2 class="text-xl font-bold text-gray-800">Fee Structure Details</h2>
+        <div class="p-4 sm:p-6 border-b flex justify-between items-center">
+          <h2 class="text-lg sm:text-xl font-bold text-gray-800">Fee Structure Details</h2>
           <button
             @click="showFeeDetailsModal = false"
             class="text-gray-500 hover:text-gray-700"
@@ -381,8 +202,8 @@
         </div>
 
         <!-- Modal Content -->
-        <div class="p-6">
-          <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="p-4 sm:p-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <div>
               <p class="text-sm text-gray-500">Academic Year</p>
               <p class="font-medium">{{ selectedFee.academicYear }}</p>
