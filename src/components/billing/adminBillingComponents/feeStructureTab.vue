@@ -1,164 +1,177 @@
 <template>
   <div class="">
-  <div class="">
-    <div class="flex justify-between mb-4">
-        <div class="flex space-x-2">
-          <div class="relative">
-            <input
-              type="text"
-              v-model="searchQuery"
-              placeholder="Search fee structures..."
-              class="pl-10 pr-4 py-2 border rounded-lg focus:ring-eduPurple focus:border-eduPurple"
-            />
-            <div class="absolute left-3 top-2.5 text-gray-400">
-              <i class="fas fa-search"></i>
-            </div>
-          </div>
-          <select
-            v-model="academicYearFilter"
-            class="border rounded-lg px-4 py-2 focus:ring-eduPurple focus:border-eduPurple"
-          >
-            <option value="">All Academic Years</option>
-            <option value="2023-2024">2023-2024</option>
-            <option value="2024-2025">2024-2025</option>
-          </select>
-          <select
-            v-model="termFilter"
-            class="border rounded-lg px-4 py-2 focus:ring-eduPurple focus:border-eduPurple"
-          >
-            <option value="">All Terms</option>
-            <option value="First">First Term</option>
-            <option value="Second">Second Term</option>
-            <option value="Third">Third Term</option>
-          </select>
-        </div>
-        <button
-          @click="showCreateFeeModal = true"
-          class="bg-eduPurple text-white px-4 py-2 rounded-lg flex items-center"
-        >
-          <i class="fas fa-plus mr-2"></i> Create Fee Structure
-        </button>
-      </div>
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Academic Year
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Term
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Type
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Total Amount
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-if="loading">
-            <td colspan="5" class="px-6 py-4 text-center">
-              <div class="flex justify-center">
-                <div
-                  class="animate-spin rounded-full h-6 w-6 border-b-2 border-eduPurple"
-                ></div>
+    <div class="">
+      <LoadingScreen message="Loading payments ... " v-if="loading" />
+
+      <ErrorScreen :message="error" v-else-if="error" />
+
+      <EmptyState
+        v-else-if="!filteredFeeStructures.length"
+        icon="fa-solid fa-money-bill"
+        heading="Nothing here yet"
+        description="Check back later for updates"
+      />
+
+      <div class="" v-else>
+        <div class="flex justify-between mb-4">
+          <div class="flex space-x-2">
+            <div class="relative">
+              <input
+                type="text"
+                v-model="searchQuery"
+                placeholder="Search fee structures..."
+                class="pl-10 pr-4 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+              <div class="absolute left-3 top-2.5 text-gray-400">
+                <i class="fas fa-search"></i>
               </div>
-            </td>
-          </tr>
-          <tr v-else-if="filteredFeeStructures.length === 0">
-            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
-              No fee structures found
-            </td>
-          </tr>
-          <tr
-            v-for="fee in filteredFeeStructures"
-            :key="fee.id"
-            class="hover:bg-gray-50"
+            </div>
+            <select
+              v-model="academicYearFilter"
+              class="block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+            >
+              <option value="">All Academic Years</option>
+              <option value="2023-2024">2023-2024</option>
+              <option value="2024-2025">2024-2025</option>
+            </select>
+            <select
+              v-model="termFilter"
+              class="block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+            >
+              <option value="">All Terms</option>
+              <option value="First">First Term</option>
+              <option value="Second">Second Term</option>
+              <option value="Third">Third Term</option>
+            </select>
+          </div>
+          <button
+            @click="showCreateFeeModal = true"
+            class="bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-2 rounded-md shadow-sm text-xs font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
-            <td class="px-6 py-4 whitespace-nowrap">
-              {{ fee.academicYear }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">{{ fee.term }}</td>
-            <td class="px-6 py-4 whitespace-nowrap">{{ fee.type }}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="font-medium"
-                >₦{{ formatCurrency(fee.totalAmount) }}</span
-              >
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
-              <button
-                @click="viewFeeDetails(fee)"
-                class="text-indigo-600 hover:text-indigo-900 mr-3"
-              >
-                <i class="fas fa-eye"></i>
-              </button>
-              <button
-                @click="editFeeStructure(fee)"
-                class="text-blue-600 hover:text-blue-900 mr-3"
-              >
-                <i class="fas fa-edit"></i>
-              </button>
-              <button
-                @click="confirmDeleteFee(fee)"
-                class="text-red-600 hover:text-red-900"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-     <!-- Pagination -->
-      <div class="flex justify-between items-center mt-4">
-        <div class="text-sm text-gray-700">
-          Showing <span class="font-medium">{{ paginationStart }}</span> to
-          <span class="font-medium">{{ paginationEnd }}</span> of
-          <span class="font-medium">{{ totalFeeStructures }}</span> results
+            + Create Fee Structure
+          </button>
         </div>
-        <div class="flex space-x-2">
-          <button
-            @click="currentPage--"
-            :disabled="currentPage === 1"
-            :class="[
-              'px-3 py-1 rounded-md',
-              currentPage === 1
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-white text-gray-700 hover:bg-gray-50',
-            ]"
-          >
-            Previous
-          </button>
-          <button
-            @click="currentPage++"
-            :disabled="currentPage === totalPages"
-            :class="[
-              'px-3 py-1 rounded-md',
-              currentPage === totalPages
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-white text-gray-700 hover:bg-gray-50',
-            ]"
-          >
-            Next
-          </button>
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Academic Year
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Term
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Type
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Total Amount
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-if="loading">
+                <td colspan="5" class="px-6 py-4 text-center">
+                  <div class="flex justify-center">
+                    <div
+                      class="animate-spin rounded-full h-6 w-6 border-b-2 border-eduPurple"
+                    ></div>
+                  </div>
+                </td>
+              </tr>
+              <tr v-else-if="filteredFeeStructures.length === 0">
+                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                  No fee structures found
+                </td>
+              </tr>
+              <tr
+                v-for="fee in filteredFeeStructures"
+                :key="fee.id"
+                class="hover:bg-gray-50"
+              >
+                <td class="px-6 py-4 whitespace-nowrap">
+                  {{ fee.academicYear }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ fee.term }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ fee.type }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="font-medium"
+                    >₦{{ formatCurrency(fee.totalAmount) }}</span
+                  >
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                  <button
+                    @click="viewFeeDetails(fee)"
+                    class="text-indigo-600 hover:text-indigo-900 mr-3"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button
+                    @click="editFeeStructure(fee)"
+                    class="text-blue-600 hover:text-blue-900 mr-3"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    @click="confirmDeleteFee(fee)"
+                    class="text-red-600 hover:text-red-900"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination -->
+        <div class="flex justify-between items-center mt-4">
+          <div class="text-sm text-gray-700">
+            Showing <span class="font-medium">{{ paginationStart }}</span> to
+            <span class="font-medium">{{ paginationEnd }}</span> of
+            <span class="font-medium">{{ totalFeeStructures }}</span> results
+          </div>
+          <div class="flex space-x-2">
+            <button
+              @click="currentPage--"
+              :disabled="currentPage === 1"
+              :class="[
+                'px-3 py-1 rounded-md',
+                currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50',
+              ]"
+            >
+              Previous
+            </button>
+            <button
+              @click="currentPage++"
+              :disabled="currentPage === totalPages"
+              :class="[
+                'px-3 py-1 rounded-md',
+                currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50',
+              ]"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
-</div>
+    </div>
     <!-- View Fee Details Modal -->
 
     <div
@@ -231,6 +244,9 @@
 
 <script setup>
 import { computed, onMounted, ref } from "vue";
+import EmptyState from "../../emptyState.vue";
+import ErrorScreen from "../../errorScreen.vue";
+import LoadingScreen from "../../loadingScreen.vue";
 
 // Fee Structures Tab
 const searchQuery = ref("");
@@ -243,6 +259,8 @@ const showCreateFeeModal = ref(false);
 const editingFee = ref(null);
 const showFeeDetailsModal = ref(false);
 const selectedFee = ref({});
+
+const error = ref(false);
 
 // Fee Structure Form
 const feeForm = ref({
@@ -496,8 +514,6 @@ const confirmDeleteFee = (fee) => {
     console.log("Delete fee structure", fee);
   }
 };
-
-
 
 onMounted(() => {
   // Fetch data from API

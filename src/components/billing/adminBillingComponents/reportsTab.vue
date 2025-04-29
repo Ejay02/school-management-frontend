@@ -31,7 +31,7 @@
       <!-- Outstanding Payments Card -->
       <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center">
-          <div class="p-3 rounded-full bg-red-100 text-red-600">
+          <div class="p-4 rounded-full bg-red-100 text-red-600">
             <i class="fas fa-exclamation-circle text-xl"></i>
           </div>
           <div class="ml-4">
