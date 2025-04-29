@@ -740,9 +740,29 @@ export const getAllAdminUsers = gql`
   }
 `;
 
-export const getFeeStructure = gql`
-  query getFeeStructure($feeStructureId: String!) {
-    getFeeStructure(feeStructureId: $feeStructureId) {
+export const getAllFeeStructures = gql`
+  query getAllFeeStructures($params: PaginationInput) {
+    getAllFeeStructures(params: $params) {
+      id
+      academicYear
+      term
+      type
+      totalAmount
+      components {
+        id
+        name
+        description
+        amount
+        feeStructureId
+      }
+    }
+  }
+
+`;
+
+export const getFeeStructureById = gql`
+  query getFeeStructureById($feeStructureId: String!) {
+    getFeeStructureById(feeStructureId: $feeStructureId) {
       id
       academicYear
       term

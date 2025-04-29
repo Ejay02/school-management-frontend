@@ -21,6 +21,7 @@
   <AddModal v-if="modalStore.addModal" />
   <CancelModal v-if="modalStore.cancelModal" />
    <CreateFeeStructureModal v-if="modalStore.createFeeStructureModal" />
+   <ViewFeeDetailsModal v-if="modalStore.viewFeeDetailsModal" />
   <NotificationContainer />
 </template>
 
@@ -32,6 +33,7 @@ import NotificationContainer from "./components/notificationContainer.vue";
 import { useModalStore } from "./store/useModalStore";
 import CancelModal from "./components/modals/cancelModal.vue";
 import CreateFeeStructureModal from "./components/modals/CreateFeeStructureModal.vue";
+import ViewFeeDetailsModal from "./components/modals/viewFeeDetailsModal.vue";
 
 const modalStore = useModalStore();
 </script>

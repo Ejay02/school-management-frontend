@@ -1,7 +1,7 @@
 <template>
   <div class="">
     <div class="">
-      <LoadingScreen message="Loading payments ... " v-if="loading" />
+      <LoadingScreen message="Loading fees structure... " v-if="loading" />
 
       <ErrorScreen :message="error" v-else-if="error" />
 
@@ -121,7 +121,7 @@
                 <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm">
                   <div class="flex space-x-2">
                     <button
-                      @click="viewFeeDetails(fee)"
+                      @click="showViewDetailsModal(fee)"
                       class="text-indigo-600 hover:text-indigo-900"
                     >
                       <i class="fas fa-eye"></i>
@@ -176,6 +176,11 @@ const itemsPerPage = 10;
 const editingFee = ref(null);
 const showFeeDetailsModal = ref(false);
 const selectedFee = ref({});
+
+const showViewDetailsModal = (fee) => {
+  selectedFee.value = fee;
+  modalStore.viewFeeDetailsModal = true;
+};
 
 const error = ref(false);
 

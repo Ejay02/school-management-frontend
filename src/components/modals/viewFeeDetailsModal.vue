@@ -1,6 +1,6 @@
 <template>
   <transition name="fade">
-        <div
+    <div
       v-if="isModalVisible"
       class="fixed top-0 left-0 w-full h-full bg-gray-900/80 flex justify-center items-center z-50"
       @click.self="handleCancel"
@@ -11,9 +11,11 @@
       >
         <!-- Modal Header -->
         <div class="p-4 sm:p-6 border-b flex justify-between items-center">
-          <h2 class="text-lg sm:text-xl font-bold text-gray-800">Fee Structure Details</h2>
+          <h2 class="text-lg sm:text-xl font-bold text-gray-800">
+            Fee Structure Details
+          </h2>
           <button
-            @click="showFeeDetailsModal = false"
+            @click="showFeeDetailsModal"
             class="text-gray-500 hover:text-gray-700"
           >
             <i class="fas fa-times"></i>
@@ -70,4 +72,14 @@
   </transition>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref } from "vue";
+import { useModalStore } from "../../store/useModalStore";
+
+const modalStore = useModalStore();
+const isModalVisible = ref(modalStore.viewFeeDetailsModal);
+
+const handleCancel = () => {
+  modalStore.viewFeeDetailsModal = false;
+};
+</script>

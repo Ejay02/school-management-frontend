@@ -78,20 +78,7 @@
               </div>
 
               <!-- Class Selection -->
-              <!-- <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >Class</label
-                >
-                <select
-                  v-model="modalStore.data.feeForm.classId"
-                  required
-                  class="w-full border rounded-lg px-3 py-2 focus:ring-eduPurple focus:border-eduPurple"
-                >
-                  <option v-for="cls in classes" :key="cls.id" :value="cls.id">
-                    {{ cls.name }}
-                  </option>
-                </select>
-              </div> -->
+           
               <Dropdown
                 v-model="selectedClass"
                 label="Select Class <span class='text-red-500'>*</span>"

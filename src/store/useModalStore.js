@@ -9,7 +9,8 @@ export const useModalStore = defineStore("modal", {
     modalId: null,
     modalTitle: "",
     data: null, // This will store the full item data
-    createFeeStructureModal:false
+    createFeeStructureModal:false,
+    viewFeeDetailsModal:false
     
   }),
   
