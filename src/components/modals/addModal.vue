@@ -348,7 +348,8 @@
               <label
                 for="capacity"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Capacity <span class="text-red-500">*</span></label
+                >Capacity <span class="text-red-500">*</span>
+                </label
               >
               <input
                 v-model="capacity"

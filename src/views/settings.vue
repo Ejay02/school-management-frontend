@@ -23,21 +23,21 @@
             <router-link
               to="/settings/profile"
               class="hover:text-eduPurple pl-4"
-              :class="{ 'text-eduPurple': $route.name === 'profile' }"
+              :class="{ 'text-indigo-600': $route.name === 'profile' }"
             >
               Account
             </router-link>
             <router-link
               to="/settings/notifications"
               class="hover:text-eduPurple"
-              :class="{ 'text-eduPurple': $route.name === 'notifications' }"
+              :class="{ 'text-indigo-600': $route.name === 'notifications' }"
             >
               Notifications
             </router-link>
             <router-link
               to="/settings/billing"
               class="hover:text-eduPurple"
-              :class="{ 'text-eduPurple': $route.name === 'billing' }"
+              :class="{ 'text-indigo-600': $route.name === 'billing' }"
             >
               Billing
             </router-link>
@@ -45,14 +45,14 @@
               v-if="role === 'super_admin' || role === 'admin'"
               to="/settings/team"
               class="hover:text-eduPurple"
-              :class="{ 'text-eduPurple': $route.name === 'team' }"
+              :class="{ 'text-indigo-600': $route.name === 'team' }"
             >
               Team
             </router-link>
             <router-link
               to="/settings/integrations"
               class="hover:text-eduPurple pr-4"
-              :class="{ 'text-eduPurple': $route.name === 'integrations' }"
+              :class="{ 'text-indigo-600': $route.name === 'integrations' }"
             >
               Integrations
             </router-link>
