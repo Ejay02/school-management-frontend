@@ -191,7 +191,7 @@
 import { createFeeStructure } from "@/graphql/mutations";
 import { useModalStore } from "@/store/useModalStore";
 import { useMutation } from "@vue/apollo-composable";
-import { computed, ref, watch, onMounted } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
 import Dropdown from "../dropdowns/dropdown.vue";

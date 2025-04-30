@@ -750,6 +750,24 @@ export const createFeeStructure = gql`
   }
 `;
 
+export const updateFeeStructure = gql`
+  mutation updateFeeStructure($id: String!, $input: UpdateFeeStructureInput!) {
+    editFeeStructure(id: $id, input: $input) {
+      id
+      academicYear
+      term
+      type
+      totalAmount
+      components {
+        id
+        name
+        description
+        amount
+      }
+    }
+  }
+  `;
+
 export const generateInvoice = gql`
   mutation generateInvoice($feeStructureId: String!) {
     generateInvoice(feeStructureId: $feeStructureId) {

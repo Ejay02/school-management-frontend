@@ -1,18 +1,7 @@
 <template>
   <div class="">
     <div class="">
-      <LoadingScreen message="Loading fees structure... " v-if="loading" />
-
-      <ErrorScreen :message="error" v-else-if="error" />
-
-      <EmptyState
-        v-else-if="!filteredFeeStructures.length"
-        icon="fa-solid fa-money-bill"
-        heading="Nothing here yet"
-        description="Check back later for updates"
-      />
-
-      <div class="" v-else>
+      <div class="">
         <div class="flex flex-col sm:flex-row justify-between mb-4 gap-3">
           <div class="flex flex-wrap gap-2">
             <div class="relative w-full sm:w-auto">
@@ -53,7 +42,25 @@
             + Create Fee Structure
           </button>
         </div>
-        <div class="bg-white rounded-lg shadow overflow-x-auto">
+
+        <LoadingScreen
+          message="Loading fees structure... "
+          v-if="feeStructureStore.loading"
+        />
+
+        <ErrorScreen
+          :message="feeStructureStore.error"
+          v-else-if="feeStructureStore.error"
+        />
+
+        <EmptyState
+          v-else-if="!filteredFeeStructures.length"
+          icon="fa-solid fa-money-bill"
+          heading="Nothing here yet"
+          description="Check back later for updates"
+        />
+
+        <div class="bg-white rounded-lg shadow overflow-x-auto" v-else>
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -73,6 +80,11 @@
                   Type
                 </th>
                 <th
+                  class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell"
+                >
+                  Description
+                </th>
+                <th
                   class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Total Amount
@@ -85,7 +97,7 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-if="loading">
+              <tr v-if="feeStructureStore.loading">
                 <td colspan="5" class="px-4 sm:px-6 py-4 text-center">
                   <div class="flex justify-center">
                     <div
@@ -95,30 +107,48 @@
                 </td>
               </tr>
               <tr v-else-if="filteredFeeStructures.length === 0">
-                <td colspan="5" class="px-4 sm:px-6 py-4 text-center text-gray-500">
+                <td
+                  colspan="5"
+                  class="px-4 sm:px-6 py-4 text-center text-gray-500"
+                >
                   No fee structures found
                 </td>
               </tr>
               <tr
                 v-for="fee in filteredFeeStructures"
-                :key="fee.id"
+                :key="fee?.id"
                 class="hover:bg-gray-50"
               >
-                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm">
-                  {{ fee.academicYear }}
+                <td
+                  class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm"
+                >
+                  {{ fee?.academicYear }}
                 </td>
-                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden sm:table-cell">
-                  {{ fee.term }}
+                <td
+                  class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden sm:table-cell"
+                >
+                  {{ fee?.term ?? "NA" }}
                 </td>
-                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell">
-                  {{ fee.type }}
+                <td
+                  class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell"
+                >
+                  {{ fee?.type ?? "NA" }}
                 </td>
-                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm">
+                <td
+                  class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell"
+                >
+                  {{ fee?.components?.description ?? "NA" }}
+                </td>
+                <td
+                  class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm"
+                >
                   <span class="font-medium"
-                    >₦{{ formatCurrency(fee.totalAmount) }}</span
+                    >₦{{ formatCurrency(fee?.totalAmount) }}</span
                   >
                 </td>
-                <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm">
+                <td
+                  class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm"
+                >
                   <div class="flex space-x-2">
                     <button
                       @click="showViewDetailsModal(fee)"
@@ -126,12 +156,7 @@
                     >
                       <i class="fas fa-eye"></i>
                     </button>
-                    <button
-                      @click="editFeeStructure(fee)"
-                      class="text-blue-600 hover:text-blue-900"
-                    >
-                      <i class="fas fa-edit"></i>
-                    </button>
+                  
                     <button
                       @click="confirmDeleteFee(fee)"
                       class="text-red-600 hover:text-red-900"
@@ -145,18 +170,20 @@
           </table>
         </div>
         <!-- Pagination -->
-        <Pagination />
-    
+        <Pagination
+          :currentPage="currentPage"
+          :hasMore="feeStructureStore.hasMore"
+          :totalPages="feeStructureStore.totalPages"
+          @update:page="handlePageChange"
+        />
       </div>
     </div>
-
-    <!-- View Fee Details Modal -->
-  
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { useFeeStructureStore } from "../../../store/feeStructureStore";
 import { useModalStore } from "../../../store/useModalStore";
 import EmptyState from "../../emptyState.vue";
 import ErrorScreen from "../../errorScreen.vue";
@@ -164,28 +191,24 @@ import LoadingScreen from "../../loadingScreen.vue";
 import Pagination from "../../pagination.vue";
 
 const modalStore = useModalStore();
+const feeStructureStore = useFeeStructureStore();
 
 // Fee Structures Tab
 const searchQuery = ref("");
 const academicYearFilter = ref("");
 const termFilter = ref("");
-const loading = ref(false);
+
 const currentPage = ref(1);
 const itemsPerPage = 10;
 
-const editingFee = ref(null);
-const showFeeDetailsModal = ref(false);
-const selectedFee = ref({});
-
 const showViewDetailsModal = (fee) => {
-  selectedFee.value = fee;
+  // Set the selected fee in the modal store for the viewFeeDetailsModal to access
+  modalStore.data = fee;
   modalStore.viewFeeDetailsModal = true;
 };
 
-const error = ref(false);
-
 const showCreateFeeModal = () => {
-   modalStore.data = {
+  modalStore.data = {
     editing: false,
     feeForm: {
       academicYear: "2023-2024",
@@ -193,196 +216,16 @@ const showCreateFeeModal = () => {
       type: "Tuition",
       totalAmount: 0,
       components: [{ name: "", description: "", amount: 0 }],
-      classId: ""
-    }
+      classId: "",
+    },
   };
 
-  // modalStore.data.editing = false;
-  modalStore.createFeeStructureModal = true
+  modalStore.createFeeStructureModal = true;
 };
-
-// const editFeeStructure = (fee) => {
-//   // Set up the form with the fee data
-//   modalStore.data.feeForm = { ...fee };
-//   modalStore.data.editing = true;
-//   modalStore.openCreateFeeStructure();
-// };
-
-// // Fee Structure Form
-// const feeForm = ref({
-//   academicYear: "2023-2024",
-//   term: "First",
-//   type: "Tuition",
-//   totalAmount: 0,
-//   components: [{ name: "", description: "", amount: 0 }],
-//   classId: "",
-// });
-
-// Dummy Data
-const feeStructures = ref([
-  {
-    id: "1",
-    academicYear: "2023-2024",
-    term: "First",
-    type: "Tuition",
-    totalAmount: 250000,
-    components: [
-      {
-        id: "1",
-        name: "Tuition Fee",
-        description: "Basic tuition fee",
-        amount: 150000,
-      },
-      {
-        id: "2",
-        name: "Technology Fee",
-        description: "Computer lab and internet",
-        amount: 50000,
-      },
-      {
-        id: "3",
-        name: "Library Fee",
-        description: "Library resources",
-        amount: 25000,
-      },
-      {
-        id: "4",
-        name: "Sports Fee",
-        description: "Sports equipment and facilities",
-        amount: 25000,
-      },
-    ],
-    classId: "1",
-  },
-  {
-    id: "2",
-    academicYear: "2023-2024",
-    term: "Second",
-    type: "Tuition",
-    totalAmount: 250000,
-    components: [
-      {
-        id: "1",
-        name: "Tuition Fee",
-        description: "Basic tuition fee",
-        amount: 150000,
-      },
-      {
-        id: "2",
-        name: "Technology Fee",
-        description: "Computer lab and internet",
-        amount: 50000,
-      },
-      {
-        id: "3",
-        name: "Library Fee",
-        description: "Library resources",
-        amount: 25000,
-      },
-      {
-        id: "4",
-        name: "Sports Fee",
-        description: "Sports equipment and facilities",
-        amount: 25000,
-      },
-    ],
-    classId: "1",
-  },
-  {
-    id: "3",
-    academicYear: "2023-2024",
-    term: "Third",
-    type: "Tuition",
-    totalAmount: 250000,
-    components: [
-      {
-        id: "1",
-        name: "Tuition Fee",
-        description: "Basic tuition fee",
-        amount: 150000,
-      },
-      {
-        id: "2",
-        name: "Technology Fee",
-        description: "Computer lab and internet",
-        amount: 50000,
-      },
-      {
-        id: "3",
-        name: "Library Fee",
-        description: "Library resources",
-        amount: 25000,
-      },
-      {
-        id: "4",
-        name: "Sports Fee",
-        description: "Sports equipment and facilities",
-        amount: 25000,
-      },
-    ],
-    classId: "1",
-  },
-  {
-    id: "4",
-    academicYear: "2023-2024",
-    term: "First",
-    type: "Boarding",
-    totalAmount: 150000,
-    components: [
-      {
-        id: "1",
-        name: "Accommodation",
-        description: "Dormitory fees",
-        amount: 100000,
-      },
-      {
-        id: "2",
-        name: "Meals",
-        description: "Food and catering",
-        amount: 50000,
-      },
-    ],
-    classId: "1",
-  },
-  {
-    id: "5",
-    academicYear: "2024-2025",
-    term: "First",
-    type: "Tuition",
-    totalAmount: 275000,
-    components: [
-      {
-        id: "1",
-        name: "Tuition Fee",
-        description: "Basic tuition fee",
-        amount: 175000,
-      },
-      {
-        id: "2",
-        name: "Technology Fee",
-        description: "Computer lab and internet",
-        amount: 50000,
-      },
-      {
-        id: "3",
-        name: "Library Fee",
-        description: "Library resources",
-        amount: 25000,
-      },
-      {
-        id: "4",
-        name: "Sports Fee",
-        description: "Sports equipment and facilities",
-        amount: 25000,
-      },
-    ],
-    classId: "1",
-  },
-]);
 
 // Computed properties
 const filteredFeeStructures = computed(() => {
-  let filtered = feeStructures.value;
+  let filtered = feeStructureStore.feeStructures;
 
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
@@ -393,7 +236,6 @@ const filteredFeeStructures = computed(() => {
         fee.type.toLowerCase().includes(query)
     );
   }
-
   if (academicYearFilter.value) {
     filtered = filtered.filter(
       (fee) => fee.academicYear === academicYearFilter.value
@@ -407,72 +249,23 @@ const filteredFeeStructures = computed(() => {
   return filtered;
 });
 
-const totalFeeStructures = computed(() => filteredFeeStructures.value.length);
-
-const paginatedFeeStructures = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return filteredFeeStructures.value.slice(start, end);
-});
-
-const totalPages = computed(() =>
-  Math.ceil(filteredFeeStructures.value.length / itemsPerPage)
-);
-
-const paginationStart = computed(
-  () => (currentPage.value - 1) * itemsPerPage + 1
-);
-
-const paginationEnd = computed(() =>
-  Math.min(currentPage.value * itemsPerPage, totalFeeStructures.value)
-);
-
 // Methods
 const formatCurrency = (value) => {
   return new Intl.NumberFormat().format(value);
 };
 
-const viewFeeDetails = (fee) => {
-  selectedFee.value = { ...fee };
-  showFeeDetailsModal.value = true;
-};
 
-// const editFeeStructure = (fee) => {
-//   editingFee.value = fee;
-//   feeForm.value = {
-//     academicYear: fee.academicYear,
-//     term: fee.term,
-//     type: fee.type,
-//     totalAmount: fee.totalAmount,
-//     components: [...fee.components],
-//     classId: fee.classId,
-//   };
-//   showCreateFeeModal.value = true;
-// };
 
-const saveFeeStructure = () => {
-  // Implement save fee structure logic
-  console.log("Save fee structure", feeForm.value);
-  showCreateFeeModal.value = false;
-  editingFee.value = null;
-};
-
-const confirmDeleteFee = (fee) => {
-  if (
-    confirm(
-      `Are you sure you want to delete the fee structure for ${fee.academicYear} ${fee.term}?`
-    )
-  ) {
-    // Implement delete fee structure logic
-    console.log("Delete fee structure", fee);
-  }
-};
+// Watch for filter changes to refresh the data
+watch([searchQuery, academicYearFilter, termFilter], () => {
+  currentPage.value = 1; // Reset to first page when filters change
+});
 
 onMounted(() => {
-  // Fetch data from API
-  loading.value = true;
-  setTimeout(() => {
-    loading.value = false;
-  }, 1000);
+  // Fetch data from API when component mounts
+  feeStructureStore.fetchFeeStructures({
+    page: currentPage.value,
+    limit: itemsPerPage,
+  });
 });
 </script>
