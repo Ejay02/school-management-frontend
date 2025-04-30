@@ -33,30 +33,17 @@
                   required
                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
                 >
-                <option v-for="year in academicYearOptions" :key="year" :value="year">{{ year }}</option>
+                  <option
+                    v-for="year in academicYearOptions"
+                    :key="year"
+                    :value="year"
+                  >
+                    {{ year }}
+                  </option>
                 </select>
               </div>
 
-              <!-- Term Selection -->
-              <div>
-                <label
-                  for="term"
-                  class="block text-sm font-medium text-gray-700 mb-1"
-                  >Term <span class="text-red-500">*</span></label
-                >
-                <select
-                  v-model="modalStore.data.feeForm.term"
-                  required
-                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-                >
-                  <option value="first">First Term</option>
-                  <option value="second">Second Term</option>
-                  <option value="third">Third Term</option>
-                  <option value="year">Year</option>
-                </select>
-              </div>
-
-              <!-- Fee Type -->
+              <!-- Fee Type Selection (YEARLY or TERM) -->
               <div>
                 <label
                   for="feeType"
@@ -67,17 +54,64 @@
                   v-model="modalStore.data.feeForm.type"
                   required
                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                  @change="handleFeeTypeChange"
                 >
-                  <option value="Tuition">Tuition</option>
-                  <option value="Development">Development Levy</option>
-                  <option value="Uniform">Uniform</option>
-                  <option value="Books">Books</option>
-                  <option value="Other">Other</option>
+                  <option
+                    v-for="option in feeTypeOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Term Selection (only shown if Fee Type is TERM) -->
+              <div v-if="modalStore.data.feeForm.type === 'TERM'">
+                <label
+                  for="term"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Term <span class="text-red-500">*</span></label
+                >
+                <select
+                  v-model="modalStore.data.feeForm.term"
+                  required
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                >
+                  <option
+                    v-for="option in termOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Fee Description -->
+              <div>
+                <label
+                  for="feeDescription"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Fee Description <span class="text-red-500">*</span></label
+                >
+                <select
+                  v-model="modalStore.data.feeForm.description"
+                  required
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                >
+                  <option
+                    v-for="option in feeDescriptionOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
                 </select>
               </div>
 
               <!-- Class Selection -->
-           
+
               <Dropdown
                 v-model="selectedClass"
                 label="Select Class <span class='text-red-500'>*</span>"
@@ -190,9 +224,14 @@
 import { createFeeStructure } from "@/graphql/mutations";
 import { useModalStore } from "@/store/useModalStore";
 import { useMutation } from "@vue/apollo-composable";
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from "vue";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
+import {
+  feeDescriptionOptions,
+  feeTypeOptions,
+  termOptions,
+} from "../../utils/utility";
 import Dropdown from "../dropdowns/dropdown.vue";
 
 const modalStore = useModalStore();
@@ -202,6 +241,8 @@ const notificationStore = useNotificationStore();
 const isModalVisible = ref(modalStore.createFeeStructureModal);
 
 const selectedClass = ref("");
+
+const showYearlyOption = ref(true);
 
 const classOptions = computed(() => {
   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
@@ -213,15 +254,15 @@ const academicYearOptions = computed(() => {
   const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
   const currentYear = currentDate.getFullYear();
   const years = [];
-  
+
   // Previous academic year (needed for terms that haven't completed yet)
   years.push(`${currentYear - 1}-${currentYear}`);
-  
+
   // Current academic year
   // If we're in Sept-Dec, the academic year is currentYear to currentYear+1
   // If we're in Jan-Aug, the academic year is currentYear-1 to currentYear
   const isNewAcademicYear = currentMonth >= 8; // September (0-indexed, so 8)
-  
+
   if (isNewAcademicYear) {
     // Sept-Dec: current academic year is this year to next year
     years.push(`${currentYear}-${currentYear + 1}`);
@@ -233,30 +274,79 @@ const academicYearOptions = computed(() => {
     // Next academic year
     years.push(`${currentYear}-${currentYear + 1}`);
   }
-  
+
   // Remove duplicates (in case previous year equals current year in Jan-Aug)
   return [...new Set(years)];
 });
 
+// Handle fee type change
+const handleFeeTypeChange = () => {
+  if (modalStore.data.feeForm.type === "YEARLY") {
+    // If type is YEARLY, clear the term field
+    modalStore.data.feeForm.term = null;
+  } else {
+    // If type is TERM, set a default term if it's null
+
+    modalStore.data.feeForm.term = "FIRST";
+  }
+};
+
 // Default form values
 const defaultFormValues = computed(() => ({
   academicYear: academicYearOptions.value[0], // Current academic year
-  term: "first",
-  type: "Tuition",
+  term: "FIRST", // Default term for TERM type
+  type: "TERM", // Default fee type
+  description: "TUITION", // Default fee description
   totalAmount: 0,
   components: [{ name: "", description: "", amount: 0 }],
   classId: "",
 }));
 
-// Initialize the form with default values
+// Initialize the form with default values and handle existing data
 const initializeForm = () => {
   if (!modalStore.data) {
     modalStore.data = { feeForm: { ...defaultFormValues.value } };
   } else if (!modalStore.data.feeForm) {
     modalStore.data.feeForm = { ...defaultFormValues.value };
   } else if (!modalStore.data.editing) {
-    // Only set default academic year for new forms, not when editing
+    // Only set defaults for new forms, not when editing
     modalStore.data.feeForm.academicYear = academicYearOptions.value[0];
+    modalStore.data.feeForm.term = "FIRST";
+    modalStore.data.feeForm.description = "TUITION";
+    modalStore.data.feeForm.type = "TERM";
+  } else {
+    // When editing, convert any old format values to new enum format
+    if (modalStore.data.feeForm.term === "first")
+      modalStore.data.feeForm.term = "FIRST";
+    if (modalStore.data.feeForm.term === "second")
+      modalStore.data.feeForm.term = "SECOND";
+    if (modalStore.data.feeForm.term === "third")
+      modalStore.data.feeForm.term = "THIRD";
+    if (modalStore.data.feeForm.term === "year") {
+      // If term was "year", set type to YEARLY and clear term
+      modalStore.data.feeForm.type = "YEARLY";
+      modalStore.data.feeForm.term = null;
+    }
+
+    // Convert old fee type values to new description enum
+    if (modalStore.data.feeForm.type === "Tuition")
+      modalStore.data.feeForm.description = "TUITION";
+    if (modalStore.data.feeForm.type === "Development")
+      modalStore.data.feeForm.description = "DEVELOPMENT_LEVY";
+    if (modalStore.data.feeForm.type === "Uniform")
+      modalStore.data.feeForm.description = "UNIFORM";
+    if (modalStore.data.feeForm.type === "Books")
+      modalStore.data.feeForm.description = "BOOKS";
+    if (modalStore.data.feeForm.type === "Other")
+      modalStore.data.feeForm.description = "OTHER";
+
+    // Ensure type is set correctly
+    if (modalStore.data.feeForm.type !== "YEARLY") {
+      modalStore.data.feeForm.type = "TERM";
+    }
+
+    // Apply fee type logic
+    handleFeeTypeChange();
   }
 };
 
@@ -268,8 +358,16 @@ const { mutate: createFee } = useMutation(createFeeStructure);
 
 const saveFeeStructure = async () => {
   try {
+    // Create a copy of the form data to modify before sending
+    const formData = { ...modalStore.data.feeForm };
+
+    // If type is YEARLY, ensure term is null
+    if (formData.type === "YEARLY") {
+      formData.term = null;
+    }
+
     const { data } = await createFee({
-      input: modalStore.data.feeForm,
+      input: formData,
     });
 
     console.log("Fee structure created:", data.createFeeStructure);
