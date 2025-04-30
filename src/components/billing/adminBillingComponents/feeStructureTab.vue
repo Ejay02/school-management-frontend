@@ -72,12 +72,14 @@
                 <th
                   class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell"
                 >
-                  Term
+                class
+                  <!-- Term -->
                 </th>
                 <th
                   class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell"
                 >
-                  Type
+                  <!-- Type -->
+                   Term
                 </th>
                 <th
                   class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell"
@@ -127,12 +129,12 @@
                 <td
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden sm:table-cell"
                 >
-                  {{ fee?.term ?? "NA" }}
+                {{ fee?.classes?.[0]?.name || 'N/A' }}
                 </td>
                 <td
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell"
                 >
-                  {{ fee?.type ?? "NA" }}
+                  {{ fee?.type ?? fee?.term  }}
                 </td>
                 <td
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell"
@@ -217,6 +219,10 @@ const termFilter = ref("");
 const currentPage = ref(1);
 const itemsPerPage = 10;
 
+function handlePageChange(newPage) {
+  currentPage.value = newPage;
+}
+
 
 
 const showDelModal = (id, title, type) => {
@@ -275,12 +281,13 @@ const filteredFeeStructures = computed(() => {
 });
 
 
-
-
-
 // Watch for filter changes to refresh the data
 watch([searchQuery, academicYearFilter, termFilter], () => {
   currentPage.value = 1; // Reset to first page when filters change
+});
+
+watch(currentPage, (newPage) => {
+  feeStructureStore.fetchFeeStructures({ page: newPage, limit });
 });
 
 onMounted(() => {

@@ -749,6 +749,10 @@ export const getAllFeeStructures = gql`
       type
       totalAmount
       description
+      classes{
+        id
+        name
+      }
       components {
         id
         name
@@ -770,6 +774,10 @@ export const getFeeStructureById = gql`
       type
       totalAmount
       description
+      classes{
+        id
+        name
+      }
       components {
         id
         name

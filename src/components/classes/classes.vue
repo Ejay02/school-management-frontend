@@ -52,17 +52,13 @@ const classStore = useClassStore();
 const loading = computed(() => classStore.loading);
 const error = computed(() => classStore.error);
 
-watch(currentPage, (newPage) => {
-  classStore.fetchClasses({ page: newPage, limit });
-});
+
 
 function handlePageChange(newPage) {
   currentPage.value = newPage;
 }
 
-onMounted(() => {
-  classStore.fetchClasses({ page: currentPage.value, limit });
-});
+
 
 const columns = [
   {
@@ -99,6 +95,14 @@ const columns = [
     accessor: "action",
   },
 ];
+
+watch(currentPage, (newPage) => {
+  classStore.fetchClasses({ page: newPage, limit });
+});
+
+onMounted(() => {
+  classStore.fetchClasses({ page: currentPage.value, limit });
+});
 </script>
 
 <style scoped></style>
