@@ -52,7 +52,7 @@
                 <div class="space-y-1">
                   <p class="text-sm text-gray-500 font-medium">Total Amount</p>
                   <p class="text-xl font-bold text-indigo-600">
-                    ₦{{ formatCurrency(selectedFee?.totalAmount) }}
+                    ${{ selectedFee?.totalAmount }}
                   </p>
                 </div>
               </div>
@@ -74,7 +74,7 @@
                         <p class="font-medium text-gray-800">{{ component.name }}</p>
                         <p class="text-sm text-gray-500 mt-1">{{ component.description }}</p>
                       </div>
-                      <p class="font-semibold text-indigo-600">₦{{ formatCurrency(component.amount) }}</p>
+                      <p class="font-semibold text-indigo-600">${{ component.amount }}</p>
                     </div>
                   </div>
                 </div>

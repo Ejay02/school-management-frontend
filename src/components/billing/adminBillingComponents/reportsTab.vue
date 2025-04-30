@@ -10,7 +10,7 @@
           <div class="ml-4">
             <h3 class="text-gray-500 text-sm">Total Revenue</h3>
             <p class="text-2xl font-bold">
-              ₦{{ formatCurrency(totalRevenue) }}
+              ${{ totalRevenue }}
             </p>
           </div>
         </div>
@@ -37,7 +37,7 @@
           <div class="ml-4">
             <h3 class="text-gray-500 text-sm">Outstanding Payments</h3>
             <p class="text-2xl font-bold">
-              ₦{{ formatCurrency(outstandingPayments) }}
+              ${{ outstandingPayments }}
             </p>
           </div>
         </div>
@@ -126,7 +126,7 @@
             <div class="flex justify-between items-center">
               <span class="font-medium">{{ cls.name }}</span>
               <span class="text-gray-700"
-                >₦{{ formatCurrency(cls.revenue) }}</span
+                >${{ cls.revenue }}</span
               >
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2 mt-1">

@@ -146,7 +146,7 @@
                   {{ payment.feeType }}
                 </td>
                 <td class="px-4 sm:px-6 py-4 whitespace-nowrap font-medium">
-                  ₦{{ formatCurrency(payment.amount) }}
+                  ${{ payment.amount }}
                 </td>
                 <td class="px-4 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                   {{ formatDate(payment.date) }}
