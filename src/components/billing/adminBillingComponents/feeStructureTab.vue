@@ -19,18 +19,19 @@
               v-model="academicYearFilter"
               class="block h-[42px] w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             >
-              <option value="">All Academic Years</option>
-              <option value="2023-2024">2023-2024</option>
-              <option value="2024-2025">2024-2025</option>
+            <option value="">All Academic Years</option>
+            <option v-for="year in academicYearOptions" :key="year" :value="year">
+              {{ year }}
+            </option>
             </select>
             <select
               v-model="termFilter"
               class="block h-[42px] w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             >
               <option value="">All Terms</option>
-              <option value="First">First Term</option>
-              <option value="Second">Second Term</option>
-              <option value="Third">Third Term</option>
+              <option v-for="option in termOptions" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </option>
             </select>
           </div>
 
@@ -117,7 +118,7 @@
                 </td>
               </tr>
               <tr
-                v-for="fee in filteredFeeStructures"
+                 v-for="fee in paginatedFeeStructures"
                 :key="fee?.id"
                 class="hover:bg-gray-50"
               >
@@ -190,8 +191,8 @@
         <!-- Pagination -->
         <Pagination
           :currentPage="currentPage"
-          :hasMore="feeStructureStore.hasMore"
-          :totalPages="feeStructureStore.totalPages"
+          :hasMore="hasMore"
+          :totalPages="totalPages"
           @update:page="handlePageChange"
         />
       </div>
@@ -207,6 +208,7 @@ import EmptyState from "../../emptyState.vue";
 import ErrorScreen from "../../errorScreen.vue";
 import LoadingScreen from "../../loadingScreen.vue";
 import Pagination from "../../pagination.vue";
+import { termOptions } from "../../../utils/utility";
 
 const modalStore = useModalStore();
 const feeStructureStore = useFeeStructureStore();
@@ -256,39 +258,90 @@ const showCreateFeeModal = () => {
 
 // Computed properties
 const filteredFeeStructures = computed(() => {
-  let filtered = feeStructureStore.feeStructures;
+  // Start with all fee structures instead of just the paginated ones
+  let filtered = feeStructureStore.allFeeStructures;
 
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
     filtered = filtered.filter(
       (fee) =>
-        fee.academicYear.toLowerCase().includes(query) ||
-        fee.term.toLowerCase().includes(query) ||
-        fee.type.toLowerCase().includes(query)
+        (fee?.academicYear?.toLowerCase() || '').includes(query) ||
+        (fee?.term?.toLowerCase() || '').includes(query) ||
+        (fee?.type?.toLowerCase() || '').includes(query) ||
+        (fee?.description?.toLowerCase() || '').includes(query) ||
+        (fee?.classes?.[0]?.name?.toLowerCase() || '').includes(query)
     );
   }
   if (academicYearFilter.value) {
+    // Convert the filter value from hyphen format to slash format
+    const formattedFilter = academicYearFilter.value.replace('-', '/');
     filtered = filtered.filter(
-      (fee) => fee.academicYear === academicYearFilter.value
+      (fee) => fee?.academicYear === formattedFilter
     );
   }
 
   if (termFilter.value) {
-    filtered = filtered.filter((fee) => fee.term === termFilter.value);
+    filtered = filtered.filter((fee) => fee?.term === termFilter.value);
   }
 
   return filtered;
 });
 
+// Generate academic year options dynamically based on academic calendar (Sept-Aug)
+const academicYearOptions = computed(() => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+  const currentYear = currentDate.getFullYear();
+  const years = [];
+
+  // Previous academic year
+  years.push(`${currentYear - 1}-${currentYear}`);
+
+  // Current academic year
+  // If we're in Sept-Dec, the academic year is currentYear to currentYear+1
+  // If we're in Jan-Aug, the academic year is currentYear-1 to currentYear
+  const isNewAcademicYear = currentMonth >= 8; // September (0-indexed, so 8)
+
+  if (isNewAcademicYear) {
+    // Sept-Dec: current academic year is this year to next year
+    years.push(`${currentYear}-${currentYear + 1}`);
+    // Next academic year
+    years.push(`${currentYear + 1}-${currentYear + 2}`);
+  } else {
+    // Jan-Aug: current academic year is previous year to this year
+    years.push(`${currentYear - 1}-${currentYear}`);
+    // Next academic year
+    years.push(`${currentYear}-${currentYear + 1}`);
+  }
+
+  // Remove duplicates
+  return [...new Set(years)];
+});
+
+
+// Add this computed property for paginated results
+const paginatedFeeStructures = computed(() => {
+const start = (currentPage.value - 1) * itemsPerPage;
+const end = start + itemsPerPage;
+return filteredFeeStructures.value.slice(start, end);
+});
+
+// Update the totalPages computation
+const totalPages = computed(() => {
+return Math.ceil(filteredFeeStructures.value.length / itemsPerPage);
+});
+
+// Update the hasMore computation
+const hasMore = computed(() => {
+return currentPage.value < totalPages.value;
+});
 
 // Watch for filter changes to refresh the data
 watch([searchQuery, academicYearFilter, termFilter], () => {
   currentPage.value = 1; // Reset to first page when filters change
 });
 
-watch(currentPage, (newPage) => {
-  feeStructureStore.fetchFeeStructures({ page: newPage, limit });
-});
+
 
 onMounted(() => {
   // Fetch data from API when component mounts
@@ -297,4 +350,5 @@ onMounted(() => {
     limit: itemsPerPage,
   });
 });
+
 </script>
