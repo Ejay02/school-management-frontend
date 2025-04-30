@@ -748,6 +748,7 @@ export const getAllFeeStructures = gql`
       term
       type
       totalAmount
+      description
       components {
         id
         name
@@ -768,6 +769,7 @@ export const getFeeStructureById = gql`
       term
       type
       totalAmount
+      description
       components {
         id
         name

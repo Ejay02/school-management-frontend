@@ -92,8 +92,8 @@ import {
   deleteEvent,
   deleteLesson,
   deleteSubject,
-    globalAnnouncementDelete,
-  personalAnnouncementDelete
+  globalAnnouncementDelete,
+  personalAnnouncementDelete,
 } from "../../graphql/mutations";
 import { useClassStore } from "../../store/classStore";
 import { useEventStore } from "../../store/eventStore";
@@ -107,7 +107,7 @@ const modalStore = useModalStore();
 const classStore = useClassStore();
 const subjectStore = useSubjectStore();
 const lessonStore = useLessonStore();
-const userStore = useUserStore(); 
+const userStore = useUserStore();
 
 const eventStore = useEventStore();
 const router = useRouter();
@@ -229,11 +229,11 @@ const handleDelete = async () => {
       const announcement = modalStore.data;
       const currentUserId = userStore.userInfo?.id;
       const userRole = userStore.userInfo?.role?.toLowerCase();
-      
+
       // Check if user is creator or admin (can perform global delete)
       const isCreator = announcement.creatorId === currentUserId;
       const isAdmin = userRole === "admin" || userRole === "super_admin";
-      
+
       if (isCreator || isAdmin) {
         // Global delete - removes for everyone
         await apolloClient.mutate({
@@ -245,7 +245,8 @@ const handleDelete = async () => {
         notificationStore.addNotification({
           type: "success",
           message: "Announcement deleted for everyone",
-        });  } else {
+        });
+      } else {
         // Personal delete - removes only for current user
         await apolloClient.mutate({
           mutation: personalAnnouncementDelete,
@@ -258,6 +259,8 @@ const handleDelete = async () => {
           message: "Announcement removed from your inbox",
         });
       }
+    } else if (source.value === "feeStructure") {
+      console.log("hello from feeStructure");
     }
     modalStore.deleteModal = false;
   } catch (error) {

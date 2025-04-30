@@ -137,7 +137,7 @@
                 <td
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell"
                 >
-                  {{ fee?.components?.description ?? "NA" }}
+                  {{ fee?.description ?? "NA" }}
                 </td>
                 <td
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm"
@@ -150,19 +150,39 @@
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm"
                 >
                   <div class="flex space-x-2">
-                    <button
-                      @click="showViewDetailsModal(fee)"
+                    <!-- <button
+                    
                       class="text-indigo-600 hover:text-indigo-900"
                     >
                       <i class="fas fa-eye"></i>
+                    </button> -->
+                    <div class="group relative">
+                      <button
+                        @click="showViewDetailsModal(fee)"
+                      class="group relative text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
+                    >
+                      <i class="fa-solid fa-arrow-right"></i>
                     </button>
+                    <span
+                      class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex"
+                    >
+                      View
+                    </span>
+                    </div>
+                  
                   
                     <button
-                      @click="confirmDeleteFee(fee)"
-                      class="text-red-600 hover:text-red-900"
+                   
+                    @click="showDelModal(fee.id, fee.description, 'feeStructure')"
+                    class="group relative w-6 h-6 flex items-center justify-center rounded-full"
+                  >
+                    <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
+                    <span
+                      class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                     >
-                      <i class="fas fa-trash"></i>
-                    </button>
+                      Delete
+                    </span>
+                  </button>
                   </div>
                 </td>
               </tr>
@@ -200,6 +220,15 @@ const termFilter = ref("");
 
 const currentPage = ref(1);
 const itemsPerPage = 10;
+
+
+
+const showDelModal = (id, title, type) => {
+  modalStore.deleteModal = true;
+  modalStore.modalId = id;
+  modalStore.modalTitle = title;
+  modalStore.source = type;
+};
 
 const showViewDetailsModal = (fee) => {
   // Set the selected fee in the modal store for the viewFeeDetailsModal to access
