@@ -142,20 +142,16 @@
                 <td
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm"
                 >
+                
                   <span class="font-medium"
-                    >₦{{ formatCurrency(fee?.totalAmount) }}</span
+                    >${{ fee?.totalAmount }}</span
                   >
                 </td>
                 <td
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm"
                 >
                   <div class="flex space-x-2">
-                    <!-- <button
-                    
-                      class="text-indigo-600 hover:text-indigo-900"
-                    >
-                      <i class="fas fa-eye"></i>
-                    </button> -->
+                
                     <div class="group relative">
                       <button
                         @click="showViewDetailsModal(fee)"
@@ -278,10 +274,7 @@ const filteredFeeStructures = computed(() => {
   return filtered;
 });
 
-// Methods
-const formatCurrency = (value) => {
-  return new Intl.NumberFormat().format(value);
-};
+
 
 
 

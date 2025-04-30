@@ -33,8 +33,7 @@
                   required
                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
                 >
-                  <option value="2023-2024">2023-2024</option>
-                  <option value="2024-2025">2024-2025</option>
+                <option v-for="year in academicYearOptions" :key="year" :value="year">{{ year }}</option>
                 </select>
               </div>
 
@@ -129,7 +128,7 @@
                     <label
                       for="amount"
                       class="block text-sm font-medium text-gray-700 mb-1"
-                      >Amount (₦)</label
+                      >Amount ($)</label
                     >
                     <input
                       type="number"
@@ -208,15 +207,58 @@ const classOptions = computed(() => {
   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
 });
 
-// Fee Structure Form
-const feeForm = ref({
-  academicYear: "2023-2024",
-  term: "First",
+// Generate academic year options dynamically based on academic calendar (Sept-Aug)
+const academicYearOptions = computed(() => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth(); // 0-11 (Jan-Dec)
+  const currentYear = currentDate.getFullYear();
+  const years = [];
+  
+  // Previous academic year (needed for terms that haven't completed yet)
+  years.push(`${currentYear - 1}-${currentYear}`);
+  
+  // Current academic year
+  // If we're in Sept-Dec, the academic year is currentYear to currentYear+1
+  // If we're in Jan-Aug, the academic year is currentYear-1 to currentYear
+  const isNewAcademicYear = currentMonth >= 8; // September (0-indexed, so 8)
+  
+  if (isNewAcademicYear) {
+    // Sept-Dec: current academic year is this year to next year
+    years.push(`${currentYear}-${currentYear + 1}`);
+    // Next academic year
+    years.push(`${currentYear + 1}-${currentYear + 2}`);
+  } else {
+    // Jan-Aug: current academic year is previous year to this year
+    years.push(`${currentYear - 1}-${currentYear}`);
+    // Next academic year
+    years.push(`${currentYear}-${currentYear + 1}`);
+  }
+  
+  // Remove duplicates (in case previous year equals current year in Jan-Aug)
+  return [...new Set(years)];
+});
+
+// Default form values
+const defaultFormValues = computed(() => ({
+  academicYear: academicYearOptions.value[0], // Current academic year
+  term: "first",
   type: "Tuition",
   totalAmount: 0,
   components: [{ name: "", description: "", amount: 0 }],
   classId: "",
-});
+}));
+
+// Initialize the form with default values
+const initializeForm = () => {
+  if (!modalStore.data) {
+    modalStore.data = { feeForm: { ...defaultFormValues.value } };
+  } else if (!modalStore.data.feeForm) {
+    modalStore.data.feeForm = { ...defaultFormValues.value };
+  } else if (!modalStore.data.editing) {
+    // Only set default academic year for new forms, not when editing
+    modalStore.data.feeForm.academicYear = academicYearOptions.value[0];
+  }
+};
 
 const handleCancel = () => {
   modalStore.createFeeStructureModal = false;
@@ -247,15 +289,23 @@ const saveFeeStructure = async () => {
   }
 };
 
+// Watch for modal visibility changes
 watch(
   () => modalStore.createFeeStructureModal,
   (newVal) => {
     isModalVisible.value = newVal;
+    if (newVal) {
+      // Initialize form when modal becomes visible
+      initializeForm();
+    }
   },
   { immediate: true }
 );
 
-onMounted(async () => {
-  await Promise.all([classStore.fetchClasses()]);
+onMounted(() => {
+  // Initialize form on component mount
+  initializeForm();
+  // Fetch classes
+  classStore.fetchClasses();
 });
 </script>
