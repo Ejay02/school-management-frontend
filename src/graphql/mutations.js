@@ -772,6 +772,15 @@ export const updateFeeStructure = gql`
   }
   `;
 
+export const deleteFeeStructure = gql`
+mutation deleteFeeStructure($feeStructureId: String!) {
+  deleteFeeStructure(feeStructureId: $feeStructureId) {
+    success
+    message
+  }
+}
+`;
+
 export const generateInvoice = gql`
   mutation generateInvoice($feeStructureId: String!) {
     generateInvoice(feeStructureId: $feeStructureId) {

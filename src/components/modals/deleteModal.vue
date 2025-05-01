@@ -90,6 +90,7 @@ import { apolloClient } from "../../../apollo-client";
 import {
   deleteClass,
   deleteEvent,
+  deleteFeeStructure,
   deleteLesson,
   deleteSubject,
   globalAnnouncementDelete,
@@ -102,14 +103,16 @@ import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 
 import { useUserStore } from "../../store/userStore";
+import { useFeeStructureStore } from "../../store/feeStructureStore";
 
 const modalStore = useModalStore();
 const classStore = useClassStore();
-const subjectStore = useSubjectStore();
-const lessonStore = useLessonStore();
 const userStore = useUserStore();
-
 const eventStore = useEventStore();
+const lessonStore = useLessonStore();
+const subjectStore = useSubjectStore();
+const feeStructureStore = useFeeStructureStore();
+
 const router = useRouter();
 
 const notificationStore = useNotificationStore();
@@ -260,7 +263,18 @@ const handleDelete = async () => {
         });
       }
     } else if (source.value === "feeStructure") {
-      console.log("hello from feeStructure");
+      await apolloClient.mutate({
+        mutation: deleteFeeStructure,
+        variables: {
+          feeStructureId: modalStore.modalId,
+        },
+      });
+
+      await feeStructureStore.refreshFeeStructures();
+      notificationStore.addNotification({
+          type: "success",
+          message: "Fee structure deleted successfully",
+        });
     }
     modalStore.deleteModal = false;
   } catch (error) {
