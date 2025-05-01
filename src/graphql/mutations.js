@@ -739,7 +739,7 @@ export const createFeeStructure = gql`
       academicYear
       term
       type
-      classes{
+      classes {
         name
       }
       description
@@ -756,12 +756,16 @@ export const createFeeStructure = gql`
 
 export const updateFeeStructure = gql`
   mutation updateFeeStructure($id: String!, $input: UpdateFeeStructureInput!) {
-    editFeeStructure(id: $id, input: $input) {
+    updateFeeStructure(id: $id, input: $input) {
       id
       academicYear
       term
       type
       totalAmount
+      classes{
+        id
+        name
+      }
       components {
         id
         name
@@ -770,15 +774,15 @@ export const updateFeeStructure = gql`
       }
     }
   }
-  `;
+`;
 
 export const deleteFeeStructure = gql`
-mutation deleteFeeStructure($feeStructureId: String!) {
-  deleteFeeStructure(feeStructureId: $feeStructureId) {
-    success
-    message
+  mutation deleteFeeStructure($feeStructureId: String!) {
+    deleteFeeStructure(feeStructureId: $feeStructureId) {
+      success
+      message
+    }
   }
-}
 `;
 
 export const generateInvoice = gql`

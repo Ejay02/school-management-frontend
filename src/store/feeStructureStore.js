@@ -103,8 +103,6 @@ export const useFeeStructureStore = defineStore("feeStructureStore", {
           // Add the new fee structure to the store
           this.addFeeStructure(data.createFeeStructure);
 
-         
-
           return data.createFeeStructure;
         }
       

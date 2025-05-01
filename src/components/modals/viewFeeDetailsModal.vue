@@ -63,10 +63,10 @@
                 <div class="space-y-1">
                   <p class="text-sm text-gray-500 font-medium">Fee Type</p>
                   <p class="text-lg font-semibold text-gray-800 capitalize">
-                    {{ selectedFee?.type.toLowerCase() }}
+                    {{ selectedFee?.type?.toLowerCase() }}
                     {{
-                      selectedFee?.term.toLowerCase()
-                        ? `(${selectedFee?.term.toLowerCase()})`
+                      selectedFee?.term?.toLowerCase()
+                        ? `(${selectedFee?.term?.toLowerCase()})`
                         : ""
                     }}
                   </p>

@@ -21,7 +21,7 @@
           </h2>
         </div>
         <div class="p-6">
-          <form @submit.prevent="saveFeeStructure">
+          <form @submit.prevent="">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <!-- Academic Year -->
               <div>
@@ -218,6 +218,7 @@
                 Cancel
               </button>
               <button
+                @click="saveFeeStructure"
                 type="submit"
                 :disabled="!isFormValid"
                 class="bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-2 rounded-md shadow-sm text-xs font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -313,8 +314,6 @@ const defaultFormValues = computed(() => ({
 }));
 
 // Initialize the form with default values and handle existing data
-
-// Initialize the form with default values and handle existing data
 const initializeForm = () => {
   if (!modalStore.data) {
     modalStore.data = { feeForm: { ...defaultFormValues.value } };
@@ -327,6 +326,11 @@ const initializeForm = () => {
     modalStore.data.feeForm.description = "TUITION";
     modalStore.data.feeForm.type = "TERM";
   } else {
+    // Create a deep copy of the form data to avoid modifying read-only objects
+    modalStore.data.feeForm = JSON.parse(
+      JSON.stringify(modalStore.data.feeForm)
+    );
+
     // When editing, ensure type is set correctly and apply fee type logic
     if (modalStore.data.feeForm.type === "YEARLY") {
       modalStore.data.feeForm.term = null;
@@ -335,6 +339,23 @@ const initializeForm = () => {
       if (!modalStore.data.feeForm.term) {
         modalStore.data.feeForm.term = "FIRST";
       }
+    }
+
+    // Make sure components are properly initialized with writable properties
+    if (modalStore.data.feeForm.components) {
+      modalStore.data.feeForm.components =
+        modalStore.data.feeForm.components.map((comp) => ({
+          name: comp.name || "",
+          description: comp.description || "",
+          amount: parseFloat(comp.amount) || 0,
+        }));
+    }
+
+    if (
+      modalStore.data.feeForm.classes &&
+      modalStore.data.feeForm.classes.length > 0
+    ) {
+      selectedClass.value = modalStore.data.feeForm.classes[0].name;
     }
   }
 };
@@ -353,19 +374,21 @@ const calculateTotalAmount = () => {
     .toFixed(2);
 };
 
-// ... existing code ...
-
-// Remove this line
-// const { mutate: createFee } = useMutation(createFeeStructure);
-
 const saveFeeStructure = async () => {
   try {
-    // Create a copy of the form data to modify before sending
-    const formData = { ...modalStore.data.feeForm };
+    // Create a clean copy of the form data to modify before sending
+    const formData = {};
+
+    // Copy only the fields we need,
+    formData.academicYear = modalStore.data.feeForm.academicYear;
+    formData.type = modalStore.data.feeForm.type;
+    formData.description = modalStore.data.feeForm.description;
 
     // If type is YEARLY, ensure term is null
     if (formData.type === "YEARLY") {
       formData.term = null;
+    } else {
+      formData.term = modalStore.data.feeForm.term;
     }
 
     // Set the classId from selectedClass
@@ -377,49 +400,47 @@ const saveFeeStructure = async () => {
       formData.classId = selectedClassObj.id;
     }
 
+    // Clean and copy components
+    formData.components = modalStore.data.feeForm.components.map(
+      (component) => ({
+        name: component.name,
+        description: component.description || "",
+        amount: parseFloat(component.amount) || 0,
+      })
+    );
+
     // Calculate total amount from components
     formData.totalAmount = parseFloat(calculateTotalAmount());
 
-    await feeStructureStore.createNewFeeStructure(formData);
-
-    notificationStore.addNotification({
-      type: "success",
-      message: "Fee structure created successfully!",
-    });
-
-    // Close the modal
-    modalStore.createFeeStructureModal = false;
+    if (modalStore.data.editing && modalStore.data.feeForm.id) {
+      // Update existing fee structure
+      await feeStructureStore.updateExistingFeeStructure(
+        modalStore.data.feeForm.id,
+        formData
+      );
+      notificationStore.addNotification({
+        type: "success",
+        message: "Fee structure updated successfully!",
+      });
+    } else {
+      // Create new fee structure
+      await feeStructureStore.createNewFeeStructure(formData);
+      notificationStore.addNotification({
+        type: "success",
+        message: "Fee structure created successfully!",
+      });
+    }
+    await feeStructureStore.refreshFeeStructures();
   } catch (error) {
     notificationStore.addNotification({
       type: "error",
-      message: "Error creating fee structure:",
-      error,
+      message: "Error creating fee structure:" + error.message,
     });
-    console.error("Error creating fee structure:", error);
+  } finally {
+    // Close the modal regardless of success or failure
+    modalStore.createFeeStructureModal = false;
   }
 };
-
-// ... existing code ...
-
-// Watch for modal visibility changes
-watch(
-  () => modalStore.createFeeStructureModal,
-  (newVal) => {
-    isModalVisible.value = newVal;
-    if (newVal) {
-      // Initialize form when modal becomes visible
-      initializeForm();
-    }
-  },
-  { immediate: true }
-);
-
-onMounted(() => {
-  // Initialize form on component mount
-  initializeForm();
-  // Fetch classes
-  classStore.fetchClasses();
-});
 
 // Add this computed property to check if the form is valid
 const isFormValid = computed(() => {
@@ -443,5 +464,25 @@ const isFormValid = computed(() => {
     (modalStore.data.feeForm.type !== "TERM" || modalStore.data.feeForm.term);
 
   return componentsValid && requiredFieldsValid;
+});
+
+// Watch for modal visibility changes
+watch(
+  () => modalStore.createFeeStructureModal,
+  (newVal) => {
+    isModalVisible.value = newVal;
+    if (newVal) {
+      // Initialize form when modal becomes visible
+      initializeForm();
+    }
+  },
+  { immediate: true }
+);
+
+onMounted(() => {
+  // Initialize form on component mount
+  initializeForm();
+  // Fetch classes
+  classStore.fetchClasses();
 });
 </script>
