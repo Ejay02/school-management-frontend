@@ -9,7 +9,9 @@
       <div
         class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
       >
-        <div class="p-6 border-b">
+        <div
+          class="p-6 border-b bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500"
+        >
           <h2 class="text-xl font-bold text-gray-800">
             {{
               modalStore.data.editing
@@ -195,6 +197,16 @@
               >
                 <i class="fas fa-plus mr-1"></i> Add Component
               </button>
+
+              <!-- Total Amount Display -->
+              <div class="mt-4 p-4 border rounded-lg bg-gray-50">
+                <div class="flex justify-between items-center">
+                  <h4 class="font-medium text-gray-800">Total Amount</h4>
+                  <div class="text-lg font-bold">
+                    ${{ calculateTotalAmount() }}
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="flex justify-between items-center mt-6">
@@ -207,7 +219,8 @@
               </button>
               <button
                 type="submit"
-                class="bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-2 rounded-md shadow-sm text-xs font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                :disabled="!isFormValid"
+                class="bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-2 rounded-md shadow-sm text-xs font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {{ modalStore.data.editing ? "Update" : "Create" }} Fee
                 Structure
@@ -221,11 +234,10 @@
 </template>
 
 <script setup>
-import { createFeeStructure } from "@/graphql/mutations";
 import { useModalStore } from "@/store/useModalStore";
-import { useMutation } from "@vue/apollo-composable";
 import { computed, onMounted, ref, watch } from "vue";
 import { useClassStore } from "../../store/classStore";
+import { useFeeStructureStore } from "../../store/feeStructureStore";
 import { useNotificationStore } from "../../store/notification";
 import {
   feeDescriptionOptions,
@@ -237,12 +249,11 @@ import Dropdown from "../dropdowns/dropdown.vue";
 const modalStore = useModalStore();
 const classStore = useClassStore();
 const notificationStore = useNotificationStore();
+const feeStructureStore = useFeeStructureStore();
 
 const isModalVisible = ref(modalStore.createFeeStructureModal);
 
 const selectedClass = ref("");
-
-const showYearlyOption = ref(true);
 
 const classOptions = computed(() => {
   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
@@ -286,7 +297,6 @@ const handleFeeTypeChange = () => {
     modalStore.data.feeForm.term = null;
   } else {
     // If type is TERM, set a default term if it's null
-
     modalStore.data.feeForm.term = "FIRST";
   }
 };
@@ -303,6 +313,8 @@ const defaultFormValues = computed(() => ({
 }));
 
 // Initialize the form with default values and handle existing data
+
+// Initialize the form with default values and handle existing data
 const initializeForm = () => {
   if (!modalStore.data) {
     modalStore.data = { feeForm: { ...defaultFormValues.value } };
@@ -315,38 +327,15 @@ const initializeForm = () => {
     modalStore.data.feeForm.description = "TUITION";
     modalStore.data.feeForm.type = "TERM";
   } else {
-    // When editing, convert any old format values to new enum format
-    if (modalStore.data.feeForm.term === "first")
-      modalStore.data.feeForm.term = "FIRST";
-    if (modalStore.data.feeForm.term === "second")
-      modalStore.data.feeForm.term = "SECOND";
-    if (modalStore.data.feeForm.term === "third")
-      modalStore.data.feeForm.term = "THIRD";
-    if (modalStore.data.feeForm.term === "year") {
-      // If term was "year", set type to YEARLY and clear term
-      modalStore.data.feeForm.type = "YEARLY";
+    // When editing, ensure type is set correctly and apply fee type logic
+    if (modalStore.data.feeForm.type === "YEARLY") {
       modalStore.data.feeForm.term = null;
-    }
-
-    // Convert old fee type values to new description enum
-    if (modalStore.data.feeForm.type === "Tuition")
-      modalStore.data.feeForm.description = "TUITION";
-    if (modalStore.data.feeForm.type === "Development")
-      modalStore.data.feeForm.description = "DEVELOPMENT_LEVY";
-    if (modalStore.data.feeForm.type === "Uniform")
-      modalStore.data.feeForm.description = "UNIFORM";
-    if (modalStore.data.feeForm.type === "Books")
-      modalStore.data.feeForm.description = "BOOKS";
-    if (modalStore.data.feeForm.type === "Other")
-      modalStore.data.feeForm.description = "OTHER";
-
-    // Ensure type is set correctly
-    if (modalStore.data.feeForm.type !== "YEARLY") {
+    } else {
       modalStore.data.feeForm.type = "TERM";
+      if (!modalStore.data.feeForm.term) {
+        modalStore.data.feeForm.term = "FIRST";
+      }
     }
-
-    // Apply fee type logic
-    handleFeeTypeChange();
   }
 };
 
@@ -354,7 +343,20 @@ const handleCancel = () => {
   modalStore.createFeeStructureModal = false;
 };
 
-const { mutate: createFee } = useMutation(createFeeStructure);
+// Calculate total amount from components
+const calculateTotalAmount = () => {
+  return modalStore.data.feeForm.components
+    .reduce(
+      (total, component) => total + (parseFloat(component.amount) || 0),
+      0
+    )
+    .toFixed(2);
+};
+
+// ... existing code ...
+
+// Remove this line
+// const { mutate: createFee } = useMutation(createFeeStructure);
 
 const saveFeeStructure = async () => {
   try {
@@ -366,17 +368,27 @@ const saveFeeStructure = async () => {
       formData.term = null;
     }
 
-    const { data } = await createFee({
-      input: formData,
+    // Set the classId from selectedClass
+    // Get the class ID from the class name
+    const selectedClassObj = classStore.getClassNames.find(
+      (cls) => cls.name === selectedClass.value
+    );
+    if (selectedClassObj) {
+      formData.classId = selectedClassObj.id;
+    }
+
+    // Calculate total amount from components
+    formData.totalAmount = parseFloat(calculateTotalAmount());
+
+    await feeStructureStore.createNewFeeStructure(formData);
+
+    notificationStore.addNotification({
+      type: "success",
+      message: "Fee structure created successfully!",
     });
 
-    console.log("Fee structure created:", data.createFeeStructure);
-
-    //  notificationStore.addNotification({
-    //         type: "success",
-    //         message: "Fee structure created!",
-    //       });
-    // Add logic to refresh fee structures list if needed
+    // Close the modal
+    modalStore.createFeeStructureModal = false;
   } catch (error) {
     notificationStore.addNotification({
       type: "error",
@@ -386,6 +398,8 @@ const saveFeeStructure = async () => {
     console.error("Error creating fee structure:", error);
   }
 };
+
+// ... existing code ...
 
 // Watch for modal visibility changes
 watch(
@@ -405,5 +419,29 @@ onMounted(() => {
   initializeForm();
   // Fetch classes
   classStore.fetchClasses();
+});
+
+// Add this computed property to check if the form is valid
+const isFormValid = computed(() => {
+  // Check if class is selected
+  if (!selectedClass.value) return false;
+
+  // Check if all fee components have name and valid amount
+  const componentsValid = modalStore.data.feeForm.components.every(
+    (component) =>
+      component.name.trim() !== "" &&
+      component.amount !== null &&
+      component.amount !== undefined &&
+      component.amount >= 0
+  );
+
+  // Check if all required fields are filled
+  const requiredFieldsValid =
+    modalStore.data.feeForm.academicYear &&
+    modalStore.data.feeForm.type &&
+    modalStore.data.feeForm.description &&
+    (modalStore.data.feeForm.type !== "TERM" || modalStore.data.feeForm.term);
+
+  return componentsValid && requiredFieldsValid;
 });
 </script>

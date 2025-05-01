@@ -739,6 +739,10 @@ export const createFeeStructure = gql`
       academicYear
       term
       type
+      classes{
+        name
+      }
+      description
       totalAmount
       components {
         id

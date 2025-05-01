@@ -19,17 +19,25 @@
               v-model="academicYearFilter"
               class="block h-[42px] w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             >
-            <option value="">All Academic Years</option>
-            <option v-for="year in academicYearOptions" :key="year" :value="year">
-              {{ year }}
-            </option>
+              <option value="">All Academic Years</option>
+              <option
+                v-for="year in academicYearOptions"
+                :key="year"
+                :value="year"
+              >
+                {{ year }}
+              </option>
             </select>
             <select
               v-model="termFilter"
               class="block h-[42px] w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             >
               <option value="">All Terms</option>
-              <option v-for="option in termOptions" :key="option.value" :value="option.value">
+              <option
+                v-for="option in termOptions"
+                :key="option.value"
+                :value="option.value"
+              >
                 {{ option.label }}
               </option>
             </select>
@@ -73,14 +81,14 @@
                 <th
                   class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell"
                 >
-                class
+                  class
                   <!-- Term -->
                 </th>
                 <th
                   class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell"
                 >
                   <!-- Type -->
-                   Term
+                  Term
                 </th>
                 <th
                   class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell"
@@ -118,7 +126,7 @@
                 </td>
               </tr>
               <tr
-                 v-for="fee in paginatedFeeStructures"
+                v-for="fee in paginatedFeeStructures"
                 :key="fee?.id"
                 class="hover:bg-gray-50"
               >
@@ -130,12 +138,12 @@
                 <td
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden sm:table-cell"
                 >
-                {{ fee?.classes?.[0]?.name || 'N/A' }}
+                  {{ fee?.classes?.[0]?.name || "N/A" }}
                 </td>
                 <td
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell"
                 >
-                  {{ fee?.type ?? fee?.term  }}
+                  {{ fee?.type ?? fee?.term }}
                 </td>
                 <td
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell"
@@ -145,43 +153,39 @@
                 <td
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm"
                 >
-                
-                  <span class="font-medium"
-                    >${{ fee?.totalAmount }}</span
-                  >
+                  <span class="font-medium">${{ fee?.totalAmount }}</span>
                 </td>
                 <td
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm"
                 >
                   <div class="flex space-x-2">
-                
                     <div class="group relative">
                       <button
                         @click="showViewDetailsModal(fee)"
-                      class="group relative text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
-                    >
-                      <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                    <span
-                      class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex"
-                    >
-                      View
-                    </span>
+                        class="group relative text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
+                      >
+                        <i class="fa-solid fa-arrow-right"></i>
+                      </button>
+                      <span
+                        class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex"
+                      >
+                        View
+                      </span>
                     </div>
-                  
-                  
+
                     <button
-                   
-                    @click="showDelModal(fee.id, fee.description, 'feeStructure')"
-                    class="group relative w-6 h-6 flex items-center justify-center rounded-full"
-                  >
-                    <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
-                    <span
-                      class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                      @click="
+                        showDelModal(fee.id, fee.description, 'feeStructure')
+                      "
+                      class="group relative w-6 h-6 flex items-center justify-center rounded-full"
                     >
-                      Delete
-                    </span>
-                  </button>
+                      <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
+                      <span
+                        class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                      >
+                        Delete
+                      </span>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -204,11 +208,11 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useFeeStructureStore } from "../../../store/feeStructureStore";
 import { useModalStore } from "../../../store/useModalStore";
+import { termOptions } from "../../../utils/utility";
 import EmptyState from "../../emptyState.vue";
 import ErrorScreen from "../../errorScreen.vue";
 import LoadingScreen from "../../loadingScreen.vue";
 import Pagination from "../../pagination.vue";
-import { termOptions } from "../../../utils/utility";
 
 const modalStore = useModalStore();
 const feeStructureStore = useFeeStructureStore();
@@ -224,8 +228,6 @@ const itemsPerPage = 10;
 function handlePageChange(newPage) {
   currentPage.value = newPage;
 }
-
-
 
 const showDelModal = (id, title, type) => {
   modalStore.deleteModal = true;
@@ -265,19 +267,17 @@ const filteredFeeStructures = computed(() => {
     const query = searchQuery.value.toLowerCase();
     filtered = filtered.filter(
       (fee) =>
-        (fee?.academicYear?.toLowerCase() || '').includes(query) ||
-        (fee?.term?.toLowerCase() || '').includes(query) ||
-        (fee?.type?.toLowerCase() || '').includes(query) ||
-        (fee?.description?.toLowerCase() || '').includes(query) ||
-        (fee?.classes?.[0]?.name?.toLowerCase() || '').includes(query)
+        (fee?.academicYear?.toLowerCase() || "").includes(query) ||
+        (fee?.term?.toLowerCase() || "").includes(query) ||
+        (fee?.type?.toLowerCase() || "").includes(query) ||
+        (fee?.description?.toLowerCase() || "").includes(query) ||
+        (fee?.classes?.[0]?.name?.toLowerCase() || "").includes(query)
     );
   }
   if (academicYearFilter.value) {
     // Convert the filter value from hyphen format to slash format
-    const formattedFilter = academicYearFilter.value.replace('-', '/');
-    filtered = filtered.filter(
-      (fee) => fee?.academicYear === formattedFilter
-    );
+    const formattedFilter = academicYearFilter.value.replace("-", "/");
+    filtered = filtered.filter((fee) => fee?.academicYear === formattedFilter);
   }
 
   if (termFilter.value) {
@@ -318,30 +318,27 @@ const academicYearOptions = computed(() => {
   return [...new Set(years)];
 });
 
-
 // Add this computed property for paginated results
 const paginatedFeeStructures = computed(() => {
-const start = (currentPage.value - 1) * itemsPerPage;
-const end = start + itemsPerPage;
-return filteredFeeStructures.value.slice(start, end);
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return filteredFeeStructures.value.slice(start, end);
 });
 
 // Update the totalPages computation
 const totalPages = computed(() => {
-return Math.ceil(filteredFeeStructures.value.length / itemsPerPage);
+  return Math.ceil(filteredFeeStructures.value.length / itemsPerPage);
 });
 
 // Update the hasMore computation
 const hasMore = computed(() => {
-return currentPage.value < totalPages.value;
+  return currentPage.value < totalPages.value;
 });
 
 // Watch for filter changes to refresh the data
 watch([searchQuery, academicYearFilter, termFilter], () => {
   currentPage.value = 1; // Reset to first page when filters change
 });
-
-
 
 onMounted(() => {
   // Fetch data from API when component mounts
@@ -350,5 +347,4 @@ onMounted(() => {
     limit: itemsPerPage,
   });
 });
-
 </script>

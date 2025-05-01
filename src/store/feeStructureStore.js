@@ -4,6 +4,8 @@ import { createFeeStructure, updateFeeStructure } from "../graphql/mutations";
 import { getAllFeeStructures, getFeeStructureById } from "../graphql/queries";
 import { useNotificationStore } from "./notification";
 
+
+
 export const useFeeStructureStore = defineStore("feeStructureStore", {
   state: () => ({
     allFeeStructures: [], // Store all fee structures
@@ -22,6 +24,7 @@ export const useFeeStructureStore = defineStore("feeStructureStore", {
       this.allFeeStructures = [];
       this.feeStructures = [];
     },
+
 
     // Refresh fee structures by forcing a new fetch
     async refreshFeeStructures(page = 1, limit = 10) {
@@ -47,7 +50,7 @@ export const useFeeStructureStore = defineStore("feeStructureStore", {
             fetchPolicy: "network-only", // Force a network request instead of using cache
           });
 
-          this.allFeeStructures = data.getAllFeeStructures;
+          this.allFeeStructures = [...data.getAllFeeStructures];
           this.totalCount = this.allFeeStructures.length;
           this.totalPages = Math.ceil(this.totalCount / limit);
         }
@@ -86,7 +89,7 @@ export const useFeeStructureStore = defineStore("feeStructureStore", {
     },
 
     async createNewFeeStructure(feeStructureData) {
-      const notificationStore = useNotificationStore();
+      
       this.loading = true;
       this.error = null;
 
@@ -100,20 +103,14 @@ export const useFeeStructureStore = defineStore("feeStructureStore", {
           // Add the new fee structure to the store
           this.addFeeStructure(data.createFeeStructure);
 
-          notificationStore.addNotification({
-            type: "success",
-            message: "Fee structure created successfully!",
-          });
+         
 
           return data.createFeeStructure;
         }
+      
       } catch (error) {
         this.error = error.message || "Error creating fee structure";
-        notificationStore.addNotification({
-          type: "error",
-          message: "Error creating fee structure",
-          error,
-        });
+        
         throw error;
       } finally {
         this.loading = false;
@@ -198,8 +195,8 @@ export const useFeeStructureStore = defineStore("feeStructureStore", {
     // This approach is a common pattern in state management to ensure UI consistency and optimize performance by reducing API calls.
     // Add a new fee structure to the store after creation
     addFeeStructure(newFeeStructure) {
-      this.allFeeStructures.unshift(newFeeStructure);
-      this.feeStructures.unshift(newFeeStructure);
+      this.allFeeStructures = [newFeeStructure, ...this.allFeeStructures];
+      this.feeStructures = [newFeeStructure, ...this.feeStructures];
     },
 
     // Update a fee structure in the store
