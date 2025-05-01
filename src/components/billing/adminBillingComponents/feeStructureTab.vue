@@ -143,7 +143,7 @@
                 <td
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell"
                 >
-                  {{ fee?.type ?? fee?.term }}
+                {{ fee?.type }} {{ fee?.term ? `(${fee?.term})` : '' }}
                 </td>
                 <td
                   class="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell"
