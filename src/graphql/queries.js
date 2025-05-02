@@ -815,4 +815,26 @@ export const getMyInvoices = gql`
   }
 `;
 
+export const getAllPayments = gql`
+  query getAllPayments($params: PaginationInput) {
+    getAllPayments(params: $params) {
+      id
+      Amount
+      classId
+      className
+      createdAt
+      description
+      feeType
+      invoiceId
+      parentId
+      paymentMethod
+      status
+      studentId
+      studentImage
+      studentName
+      studentSurname
+    }
+  }
+`
+
 

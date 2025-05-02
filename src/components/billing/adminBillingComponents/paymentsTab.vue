@@ -198,7 +198,7 @@
       </div>
       <div class="flex space-x-2">
         <button
-          @click="paymentCurrentPage--"
+          @click="paymentCurrentPage"
           :disabled="paymentCurrentPage === 1"
           :class="[
             'px-3 py-1 rounded-md text-xs sm:text-sm',
