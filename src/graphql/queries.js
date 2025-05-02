@@ -749,7 +749,7 @@ export const getAllFeeStructures = gql`
       type
       totalAmount
       description
-      classes{
+      classes {
         id
         name
       }
@@ -762,7 +762,6 @@ export const getAllFeeStructures = gql`
       }
     }
   }
-
 `;
 
 export const getFeeStructureById = gql`
@@ -774,7 +773,7 @@ export const getFeeStructureById = gql`
       type
       totalAmount
       description
-      classes{
+      classes {
         id
         name
       }
@@ -819,7 +818,7 @@ export const getAllPayments = gql`
   query getAllPayments($params: PaginationInput) {
     getAllPayments(params: $params) {
       id
-      Amount
+      amount
       classId
       className
       createdAt
@@ -835,6 +834,25 @@ export const getAllPayments = gql`
       studentSurname
     }
   }
-`
+`;
 
-
+export const getPaymentById = gql`
+  query getPaymentById($paymentId: String!) {
+    getPaymentById(paymentId: $paymentId) {
+      id
+      Amount
+      classId
+      className
+      createdAt
+      description
+      feeType
+      invoiceId
+      parentId
+      status
+      studentId
+      studentImage
+      studentName
+      studentSurname
+    }
+  }
+`;

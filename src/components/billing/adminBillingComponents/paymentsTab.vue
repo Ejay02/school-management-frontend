@@ -1,12 +1,18 @@
 <template>
   <div>
     <div class="">
-      <LoadingScreen message="Loading payments ... " v-if="loading" />
+      <LoadingScreen
+        message="Loading payments ... "
+        v-if="paymentStore.loading"
+      />
 
-      <ErrorScreen :message="error" v-else-if="error" />
+      <ErrorScreen
+        :message="paymentStore.error"
+        v-else-if="paymentStore.error"
+      />
 
       <EmptyState
-        v-else-if="!payments.length"
+        v-else-if="!paymentStore.payments.length && !paymentStore.loading"
         icon="fa-solid fa-money-bill"
         heading="Nothing here yet"
         description="Check back later for updates"
@@ -51,7 +57,7 @@
           </div>
           <div class="mt-2 md:mt-0">
             <button
-             @click="exportToExcel"
+              @click="exportToExcel"
               class="w-full sm:w-auto h-[42px] bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-2 rounded-md shadow-sm text-xs font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               <i class="fas fa-file-export mr-2"></i> Export
@@ -102,7 +108,7 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-if="loading">
+              <tr v-if="paymentStore.loading">
                 <td colspan="7" class="px-4 sm:px-6 py-4 text-center">
                   <div class="flex justify-center">
                     <div
@@ -176,19 +182,35 @@
                   </span>
                 </td>
                 <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm">
-                  <div class="flex space-x-2">
-                    <button
-                      @click="viewPaymentDetails(payment)"
-                      class="text-indigo-600 hover:text-indigo-900"
-                    >
-                      <i class="fas fa-eye"></i>
-                    </button>
-                    <button
-                      @click="printReceipt(payment)"
-                      class="text-green-600 hover:text-green-900"
-                    >
-                      <i class="fas fa-print"></i>
-                    </button>
+                  <div class="flex gap-1">
+                    <!--  -->
+                    <div class="group relative">
+                      <button
+                        @click="viewPaymentDetails(payment)"
+                        class="group relative text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
+                      >
+                        <i class="fa-solid fa-arrow-right"></i>
+                      </button>
+                      <span
+                        class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex"
+                      >
+                        View
+                      </span>
+                    </div>
+
+                    <div class="group relative">
+                      <button
+                        @click="printReceipt(payment)"
+                        class="group relative text-gray-700 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
+                      >
+                        <i class="fas fa-print"></i>
+                      </button>
+                      <span
+                        class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex"
+                      >
+                        Print
+                      </span>
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -199,48 +221,20 @@
     </div>
 
     <!-- Pagination for Payments -->
-    <div
-      class="flex flex-col sm:flex-row justify-between items-center mt-4 gap-3"
-    >
-      <div class="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
-        Showing
-        <span class="font-medium">{{ paymentPaginationStart }}</span> to
-        <span class="font-medium">{{ paymentPaginationEnd }}</span> of
-        <span class="font-medium">{{ totalPayments }}</span> results
-      </div>
-      <div class="flex space-x-2">
-        <button
-          @click="paymentCurrentPage"
-          :disabled="paymentCurrentPage === 1"
-          :class="[
-            'px-3 py-1 rounded-md text-xs sm:text-sm',
-            paymentCurrentPage === 1
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white text-gray-700 hover:bg-gray-50',
-          ]"
-        >
-          Previous
-        </button>
-        <button
-          @click="paymentCurrentPage++"
-          :disabled="paymentCurrentPage === paymentTotalPages"
-          :class="[
-            'px-3 py-1 rounded-md text-xs sm:text-sm',
-            paymentCurrentPage === paymentTotalPages
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white text-gray-700 hover:bg-gray-50',
-          ]"
-        >
-          Next
-        </button>
-      </div>
-    </div>
+    <Pagination
+      :currentPage="paymentCurrentPage"
+      :hasMore="paymentCurrentPage < paymentTotalPages"
+      :totalPages="paymentTotalPages"
+      @update:page="handlePageChange"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useClassStore } from "../../../store/classStore";
+import { usePaymentStore } from "../../../store/paymentStore";
+import { useUserStore } from "../../../store/userStore";
 import Dropdown from "../../dropdowns/dropdown.vue";
 import EmptyState from "../../emptyState.vue";
 import LoadingScreen from "../../loadingScreen.vue";
@@ -248,97 +242,29 @@ import LoadingScreen from "../../loadingScreen.vue";
 import { printPaymentReceipt } from "../../../utils/print.reciept";
 import ErrorScreen from "../../errorScreen.vue";
 
-import * as XLSX from 'xlsx';
+import * as XLSX from "xlsx";
+import Pagination from "../../pagination.vue";
 
 const classStore = useClassStore();
+const paymentStore = usePaymentStore();
+const userStore = useUserStore();
 
 const selectedClass = ref("");
-
 const paymentSearchQuery = ref("");
 const paymentStatusFilter = ref("");
-
 const paymentCurrentPage = ref(1);
 const itemsPerPage = 10;
-const loading = ref(false);
-const error = ref(false);
-
-const payments = ref([
-  {
-    id: "1",
-    student: {
-      id: "STD001",
-      name: "John",
-      surname: "Doe",
-      photo: "",
-    },
-    class: {
-      id: "1",
-      name: "Primary 6",
-    },
-    feeType: "Tuition",
-    amount: 250000,
-    date: "2023-09-05",
-    status: "Paid",
-  },
-  {
-    id: "2",
-    student: {
-      id: "STD002",
-      name: "Jane",
-      surname: "Smith",
-      photo: "",
-    },
-    class: {
-      id: "1",
-      name: "Primary 6",
-    },
-    feeType: "Tuition",
-    amount: 250000,
-    date: "2023-09-10",
-    status: "Paid",
-  },
-  {
-    id: "3",
-    student: {
-      id: "STD003",
-      name: "Michael",
-      surname: "Johnson",
-      photo: "",
-    },
-    class: {
-      id: "2",
-      name: "JSS 1",
-    },
-    feeType: "Tuition",
-    amount: 300000,
-    date: "2023-09-15",
-    status: "Pending",
-  },
-  {
-    id: "4",
-    student: {
-      id: "STD004",
-      name: "Sarah",
-      surname: "Williams",
-      photo: "",
-    },
-    class: {
-      id: "2",
-      name: "JSS 1",
-    },
-    feeType: "Tuition",
-    amount: 300000,
-    date: "2023-08-20",
-    status: "Overdue",
-  },
-]);
 
 const classOptions = computed(() => {
   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
 });
 
+const handlePageChange = (page) => {
+  paymentCurrentPage.value = page;
+};
+
 const filteredPayments = computed(() => {
-  let result = [...payments.value];
+  let result = [...paymentStore.payments];
 
   if (paymentSearchQuery.value) {
     const query = paymentSearchQuery.value.toLowerCase();
@@ -358,7 +284,7 @@ const filteredPayments = computed(() => {
 
   if (selectedClass.value) {
     result = result.filter(
-      (payment) => payment.class.id === selectedClass.value
+      (payment) => payment.class.name === selectedClass.value
     );
   }
 
@@ -369,12 +295,6 @@ const totalPayments = computed(() => filteredPayments.value.length);
 
 const paymentTotalPages = computed(() =>
   Math.ceil(totalPayments.value / itemsPerPage)
-);
-const paymentPaginationStart = computed(
-  () => (paymentCurrentPage.value - 1) * itemsPerPage + 1
-);
-const paymentPaginationEnd = computed(() =>
-  Math.min(paymentCurrentPage.value * itemsPerPage, totalPayments.value)
 );
 
 const formatDate = (dateString) => {
@@ -395,35 +315,35 @@ const printReceipt = (payment) => {
   printPaymentReceipt(payment, formatDate);
 };
 
-
-
-
 const exportToExcel = () => {
   // Prepare data for export
-  const dataToExport = filteredPayments.value.map(payment => ({
-    'Student ID': payment.student.id,
-    'Student Name': `${payment.student.name} ${payment.student.surname}`,
-    'Class': payment.class.name,
-    'Fee Type': payment.feeType,
-    'Amount': `$${payment.amount}`,
-    'Date': formatDate(payment.date),
-    'Status': payment.status
+  const dataToExport = filteredPayments.value.map((payment) => ({
+    "Student ID": payment.student.id,
+    "Student Name": `${payment.student.name} ${payment.student.surname}`,
+    Class: payment.class.name,
+    "Fee Type": payment.feeType,
+    Amount: `$${payment.amount}`,
+    Date: formatDate(payment.date),
+    Status: payment.status,
   }));
-  
+
   // Create worksheet
   const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-  
+
   // Create workbook
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Payments');
-  
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Payments");
+
   // Generate Excel file
-  XLSX.writeFile(workbook, 'payments_export.xlsx');
+  XLSX.writeFile(workbook, "payments_export.xlsx");
 };
 
-
+// Reset pagination when filters change
+watch([paymentSearchQuery, paymentStatusFilter, selectedClass], () => {
+  paymentCurrentPage.value = 1;
+});
 
 onMounted(async () => {
-  await Promise.all([classStore.fetchClasses()]);
+  await Promise.all([classStore.fetchClasses(), paymentStore.fetchPayments()]);
 });
 </script>
