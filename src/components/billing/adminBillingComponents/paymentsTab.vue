@@ -111,7 +111,10 @@
                 </td>
               </tr>
               <tr v-else-if="filteredPayments.length === 0">
-                <td colspan="7" class="px-4 sm:px-6 py-4 text-center text-gray-500">
+                <td
+                  colspan="7"
+                  class="px-4 sm:px-6 py-4 text-center text-gray-500"
+                >
                   No payments found
                 </td>
               </tr>
@@ -139,16 +142,22 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-4 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                <td
+                  class="px-4 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell"
+                >
                   {{ payment.class.name }}
                 </td>
-                <td class="px-4 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
+                <td
+                  class="px-4 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell"
+                >
                   {{ payment.feeType }}
                 </td>
                 <td class="px-4 sm:px-6 py-4 whitespace-nowrap font-medium">
                   ${{ payment.amount }}
                 </td>
-                <td class="px-4 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
+                <td
+                  class="px-4 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell"
+                >
                   {{ formatDate(payment.date) }}
                 </td>
                 <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
@@ -189,7 +198,9 @@
     </div>
 
     <!-- Pagination for Payments -->
-    <div class="flex flex-col sm:flex-row justify-between items-center mt-4 gap-3">
+    <div
+      class="flex flex-col sm:flex-row justify-between items-center mt-4 gap-3"
+    >
       <div class="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
         Showing
         <span class="font-medium">{{ paymentPaginationStart }}</span> to
@@ -227,12 +238,13 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue';
+import { computed, onMounted, ref } from "vue";
 import { useClassStore } from "../../../store/classStore";
 import Dropdown from "../../dropdowns/dropdown.vue";
 import EmptyState from "../../emptyState.vue";
 import LoadingScreen from "../../loadingScreen.vue";
 
+import { printPaymentReceipt } from "../../../utils/print.reciept";
 import ErrorScreen from "../../errorScreen.vue";
 
 const classStore = useClassStore();
@@ -371,18 +383,13 @@ const formatDate = (dateString) => {
   });
 };
 
-const formatCurrency = (amount) => {
-  return amount.toLocaleString("en-NG");
-};
-
 const viewPaymentDetails = (payment) => {
   console.log("View payment details", payment);
   // Implement view payment details logic
 };
 
 const printReceipt = (payment) => {
-  console.log("Print receipt", payment);
-  // Implement print receipt logic
+  printPaymentReceipt(payment, formatDate);
 };
 
 onMounted(async () => {
