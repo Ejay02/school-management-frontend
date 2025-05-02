@@ -362,13 +362,12 @@ const studentSearchQuery = ref("");
 const studentAttendance = ref({});
 const loadingStudents = ref(false);
 
-// Computed properties
-const loading = computed(() => attendanceStore.loading);
 const error = computed(() => attendanceStore.error);
-const attendanceRecords = computed(() => attendanceStore.attendanceRecords);
-const classes = computed(() => classStore.allClasses);
 const lessons = computed(() => lessonStore.lessons);
+const classes = computed(() => classStore.allClasses);
 const students = computed(() => studentStore.students);
+const loading = computed(() => attendanceStore.loading);
+const attendanceRecords = computed(() => attendanceStore.attendanceRecords);
 
 // Add computed property for filtered records
 const filteredRecords = computed(() => {
@@ -410,21 +409,6 @@ const handlePageChange = async (newPage) => {
     search: searchQuery.value,
   });
 };
-
-// Add watcher for search and filter changes
-watch([searchQuery, filterStatus], () => {
-  currentPage.value = 1; // Reset to first page
-  handlePageChange(1);
-});
-
-// On component mount
-onMounted(async () => {
-  await handlePageChange(1);
-});
-
-watch(currentPage, (newPage) => {
-  classStore.fetchClasses({ page: newPage, limit });
-});
 
 // Get lessons for selected class
 const filteredLessons = computed(() => {
@@ -479,32 +463,12 @@ const filteredStudents = computed(() => {
   if (!selectedClass.value) return [];
 
   // Find the class object in class store that matches the selected class ID
-  const classObj = classStore.classes.find(
+  const classObj = classStore.allClasses.find(
     (cls) => cls.id === selectedClass.value
   );
 
   // Return the students from that class if available
   return classObj && classObj.students ? classObj.students : [];
-});
-
-// Reset pagination when filters change
-watch([searchQuery, filterStatus], () => {
-  currentPage.value = 1;
-});
-
-// Reset lesson when class changes
-watch(selectedClass, () => {
-  selectedLesson.value = "";
-  studentAttendance.value = {};
-});
-
-// Update student attendance state when lesson changes
-watch(selectedLesson, () => {
-  if (selectedLesson.value && students.value.length > 0) {
-    initializeStudentAttendance();
-  } else {
-    studentAttendance.value = {};
-  }
 });
 
 // Toggle mark attendance mode
@@ -607,8 +571,40 @@ async function saveAttendance() {
   }
 }
 
+// Add watcher for search and filter changes
+watch([searchQuery, filterStatus], () => {
+  currentPage.value = 1; // Reset to first page
+  handlePageChange(1);
+});
+
+watch(currentPage, (newPage) => {
+  classStore.fetchClasses({ page: newPage, limit });
+});
+
+// Reset pagination when filters change
+watch([searchQuery, filterStatus], () => {
+  currentPage.value = 1;
+});
+
+// Reset lesson when class changes
+watch(selectedClass, () => {
+  selectedLesson.value = "";
+  studentAttendance.value = {};
+});
+
+// Update student attendance state when lesson changes
+watch(selectedLesson, () => {
+  if (selectedLesson.value && students.value.length > 0) {
+    initializeStudentAttendance();
+  } else {
+    studentAttendance.value = {};
+  }
+});
+
 // Initialize data on component mount
 onMounted(async () => {
+  await handlePageChange(1);
+
   attendanceStore.fetchAttendance();
 
   // Fetch classes and lessons
