@@ -44,8 +44,8 @@
 
         <!-- Weekly attendance chart -->
         <div class="bg-white rounded-lg shadow border border-gray-200 mb-6">
-          <div class="h-96">
-            <AttendanceCard label="Weekly Attendance Overview" />
+          <div class="">
+            <AttendanceCard label="Weekly Attendance Overview" :showSummary="true"/>
           </div>
         </div>
 
