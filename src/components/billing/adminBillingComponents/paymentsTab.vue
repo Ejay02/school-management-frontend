@@ -234,7 +234,6 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useClassStore } from "../../../store/classStore";
 import { usePaymentStore } from "../../../store/paymentStore";
-import { useUserStore } from "../../../store/userStore";
 import Dropdown from "../../dropdowns/dropdown.vue";
 import EmptyState from "../../emptyState.vue";
 import LoadingScreen from "../../loadingScreen.vue";
