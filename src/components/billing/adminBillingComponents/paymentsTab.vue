@@ -243,11 +243,13 @@ import { printPaymentReceipt } from "../../../utils/print.reciept";
 import ErrorScreen from "../../errorScreen.vue";
 
 import * as XLSX from "xlsx";
+
+
 import Pagination from "../../pagination.vue";
 
 const classStore = useClassStore();
 const paymentStore = usePaymentStore();
-const userStore = useUserStore();
+
 
 const selectedClass = ref("");
 const paymentSearchQuery = ref("");
