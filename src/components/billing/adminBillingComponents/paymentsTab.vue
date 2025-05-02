@@ -51,6 +51,7 @@
           </div>
           <div class="mt-2 md:mt-0">
             <button
+             @click="exportToExcel"
               class="w-full sm:w-auto h-[42px] bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-2 rounded-md shadow-sm text-xs font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               <i class="fas fa-file-export mr-2"></i> Export
@@ -247,6 +248,8 @@ import LoadingScreen from "../../loadingScreen.vue";
 import { printPaymentReceipt } from "../../../utils/print.reciept";
 import ErrorScreen from "../../errorScreen.vue";
 
+import * as XLSX from 'xlsx';
+
 const classStore = useClassStore();
 
 const selectedClass = ref("");
@@ -391,6 +394,34 @@ const viewPaymentDetails = (payment) => {
 const printReceipt = (payment) => {
   printPaymentReceipt(payment, formatDate);
 };
+
+
+
+
+const exportToExcel = () => {
+  // Prepare data for export
+  const dataToExport = filteredPayments.value.map(payment => ({
+    'Student ID': payment.student.id,
+    'Student Name': `${payment.student.name} ${payment.student.surname}`,
+    'Class': payment.class.name,
+    'Fee Type': payment.feeType,
+    'Amount': `$${payment.amount}`,
+    'Date': formatDate(payment.date),
+    'Status': payment.status
+  }));
+  
+  // Create worksheet
+  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  
+  // Create workbook
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Payments');
+  
+  // Generate Excel file
+  XLSX.writeFile(workbook, 'payments_export.xlsx');
+};
+
+
 
 onMounted(async () => {
   await Promise.all([classStore.fetchClasses()]);
