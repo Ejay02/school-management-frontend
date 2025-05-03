@@ -7,7 +7,7 @@
       <div v-for="(cls, index) in topClasses" :key="cls.id">
         <div class="flex justify-between items-center">
           <span class="font-medium">{{ cls.name }}</span>
-          <span class="text-gray-700">${{ cls.revenue }}</span>
+          <span class="text-gray-700">${{ cls.revenue.toLocaleString() }}</span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
           <div
@@ -23,13 +23,9 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed } from "vue";
+import { useBillingDashboardStore } from "../../../../store/billingDashboardStore";
 
-const topClasses = ref([
-  { id: "1", name: "Primary 6", revenue: 750000 },
-  { id: "2", name: "JSS 1", revenue: 600000 },
-  { id: "3", name: "JSS 2", revenue: 450000 },
-  { id: "4", name: "JSS 3", revenue: 350000 },
-  { id: "5", name: "JSS 4", revenue: 30000 },
-]);
+const billingDashboardStore = useBillingDashboardStore();
+const topClasses = computed(() => billingDashboardStore.getTopClassesByRevenue);
 </script>

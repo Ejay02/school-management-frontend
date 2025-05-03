@@ -10,7 +10,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
+import { useBillingDashboardStore } from "../../../../store/billingDashboardStore";
 import {
   Chart,
   DoughnutController,
@@ -27,34 +28,43 @@ Chart.register(
   Legend
 );
 
+const billingDashboardStore = useBillingDashboardStore();
+const paymentStatusDistribution = computed(() => billingDashboardStore.getPaymentStatusDistribution);
+
 const chartRef = ref(null);
 let chartInstance = null;
 
-// Dummy data for payment statuses
-const paymentData = {
-  labels: ['Paid', 'Pending', 'Overdue'],
-  datasets: [{
-    data: [65, 25, 10], // Percentages
-    backgroundColor: [
-      'rgba(34, 197, 94, 0.8)', // Green for Paid
-      'rgba(234, 179, 8, 0.8)',  // Yellow for Pending
-      'rgba(239, 68, 68, 0.8)'   // Red for Overdue
-    ],
-    borderColor: [
-      'rgba(34, 197, 94, 1)',
-      'rgba(234, 179, 8, 1)',
-      'rgba(239, 68, 68, 1)'
-    ],
-    borderWidth: 1,
-    hoverOffset: 5
-  }]
-};
-
-onMounted(() => {
-  if (chartRef.value) {
+const createChart = () => {
+  if (chartRef.value && paymentStatusDistribution.value.labels.length > 0) {
+    // Destroy existing chart if it exists
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+    
+    const chartData = {
+      labels: paymentStatusDistribution.value.labels,
+      datasets: [{
+        data: paymentStatusDistribution.value.data,
+        backgroundColor: [
+          'rgba(34, 197, 94, 0.8)', // Green for Paid
+          'rgba(116, 107, 253, 0.8)', // Purple for Partial
+          'rgba(234, 179, 8, 0.8)',  // Yellow for Pending
+          'rgba(239, 68, 68, 0.8)'   // Red for Overdue
+        ],
+        borderColor: [
+          'rgba(34, 197, 94, 1)',
+          'rgba(116, 107, 253, 1)', 
+          'rgba(234, 179, 8, 1)',
+          'rgba(239, 68, 68, 1)'
+        ],
+        borderWidth: 1,
+        hoverOffset: 5
+      }]
+    };
+    
     chartInstance = new Chart(chartRef.value, {
       type: 'doughnut',
-      data: paymentData,
+      data: chartData,
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -94,6 +104,15 @@ onMounted(() => {
       }
     });
   }
+};
+
+// Watch for changes in the payment status distribution data
+watch(paymentStatusDistribution, () => {
+  createChart();
+}, { deep: true });
+
+onMounted(() => {
+  createChart();
 });
 </script>
 

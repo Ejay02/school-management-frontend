@@ -6,20 +6,20 @@
       </div>
       <div class="ml-4">
         <h3 class="text-gray-500 text-sm">Outstanding Payments</h3>
-        <p class="text-2xl font-bold">${{ outstandingPayments }}</p>
+        <p class="text-2xl font-bold">${{ outstandingPayments.amount.toLocaleString() }}</p>
       </div>
     </div>
     <div class="mt-2">
       <div class="flex justify-between items-center">
         <span class="text-sm text-gray-500"
-          >{{ overdueCount }} students with overdue fees</span
+          >{{ outstandingPayments.overdueCount }} students with overdue fees</span
         >
-        <span class="text-sm text-red-600">{{ overduePercentage }}%</span>
+        <span class="text-sm text-red-600">{{ outstandingPayments.overduePercentage }}%</span>
       </div>
       <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
         <div
           class="bg-red-600 h-2 rounded-full"
-          :style="{ width: `${overduePercentage}%` }"
+          :style="{ width: `${outstandingPayments.overduePercentage}%` }"
         ></div>
       </div>
     </div>
@@ -27,9 +27,9 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed } from "vue";
+import { useBillingDashboardStore } from "../../../../store/billingDashboardStore";
 
-const outstandingPayments = ref(300000);
-const overdueCount = ref(5);
-const overduePercentage = ref(10);
+const billingDashboardStore = useBillingDashboardStore();
+const outstandingPayments = computed(() => billingDashboardStore.getOutstandingPayments);
 </script>

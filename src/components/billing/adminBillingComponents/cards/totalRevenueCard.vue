@@ -8,19 +8,21 @@
         <div class="ml-4">
           <h3 class="text-gray-500 text-sm">Total Revenue</h3>
           <p class="text-2xl font-bold">
-            ${{ totalRevenue }}
+            ${{ totalRevenue.amount.toLocaleString() }}
           </p>
         </div>
       </div>
       <div class="mt-4">
         <div class="flex justify-between items-center">
           <span class="text-sm text-gray-500">This Term</span>
-          <span class="text-sm text-green-600">+{{ revenueGrowth }}%</span>
+          <span class="text-sm text-green-600"
+            >+{{ totalRevenue.growthPercentage }}%</span
+          >
         </div>
         <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
           <div
             class="bg-green-600 h-2 rounded-full"
-            :style="{ width: `${revenueGrowth}%` }"
+            :style="{ width: `${totalRevenue.growthPercentage}%` }"
           ></div>
         </div>
       </div>
@@ -29,9 +31,9 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed } from "vue";
+import { useBillingDashboardStore } from "../../../../store/billingDashboardStore";
 
-const totalRevenue = ref(1250000);
-const revenueGrowth = ref(15);
+const billingDashboardStore = useBillingDashboardStore();
+const totalRevenue = computed(() => billingDashboardStore.getTotalRevenue);
 </script>
-

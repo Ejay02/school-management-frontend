@@ -856,3 +856,36 @@ export const getPaymentById = gql`
     }
   }
 `;
+
+export const getBillingReportDashboard = gql`
+  query getBillingReportDashboard {
+    getBillingReportDashboard {
+      totalRevenue {
+        amount
+        growthPercentage
+      }
+      outstandingPayments {
+        amount
+        overdueCount
+        overduePercentage
+      }
+      collectionRate {
+        rate
+        targetRate
+      }
+      revenueTrend {
+        months
+        data
+      }
+      paymentStatusDistribution {
+        labels
+        data
+      }
+      topClassesByRevenue {
+        id
+        name
+        revenue
+      }
+    }
+  }
+`;

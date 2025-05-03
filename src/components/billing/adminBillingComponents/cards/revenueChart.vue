@@ -8,7 +8,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
+import { useBillingDashboardStore } from "../../../../store/billingDashboardStore";
 import {
   Chart,
   LineController,
@@ -35,15 +36,14 @@ Chart.register(
   Filler
 );
 
+const billingDashboardStore = useBillingDashboardStore();
+const revenueTrend = computed(() => billingDashboardStore.getRevenueTrend);
+
 const chartRef = ref(null);
 let chartInstance = null;
 
-// Dummy data for the chart
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const revenueData = [85000, 72000, 90000, 105000, 95000, 110000, 120000, 115000, 130000, 145000, 135000, 150000];
-
-onMounted(() => {
-  if (chartRef.value) {
+const createChart = () => {
+  if (chartRef.value && revenueTrend.value.months.length > 0) {
     const ctx = chartRef.value.getContext('2d');
     
     // Create gradient for area under the line
@@ -51,13 +51,18 @@ onMounted(() => {
     gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
     gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
     
+    // Destroy existing chart if it exists
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+    
     chartInstance = new Chart(chartRef.value, {
       type: 'line',
       data: {
-        labels: months,
+        labels: revenueTrend.value.months,
         datasets: [{
           label: 'Revenue',
-          data: revenueData,
+          data: revenueTrend.value.data,
           borderColor: '#6366f1', // Indigo color
           backgroundColor: gradient,
           borderWidth: 2,
@@ -140,6 +145,15 @@ onMounted(() => {
       }
     });
   }
+};
+
+// Watch for changes in the revenue trend data
+watch(revenueTrend, () => {
+  createChart();
+}, { deep: true });
+
+onMounted(() => {
+  createChart();
 });
 </script>
 

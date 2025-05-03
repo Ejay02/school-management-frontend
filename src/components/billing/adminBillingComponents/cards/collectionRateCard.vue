@@ -7,26 +7,26 @@
         </div>
         <div class="ml-4">
           <h3 class="text-gray-500 text-sm">Collection Rate</h3>
-          <p class="text-2xl font-bold">{{ collectionRate }}%</p>
+          <p class="text-2xl font-bold">{{ collectionRate.rate }}%</p>
         </div>
       </div>
       <div class="mt-4">
         <div class="flex justify-between items-center">
-          <span class="text-sm text-gray-500">Target: 95%</span>
+          <span class="text-sm text-gray-500">Target: {{ collectionRate.targetRate }}%</span>
           <span
             class="text-sm"
             :class="
-              collectionRate >= 95 ? 'text-green-600' : 'text-yellow-600'
+              collectionRate.rate >= collectionRate.targetRate ? 'text-green-600' : 'text-yellow-600'
             "
           >
-            {{ collectionRate >= 95 ? "On Target" : "Below Target" }}
+            {{ collectionRate.rate >= collectionRate.targetRate ? "On Target" : "Below Target" }}
           </span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
           <div
-            :class="collectionRate >= 95 ? 'bg-green-600' : 'bg-yellow-600'"
+            :class="collectionRate.rate >= collectionRate.targetRate ? 'bg-green-600' : 'bg-yellow-600'"
             class="h-2 rounded-full"
-            :style="{ width: `${collectionRate}%` }"
+            :style="{ width: `${collectionRate.rate}%` }"
           ></div>
         </div>
       </div>
@@ -35,10 +35,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed } from 'vue';
+import { useBillingDashboardStore } from "../../../../store/billingDashboardStore";
 
-
-
-const collectionRate = ref(85);
+const billingDashboardStore = useBillingDashboardStore();
+const collectionRate = computed(() => billingDashboardStore.getCollectionRate);
 </script>
 
