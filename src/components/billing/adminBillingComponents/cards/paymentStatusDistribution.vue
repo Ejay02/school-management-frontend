@@ -3,8 +3,14 @@
     <h3 class="text-lg font-medium text-gray-900 mb-4">
       Payment Status Distribution
     </h3>
-    <div class="h-64 relative">
+
+    <div v-if="hasData" class="h-64 relative">
       <canvas ref="chartRef"></canvas>
+    </div>
+    <div v-else class="h-64 flex flex-col items-center justify-center text-gray-400">
+      <i class="fas fa-chart-pie text-4xl mb-3"></i>
+      <h4 class="text-lg font-medium">No Payment Data</h4>
+      <p class="text-sm text-center">There are no payment records to display at this time.</p>
     </div>
   </div>
 </template>
@@ -31,11 +37,21 @@ Chart.register(
 const billingDashboardStore = useBillingDashboardStore();
 const paymentStatusDistribution = computed(() => billingDashboardStore.getPaymentStatusDistribution);
 
+// Check if there's actual data (any non-zero value)
+const hasData = computed(() => {
+  if (!paymentStatusDistribution.value || !paymentStatusDistribution.value.data) {
+    return false;
+  }
+  
+  // Check if all values are zero
+  return paymentStatusDistribution.value.data.some(value => value > 0);
+});
+
 const chartRef = ref(null);
 let chartInstance = null;
 
 const createChart = () => {
-  if (chartRef.value && paymentStatusDistribution.value.labels.length > 0) {
+  if (chartRef.value && paymentStatusDistribution.value.labels.length > 0 && hasData.value) {
     // Destroy existing chart if it exists
     if (chartInstance) {
       chartInstance.destroy();
@@ -107,12 +123,19 @@ const createChart = () => {
 };
 
 // Watch for changes in the payment status distribution data
-watch(paymentStatusDistribution, () => {
-  createChart();
+watch([paymentStatusDistribution, hasData], () => {
+  if (hasData.value) {
+    createChart();
+  } else if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+  }
 }, { deep: true });
 
 onMounted(() => {
-  createChart();
+  if (hasData.value) {
+    createChart();
+  }
 });
 </script>
 

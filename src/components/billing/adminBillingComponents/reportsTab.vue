@@ -1,7 +1,7 @@
 <template>
   <div>
     <LoadingScreen
-      message="Loading dashboard data..."
+      message="Loading reports data..."
       v-if="billingDashboardStore.loading"
     />
 
