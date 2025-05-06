@@ -28,7 +28,6 @@ import {
   formatTime,
 } from "../../utils/date.holidays.js";
 
-
 const currentEvents = ref([]);
 const calendarRef = ref(null);
 const holidaysFetched = ref(false);
@@ -43,8 +42,6 @@ const userEvents = computed(() => {
   const currentUserId = userStore.userInfo?.id;
 
   // Filter events for current user
-  // This will depend on your event structure - adjust as needed
-  // For example, events might have a creatorId, participantIds, or other fields
   const filteredEvents = eventStore.allEvents.filter((event) => {
     // Check if user is the creator
     const isCreator = event.creatorId === currentUserId;
@@ -118,67 +115,71 @@ const calendarOptions = ref({
     const calendarApi = info.view.calendar;
     calendarApi.changeView("timeGridDay", info.dateStr);
   },
-  select: handleDateSelect,
   eventClick: handleEventClick,
   eventsSet: handleEvents,
-  eventDidMount: function (info) {
-    // Add tooltip with event details for user events
+  
+  // Modern tooltip implementation
+  eventDidMount: function(info) {
     if (info.event.extendedProps.isUserEvent) {
-      const tooltip = document.createElement("div");
-      tooltip.className = "event-tooltip";
+      const eventEl = info.el;
+      
+      // Create tooltip element
+      const tooltip = document.createElement('div');
+      tooltip.className = 'event-tooltip';
+      tooltip.style.display = 'none';
+      
+      // Get event data
+      const eventTitle = info.event.title;
+      const eventStatus = info.event.extendedProps.status || '';
+      const eventType = info.event.extendedProps.type || '';
+      const eventStart = info.event.start ? formatTime(info.event.start) : '';
+      const eventEnd = info.event.end ? formatTime(info.event.end) : '';
+      const eventLocation = info.event.extendedProps.location || '';
+      
+      // Get status color
+      const statusColor = 
+        eventStatus === "CANCELLED" ? "#FDA4AF" :
+        eventStatus === "COMPLETED" ? "#86EFAC" : "#FAE27C";
+      
+      // Create tooltip content with modern styling
       tooltip.innerHTML = `
-        <div class="p-2 bg-white shadow-md rounded-md">
-          <p class="font-bold">${info.event.title}</p>
-          ${
-            info.event.extendedProps.status
-              ? `<p class="text-xs">Status: ${info.event.extendedProps.status}</p>`
-              : ""
-          }
-          ${
-            info.event.extendedProps.type
-              ? `<p class="text-xs">Type: ${info.event.extendedProps.type}</p>`
-              : ""
-          }
-          ${
-            info.event.start
-              ? `<p class="text-xs">Start: ${formatTime(info.event.start)}</p>`
-              : ""
-          }
-          ${
-            info.event.end
-              ? `<p class="text-xs">End: ${formatTime(info.event.end)}</p>`
-              : ""
-          }
-          ${
-            info.event.extendedProps.location
-              ? `<p class="text-xs">Location: ${info.event.extendedProps.location}</p>`
-              : ""
-          }
+        <div class="tooltip-container">
+          <div class="tooltip-header">
+            <div class="status-indicator" style="background-color: ${statusColor}"></div>
+            <div class="tooltip-title">${eventTitle}</div>
+          </div>
+          ${eventStatus ? `<div class="tooltip-detail"><i class="tooltip-icon status-icon"></i>Status: ${eventStatus}</div>` : ''}
+          ${eventType ? `<div class="tooltip-detail"><i class="tooltip-icon type-icon"></i>Type: ${eventType}</div>` : ''}
+          ${eventStart ? `<div class="tooltip-detail"><i class="tooltip-icon time-icon"></i>Start: ${eventStart}</div>` : ''}
+          ${eventEnd ? `<div class="tooltip-detail"><i class="tooltip-icon time-icon"></i>End: ${eventEnd}</div>` : ''}
+          ${eventLocation ? `<div class="tooltip-detail"><i class="tooltip-icon location-icon"></i>Location: ${eventLocation}</div>` : ''}
         </div>
       `;
-
-      const eventEl = info.el;
-      eventEl.addEventListener("mouseover", function () {
-        document.body.appendChild(tooltip);
+      
+      document.body.appendChild(tooltip);
+      
+      // Show tooltip on mouseover
+      eventEl.addEventListener('mouseover', function() {
         const rect = eventEl.getBoundingClientRect();
-        tooltip.style.position = "absolute";
-        tooltip.style.top = `${rect.bottom + window.scrollY}px`;
-        tooltip.style.left = `${rect.left + window.scrollX}px`;
-        tooltip.style.zIndex = 1000;
+        tooltip.style.position = 'absolute';
+        tooltip.style.left = rect.left + window.scrollX + 'px';
+        tooltip.style.top = rect.bottom + window.scrollY + 5 + 'px'; // 5px offset
+        tooltip.style.display = 'block';
       });
-
-      eventEl.addEventListener("mouseout", function () {
-        if (document.body.contains(tooltip)) {
-          document.body.removeChild(tooltip);
+      
+      // Hide tooltip on mouseout
+      eventEl.addEventListener('mouseout', function() {
+        tooltip.style.display = 'none';
+      });
+      
+      // Clean up tooltip when event element is removed
+      info.el.addEventListener('DOMNodeRemoved', function() {
+        if (tooltip && tooltip.parentNode) {
+          tooltip.parentNode.removeChild(tooltip);
         }
       });
     }
   },
-
-  events: [
-    // These sample events will be replaced with fetched events
-    // ... existing code ...
-  ],
 
   eventTimeFormat: {
     hour: "numeric",
@@ -187,47 +188,6 @@ const calendarOptions = ref({
     omitZeroMinute: false,
   },
 });
-
-onMounted(async () => {
-  try {
-    // Fetch holidays
-    const countryCode = await fetchCountry();
-    const holidays = await fetchHolidays(countryCode);
-    holidays.forEach((holiday) => {
-      holiday.classNames = ["bg-green-300", "ring-green-600/20"]; // Add holiday styles
-    });
-
-    // Fetch events for the current user
-    await eventStore.fetchEvents();
-
-    // Combine holidays, initial events, and user events
-    calendarOptions.value.events = [
-      ...holidays,
-      ...userEvents.value,
-    ];
-    holidaysFetched.value = true;
-  } catch (error) {
-    console.error("Error fetching calendar data:", error);
-  }
-});
-
-// #TODO move to modal
-function handleDateSelect(selectInfo) {
-  let title = prompt("Please enter a new title for your event");
-  let calendarApi = selectInfo.view.calendar;
-
-  calendarApi.unselect();
-
-  if (title) {
-    calendarApi.addEvent({
-      id: createEventId(),
-      title,
-      start: selectInfo.startStr,
-      end: selectInfo.endStr,
-      allDay: selectInfo.allDay,
-    });
-  }
-}
 
 //#TODO move to a modal
 function handleEventClick(clickInfo) {
@@ -251,6 +211,37 @@ function handleEventClick(clickInfo) {
 function handleEvents(events) {
   currentEvents.value = events;
 }
+
+onMounted(async () => {
+  try {
+    // Fetch holidays
+    const countryCode = await fetchCountry();
+    const holidays = await fetchHolidays(countryCode);
+    holidays.forEach((holiday) => {
+      holiday.classNames = ["bg-green-300", "ring-green-600/20"]; // Add holiday styles
+    });
+
+    // Fetch events for the current user
+    await eventStore.fetchEvents();
+    
+    // Force a refresh of the events store to ensure we have the latest data
+    await eventStore.refetchAll();
+
+    // Combine holidays and user events
+    calendarOptions.value.events = [...holidays, ...userEvents.value];
+
+    // Update the calendar with the latest events
+    if (calendarRef.value) {
+      const calendarApi = calendarRef.value.getApi();
+      calendarApi.removeAllEvents();
+      calendarApi.addEventSource(calendarOptions.value.events);
+    }
+
+    holidaysFetched.value = true;
+  } catch (error) {
+    console.error("Error fetching calendar data:", error);
+  }
+});
 </script>
 
 <style>
@@ -441,5 +432,94 @@ function handleEvents(events) {
   align-items: center;
   gap: 0.25rem;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+/* tooltip styling */
+.event-tooltip {
+  z-index: 10000;
+  max-width: 350px; /* Increased from 300px to 350px */
+  width: 320px; /* Added fixed width for consistency */
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-family: system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+  animation: tooltip-fade-in 0.2s ease-out;
+}
+
+@keyframes tooltip-fade-in {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tooltip-container {
+  padding: 0;
+}
+
+.tooltip-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.tooltip-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #201d1d;
+  line-height: 1.3;
+}
+
+.tooltip-detail {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #555;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.tooltip-detail:last-child {
+  border-bottom: none;
+}
+
+.tooltip-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  opacity: 0.7;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+/* Simulate icons with CSS */
+.status-icon {
+  background-color: #792e8a;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clip-rule='evenodd' /%3E%3C/svg%3E");
+}
+
+.type-icon {
+   background-color: #792e8a;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath d='M9 2a1 1 0 000 2h2a1 1 0 100-2H9z' /%3E%3Cpath fill-rule='evenodd' d='M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z' clip-rule='evenodd' /%3E%3C/svg%3E");
+}
+
+.time-icon {
+   background-color: #792e8a;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z' clip-rule='evenodd' /%3E%3C/svg%3E");
+}
+
+.location-icon {
+   background-color: #792e8a;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z' clip-rule='evenodd' /%3E%3C/svg%3E");
 }
 </style>
