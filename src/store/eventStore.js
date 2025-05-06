@@ -45,6 +45,7 @@ export const useEventStore = defineStore("eventStore", {
           });
 
           this.allEvents = res.data.getEvents;
+          console.log('allEvents store:', this.allEvents.length)
           this.totalCount = this.allEvents.length;
           this.totalPages = Math.ceil(this.totalCount / limit);
         }

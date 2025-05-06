@@ -38,25 +38,8 @@ const userStore = useUserStore();
 const userEvents = computed(() => {
   if (!eventStore.allEvents || eventStore.allEvents.length === 0) return [];
 
-  // Get current user ID
-  const currentUserId = userStore.userInfo?.id;
-
-  // Filter events for current user
-  const filteredEvents = eventStore.allEvents.filter((event) => {
-    // Check if user is the creator
-    const isCreator = event.creatorId === currentUserId;
-
-    // Check if user is a participant (if your events have participants)
-    const isParticipant = event.participants?.some(
-      (p) => p.id === currentUserId
-    );
-
-    // Return true if user is involved with this event
-    return isCreator || isParticipant;
-  });
-
-  // Map events to FullCalendar format
-  return filteredEvents.map((event) => ({
+  // Map events to FullCalendar format without filtering
+  return eventStore.allEvents.map((event) => ({
     id: event.id,
     title: event.title,
     start: event.startTime,
@@ -117,30 +100,33 @@ const calendarOptions = ref({
   },
   eventClick: handleEventClick,
   eventsSet: handleEvents,
-  
+
   // Modern tooltip implementation
-  eventDidMount: function(info) {
+  eventDidMount: function (info) {
     if (info.event.extendedProps.isUserEvent) {
       const eventEl = info.el;
-      
+
       // Create tooltip element
-      const tooltip = document.createElement('div');
-      tooltip.className = 'event-tooltip';
-      tooltip.style.display = 'none';
-      
+      const tooltip = document.createElement("div");
+      tooltip.className = "event-tooltip";
+      tooltip.style.display = "none";
+
       // Get event data
       const eventTitle = info.event.title;
-      const eventStatus = info.event.extendedProps.status || '';
-      const eventType = info.event.extendedProps.type || '';
-      const eventStart = info.event.start ? formatTime(info.event.start) : '';
-      const eventEnd = info.event.end ? formatTime(info.event.end) : '';
-      const eventLocation = info.event.extendedProps.location || '';
-      
+      const eventStatus = info.event.extendedProps.status || "";
+      const eventType = info.event.extendedProps.type || "";
+      const eventStart = info.event.start ? formatTime(info.event.start) : "";
+      const eventEnd = info.event.end ? formatTime(info.event.end) : "";
+      const eventLocation = info.event.extendedProps.location || "";
+
       // Get status color
-      const statusColor = 
-        eventStatus === "CANCELLED" ? "#FDA4AF" :
-        eventStatus === "COMPLETED" ? "#86EFAC" : "#FAE27C";
-      
+      const statusColor =
+        eventStatus === "CANCELLED"
+          ? "#FDA4AF"
+          : eventStatus === "COMPLETED"
+          ? "#86EFAC"
+          : "#FAE27C";
+
       // Create tooltip content with modern styling
       tooltip.innerHTML = `
         <div class="tooltip-container">
@@ -148,32 +134,52 @@ const calendarOptions = ref({
             <div class="status-indicator" style="background-color: ${statusColor}"></div>
             <div class="tooltip-title">${eventTitle}</div>
           </div>
-          ${eventStatus ? `<div class="tooltip-detail"><i class="tooltip-icon status-icon"></i>Status: ${eventStatus}</div>` : ''}
-          ${eventType ? `<div class="tooltip-detail"><i class="tooltip-icon type-icon"></i>Type: ${eventType}</div>` : ''}
-          ${eventStart ? `<div class="tooltip-detail"><i class="tooltip-icon time-icon"></i>Start: ${eventStart}</div>` : ''}
-          ${eventEnd ? `<div class="tooltip-detail"><i class="tooltip-icon time-icon"></i>End: ${eventEnd}</div>` : ''}
-          ${eventLocation ? `<div class="tooltip-detail"><i class="tooltip-icon location-icon"></i>Location: ${eventLocation}</div>` : ''}
+          ${
+            eventStatus
+              ? `<div class="tooltip-detail"><i class="tooltip-icon status-icon"></i>Status: ${eventStatus}</div>`
+              : ""
+          }
+          ${
+            eventType
+              ? `<div class="tooltip-detail"><i class="tooltip-icon type-icon"></i>Type: ${eventType}</div>`
+              : ""
+          }
+          ${
+            eventStart
+              ? `<div class="tooltip-detail"><i class="tooltip-icon time-icon"></i>Start: ${eventStart}</div>`
+              : ""
+          }
+          ${
+            eventEnd
+              ? `<div class="tooltip-detail"><i class="tooltip-icon time-icon"></i>End: ${eventEnd}</div>`
+              : ""
+          }
+          ${
+            eventLocation
+              ? `<div class="tooltip-detail"><i class="tooltip-icon location-icon"></i>Location: ${eventLocation}</div>`
+              : ""
+          }
         </div>
       `;
-      
+
       document.body.appendChild(tooltip);
-      
+
       // Show tooltip on mouseover
-      eventEl.addEventListener('mouseover', function() {
+      eventEl.addEventListener("mouseover", function () {
         const rect = eventEl.getBoundingClientRect();
-        tooltip.style.position = 'absolute';
-        tooltip.style.left = rect.left + window.scrollX + 'px';
-        tooltip.style.top = rect.bottom + window.scrollY + 5 + 'px'; // 5px offset
-        tooltip.style.display = 'block';
+        tooltip.style.position = "absolute";
+        tooltip.style.left = rect.left + window.scrollX + "px";
+        tooltip.style.top = rect.bottom + window.scrollY + 5 + "px"; // 5px offset
+        tooltip.style.display = "block";
       });
-      
+
       // Hide tooltip on mouseout
-      eventEl.addEventListener('mouseout', function() {
-        tooltip.style.display = 'none';
+      eventEl.addEventListener("mouseout", function () {
+        tooltip.style.display = "none";
       });
-      
+
       // Clean up tooltip when event element is removed
-      info.el.addEventListener('DOMNodeRemoved', function() {
+      info.el.addEventListener("DOMNodeRemoved", function () {
         if (tooltip && tooltip.parentNode) {
           tooltip.parentNode.removeChild(tooltip);
         }
@@ -221,14 +227,14 @@ onMounted(async () => {
       holiday.classNames = ["bg-green-300", "ring-green-600/20"]; // Add holiday styles
     });
 
-    // Fetch events for the current user
+    // Fetch events for the current user - only call fetchEvents once
     await eventStore.fetchEvents();
-    
-    // Force a refresh of the events store to ensure we have the latest data
-    await eventStore.refetchAll();
+
+    // Don't call refetchAll() here as it clears the events you just fetched
 
     // Combine holidays and user events
     calendarOptions.value.events = [...holidays, ...userEvents.value];
+    console.log("calendarOptions:", calendarOptions.value);
 
     // Update the calendar with the latest events
     if (calendarRef.value) {
@@ -448,8 +454,14 @@ onMounted(async () => {
 }
 
 @keyframes tooltip-fade-in {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .tooltip-container {
@@ -509,17 +521,17 @@ onMounted(async () => {
 }
 
 .type-icon {
-   background-color: #792e8a;
+  background-color: #792e8a;
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath d='M9 2a1 1 0 000 2h2a1 1 0 100-2H9z' /%3E%3Cpath fill-rule='evenodd' d='M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z' clip-rule='evenodd' /%3E%3C/svg%3E");
 }
 
 .time-icon {
-   background-color: #792e8a;
+  background-color: #792e8a;
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z' clip-rule='evenodd' /%3E%3C/svg%3E");
 }
 
 .location-icon {
-   background-color: #792e8a;
+  background-color: #792e8a;
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z' clip-rule='evenodd' /%3E%3C/svg%3E");
 }
 </style>
