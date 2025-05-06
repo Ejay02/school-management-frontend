@@ -21,7 +21,6 @@ import FullCalendar from "@fullcalendar/vue3";
 import { computed, onMounted, ref } from "vue";
 
 import { useEventStore } from "../../store/eventStore.js";
-import { useUserStore } from "../../store/userStore.js";
 import {
   fetchCountry,
   fetchHolidays,
@@ -32,38 +31,38 @@ const currentEvents = ref([]);
 const calendarRef = ref(null);
 const holidaysFetched = ref(false);
 const eventStore = useEventStore();
-const userStore = useUserStore();
+
+const getStatusColor = (status) => {
+  if (status === "CANCELLED") return "#FDA4AF";
+  if (status === "COMPLETED") return "#86EFAC";
+  return "#FAE27C";
+};
 
 // Fetch user events
 const userEvents = computed(() => {
   if (!eventStore.allEvents || eventStore.allEvents.length === 0) return [];
 
-  // Map events to FullCalendar format without filtering
-  return eventStore.allEvents.map((event) => ({
-    id: event.id,
-    title: event.title,
-    start: event.startTime,
-    end: event.endTime,
-    description: event.description,
-    location: event.location,
-    backgroundColor:
-      event.status === "CANCELLED"
-        ? "#FDA4AF"
-        : event.status === "COMPLETED"
-        ? "#86EFAC"
-        : "#FAE27C",
-    borderColor:
-      event.status === "CANCELLED"
-        ? "#FDA4AF"
-        : event.status === "COMPLETED"
-        ? "#86EFAC"
-        : "#FAE27C",
-    extendedProps: {
-      status: event.status,
-      type: event.type,
-      isUserEvent: true,
-    },
-  }));
+  // Map events to FullCalendar format
+  return eventStore.allEvents.map((event) => {
+    // Get the color based on event status
+    const statusColor = getStatusColor(event.status);
+
+    return {
+      id: event.id,
+      title: event.title,
+      start: event.startTime,
+      end: event.endTime,
+      description: event.description,
+      location: event.location,
+      backgroundColor: statusColor,
+      borderColor: statusColor,
+      extendedProps: {
+        status: event.status,
+        type: event.type,
+        isUserEvent: true,
+      },
+    };
+  });
 });
 
 const calendarOptions = ref({
@@ -101,7 +100,6 @@ const calendarOptions = ref({
   eventClick: handleEventClick,
   eventsSet: handleEvents,
 
-  // Modern tooltip implementation
   eventDidMount: function (info) {
     if (info.event.extendedProps.isUserEvent) {
       const eventEl = info.el;
@@ -119,48 +117,43 @@ const calendarOptions = ref({
       const eventEnd = info.event.end ? formatTime(info.event.end) : "";
       const eventLocation = info.event.extendedProps.location || "";
 
-      // Get status color
-      const statusColor =
-        eventStatus === "CANCELLED"
-          ? "#FDA4AF"
-          : eventStatus === "COMPLETED"
-          ? "#86EFAC"
-          : "#FAE27C";
+    
+      const statusColor = getStatusColor(eventStatus);
 
-      // Create tooltip content with modern styling
+      // Create tooltip content 
       tooltip.innerHTML = `
-        <div class="tooltip-container">
-          <div class="tooltip-header">
-            <div class="status-indicator" style="background-color: ${statusColor}"></div>
-            <div class="tooltip-title">${eventTitle}</div>
-          </div>
-          ${
-            eventStatus
-              ? `<div class="tooltip-detail"><i class="tooltip-icon status-icon"></i>Status: ${eventStatus}</div>`
-              : ""
-          }
-          ${
-            eventType
-              ? `<div class="tooltip-detail"><i class="tooltip-icon type-icon"></i>Type: ${eventType}</div>`
-              : ""
-          }
-          ${
-            eventStart
-              ? `<div class="tooltip-detail"><i class="tooltip-icon time-icon"></i>Start: ${eventStart}</div>`
-              : ""
-          }
-          ${
-            eventEnd
-              ? `<div class="tooltip-detail"><i class="tooltip-icon time-icon"></i>End: ${eventEnd}</div>`
-              : ""
-          }
-          ${
-            eventLocation
-              ? `<div class="tooltip-detail"><i class="tooltip-icon location-icon"></i>Location: ${eventLocation}</div>`
-              : ""
-          }
+      <div class="tooltip-container">
+        <div class="tooltip-header">
+          <div class="status-indicator" style="background-color: ${statusColor}"></div>
+          <div class="tooltip-title">${eventTitle}</div>
         </div>
-      `;
+        ${
+          eventStatus
+            ? `<div class="tooltip-detail"><i class="tooltip-icon status-icon"></i>Status: ${eventStatus}</div>`
+            : ""
+        }
+        ${
+          eventType
+            ? `<div class="tooltip-detail"><i class="tooltip-icon type-icon"></i>Type: ${eventType}</div>`
+            : ""
+        }
+        ${
+          eventStart
+            ? `<div class="tooltip-detail"><i class="tooltip-icon time-icon"></i>Start: ${eventStart}</div>`
+            : ""
+        }
+        ${
+          eventEnd
+            ? `<div class="tooltip-detail"><i class="tooltip-icon time-icon"></i>End: ${eventEnd}</div>`
+            : ""
+        }
+        ${
+          eventLocation
+            ? `<div class="tooltip-detail"><i class="tooltip-icon location-icon"></i>Location: ${eventLocation}</div>`
+            : ""
+        }
+      </div>
+    `;
 
       document.body.appendChild(tooltip);
 
@@ -178,12 +171,35 @@ const calendarOptions = ref({
         tooltip.style.display = "none";
       });
 
-      // Clean up tooltip when event element is removed
-      info.el.addEventListener("DOMNodeRemoved", function () {
-        if (tooltip && tooltip.parentNode) {
-          tooltip.parentNode.removeChild(tooltip);
-        }
+      // Clean up tooltip when event element is removed - REPLACE deprecated DOMNodeRemoved
+      // Create a MutationObserver to watch for the element being removed from DOM
+      const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+          // Check if our element was removed
+          if (
+            Array.from(mutation.removedNodes).includes(eventEl) ||
+            !document.body.contains(eventEl)
+          ) {
+            // Clean up the tooltip
+            if (tooltip && tooltip.parentNode) {
+              tooltip.parentNode.removeChild(tooltip);
+            }
+            // Disconnect the observer since we no longer need it
+            observer.disconnect();
+          }
+        });
       });
+
+      // Start observing the parent element for child removals
+      if (eventEl.parentNode) {
+        observer.observe(eventEl.parentNode, {
+          childList: true,
+          subtree: true,
+        });
+
+        // Store the observer on the element for potential cleanup later
+        eventEl._tooltipObserver = observer;
+      }
     }
   },
 
@@ -230,11 +246,10 @@ onMounted(async () => {
     // Fetch events for the current user - only call fetchEvents once
     await eventStore.fetchEvents();
 
-    // Don't call refetchAll() here as it clears the events you just fetched
 
     // Combine holidays and user events
     calendarOptions.value.events = [...holidays, ...userEvents.value];
-    console.log("calendarOptions:", calendarOptions.value);
+    
 
     // Update the calendar with the latest events
     if (calendarRef.value) {
