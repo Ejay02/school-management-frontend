@@ -6,7 +6,7 @@
           <div class="h-full bg-white p-4 rounded-md w-full">
             <h1 class="text-xl font-semibold mb-6 text-gray-500">Schedule</h1>
 
-            <div class="flex-col  w-full">
+            <div class="flex-col w-full">
               <PlannerCard />
             </div>
           </div>

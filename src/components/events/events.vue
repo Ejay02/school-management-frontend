@@ -113,7 +113,6 @@ function handlePageChange(newPage) {
   currentPage.value = newPage;
 }
 
-
 const viewMode = ref(
   userStore.currentRole === "ADMIN" || userStore.currentRole === "TEACHER"
     ? "list"

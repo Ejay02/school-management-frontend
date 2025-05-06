@@ -13,19 +13,78 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import listPlugin from "@fullcalendar/list";
-import FullCalendar from "@fullcalendar/vue3";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import listPlugin from "@fullcalendar/list";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import FullCalendar from "@fullcalendar/vue3";
+import { computed, onMounted, ref } from "vue";
 
-import { fetchCountry, fetchHolidays } from "../../utils/date.holidays.js";
-import { INITIAL_EVENTS, createEventId } from "../../utils/event-utils.js";
+import { useEventStore } from "../../store/eventStore.js";
+import { useUserStore } from "../../store/userStore.js";
+import {
+  fetchCountry,
+  fetchHolidays,
+  formatTime,
+} from "../../utils/date.holidays.js";
+
 
 const currentEvents = ref([]);
 const calendarRef = ref(null);
 const holidaysFetched = ref(false);
+const eventStore = useEventStore();
+const userStore = useUserStore();
+
+// Fetch user events
+const userEvents = computed(() => {
+  if (!eventStore.allEvents || eventStore.allEvents.length === 0) return [];
+
+  // Get current user ID
+  const currentUserId = userStore.userInfo?.id;
+
+  // Filter events for current user
+  // This will depend on your event structure - adjust as needed
+  // For example, events might have a creatorId, participantIds, or other fields
+  const filteredEvents = eventStore.allEvents.filter((event) => {
+    // Check if user is the creator
+    const isCreator = event.creatorId === currentUserId;
+
+    // Check if user is a participant (if your events have participants)
+    const isParticipant = event.participants?.some(
+      (p) => p.id === currentUserId
+    );
+
+    // Return true if user is involved with this event
+    return isCreator || isParticipant;
+  });
+
+  // Map events to FullCalendar format
+  return filteredEvents.map((event) => ({
+    id: event.id,
+    title: event.title,
+    start: event.startTime,
+    end: event.endTime,
+    description: event.description,
+    location: event.location,
+    backgroundColor:
+      event.status === "CANCELLED"
+        ? "#FDA4AF"
+        : event.status === "COMPLETED"
+        ? "#86EFAC"
+        : "#FAE27C",
+    borderColor:
+      event.status === "CANCELLED"
+        ? "#FDA4AF"
+        : event.status === "COMPLETED"
+        ? "#86EFAC"
+        : "#FAE27C",
+    extendedProps: {
+      status: event.status,
+      type: event.type,
+      isUserEvent: true,
+    },
+  }));
+});
 
 const calendarOptions = ref({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
@@ -36,34 +95,12 @@ const calendarOptions = ref({
     right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
   },
   initialView: "dayGridMonth",
-  initialEvents: INITIAL_EVENTS,
   editable: true,
   selectable: true,
   selectMirror: true,
   dayMaxEventRows: 3,
   moreLinkClick: "popover",
   height: "auto",
-  // views: {
-  //   dayGrid: {
-  //     dayMaxEventRows: 3,
-  //   },
-  //   // Add responsive views for smaller screens
-  //   timeGridWeek: {
-  //     type: "timeGrid",
-  //     duration: { days: 7 },
-  //     buttonText: "week",
-  //   },
-  //   timeGridDay: {
-  //     type: "timeGrid",
-  //     duration: { days: 1 },
-  //     buttonText: "day",
-  //   },
-  //   listWeek: {
-  //     type: "list",
-  //     duration: { days: 7 },
-  //     buttonText: "list",
-  //   },
-  // },
   views: {
     dayGrid: {
       dayMaxEventRows: 3,
@@ -76,8 +113,6 @@ const calendarOptions = ref({
     },
   },
 
-  //
-
   weekends: true,
   dateClick: function (info) {
     const calendarApi = info.view.calendar;
@@ -86,67 +121,63 @@ const calendarOptions = ref({
   select: handleDateSelect,
   eventClick: handleEventClick,
   eventsSet: handleEvents,
+  eventDidMount: function (info) {
+    // Add tooltip with event details for user events
+    if (info.event.extendedProps.isUserEvent) {
+      const tooltip = document.createElement("div");
+      tooltip.className = "event-tooltip";
+      tooltip.innerHTML = `
+        <div class="p-2 bg-white shadow-md rounded-md">
+          <p class="font-bold">${info.event.title}</p>
+          ${
+            info.event.extendedProps.status
+              ? `<p class="text-xs">Status: ${info.event.extendedProps.status}</p>`
+              : ""
+          }
+          ${
+            info.event.extendedProps.type
+              ? `<p class="text-xs">Type: ${info.event.extendedProps.type}</p>`
+              : ""
+          }
+          ${
+            info.event.start
+              ? `<p class="text-xs">Start: ${formatTime(info.event.start)}</p>`
+              : ""
+          }
+          ${
+            info.event.end
+              ? `<p class="text-xs">End: ${formatTime(info.event.end)}</p>`
+              : ""
+          }
+          ${
+            info.event.extendedProps.location
+              ? `<p class="text-xs">Location: ${info.event.extendedProps.location}</p>`
+              : ""
+          }
+        </div>
+      `;
+
+      const eventEl = info.el;
+      eventEl.addEventListener("mouseover", function () {
+        document.body.appendChild(tooltip);
+        const rect = eventEl.getBoundingClientRect();
+        tooltip.style.position = "absolute";
+        tooltip.style.top = `${rect.bottom + window.scrollY}px`;
+        tooltip.style.left = `${rect.left + window.scrollX}px`;
+        tooltip.style.zIndex = 1000;
+      });
+
+      eventEl.addEventListener("mouseout", function () {
+        if (document.body.contains(tooltip)) {
+          document.body.removeChild(tooltip);
+        }
+      });
+    }
+  },
 
   events: [
-    {
-      title: "Study",
-      start: "2024-11-24",
-      end: "2024-11-28",
-      display: "block",
-      backgroundColor: "#CFCEFF",
-      borderColor: "#CFCEFF",
-    },
-    {
-      title: "Meeting",
-      start: "2024-11-25T10:30:00",
-      display: "dot",
-      backgroundColor: "#FAE27C",
-      borderColor: "#FAE27C",
-    },
-    {
-      title: "Lunch",
-      start: "2024-11-25T12:00:00",
-      backgroundColor: "#CFCEFF",
-      borderColor: "#CFCEFF",
-    },
-    {
-      title: "Conference",
-      start: "2024-11-04",
-      end: "2024-11-14",
-      display: "block",
-      backgroundColor: "#FAE27C",
-    },
-
-    {
-      title: "Meeting",
-      start: "2024-11-25T10:30:00",
-      backgroundColor: "#CFCEFF",
-      borderColor: "#CFCEFF",
-    },
-    {
-      title: "Lunch",
-      start: "2024-11-28T12:00:00",
-      backgroundColor: "#FAE27C",
-      borderColor: "#FAE27C",
-    },
-    {
-      title: "Meeting",
-      start: "2024-11-25T14:30:00",
-      backgroundColor: "#CFCEFF",
-      borderColor: "#CFCEFF",
-    },
-    {
-      title: "Happy Hour",
-      start: "2024-11-25T17:30:00",
-      backgroundColor: "#FAE27C",
-      borderColor: "#FAE27C",
-    },
-    {
-      title: "Dinner",
-      start: "2024-11-25T20:00:00",
-      backgroundColor: "#CFCEFF",
-      borderColor: "#CFCEFF",
-    },
+    // These sample events will be replaced with fetched events
+    // ... existing code ...
   ],
 
   eventTimeFormat: {
@@ -159,15 +190,24 @@ const calendarOptions = ref({
 
 onMounted(async () => {
   try {
+    // Fetch holidays
     const countryCode = await fetchCountry();
     const holidays = await fetchHolidays(countryCode);
     holidays.forEach((holiday) => {
       holiday.classNames = ["bg-green-300", "ring-green-600/20"]; // Add holiday styles
     });
-    calendarOptions.value.events = [...INITIAL_EVENTS, ...holidays];
+
+    // Fetch events for the current user
+    await eventStore.fetchEvents();
+
+    // Combine holidays, initial events, and user events
+    calendarOptions.value.events = [
+      ...holidays,
+      ...userEvents.value,
+    ];
     holidaysFetched.value = true;
   } catch (error) {
-    console.error("Error fetching holidays:", error);
+    console.error("Error fetching calendar data:", error);
   }
 });
 
@@ -191,6 +231,14 @@ function handleDateSelect(selectInfo) {
 
 //#TODO move to a modal
 function handleEventClick(clickInfo) {
+  // For user events, navigate to event details
+  if (clickInfo.event.extendedProps.isUserEvent) {
+    // Navigate to event details page
+    window.location.href = `/event/${clickInfo.event.id}`;
+    return;
+  }
+
+  // For regular calendar events
   if (
     confirm(
       `Are you sure you want to delete the event '${clickInfo.event.title}'`

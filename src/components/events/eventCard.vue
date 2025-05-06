@@ -62,7 +62,9 @@
         </h2>
 
         <div class="text-gray-500 mb-4">
-          <p class="line-clamp-2 prose max-w-none font-serif text-lg">{{ event.description }}</p>
+          <p class="line-clamp-2 prose max-w-none font-serif text-lg">
+            {{ event.description }}
+          </p>
         </div>
 
         <div class="space-y-2">
@@ -191,10 +193,10 @@
                   Cancel Event
                 </span>
               </button>
-              
+
               <button
                 @click="showDelModal(event.id, event.title, 'eventList')"
-                class=" group relative w-6 h-6 flex items-center justify-center rounded-full"
+                class="group relative w-6 h-6 flex items-center justify-center rounded-full"
               >
                 <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
 
@@ -246,12 +248,11 @@ const handleMarkEventAsRead = async (eventId) => {
   await eventStore.markEventAsRead(eventId);
 };
 
-
 const handleCancelEvent = (eventId, eventTitle) => {
-  modalStore.cancelModal = true; 
+  modalStore.cancelModal = true;
   modalStore.modalId = eventId;
   modalStore.modalTitle = eventTitle;
   modalStore.modalMessage = `Are you sure you want to cancel the event "${eventTitle}"?`;
-  modalStore.confirmAction = 'cancelEvent';
+  modalStore.confirmAction = "cancelEvent";
 };
 </script>
