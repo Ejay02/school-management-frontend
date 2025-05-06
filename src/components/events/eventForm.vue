@@ -191,6 +191,7 @@
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             >
               <option value="">All Classes</option>
+              <option value="">No Class</option>
               <option
                 v-for="classItem in classes"
                 :key="classItem.id"
@@ -474,7 +475,7 @@ const handleSubmit = async () => {
       },
     });
 
-await eventStore.refetchAll();
+    await eventStore.refetchAll();
 
     notificationStore.addNotification({
       type: "success",

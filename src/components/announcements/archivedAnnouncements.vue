@@ -193,11 +193,11 @@ import { socket } from "../../socket/socket";
 import { useAnnouncementStore } from "../../store/announcementStore";
 import { useUserStore } from "../../store/userStore";
 import { formatDate } from "../../utils/date.holidays";
+import { setupInfiniteScroll } from "../../utils/scroll";
 import { availableTargetRoles } from "../../utils/utility";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
-import { setupInfiniteScroll } from "../../utils/scroll";
 
 const showDelModal = (id, title, type, data) => {
   modalStore.deleteModal = true;
@@ -269,20 +269,21 @@ const displayedArchivedAnnouncements = computed(() => {
   return filteredArchivedAnnouncements.value.slice(0, endIndex);
 });
 
-
 const loadMoreArchivedAnnouncements = async () => {
   if (isLoadingMore.value) return;
 
-  if (displayedArchivedAnnouncements.value.length >= filteredArchivedAnnouncements.value.length) {
+  if (
+    displayedArchivedAnnouncements.value.length >=
+    filteredArchivedAnnouncements.value.length
+  ) {
     return;
   }
 
   isLoadingMore.value = true;
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise((resolve) => setTimeout(resolve, 500));
   currentPage.value++;
   isLoadingMore.value = false;
 };
-
 
 const { setupObserver, cleanup } = setupInfiniteScroll(
   loadMoreArchivedAnnouncements,

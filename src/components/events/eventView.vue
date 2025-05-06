@@ -337,7 +337,7 @@
                   class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all"
                 >
                   <p
-                    v-if="event?.classId"
+                   v-if="event?.targetRoles && event?.targetRoles.length !== 4"
                     class="flex items-center text-gray-700"
                   >
                     <svg
@@ -354,8 +354,10 @@
                         d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
                       />
                     </svg>
+                    
                     {{ formatTargetRoles(event?.targetRoles) }}
                   </p>
+                  
                   <p v-else class="text-gray-700 flex items-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -371,12 +373,15 @@
                         d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9"
                       />
                     </svg>
+                    
                     Open to everyone
                   </p>
+                  <!--  -->
 
                   <div class="mt-5">
                     <p class="text-gray-700 mb-3 flex items-center">
                       <svg
+                      v-if="!event?.targetRoles && !event?.targetRoles.length < 4"
                         xmlns="http://www.w3.org/2000/svg"
                         class="h-5 w-5 mr-2 text-indigo-500"
                         fill="none"
@@ -395,7 +400,7 @@
                         <template v-if="event?.class">
                           {{ event?.class?.students.length }} attendees
                         </template>
-                        <template v-else> Whole school event </template>
+                        <template v-else-if="!event?.targetRoles && !event?.targetRoles.length < 4"> Whole school event </template>
                       </span>
                     </p>
 

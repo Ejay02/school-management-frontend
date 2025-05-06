@@ -104,7 +104,7 @@ export const useAnnouncementStore = defineStore("announcement", {
               sortOrder: "DESC",
             },
           },
-          fetchPolicy: "no-cache",
+          fetchPolicy: "network-only",
         });
 
         this.archivedAnnouncements = res.data.getAllAnnouncements;

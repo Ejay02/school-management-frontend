@@ -349,8 +349,7 @@
                 for="capacity"
                 class="block text-sm font-medium text-gray-700 mb-1"
                 >Capacity <span class="text-red-500">*</span>
-                </label
-              >
+              </label>
               <input
                 v-model="capacity"
                 type="number"
@@ -511,7 +510,10 @@
             </label>
           </div>
 
-          <div class="flex gap-2">
+          <div
+            class="flex gap-2"
+            v-if="haveAccess && eventVisibility.toLowerCase() !== 'private'"
+          >
             <Dropdown
               class="w-1/2"
               v-model="selectedClass"
@@ -874,10 +876,10 @@ import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import { computed, onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
 import {
-createAnnouncement,
-createClass,
-createEvent,
-createSubject,
+  createAnnouncement,
+  createClass,
+  createEvent,
+  createSubject,
 } from "../../graphql/mutations";
 import { useAnnouncementStore } from "../../store/announcementStore";
 import { useClassStore } from "../../store/classStore";
@@ -888,8 +890,8 @@ import { useTeacherStore } from "../../store/teacherStore";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
 import {
-availableTargetRoles,
-eventVisibilityOptions,
+  availableTargetRoles,
+  eventVisibilityOptions,
 } from "../../utils/utility.js";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
@@ -899,7 +901,7 @@ const isLoading = ref(false);
 const modalStore = useModalStore();
 const classStore = useClassStore();
 const teacherStore = useTeacherStore();
-const eventStore = useEventStore()
+const eventStore = useEventStore();
 const subjectStore = useSubjectStore();
 const announcementStore = useAnnouncementStore();
 const notificationStore = useNotificationStore();
@@ -1214,15 +1216,29 @@ const handleAdd = async () => {
         message: "Result created successfully!",
       });
     } else if (source.value === "events") {
+      // Extract the class ID determination logic
+      let eventClassId = null;
+      if (eventVisibility.value.toLowerCase() !== "private") {
+        if (selectedClass.value) {
+          eventClassId = getClassIdByName(selectedClass.value);
+        }
+      }
+
+      // Extract the target roles determination logic
+      let eventTargetRoles = ["ADMIN", "TEACHER", "STUDENT", "PARENT"];
+      if (eventVisibility.value.toLowerCase() === "private") {
+        eventTargetRoles = [role.value.toUpperCase()];
+      } else if (selectedTargetRoles.value.length > 0) {
+        eventTargetRoles = selectedTargetRoles.value.map((role) => role.value);
+      }
+
       await apolloClient.mutate({
         mutation: createEvent,
         variables: {
           data: {
             title: title.value,
             description: content.value,
-            classId: selectedClass.value
-              ? getClassIdByName(selectedClass.value)
-              : null,
+            classId: eventClassId,
             location: location.value,
             startTime: new Date(
               `${date.value}T${startTime.value}`
@@ -1232,14 +1248,10 @@ const handleAdd = async () => {
             visibility: haveAccess.value
               ? eventVisibility.value
               : privateVisibility.value,
-            targetRoles:
-              selectedTargetRoles.value.length > 0
-                ? selectedTargetRoles.value.map((role) => role.value)
-                : ["ADMIN", "TEACHER", "STUDENT", "PARENT"],
+            targetRoles: eventTargetRoles,
           },
         },
       });
-
       await eventStore.refetchAll();
 
       notificationStore.addNotification({
@@ -1247,7 +1259,6 @@ const handleAdd = async () => {
         message: "Event created successfully!",
       });
     } else if (source.value === "announcements") {
-
       await apolloClient.mutate({
         mutation: createAnnouncement,
         variables: {

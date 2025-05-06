@@ -8,7 +8,7 @@
 
     <EmptyState
       v-else-if="!users.length && !loading"
-      icon="fa-regular fa-users"
+      icon="fa-solid fa-users"
       heading="No users found"
       description="There are no users to display."
     />
@@ -52,16 +52,26 @@
             <!-- Actions Section -->
             <div class="flex items-center space-x-4 justify-between">
               <!-- Role Dropdown -->
+
               <div>
-                <select
-                  v-if="user.id !== userStore.userInfo.id"
-                  v-model="user.role"
-                  @change="updateUserRole(user.id, user.role)"
-                  class="cursor-pointer block w-32 rounded-md bg-white px-2 py-1 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
-                >
-                  <option value="teacher" selected>Teacher</option>
-                  <option value="admin" class="text-gray-500">Admin</option>
-                </select>
+                <div class="" v-if="user.id !== userStore.userInfo.id">
+                  <select
+                    v-if="role === 'super_admin'"
+                    v-model="user.role"
+                    @change="updateUserRole(user.id, user.role)"
+                    class="cursor-pointer block w-32 rounded-md bg-white px-2 py-1 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
+                  >
+                    <option value="teacher" selected>Teacher</option>
+                    <option value="admin" class="text-gray-500">Admin</option>
+                  </select>
+                  <!--  -->
+                  <span
+                    v-else
+                    class="block w-32 rounded-md bg-gray-100 px-2 py-1 text-sm text-purple-600 italic border border-gray-300 cursor-not-allowed"
+                  >
+                    {{ user.role }}
+                  </span>
+                </div>
                 <span
                   v-else
                   class="block w-32 rounded-md bg-gray-100 px-2 py-1 text-sm text-purple-600 italic border border-gray-300 cursor-not-allowed"
@@ -70,8 +80,10 @@
                 </span>
               </div>
               <!-- Del btn -->
+              <!-- v-if="user.id !== userStore.userInfo.id" -->
+
               <button
-                v-if="user.id !== userStore.userInfo.id"
+                v-if="role === 'super_admin'"
                 @click="showDelModal(user.id, user.name, 'userList')"
                 class="group relative w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600"
               >
@@ -115,6 +127,8 @@ import Pagination from "../pagination.vue";
 const userStore = useUserStore();
 const modalStore = useModalStore();
 const notificationStore = useNotificationStore();
+
+const role = userStore.currentRole.toLowerCase();
 
 const users = ref([]);
 const limit = 10;

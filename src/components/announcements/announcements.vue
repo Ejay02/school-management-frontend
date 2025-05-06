@@ -53,7 +53,7 @@ const announcementForm = ref({
 });
 
 const archivedAnnouncements = computed(
-  () => announcementStore.announcements?.filter((a) => a.isArchived) || []
+  () => announcementStore.archivedAnnouncements || []
 );
 
 const resetForm = () => {
@@ -88,53 +88,7 @@ const handleViewChange = async (newView) => {
   }
 };
 
-const saveAnnouncement = async () => {
-  try {
-    const formData = {
-      ...announcementForm.value,
-      creatorId: userStore.userInfo?.id,
-      creatorRole: userStore.userInfo?.role,
-    };
 
-    if (editingAnnouncement.value) {
-      await announcementStore.updateAnnouncement(
-        editingAnnouncement.value.id,
-        formData
-      );
-      notificationStore.addNotification({
-        type: "success",
-        message: `Announcement updated successfully`,
-      });
-    } else {
-      await announcementStore.createAnnouncement(formData);
-      notificationStore.addNotification({
-        type: "success",
-        message: `Announcement published successfully`,
-      });
-    }
-
-    resetForm();
-    showNewAnnouncementModal.value = false;
-    // Refresh announcements after saving
-    await announcementStore.fetchAnnouncements();
-  } catch (error) {
-    notificationStore.addNotification({
-      type: "error",
-      message: `Failed to save announcement: ${error.message}`,
-    });
-  }
-};
-
-const editAnnouncement = (announcement) => {
-  editingAnnouncement.value = announcement;
-  announcementForm.value = {
-    title: announcement.title,
-    content: announcement.content,
-    targetRoles: announcement.targetRoles || [],
-    classId: announcement.classId || "",
-  };
-  showNewAnnouncementModal.value = true;
-};
 
 onMounted(async () => {
   await announcementStore.fetchAnnouncements();

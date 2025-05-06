@@ -679,7 +679,6 @@ export const getAllAnnouncements = gql`
       creatorId
       creatorRole
       targetRoles
-      isArchived
       archivedAt
       createdAt
     }
@@ -700,7 +699,6 @@ export const getAnnouncementById = gql`
       creatorId
       creatorRole
       targetRoles
-      isArchived
       archivedAt
       createdAt
     }

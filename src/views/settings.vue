@@ -35,6 +35,7 @@
               Notifications
             </router-link>
             <router-link
+             v-if="role === 'super_admin' || role === 'parent'"
               to="/settings/billing"
               class="hover:text-eduPurple"
               :class="{ 'text-indigo-600': $route.name === 'billing' }"
@@ -42,7 +43,7 @@
               Billing
             </router-link>
             <router-link
-              v-if="role === 'super_admin' || role === 'admin'"
+              v-if="role === 'super_admin' || role === 'admin' || role === 'teacher' "
               to="/settings/team"
               class="hover:text-eduPurple"
               :class="{ 'text-indigo-600': $route.name === 'team' }"

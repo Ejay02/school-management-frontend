@@ -78,9 +78,10 @@
             ></i>
           </div>
 
-          <span class="text-[10px] text-gray-400 text-right capitalize">{{
-            role
-          }}</span>
+          <span
+            class="items-center rounded-md bg-purple-50 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset  text-center"
+            >{{ role.toLowerCase() }}</span
+          >
         </div>
 
         <!-- Here's the fixed avatar section -->
