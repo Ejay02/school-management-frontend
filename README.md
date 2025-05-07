@@ -11,7 +11,7 @@ A comprehensive school management system built with Vue 3 that helps educational
 - Visual representation of attendance and performance statistics
 - Recent activities feed
 - Financial insights and fee collection status.
-- intra school chat
+
 
 ### User Management
 
