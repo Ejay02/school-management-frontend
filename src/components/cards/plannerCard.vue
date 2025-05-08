@@ -214,22 +214,12 @@ const calendarOptions = ref({
   },
 });
 
-//#TODO move to a modal
 function handleEventClick(clickInfo) {
   // For user events, navigate to event details
   if (clickInfo.event.extendedProps.isUserEvent) {
     // Navigate to event details page
     window.location.href = `/event/${clickInfo.event.id}`;
     return;
-  }
-
-  // For regular calendar events
-  if (
-    confirm(
-      `Are you sure you want to delete the event '${clickInfo.event.title}'`
-    )
-  ) {
-    clickInfo.event.remove();
   }
 }
 
@@ -313,7 +303,6 @@ onMounted(async () => {
 
   .fc-daygrid-day-number {
     padding: 0.25rem !important;
-
   }
 }
 
@@ -550,5 +539,52 @@ onMounted(async () => {
 .location-icon {
   background-color: #792e8a;
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z' clip-rule='evenodd' /%3E%3C/svg%3E");
+}
+
+/* Fix for overlapping text in day view */
+.fc .fc-timegrid-event .fc-event-time {
+  display: block; /* Change from flex to block */
+  white-space: normal; /* Allow text to wrap */
+  font-size: 0.7rem; /* Slightly smaller font */
+  margin-bottom: 2px; /* Add space between time and title */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fc .fc-timegrid-event .fc-event-title {
+  display: block;
+  white-space: normal; /* Allow text to wrap */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+/* Make sure the event container has enough padding */
+.fc .fc-timegrid-event {
+  padding: 4px 6px;
+}
+
+/* Fix for list view time display */
+.fc .fc-list-event-time {
+  white-space: nowrap; /* Keep time on one line */
+  font-size: 0.8rem;
+  color: #555;
+  width: 140px; /* Fixed width to prevent overflow */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ensure list event title doesn't overflow */
+.fc .fc-list-event-title {
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fc-h-event .fc-event-title,
+.fc .fc-timegrid-event .fc-event-time,
+.fc-v-event .fc-event-title-container {
+  color: black;
 }
 </style>
