@@ -10,9 +10,11 @@ A comprehensive school management system built with Vue 3 that helps educational
 - Quick access to important notifications
 - Visual representation of attendance and performance statistics
 - Recent activities feed
-- Financial insights and fee collection status
+- Financial insights and fee collection status.
+
 
 ### User Management
+
 
 - Role-based access control (Admin, Teacher, Student, Parent)
 - Profile management with avatar customization
