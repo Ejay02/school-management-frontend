@@ -1,5 +1,7 @@
 <template>
-  <div v-if="holidaysFetched" class="fc-custom-theme w-full">
+  <CalenderSkeleton v-if="eventStore.loading || !holidaysFetched" />
+
+  <div v-else class="fc-custom-theme w-full">
     <div class="w-full">
       <div class="calendar-container">
         <FullCalendar
@@ -18,6 +20,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import FullCalendar from "@fullcalendar/vue3";
+
 import { computed, onMounted, ref } from "vue";
 
 import { useEventStore } from "../../store/eventStore.js";
@@ -26,6 +29,7 @@ import {
   fetchHolidays,
   formatTime,
 } from "../../utils/date.holidays.js";
+import CalenderSkeleton from "../skeletonLoaders/calenderSkeleton.vue";
 
 const currentEvents = ref([]);
 const calendarRef = ref(null);
@@ -117,10 +121,9 @@ const calendarOptions = ref({
       const eventEnd = info.event.end ? formatTime(info.event.end) : "";
       const eventLocation = info.event.extendedProps.location || "";
 
-    
       const statusColor = getStatusColor(eventStatus);
 
-      // Create tooltip content 
+      // Create tooltip content
       tooltip.innerHTML = `
       <div class="tooltip-container">
         <div class="tooltip-header">
@@ -246,10 +249,8 @@ onMounted(async () => {
     // Fetch events for the current user - only call fetchEvents once
     await eventStore.fetchEvents();
 
-
     // Combine holidays and user events
     calendarOptions.value.events = [...holidays, ...userEvents.value];
-    
 
     // Update the calendar with the latest events
     if (calendarRef.value) {
@@ -312,6 +313,7 @@ onMounted(async () => {
 
   .fc-daygrid-day-number {
     padding: 0.25rem !important;
+
   }
 }
 
@@ -458,7 +460,7 @@ onMounted(async () => {
 /* tooltip styling */
 .event-tooltip {
   z-index: 10000;
-  max-width: 350px; /* Increased from 300px to 350px */
+  max-width: 350px;
   width: 320px; /* Added fixed width for consistency */
   background: white;
   border-radius: 8px;
