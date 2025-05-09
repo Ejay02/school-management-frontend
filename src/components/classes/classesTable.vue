@@ -34,11 +34,17 @@
         <td class="hidden md:table-cell">
           {{ item?.feeStructure?.academicYear ?? "NA" }}
         </td>
-        <td class="hidden md:table-cell">
+        <td
+          class="hidden md:table-cell"
+          v-if="
+            role.toLowerCase() === 'admin' ||
+            role.toLowerCase() === 'super_admin'
+          "
+        >
           {{ item?.feeStructure?.totalAmount ?? "NA" }}
         </td>
 
-        <td>
+        <td v-if="role.toLowerCase() === 'admin' || role.toLowerCase() === 'super_admin'">
           <div class="flex items-center gap-2">
             <div
               class="group relative"

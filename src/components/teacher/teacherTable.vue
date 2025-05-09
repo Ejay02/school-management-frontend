@@ -29,8 +29,8 @@
               v-else
               class="w-10 h-10 rounded-full mr-3 bg-eduPurple flex items-center justify-center font-bold"
             >
-              {{ item?.name[0]?.toUpperCase() || 'N'
-              }}{{ item?.surname[0].toUpperCase() || 'A' }}
+              {{ item?.name[0]?.toUpperCase() || "N"
+              }}{{ item?.surname[0].toUpperCase() || "A" }}
             </div>
           </div>
 
@@ -69,7 +69,13 @@
           {{ item?.address || "N/A" }}
         </td>
         <td>
-          <div class="flex items-center gap-2 relative">
+          <div
+            class="flex items-center gap-2 relative"
+            v-if="
+              role.toLowerCase() === 'super_admin' ||
+              role.toLowerCase() === 'admin'
+            "
+          >
             <router-link :to="`/teacher/${item?.id}`" class="group relative">
               <button
                 class="group relative text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
@@ -84,6 +90,7 @@
             </router-link>
 
             <!-- admin shouldnt updateother  user deets just assign classes etc -->
+             <!--  -->
             <!-- <div
               class="group relative"
               @click="showEditModal(item.id, item.title, item, 'teacherList')"

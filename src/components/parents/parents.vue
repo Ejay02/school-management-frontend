@@ -12,9 +12,9 @@
 
       <EmptyState
         v-else-if="!parentStore.parents.length && !loading"
-        icon="fa-regular fa-hourglass"
+        icon="fa-solid fa-user-xmark"
         heading="Nothing here yet!"
-        description="Invite a parent to get started."
+        description="No parents have been added yet."
       />
 
       <!-- list -->

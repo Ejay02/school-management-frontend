@@ -12,9 +12,9 @@
 
       <EmptyState
         v-else-if="!teacherStore.teachers.length && !loading"
-        icon="fa-regular fa-hourglass"
+        icon="fa-solid fa-user-xmark"
         heading="Nothing here yet!"
-        description="Invite a teacher to get started."
+        description="No teachers have been added yet."
       />
       <!-- list -->
       <div class="" v-else>

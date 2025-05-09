@@ -9,12 +9,12 @@
       <LoadingScreen v-if="loading" message="Loading Students..." />
 
       <ErrorScreen v-else-if="error" />
-
+   
       <EmptyState
         v-else-if="!studentStore?.students.length && !loading"
-        icon="fa-regular fa-hourglass"
+        icon="fa-solid fa-users"
         heading="Nothing here yet!"
-        description="Invite a student to get started."
+        description="No students found."
       />
 
       <!-- list -->
