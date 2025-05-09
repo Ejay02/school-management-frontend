@@ -43,22 +43,23 @@ import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
 import ClassesTable from "./classesTable.vue";
+import { useUserStore } from "../../store/userStore";
 
 const limit = 10;
 
 const currentPage = ref(1);
 
 const classStore = useClassStore();
+const userStore = useUserStore();
+
+const role = computed(() => userStore.currentRole);
+
 const loading = computed(() => classStore.loading);
 const error = computed(() => classStore.error);
-
-
 
 function handlePageChange(newPage) {
   currentPage.value = newPage;
 }
-
-
 
 const columns = [
   {
@@ -85,15 +86,27 @@ const columns = [
     accessor: "year",
     class: "hidden md:table-cell",
   },
-  {
-    header: "Tuition",
-    accessor: "tuition",
-    class: "hidden md:table-cell",
-  },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
+  // Only show tuition column for admin or super_admin
+  ...(role.value.toLowerCase() === "admin" ||
+  role.value.toLowerCase() === "super_admin"
+    ? [
+        {
+          header: "Tuition",
+          accessor: "tuition",
+          class: "hidden md:table-cell",
+        },
+      ]
+    : []),
+  // Only show actions column for admin or super_admin
+  ...(role.value.toLowerCase() === "admin" ||
+  role.value.toLowerCase() === "super_admin"
+    ? [
+        {
+          header: "Actions",
+          accessor: "action",
+        },
+      ]
+    : []),
 ];
 
 watch(currentPage, (newPage) => {

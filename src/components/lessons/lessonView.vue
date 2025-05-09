@@ -388,6 +388,7 @@ const error = computed(() => lessonStore.error);
 
 const { isTeacher, userId, isAssignedToSelection } = useTeacherAccessCheck();
 
+
 const formatTime = (timeString) => {
   if (!timeString) return "";
   const [hours, minutes] = timeString.split(":");
@@ -469,6 +470,10 @@ ${
 
 const canEditLesson = computed(() => {
   if (!lesson.value) return false;
+
+  if (userId.value === lesson.value.teacher?.id) {
+    return true;
+  }
 
   // Use the lesson data to check if the teacher has access
   return isAssignedToSelection(
