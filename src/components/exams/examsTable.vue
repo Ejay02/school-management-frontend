@@ -1,34 +1,7 @@
 <template>
   <div>
-    <!-- Filters and search -->
-    <div class="my-4 flex flex-col md:flex-row gap-4 justify-between">
-      <div class="relative w-full md:w-64">
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Search exams..."
-          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-        />
-        <div class="absolute left-3 top-2.5 text-gray-400">
-          <i class="fa-solid fa-search"></i>
-        </div>
-      </div>
-
-      <div class="flex gap-2">
-        <select
-          v-model="sortBy"
-          class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-        >
-          <option value="date">Sort by Date</option>
-          <option value="subject">Sort by Subject</option>
-          <option value="class">Sort by Class</option>
-          <option value="teacher">Sort by Teacher</option>
-        </select>
-      </div>
-    </div>
-
     <!-- Exams cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-6 cursor-pointer">
       <div
         v-for="item in filteredData"
         :key="item?.id"
@@ -86,10 +59,11 @@
               {{ formatDate(item?.endTime) || "Time not specified" }}</span
             >
           </div>
+
           <div class="flex items-center text-sm text-gray-500 mt-2">
             <i class="fa-solid fa-question-circle mr-2"></i>
-            <span>20 Questions</span>
-            <!-- <span>{{ getQuestionCount(exam)  }} Questions</span> -->
+
+            <span>{{ getQuestionCount(item) }} Question(s)</span>
           </div>
         </div>
 
@@ -131,7 +105,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
@@ -153,34 +127,9 @@ const userStore = useUserStore();
 const role = userStore.currentRole;
 const modalStore = useModalStore();
 
-const searchQuery = ref("");
-const sortBy = ref("date");
-
 // Filter and sort exams
 const filteredData = computed(() => {
   let exams = [...(props.data || [])];
-
-  // Apply search filter
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    exams = exams.filter(
-      (exam) =>
-        exam.subject?.toLowerCase().includes(query) ||
-        exam.class?.toLowerCase().includes(query) ||
-        exam.teacher?.toLowerCase().includes(query)
-    );
-  }
-
-  // Apply sorting
-  if (sortBy.value === "date") {
-    exams.sort((a, b) => new Date(b.date) - new Date(a.date));
-  } else if (sortBy.value === "subject") {
-    exams.sort((a, b) => a.subject?.localeCompare(b.subject));
-  } else if (sortBy.value === "class") {
-    exams.sort((a, b) => a.class?.localeCompare(b.class));
-  } else if (sortBy.value === "teacher") {
-    exams.sort((a, b) => a.teacher?.localeCompare(b.teacher));
-  }
 
   return exams;
 });
@@ -203,13 +152,21 @@ const showEditModal = (id, title, data, type) => {
   modalStore.data = data;
   modalStore.source = type;
 };
+
+const getQuestionCount = (item) => {
+  try {
+    if (item?.content) {
+      const parsedContent = JSON.parse(item.content);
+      return parsedContent.questions?.length || 0;
+    }
+    return 0;
+  } catch (error) {
+    console.error("Error parsing exam content:", error);
+    return 0;
+  }
+};
 </script>
 
 <style scoped>
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
+
 </style>
