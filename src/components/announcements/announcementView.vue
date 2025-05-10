@@ -16,7 +16,10 @@
       <!-- Card with gradient header -->
       <div class="bg-white rounded-xl shadow-xl overflow-hidden w-full">
         <!-- Gradient header -->
-        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
+        <div
+          class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 relative"
+        >
+          <div class="absolute inset-0 pattern-dots opacity-10"></div>
           <div class="flex items-center gap-4">
             <button
               @click="goBack"
@@ -127,21 +130,20 @@
 </template>
 
 <script setup>
-import ErrorScreen from "../errorScreen.vue";
-import { ref, computed, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import LoadingScreen from "../loadingScreen.vue";
-import { useUserStore } from "../../store/userStore";
-import { formatDate } from "../../utils/date.holidays";
 import { useApolloClient } from "@vue/apollo-composable";
+import { computed, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useNavigation } from "../../composables/useNavigation";
 import { useAnnouncementStore } from "../../store/announcementStore";
+import { useUserStore } from "../../store/userStore";
+import { formatDate } from "../../utils/date.holidays";
+import ErrorScreen from "../errorScreen.vue";
+import LoadingScreen from "../loadingScreen.vue";
 
 const route = useRoute();
 const router = useRouter();
 
 const announcementId = route.params.id;
-
 
 const { goBack } = useNavigation();
 const { client } = useApolloClient();

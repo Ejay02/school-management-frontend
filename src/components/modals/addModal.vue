@@ -9,8 +9,9 @@
       class="max-w-lg w-full text-left bg-white cursor-pointer rounded-md h-auto mt-4 shadow-md overflow-y-auto"
     >
       <div
-        class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 w-full"
+        class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 w-full relative"
       >
+      <div class="absolute inset-0 pattern-dots opacity-10"></div>
         <h3 class="text-xl font-medium capitalize items-center text-center">
           {{ modalTitle }}
         </h3>

@@ -10,8 +10,9 @@
         class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
       >
         <div
-          class="p-6 border-b bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500"
+          class="p-6 border-b bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 relative"
         >
+        <div class="absolute inset-0 pattern-dots opacity-10"></div>
           <h2 class="text-xl font-bold text-gray-800">
             {{
               modalStore.data.editing

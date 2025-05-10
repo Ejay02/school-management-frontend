@@ -10,6 +10,7 @@
         <div
           class="rounded-md bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 relative"
         >
+        <div class="absolute inset-0 pattern-dots opacity-10"></div>
           <!-- Back arrow button -->
           <button
             @click="router.push('/events')"
