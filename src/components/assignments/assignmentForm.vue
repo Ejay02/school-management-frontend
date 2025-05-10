@@ -36,7 +36,7 @@
               <label
                 for="title"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Title <span class='text-red-500'>*</span></label
+                >Title <span class="text-red-500">*</span></label
               >
               <input
                 v-model="title"
@@ -89,7 +89,7 @@
                 <label
                   for="startDate"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Start Date <span class='text-red-500'>*</span></label
+                  >Start Date <span class="text-red-500">*</span></label
                 >
                 <input
                   type="date"
@@ -101,7 +101,7 @@
                 <label
                   for="dueDate"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Due Date <span class='text-red-500'>*</span></label
+                  >Due Date <span class="text-red-500">*</span></label
                 >
                 <input
                   type="date"
@@ -116,7 +116,7 @@
               <label
                 for="description"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Description <span class='text-red-500'>*</span></label
+                >Description <span class="text-red-500">*</span></label
               >
               <QuillEditor
                 v-model:content="description"
@@ -132,7 +132,7 @@
               <label
                 for="instructions"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Instructions <span class='text-red-500'>*</span></label
+                >Instructions <span class="text-red-500">*</span></label
               >
               <QuillEditor
                 v-model:content="instructions"
@@ -145,7 +145,9 @@
 
             <!-- Questions Section -->
             <div class="space-y-4">
-              <h3 class="text-lg font-medium">Questions <span class='text-red-500'>*</span></h3>
+              <h3 class="text-lg font-medium">
+                Questions <span class="text-red-500">*</span>
+              </h3>
 
               <!-- Default Question -->
               <div class="p-6 rounded-md space-y-4 bg-gray-50">
@@ -169,7 +171,7 @@
                     <label
                       for="quill"
                       class="block text-sm font-medium text-gray-700 mb-1"
-                      >Question Text <span class='text-red-500'>*</span></label
+                      >Question Text <span class="text-red-500">*</span></label
                     >
                     <QuillEditor
                       v-model:content="questions[0].content"
@@ -186,7 +188,7 @@
                         for="questionPoints"
                         class="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        Question Points <span class='text-red-500'>*</span>
+                        Question Points <span class="text-red-500">*</span>
                         <span class="text-xs text-gray-500">(min: 5)</span>
                       </label>
                       <input
@@ -231,7 +233,7 @@
                       for="correctAnswer"
                       class="block text-sm font-medium text-gray-700 mb-1"
                     >
-                      Correct Answer <span class='text-red-500'>*</span>
+                      Correct Answer <span class="text-red-500">*</span>
                       <span class="text-xs text-gray-500 ml-1"
                         >(Only visible to teachers)</span
                       >
@@ -280,7 +282,7 @@
                     <label
                       for="quill"
                       class="block text-sm font-medium text-gray-700 mb-1"
-                      >Question Text <span class='text-red-500'>*</span></label
+                      >Question Text <span class="text-red-500">*</span></label
                     >
                     <QuillEditor
                       v-model:content="question.content"
@@ -297,7 +299,7 @@
                         for="questionPoints"
                         class="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        Question Points <span class='text-red-500'>*</span>
+                        Question Points <span class="text-red-500">*</span>
                         <span class="text-xs text-gray-500">(min: 5)</span>
                       </label>
                       <input
@@ -342,7 +344,7 @@
                       for="correctAnswer"
                       class="block text-sm font-medium text-gray-700 mb-1"
                     >
-                      Correct Answer <span class='text-red-500'>*</span>
+                      Correct Answer <span class="text-red-500">*</span>
                       <span class="text-xs text-gray-500 ml-1"
                         >(Only visible to teachers)</span
                       >
@@ -601,26 +603,19 @@ onMounted(async () => {
   if (!lessonStore.lessons.length) lessonStore.fetchLessons();
 
   if (isEditing.value) {
-    try {
-      const { data } = await apolloClient.query({
-        query: getAssignmentById,
-        variables: { id: route.params.id },
-      });
+    const { data } = await apolloClient.query({
+      query: getAssignmentById,
+      variables: { id: route.params.id },
+    });
 
-      const assignment = data.assignment;
-      title.value = assignment.title;
-      description.value = assignment.description;
-      instructions.value = assignment.instructions;
-      startDate.value = assignment.startDate;
-      dueDate.value = assignment.dueDate;
-      selectedClass.value = classStore.getClassNameById(assignment.classId);
-      selectedSubject.value = assignment.subjectId;
-    } catch (error) {
-      notificationStore.addNotification({
-        type: "error",
-        message: "Failed to load assignment",
-      });
-    }
+    const assignment = data.assignment;
+    title.value = assignment.title;
+    description.value = assignment.description;
+    instructions.value = assignment.instructions;
+    startDate.value = assignment.startDate;
+    dueDate.value = assignment.dueDate;
+    selectedClass.value = classStore.getClassNameById(assignment.classId);
+    selectedSubject.value = assignment.subjectId;
   }
 });
 </script>

@@ -52,15 +52,6 @@ export const formatDate = (dateString) => {
   return `${day}-${month}-${year}`;
 };
 
-// export const formatEventDate = (dateString) => {
-//   return new Date(dateString).toLocaleDateString("en-US", {
-//     weekday: "short",
-//     year: "numeric",
-//     month: "short",
-//     day: "numeric",
-//   });
-// };
-
 export const formatEventDate = (dateString) => {
   if (!dateString) return null;
 
@@ -76,23 +67,6 @@ export const formatTime = (dateString) => {
     minute: "2-digit",
   });
 };
-
-// function getMonday(date) {
-//   const day = date.getDay();
-//   const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
-//   return new Date(date.setDate(diff));
-// }
-
-// // Function to get the Friday of the current week
-// function getFriday(date) {
-//   const monday = getMonday(new Date(date));
-//   return new Date(monday.setDate(monday.getDate() + 4));
-// }
-
-// // Format date for input fields
-// function formatDateForInput(date) {
-//   return date.toISOString().split("T")[0];
-// }
 
 export const getMonday = (date) => {
   const day = date.getDay();

@@ -77,7 +77,7 @@ export const useAnnouncementStore = defineStore("announcement", {
         const res = await apolloClient.query({
           query: getAnnouncementById,
           variables: { announcementId },
-          fetchPolicy: "no-cache",
+          fetchPolicy: "network-only",
         });
 
         this.selectedAnnouncement = res?.data?.getAnnouncementById;

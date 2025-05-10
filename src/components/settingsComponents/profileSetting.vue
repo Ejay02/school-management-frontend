@@ -20,9 +20,10 @@
             <!-- Fallback to initials if no image is available -->
             <div
               v-else
-              class="h-32 w-32 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200 text-2xl"
+              class="h-32 w-32 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200 text-2xl capitalize"
             >
-              {{ capitalizedName[0] }}{{ capitalizedSurname[0] }}
+              {{ userStore?.userInfo?.name[0] }}
+              {{ userStore?.userInfo?.surname[0] }}
             </div>
             <button
               type="button"
@@ -153,7 +154,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import { apolloClient } from "../../../apollo-client";
 import {
   updateAdminProfile,
@@ -172,17 +173,6 @@ const profilePreview = ref(null);
 const fileInput = ref(null);
 const imageFile = ref(null);
 const imageBase64 = ref(null);
-
-// Helper function to capitalize first letter
-const capitalize = (str) => {
-  if (!str) return "";
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
-
-const capitalizedName = computed(() => capitalize(userStore.userInfo.name));
-const capitalizedSurname = computed(() =>
-  capitalize(userStore.userInfo.surname)
-);
 
 // Format date to YYYY-MM-DD for input[type="date"]
 const formatDateForInput = (dateString) => {
@@ -209,10 +199,6 @@ const formData = reactive({
   pushNotifications: false,
 });
 
-
-
-
-
 const handleImageChange = (event) => {
   const file = event.target.files[0];
   if (file) {
@@ -238,31 +224,30 @@ const handleImageChange = (event) => {
 // Helper function to handle role-specific operations
 const getRoleSpecificData = (operation, data = null) => {
   const role = userStore.currentRole.toLowerCase();
-  
+
   if (role === "admin" || role === "super_admin") {
-    return operation === "mutation" 
-      ? updateAdminProfile 
+    return operation === "mutation"
+      ? updateAdminProfile
       : data?.updateAdminProfile;
   } else if (role === "teacher") {
-    return operation === "mutation" 
-      ? updateTeacherProfile 
+    return operation === "mutation"
+      ? updateTeacherProfile
       : data?.updateTeacherProfile;
   } else if (role === "student") {
-    return operation === "mutation" 
-      ? updateStudentProfile 
+    return operation === "mutation"
+      ? updateStudentProfile
       : data?.updateStudentProfile;
   } else if (role === "parent") {
-    return operation === "mutation" 
-      ? updateParentProfile 
+    return operation === "mutation"
+      ? updateParentProfile
       : data?.updateParentProfile;
   }
-  
+
   if (operation === "mutation") {
     throw new Error(`No profile update mutation available for role: ${role}`);
   }
   return null;
 };
-
 
 const getProfileMutation = () => getRoleSpecificData("mutation");
 

@@ -47,6 +47,20 @@
                 class="cursor-pointer mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
             </div>
+            <!-- desc -->
+            <div>
+              <label
+                for="description"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Description</label
+              >
+              <textarea
+                v-model="description"
+                rows="3"
+                class="cursor-pointer mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Enter exam description"
+              ></textarea>
+            </div>
 
             <!-- Class and Subject Selection -->
             <div class="flex gap-4">
@@ -159,7 +173,7 @@
                         for="questionPoints"
                         class="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        Question Points <span class='text-red-500'>*</span>
+                        Question Points <span class="text-red-500">*</span>
                         <span class="text-xs text-gray-500">(min: 5)</span>
                       </label>
                       <input
@@ -205,7 +219,7 @@
                     <label
                       for="correctAnswer"
                       class="block text-sm font-medium text-gray-700 mb-1"
-                      >Correct Answer <span class='text-red-500'>*</span>
+                      >Correct Answer <span class="text-red-500">*</span>
                       <span class="text-xs text-gray-500 ml-1"
                         >(Only visible to teachers)</span
                       ></label
@@ -254,7 +268,7 @@
                     <label
                       for="questionText"
                       class="block text-sm font-medium text-gray-700 mb-1"
-                      >Question Text <span class='text-red-500'>*</span></label
+                      >Question Text <span class="text-red-500">*</span></label
                     >
                     <QuillEditor
                       v-model:content="question.content"
@@ -271,7 +285,7 @@
                         for="questionPoints"
                         class="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        Question Points <span class='text-red-500'>*</span>
+                        Question Points <span class="text-red-500">*</span>
                         <span class="text-xs text-gray-500">(min: 5)</span>
                       </label>
                       <input
@@ -317,7 +331,7 @@
                     <label
                       for="correctAnswer"
                       class="block text-sm font-medium text-gray-700 mb-1"
-                      >Correct Answer <span class='text-red-500'>*</span>
+                      >Correct Answer <span class="text-red-500">*</span>
                       <span class="text-xs text-gray-500 ml-1"
                         >(Only visible to teachers)</span
                       >
@@ -352,6 +366,7 @@
           >
             Cancel
           </button>
+
           <button
             @click="handleSubmit"
             class="px-4 py-2 rounded-md transition-colors duration-200"
@@ -365,12 +380,22 @@
             {{ isEditing ? "Update" : "Create" }} Exam
           </button>
         </div>
-        <div
-          v-if="!isTeacher && !isAssignedTeacher"
-          class="text-red-500 text-sm text-end"
-        >
-          ** You can only create exams for classes/subjects you're assigned to.
+
+        <div v-if="!isFormValid" class="text-red-500 text-sm mt-2 text-end">
+          <div v-if="!isTeacher">** You must be a teacher to create exams.</div>
+          <div v-else-if="!isAssignedTeacher">
+            ** You can only create exams for classes/subjects you're assigned
+            to.
+          </div>
+          <div v-else-if="!basicFieldsValid">
+            ** Please fill in all required fields.
+          </div>
+          <div v-else-if="!questionsValid">
+            ** Please ensure all questions are valid.
+          </div>
         </div>
+
+        <!--  -->
       </div>
     </div>
   </div>
@@ -387,6 +412,7 @@ import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useUserStore } from "../../store/userStore";
+import { formatEventDate } from "../../utils/date.holidays";
 import { questionTypes } from "../../utils/utility";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
@@ -397,6 +423,10 @@ const userStore = useUserStore();
 const classStore = useClassStore();
 const subjectStore = useSubjectStore();
 const notificationStore = useNotificationStore();
+
+const userId = userStore.userInfo?.id;
+
+const isTeacher = userStore.userInfo?.role === "TEACHER";
 
 const title = ref("");
 const description = ref("");
@@ -436,39 +466,43 @@ const filteredSubjects = computed(() => {
   return classObj?.subjects || [];
 });
 
-const userId = userStore.userInfo?.id;
+const isTeacherForSubject = () => {
+  if (!selectedSubject.value || !userId) return false;
 
-const isTeacher = userStore.userInfo?.role === "TEACHER";
-
-const isAssignedTeacher = computed(() => {
-  if (!isTeacher) return false;
-
-  // Get selected class and subject
+  // Instead of relying on the store's subject data, use the subject data from the class
+  // which contains the necessary teacher information
   const classObj = classStore.allClasses.find(
     (c) => c.name === selectedClass.value
   );
-  const subject = subjectStore.subjects.find(
+  const subject = classObj?.subjects?.find(
     (s) => s.id === selectedSubject.value
   );
 
-  // Check if teacher is supervisor of class
-  const isClassSupervisor = classObj?.supervisorId === userId;
+  // If we're the supervisor of the class, we can create exams for any subject
+  if (classObj?.supervisor?.id === userId) return true;
 
-  // Check if teacher is assigned to subject
-  const isSubjectTeacher = subject?.teachers?.some((t) => t.id === userId);
+  // Check if the subject exists in the selected class
+  return !!subject;
+};
 
-  return isClassSupervisor || isSubjectTeacher;
+const isAssignedTeacher = computed(() => {
+  if (!isTeacher) return false;
+  return isTeacherForSubject();
 });
 
-const isFormValid = computed(() => {
-  // Basic form validation
-  const basicFieldsValid =
+const basicFieldsValid = computed(() => {
+  return (
     title.value &&
     selectedClass.value &&
     selectedSubject.value &&
     date.value &&
     startTime.value &&
-    endTime.value;
+    endTime.value
+  );
+});
+
+const isFormValid = computed(() => {
+  
 
   // Question validation
   const questionsValid = questions.value.every((question) => {
@@ -521,6 +555,22 @@ const getClassIdByName = (className) => {
 
 const handleSubmit = async () => {
   try {
+    const formattedDate = formatEventDate(date.value);
+
+    // Create proper datetime strings by combining date and time
+    let formattedStartTime = null;
+    let formattedEndTime = null;
+
+    if (date.value && startTime.value) {
+      // Create a full ISO datetime string
+      formattedStartTime = `${date.value}T${startTime.value}:00`;
+    }
+
+    if (date.value && endTime.value) {
+      // Create a full ISO datetime string
+      formattedEndTime = `${date.value}T${endTime.value}:00`;
+    }
+
     const examData = {
       title: title.value,
       description: description.value,
@@ -528,9 +578,9 @@ const handleSubmit = async () => {
       content: JSON.stringify({
         questions: questions.value,
       }),
-      date: date.value,
-      startTime: startTime.value,
-      endTime: endTime.value,
+      date: formattedDate,
+      startTime: formattedStartTime,
+      endTime: formattedEndTime,
       classId: getClassIdByName(selectedClass.value),
       subjectId: selectedSubject.value,
     };

@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 
 import { apolloClient } from "../../apollo-client";
-import { getAllExams } from "../graphql/queries";
+import { getAllExams, getClassExams } from "../graphql/queries";
 
 export const useExamStore = defineStore("examStore", {
   state: () => ({
@@ -29,7 +29,8 @@ export const useExamStore = defineStore("examStore", {
         if (this.allExams.length === 0) {
           const { data } = await apolloClient.query({
             query: getAllExams,
-            variables: { pagination: { page: 1, limit: 1000 } },
+            variables: { params: { page: 1, limit: 1000 } },
+            fetchPolicy: "network-only",
           });
 
           this.allExams = data.getAllExams;
@@ -49,19 +50,46 @@ export const useExamStore = defineStore("examStore", {
       }
     },
 
+    async fetchClassExams(classId, { page = 1, limit = 100 } = {}) {
+      this.loading = true;
+
+      try {
+        const { data } = await apolloClient.query({
+          query: getClassExams,
+          variables: {
+            classId,
+            params: { page, limit },
+          },
+          fetchPolicy: "network-only",
+        });
+
+        this.classExams = data.getClassExams;
+        this.totalCount = this.classExams.length;
+        this.totalPages = Math.ceil(this.totalCount / limit);
+      } catch (err) {
+        this.error = err;
+      } finally {
+        this.loading = false;
+      }
+    },
+
     resetExams() {
       this.allExams = [];
       this.exams = [];
+      this.classExams = [];
     },
 
     async refreshExams(page = 1, limit = 10) {
       // Reset the exams array to force a fresh fetch
       this.resetExams();
-      // Clear Apollo cache for this query
-      await apolloClient.cache.evict({ fieldName: "getAllExams" });
-      await apolloClient.cache.gc();
+
       // Fetch exams again
       await this.fetchExams({ page, limit });
+    },
+
+    async refreshClassExams(classId, { page = 1, limit = 10 } = {}) {
+      this.resetExams();
+      await this.fetchClassExams(classId, { page, limit });
     },
   },
 });

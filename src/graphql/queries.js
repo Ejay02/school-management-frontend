@@ -344,8 +344,8 @@ export const getLessonById = gql`
 `;
 
 export const getAllExams = gql`
-  query getAllExams($pagination: PaginationInput) {
-    getAllExams(params: $pagination) {
+  query getAllExams($params: PaginationInput) {
+    getAllExams(params: $params) {
       id
       title
       startTime
@@ -367,6 +367,7 @@ export const getAllExams = gql`
         id
         name
         surname
+        image
       }
       class {
         id
@@ -378,6 +379,41 @@ export const getAllExams = gql`
         name
       }
     }
+  }
+`;
+
+export const getClassExams = gql`
+  query getClassExams($classId: String!, $params: PaginationInput) {
+    getClassExams(classId: $classId, params: $params) {
+      id
+      class{
+        id
+        name
+      }
+      classId
+      content
+      date
+      description
+      startTime
+      endTime
+      instructions
+      questions {
+        id
+        type
+        content
+        options
+        correctAnswer
+        points
+      }
+      subject{
+        id
+        name
+      }
+      title
+      teacherId
+      createdAt
+    }
+    
   }
 `;
 

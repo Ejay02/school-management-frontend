@@ -12,9 +12,9 @@
 
       <EmptyState
         v-else-if="!examStore?.exams?.length && !loading"
-        icon="fa-regular fa-hourglass"
+        icon="fa-solid fa-file-pen"
         heading="Nothing here yet!"
-        description="Add exam to get started."
+        description="No exam found."
       />
 
       <!-- list -->
@@ -37,12 +37,12 @@
 import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
 
-import ExamsTable from "./examsTable.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useExamStore } from "../../store/examStore";
-import LoadingScreen from "../loadingScreen.vue";
-import ErrorScreen from "../errorScreen.vue";
 import EmptyState from "../emptyState.vue";
+import ErrorScreen from "../errorScreen.vue";
+import LoadingScreen from "../loadingScreen.vue";
+import ExamsTable from "./examsTable.vue";
 
 const limit = 10;
 const currentPage = ref(1);
@@ -50,17 +50,9 @@ const examStore = useExamStore();
 const loading = computed(() => examStore.loading);
 const error = computed(() => examStore.error);
 
-watch(currentPage, (newPage) => {
-  examStore.fetchExams({ page: newPage, limit });
-});
-
 function handlePageChange(newPage) {
   currentPage.value = newPage;
 }
-
-onMounted(() => {
-  examStore.fetchExams({ page: currentPage.value, limit });
-});
 
 const columns = [
   {
@@ -87,6 +79,14 @@ const columns = [
     accessor: "action",
   },
 ];
+
+watch(currentPage, (newPage) => {
+  examStore.fetchExams({ page: newPage, limit });
+});
+
+onMounted(() => {
+  examStore.fetchExams({ page: currentPage.value, limit });
+});
 </script>
 
 <style scoped></style>

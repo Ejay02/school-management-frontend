@@ -68,8 +68,8 @@
         <!-- user -->
         <div class="flex flex-col">
           <div class="relative inline-block">
-            <span class="text-sm leading-3 font-medium pr-1">
-              {{ capitalizedName }} {{ capitalizedSurname }}
+            <span class="text-sm leading-3 font-medium pr-1 capitalize">
+              {{ userStore?.userInfo?.name }} {{ userStore?.userInfo?.surname }}
             </span>
             <i
               class="fa-regular fa-copy text-xs absolute top-0"
@@ -79,26 +79,27 @@
           </div>
 
           <span
-            class="items-center rounded-md bg-purple-50 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset  text-center"
+            class="items-center rounded-md bg-purple-50 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset text-center"
             >{{ role.toLowerCase() }}</span
           >
         </div>
 
-        <!-- Here's the fixed avatar section -->
+        <!-- fixed avatar section -->
         <div class="" @click="toggleDropdown">
           <div class="mr-4 relative">
             <img
               v-if="userStore?.userInfo?.image"
               :src="userStore?.userInfo?.image"
-              :alt="`${capitalizedName} avatar`"
+              :alt="`${userStore?.userInfo?.name} avatar`"
               class="w-16 h-16 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
             />
 
             <div
               v-else
-              class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200"
+              class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200 capitalize"
             >
-              {{ capitalizedName[0] }}{{ capitalizedSurname[0] }}
+              {{ userStore?.userInfo?.name[0]
+              }}{{ userStore?.userInfo?.surname[0] }}
             </div>
           </div>
 
@@ -110,7 +111,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { ref } from "vue";
 import { useAnnouncementStore } from "../store/announcementStore";
 import { useNotificationStore } from "../store/notification";
 import { useUserStore } from "../store/userStore";
@@ -125,16 +126,7 @@ const role = userStore.currentRole;
 
 const parentId = userStore?.userInfo.id;
 
-// Helper function to capitalize first letter
-const capitalize = (str) => {
-  if (!str) return "";
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
 
-const capitalizedName = computed(() => capitalize(userStore.userInfo.name));
-const capitalizedSurname = computed(() =>
-  capitalize(userStore.userInfo.surname)
-);
 
 const showDropdown = ref(false);
 

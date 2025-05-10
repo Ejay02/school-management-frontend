@@ -11,23 +11,23 @@
         <img
           v-if="userStore?.userInfo?.image"
           :src="userStore?.userInfo?.image"
-          :alt="`${capitalizedName} image`"
+          :alt="`${userStore?.userInfo?.name} image`"
           class="w-12 h-12 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
         />
 
         <div
           v-else
-          class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200"
+          class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200 capitalize"
         >
-          {{ capitalizedName[0] }}{{ capitalizedSurname[0] }}
+        {{ userStore?.userInfo?.name[0] }} {{ userStore?.userInfo?.surname[0] }}
         </div>
       </div>
 
       <div>
         <span
-          class="text-xs font-medium text-gray-800 group-hover:text-indigo-500"
+          class="text-xs font-medium text-gray-800 group-hover:text-indigo-500 capitalize"
         >
-          {{ capitalizedName }} {{ capitalizedSurname }}
+        {{ userStore?.userInfo?.name }} {{ userStore?.userInfo?.surname }}
         </span>
         <br />
         <span class="text-xs text-gray-400 group-hover:text-indigo-500">{{
@@ -103,15 +103,6 @@ const router = useRouter();
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
 
-const capitalize = (str) => {
-  if (!str) return "";
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
-
-const capitalizedName = computed(() => capitalize(userStore.userInfo.name));
-const capitalizedSurname = computed(() =>
-  capitalize(userStore.userInfo.surname)
-);
 
 const { mutate: logoutMutate } = useMutation(logoutMutation);
 
