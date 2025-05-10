@@ -40,6 +40,7 @@ import Admissions from "../views/infoPages/admissions.vue";
 import Calender from "../views/infoPages/calender.vue";
 import Contact from "../views/infoPages/contact.vue";
 import Settings from "../views/settings.vue";
+import ExamView from "../components/exams/examView.vue";
 
 const publicRoutes = [
   "Home",
@@ -198,6 +199,12 @@ const routes = [
         path: "exam/:id/edit",
         name: "EditExam",
         component: ExamForm,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: "/exams/:id",
+        name: "ExamView",
+        component: ExamView,
         meta: { requiresAuth: true },
       },
       {

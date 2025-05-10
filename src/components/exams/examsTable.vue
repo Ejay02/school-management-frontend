@@ -1,7 +1,9 @@
 <template>
   <div>
     <!-- Exams cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-6 cursor-pointer">
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-6 cursor-pointer"
+    >
       <div
         v-for="item in filteredData"
         :key="item?.id"
@@ -9,9 +11,10 @@
       >
         <!-- Card header with subject color -->
         <div
-          class="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 text-white flex items-center justify-between"
+          class="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 text-white flex items-center justify-between relative"
         >
-          <div class="">
+          <div class="absolute inset-0 pattern-dots opacity-10"></div>
+          <div class="relative z-10">
             <h3 class="font-bold text-lg truncate capitalize">
               {{ item?.title }}
             </h3>
@@ -22,7 +25,7 @@
             </div>
           </div>
           <!--  -->
-          <div class="">
+          <div class="relative z-10">
             <div class="mr-4 relative">
               <img
                 v-if="item?.teacher?.image"
@@ -167,6 +170,4 @@ const getQuestionCount = (item) => {
 };
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

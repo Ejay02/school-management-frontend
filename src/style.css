@@ -5,3 +5,20 @@
 html, body {
   font-family: 'Inter', sans-serif;
 }
+
+@layer utilities {
+  .pattern-dots {
+    background-image: radial-gradient(currentColor 1px, transparent 1px);
+    background-size: calc(10 * 1px) calc(10 * 1px);
+  }
+  
+  .pattern-dots-sm {
+    background-image: radial-gradient(currentColor 0.5px, transparent 0.5px);
+    background-size: calc(5 * 1px) calc(5 * 1px);
+  }
+  
+  .pattern-dots-lg {
+    background-image: radial-gradient(currentColor 1.5px, transparent 1.5px);
+    background-size: calc(15 * 1px) calc(15 * 1px);
+  }
+}

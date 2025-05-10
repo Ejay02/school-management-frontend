@@ -18,7 +18,7 @@
         </svg>
       </div> -->
       <div
-        class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 text-center mb-4 mx-auto"
+        class="animate-spin rounded-full  h-16 w-16 border-t-4 border-indigo-500 text-center mb-4 mx-auto"
       ></div>
       <div class="text-lg font-mono text-gray-600">{{ message }}</div>
     </div>
