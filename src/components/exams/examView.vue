@@ -7,6 +7,35 @@
       <!-- Error state -->
       <ErrorScreen v-else-if="error" :message="error" />
 
+      <!-- Timer Banner -->
+      <div v-if="exam && isExamActive" class="bg-indigo-100 p-3 mb-4 rounded-lg shadow-sm">
+        <div class="flex justify-between items-center">
+          <div class="text-indigo-800 font-medium flex items-center">
+            <i class="fa-solid fa-hourglass-half mr-2 animate-pulse"></i>
+            Time Remaining:
+          </div>
+          <div class="text-indigo-900 font-bold text-xl">
+            {{ formatTimeRemaining(timeRemaining) }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Not Started Yet -->
+      <div v-else-if="exam && !hasExamStarted" class="bg-amber-100 p-4 rounded-lg shadow-sm mb-4">
+        <div class="flex items-center text-amber-800">
+          <i class="fa-solid fa-clock mr-2"></i>
+          <span class="font-medium">This exam has not started yet. It will begin at {{ formatTime(exam.startTime) }} on   {{ formatDate(exam.date) }}.</span>
+        </div>
+      </div>
+
+      <!-- Exam Ended -->
+      <div v-else-if="exam && hasExamEnded" class="bg-gray-100 p-4 rounded-lg shadow-sm mb-4">
+        <div class="flex items-center text-gray-800">
+          <i class="fa-solid fa-flag-checkered mr-2"></i>
+          <span class="font-medium">This exam has ended.</span>
+        </div>
+      </div>
+
       <!-- Exam content -->
       <div
         v-else-if="exam"
@@ -159,7 +188,7 @@
 
           <div v-else class="space-y-8">
             <div
-              v-for="(question, index) in examQuestions"
+              v-for="(question, index) in processedExamQuestions"
               :key="index"
               class="bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200"
             >
@@ -209,7 +238,7 @@
 
               <!-- Correct Answer (only visible to teachers and admins) -->
               <div
-                v-if="isTeacherOrAdmin && question.correctAnswer"
+                v-if="isTeacherOrAdmin && question.correctAnswer && !isExamActive"
                 class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg shadow-sm"
               >
                 <h4 class="font-medium text-green-700 flex items-center">
@@ -230,7 +259,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { apolloClient } from "../../../apollo-client";
 import { getExamById } from "../../graphql/queries";
@@ -249,11 +278,84 @@ const exam = ref(null);
 const loading = ref(true);
 const error = ref(null);
 const examQuestions = ref([]);
+const timeRemaining = ref(0);
+const timerInterval = ref(null);
 
 const isTeacherOrAdmin = computed(() => {
   const role = userStore.currentRole?.toLowerCase();
   return role === "teacher" || role === "admin" || role === "super_admin";
 });
+
+// Compute if exam has started based on current time and exam start time
+const hasExamStarted = computed(() => {
+  if (!exam.value || !exam.value.startTime) return false;
+  const now = new Date();
+  const startTime = new Date(exam.value.startTime);
+  return now >= startTime;
+});
+
+// Compute if exam has ended based on current time and exam end time
+const hasExamEnded = computed(() => {
+  if (!exam.value || !exam.value.endTime) return false;
+  const now = new Date();
+  const endTime = new Date(exam.value.endTime);
+  return now >= endTime;
+});
+
+// Compute if exam is currently active (started but not ended)
+const isExamActive = computed(() => {
+  return hasExamStarted.value && !hasExamEnded.value;
+});
+
+// Process exam questions to remove correct answers from non-admin/teacher view
+// or when exam is active (even for teachers/admins)
+const processedExamQuestions = computed(() => {
+  if (!examQuestions.value) return [];
+  
+  // If user is not teacher/admin or exam is active, remove correct answers
+  if (!isTeacherOrAdmin.value || isExamActive.value) {
+    return examQuestions.value.map(question => {
+      const { correctAnswer, ...rest } = question;
+      return rest;
+    });
+  }
+  
+  // Otherwise return questions with answers (for teachers/admins after exam)
+  return examQuestions.value;
+});
+
+// Format remaining time as MM:SS
+const formatTimeRemaining = (seconds) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
+// Start the timer
+const startTimer = () => {
+  if (!exam.value || !exam.value.endTime) return;
+  
+  // Calculate initial time remaining
+  const now = new Date();
+  const endTime = new Date(exam.value.endTime);
+  const initialTimeRemaining = Math.max(0, Math.floor((endTime - now) / 1000));
+  
+  timeRemaining.value = initialTimeRemaining;
+  
+  // Set up interval to update timer every second
+  timerInterval.value = setInterval(() => {
+    if (timeRemaining.value > 0) {
+      timeRemaining.value--;
+    } else {
+      // Time's up
+      clearInterval(timerInterval.value);
+      notificationStore.addNotification({
+        type: "info",
+        message: "Exam time has ended",
+      });
+    }
+  }, 1000);
+};
 
 onMounted(async () => {
   const examId = route.params.id;
@@ -287,6 +389,11 @@ onMounted(async () => {
       } else {
         examQuestions.value = [];
       }
+      
+      // Start timer if exam is active
+      if (isExamActive.value) {
+        startTimer();
+      }
     } else {
       error.value = "Exam not found";
     }
@@ -299,6 +406,13 @@ onMounted(async () => {
     });
   } finally {
     loading.value = false;
+  }
+});
+
+// Clean up timer when component is unmounted
+onUnmounted(() => {
+  if (timerInterval.value) {
+    clearInterval(timerInterval.value);
   }
 });
 </script>

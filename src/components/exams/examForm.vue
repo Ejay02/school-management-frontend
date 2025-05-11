@@ -416,11 +416,13 @@ import { formatEventDate } from "../../utils/date.holidays";
 import { questionTypes } from "../../utils/utility";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
+import { useExamStore } from "../../store/examStore";
 
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
 const classStore = useClassStore();
+const examStore = useExamStore();
 const subjectStore = useSubjectStore();
 const notificationStore = useNotificationStore();
 
@@ -609,6 +611,7 @@ const handleSubmit = async () => {
         message: "Exam created successfully!",
       });
     }
+    await examStore.refreshExams()
 
     router.push("/exams");
   } catch (error) {
