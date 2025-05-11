@@ -96,7 +96,7 @@
             >
               <i class="fa-solid fa-circle-info mr-2"></i> Description
             </h3>
-            <p class="text-gray-700">{{ exam.description }}</p>
+            <p class="text-gray-700 font-serif">{{ exam.description }}</p>
           </div>
 
           <div

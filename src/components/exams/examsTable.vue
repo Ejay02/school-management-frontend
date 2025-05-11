@@ -46,7 +46,7 @@
 
         <!-- Card content -->
         <div class="p-4 flex-1 flex flex-col">
-          <div class="mb-3 text-sm text-gray-600 line-clamp-3">
+          <div class="mb-3 text-sm text-gray-600 line-clamp-3 font-serif">
             {{ item?.description || "No description provided" }}
           </div>
 
@@ -58,8 +58,8 @@
           <div class="flex items-center text-sm text-gray-500 mt-2">
             <i class="fa-solid fa-clock mr-2"></i>
             <span
-              >{{ formatDate(item?.startTime) || "Time not specified" }} -
-              {{ formatDate(item?.endTime) || "Time not specified" }}</span
+              >{{ formatTime(item?.startTime) || "Time not specified" }} -
+              {{ formatTime(item?.endTime) || "Time not specified" }}</span
             >
           </div>
 
@@ -112,7 +112,7 @@ import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
-import { formatDate } from "../../utils/date.holidays";
+import { formatDate, formatTime } from "../../utils/date.holidays";
 
 const props = defineProps({
   columns: {
