@@ -429,7 +429,6 @@ export const updateExam = gql`
 `;
 
 //  might want to assign an exam to only certain students in a class (for example, makeup exams, special assessments)
-
 export const assignExamToStudent = gql`
   mutation assignExamToStudent($input: AssignExamToStudentInput) {
     assignExamToStudent(input: $input) {
@@ -481,7 +480,6 @@ export const assignExamToStudent = gql`
     }
   }
 `;
-
 
 
 export const startExam = gql`

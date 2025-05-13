@@ -2,9 +2,12 @@
   <div class="container mx-auto rounded border border-gray-300 p-2 w-full">
     <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-md">
       <div
-        class="flex gap-2 bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors text-white p-6 rounded-t-lg"
+        class="flex gap-2 bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors text-white p-6 rounded-t-lg relative"
       >
+        <div class="absolute inset-0 bg-black opacity-10 pattern-dots"></div>
+
         <!--  -->
+
         <button
           @click="$router.back()"
           class="top-4 left-4 bg-white/20 backdrop-blur-sm p-2 rounded-full text-white hover:bg-white/30 transition-all animate-bounce-once"
@@ -409,6 +412,7 @@ import { apolloClient } from "../../../apollo-client";
 import { createExam, updateExam } from "../../graphql/mutations";
 import { getExamById } from "../../graphql/queries";
 import { useClassStore } from "../../store/classStore";
+import { useExamStore } from "../../store/examStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useUserStore } from "../../store/userStore";
@@ -416,7 +420,6 @@ import { formatEventDate } from "../../utils/date.holidays";
 import { questionTypes } from "../../utils/utility";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
-import { useExamStore } from "../../store/examStore";
 
 const route = useRoute();
 const router = useRouter();
@@ -504,8 +507,6 @@ const basicFieldsValid = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  
-
   // Question validation
   const questionsValid = questions.value.every((question) => {
     const hasContent = question.content?.trim().length > 0;
@@ -591,7 +592,7 @@ const handleSubmit = async () => {
       await apolloClient.mutate({
         mutation: updateExam,
         variables: {
-          id: route.params.id,
+          examId: route.params.id,
           input: examData,
         },
       });
@@ -611,7 +612,7 @@ const handleSubmit = async () => {
         message: "Exam created successfully!",
       });
     }
-    await examStore.refreshExams()
+    await examStore.refreshExams();
 
     router.push("/exams");
   } catch (error) {
@@ -630,28 +631,48 @@ onMounted(async () => {
   if (!subjectStore.subjects.length) {
     await subjectStore.fetchSubjects();
   }
-  if (isEditing.value) {
-    try {
-      const { data } = await apolloClient.query({
-        query: getExamById,
-        variables: { id: route.params.id },
-      });
 
-      const exam = data.exam;
-      title.value = exam.title;
-      description.value = exam.description;
-      instructions.value = exam.instructions;
-      questions.value = JSON.parse(exam.content).questions;
-      selectedClass.value = classStore.getClassNameById(exam.classId);
-      selectedSubject.value = exam.subjectId;
-      date.value = exam.date;
-      startTime.value = exam.startTime;
-      endTime.value = exam.endTime;
-    } catch (error) {
-      notificationStore.addNotification({
-        type: "error",
-        message: "Failed to load exam",
-      });
+  if (isEditing.value) {
+    const { data } = await apolloClient.query({
+      query: getExamById,
+      variables: { examId: route.params.id },
+      fetchPolicy: "network-only",
+    });
+
+    const exam = data.getExamById;
+
+    title.value = exam.title;
+    description.value = exam.description;
+    instructions.value = exam.instructions;
+    questions.value = JSON.parse(exam.content).questions;
+
+    // Format class name
+    if (exam.class) {
+      // Use the class name directly from the response
+      selectedClass.value = exam.class.name;
+    }
+
+    // Set subject ID
+    if (exam.subject) {
+      selectedSubject.value = exam.subject.id;
+    }
+
+    // Format date (YYYY-MM-DD)
+    if (exam.date) {
+      const dateObj = new Date(exam.date);
+      date.value = dateObj.toISOString().split("T")[0];
+    }
+
+    // Format start time (HH:MM)
+    if (exam.startTime) {
+      const startTimeObj = new Date(exam.startTime);
+      startTime.value = startTimeObj.toTimeString().substring(0, 5);
+    }
+
+    // Format end time (HH:MM)
+    if (exam.endTime) {
+      const endTimeObj = new Date(exam.endTime);
+      endTime.value = endTimeObj.toTimeString().substring(0, 5);
     }
   }
 });

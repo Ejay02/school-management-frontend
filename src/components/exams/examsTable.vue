@@ -76,21 +76,24 @@
           <button
             @click="viewExam(item.id)"
             class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center"
-            :disabled="
-              getExamStatus(item) === 'completed' ||
-              (role === 'super_admin' && getExamStatus(item) !== 'active')
-            "
+            :class="{
+              'opacity-50 cursor-not-allowed':
+                getExamStatus(item) !== 'active' && !isCreator(item.id),
+            }"
+            :disabled="getExamStatus(item) !== 'active' && !isCreator(item.id)"
           >
-            <i class="fa-solid fa-eye mr-1"></i>
+            <i
+              v-if="getExamStatus(item) === 'completed'"
+              class="fa-solid fa-user-check mr-1"
+            ></i>
+            <i v-else class="fa-solid fa-eye mr-1"></i>
             {{
               isCreator(item.id)
                 ? "View"
                 : getExamStatus(item) === "completed"
                 ? "Completed"
-                : role === "super_admin"
-                ? `Start Exam (${formatTime(item.startTime)} - ${formatTime(
-                    item.endTime
-                  )})`
+                : role === "student"
+                ? `Start Exam `
                 : "View"
             }}
           </button>
@@ -192,25 +195,16 @@ const showDelModal = (id, title, type) => {
   modalStore.source = type;
 };
 
-const showEditModal = (id, title, data, type) => {
-  modalStore.editModal = true;
-  modalStore.modalId = id;
-  modalStore.modalTitle = title;
-  modalStore.data = data;
-  modalStore.source = type;
+const showEditModal = (id) => {
+  router.push(`dashboard/exam/${id}/edit`);
 };
 
 const getQuestionCount = (item) => {
-  try {
-    if (item?.content) {
-      const parsedContent = JSON.parse(item.content);
-      return parsedContent.questions?.length || 0;
-    }
-    return 0;
-  } catch (error) {
-    console.error("Error parsing exam content:", error);
-    return 0;
+  if (item?.content) {
+    const parsedContent = JSON.parse(item.content);
+    return parsedContent.questions?.length || 0;
   }
+  return 0;
 };
 </script>
 

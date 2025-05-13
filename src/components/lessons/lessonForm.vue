@@ -18,7 +18,7 @@
               <label
                 for="title"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Title <span class='text-red-500'>*</span></label
+                >Title <span class="text-red-500">*</span></label
               >
               <input
                 v-model="title"
@@ -52,7 +52,7 @@
                 <label
                   for="day"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Day <span class='text-red-500'>*</span></label
+                  >Day <span class="text-red-500">*</span></label
                 >
                 <select
                   v-model="day"
@@ -69,7 +69,7 @@
                 <label
                   for="startTime"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Start Time <span class='text-red-500'>*</span></label
+                  >Start Time <span class="text-red-500">*</span></label
                 >
                 <input
                   type="time"
@@ -81,7 +81,7 @@
                 <label
                   for="endTime"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >End Time <span class='text-red-500'>*</span></label
+                  >End Time <span class="text-red-500">*</span></label
                 >
                 <input
                   type="time"
@@ -99,7 +99,7 @@
               <label
                 for="description"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Description <span class='text-red-500'>*</span></label
+                >Description <span class="text-red-500">*</span></label
               >
               <textarea
                 v-model="description"
@@ -113,7 +113,7 @@
               <label
                 for="quill"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Content <span class='text-red-500'>*</span></label
+                >Content <span class="text-red-500">*</span></label
               >
               <div class="h-[calc(100%-28px)]">
                 <QuillEditor
@@ -282,35 +282,28 @@ onMounted(async () => {
     await subjectStore.fetchSubjects();
   }
   if (isEditing.value) {
-    try {
-      const { data } = await apolloClient.query({
-        query: getLessonById,
-        variables: { id: route.params.id },
-      });
+    const { data } = await apolloClient.query({
+      query: getLessonById,
+      variables: { id: route.params.id },
+    });
 
-      const lesson = data.getLessonById;
-      title.value = lesson.name;
-      description.value = lesson.description;
-      content.value = lesson.content;
-      day.value = lesson.day;
-      startTime.value = lesson.startTime;
-      endTime.value = lesson.endTime;
+    const lesson = data.getLessonById;
+    title.value = lesson.name;
+    description.value = lesson.description;
+    content.value = lesson.content;
+    day.value = lesson.day;
+    startTime.value = lesson.startTime;
+    endTime.value = lesson.endTime;
 
-      if (lesson.class && lesson.class.name) {
-        selectedClass.value = lesson.class.name;
-      }
-      // Wait for the next tick to ensure filteredSubjects is updated
-      await nextTick();
+    if (lesson.class && lesson.class.name) {
+      selectedClass.value = lesson.class.name;
+    }
+    // Wait for the next tick to ensure filteredSubjects is updated
+    await nextTick();
 
-      // Set subject ID directly from the response
-      if (lesson.subject && lesson.subject.id) {
-        selectedSubject.value = lesson.subject.id;
-      }
-    } catch (error) {
-      notificationStore.addNotification({
-        type: "error",
-        message: "Failed to load lesson",
-      });
+    // Set subject ID directly from the response
+    if (lesson.subject && lesson.subject.id) {
+      selectedSubject.value = lesson.subject.id;
     }
   }
 });
