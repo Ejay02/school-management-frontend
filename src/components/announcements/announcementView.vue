@@ -211,7 +211,6 @@ const fetchAnnouncement = async () => {
     }
   } catch (err) {
     error.value = err.message || "Failed to load announcement";
-    console.error("Error loading announcement:", err);
   } finally {
     loading.value = false;
   }

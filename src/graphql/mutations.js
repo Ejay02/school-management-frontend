@@ -428,6 +428,97 @@ export const updateExam = gql`
   }
 `;
 
+//  might want to assign an exam to only certain students in a class (for example, makeup exams, special assessments)
+
+export const assignExamToStudent = gql`
+  mutation assignExamToStudent($input: AssignExamToStudentInput) {
+    assignExamToStudent(input: $input) {
+      id
+      completedAt
+      createdAt
+      hasTaken
+      startedAt
+      student {
+        id
+        name
+        surname
+      }
+      exam {
+        id
+        title
+        date
+        description
+        instructions
+        content
+        questions {
+          id
+          type
+          content
+          options
+          correctAnswer
+          points
+        }
+        class {
+          id
+          name
+          students {
+            id
+            name
+            surname
+          }
+        }
+
+        classId
+        startTime
+        endTime
+
+        teacher {
+          id
+          name
+          surname
+        }
+      }
+    }
+  }
+`;
+
+
+
+export const startExam = gql`
+  mutation startExam($input: StartExamInput) {
+    startExam(input: $input) {
+      id
+      completedAt
+      createdAt
+      examId
+      hasTaken
+      startedAt
+      studentId
+      exam {
+        id
+        title
+      }
+    }
+  }
+`;
+
+export const completeExam = gql`
+  mutation completeExam($input: CompleteExamInput!) {
+    completeExam(input: $input) {
+      completedAt
+      createdAt
+      examId
+      hasTaken
+      startedAt
+      studentId
+      exam {
+        id
+        title
+      }
+    }
+  }
+`;
+
 export const deleteExam = gql`
   mutation deleteExam($examId: String!) {
     deleteExam(examId: $examId) {
@@ -762,7 +853,7 @@ export const updateFeeStructure = gql`
       term
       type
       totalAmount
-      classes{
+      classes {
         id
         name
       }
@@ -817,3 +908,5 @@ export const initiatePayment = gql`
     initiatePayment(invoiceId: $invoiceId, amount: $amount)
   }
 `;
+
+

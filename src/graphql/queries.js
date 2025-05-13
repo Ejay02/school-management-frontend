@@ -386,7 +386,7 @@ export const getClassExams = gql`
   query getClassExams($classId: String!, $params: PaginationInput) {
     getClassExams(classId: $classId, params: $params) {
       id
-      class{
+      class {
         id
         name
       }
@@ -405,7 +405,7 @@ export const getClassExams = gql`
         correctAnswer
         points
       }
-      subject{
+      subject {
         id
         name
       }
@@ -413,7 +413,6 @@ export const getClassExams = gql`
       teacherId
       createdAt
     }
-    
   }
 `;
 
@@ -450,6 +449,37 @@ export const getExamById = gql`
       subject {
         id
         name
+      }
+    }
+  }
+`;
+
+export const getStudentExams = gql`
+  query getStudentExams($studentId: String!) {
+    getStudentExams(studentId: $studentId) {
+      completedAt
+      createdAt
+      exam {
+        class {
+          id
+          name
+        }
+        content
+        description
+        endTime
+        id
+
+        instructions
+        questions {
+          content
+          correctAnswer
+          id
+          options
+          points
+          type
+        }
+        startTime
+        title
       }
     }
   }
@@ -921,5 +951,13 @@ export const getBillingReportDashboard = gql`
         revenue
       }
     }
+  }
+`;
+
+
+
+export const calculateFinalGrade = gql`
+  query calculateFinalGrade($classId: String!, $studentId: String!) {
+    calculateFinalGrade(classId: $classId, studentId: $studentId)
   }
 `;

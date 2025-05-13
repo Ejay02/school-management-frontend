@@ -8,12 +8,9 @@
     </div>
 
     <div class="flex flex-col gap-4">
-      <div v-if="loading" class="flex justify-center items-center py-8">
-        <LoadingScreen message="Loading announcements..." />
-      </div>
-      <div v-else-if="error" class="flex justify-center items-center py-8">
-        <ErrorScreen :message="error" />
-      </div>
+      <LoadingScreen v-if="loading" message="Loading announcements..." />
+
+      <ErrorScreen v-else-if="error" :message="error" />
 
       <EmptyState
         v-else-if="!announcements.length"

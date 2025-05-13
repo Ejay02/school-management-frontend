@@ -8,7 +8,10 @@
       <ErrorScreen v-else-if="error" :message="error" />
 
       <!-- Timer Banner -->
-      <div v-if="exam && isExamActive" class="bg-indigo-100 p-3 mb-4 rounded-lg shadow-sm">
+      <div
+        v-if="exam && isExamActive"
+        class="bg-indigo-100 p-3 mb-4 rounded-lg shadow-sm"
+      >
         <div class="flex justify-between items-center">
           <div class="text-indigo-800 font-medium flex items-center">
             <i class="fa-solid fa-hourglass-half mr-2 animate-pulse"></i>
@@ -21,24 +24,60 @@
       </div>
 
       <!-- Exam Not Started Yet -->
-      <div v-else-if="exam && !hasExamStarted" class="bg-amber-100 p-4 rounded-lg shadow-sm mb-4">
+      <div
+        v-else-if="exam && !hasExamStarted"
+        class="bg-amber-100 p-4 rounded-lg shadow-sm mb-4"
+      >
         <div class="flex items-center text-amber-800">
           <i class="fa-solid fa-clock mr-2"></i>
-          <span class="font-medium">This exam has not started yet. It will begin at {{ formatTime(exam.startTime) }} on   {{ formatDate(exam.date) }}.</span>
+          <span class="font-medium"
+            >This exam has not started yet. It will begin at
+            {{ formatTime(exam.startTime) }} on
+            {{ formatDate(exam.date) }}.</span
+          >
         </div>
       </div>
 
       <!-- Exam Ended -->
-      <div v-else-if="exam && hasExamEnded" class="bg-gray-100 p-4 rounded-lg shadow-sm mb-4">
+      <div
+        v-else-if="exam && hasExamEnded"
+        class="bg-gray-100 p-4 rounded-lg shadow-sm mb-4"
+      >
         <div class="flex items-center text-gray-800">
           <i class="fa-solid fa-flag-checkered mr-2"></i>
           <span class="font-medium">This exam has ended.</span>
+        </div>
+
+        <!-- Show score if exam is completed -->
+        <div
+          v-if="examCompleted"
+          class="mt-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm"
+        >
+          <h3 class="text-xl font-bold text-indigo-700 mb-2">Exam Results</h3>
+          <div
+            class="flex items-center justify-between bg-indigo-50 p-3 rounded-lg mb-3"
+          >
+            <span class="font-medium">Your Score:</span>
+            <span class="text-xl font-bold text-indigo-700"
+              >{{ score }} / {{ totalPossibleScore }}</span
+            >
+          </div>
+          <div
+            class="flex items-center justify-between bg-indigo-50 p-3 rounded-lg"
+          >
+            <span class="font-medium">Percentage:</span>
+            <span
+              class="text-xl font-bold"
+              :class="scorePercentage >= 70 ? 'text-green-600' : 'text-red-600'"
+              >{{ scorePercentage }}%</span
+            >
+          </div>
         </div>
       </div>
 
       <!-- Exam content -->
       <div
-        v-else-if="exam"
+        v-if="exam"
         class="bg-white rounded-xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer"
       >
         <!-- Exam header -->
@@ -224,10 +263,23 @@
                   <div
                     v-for="(option, optIndex) in question.options"
                     :key="optIndex"
-                    class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 bg-white hover:bg-indigo-50 hover:border-indigo-200 transition-colors duration-200"
+                    class="flex items-center space-x-3 p-3 rounded-lg border cursor-pointer"
+                    :class="{
+                      'bg-white hover:bg-indigo-50 hover:border-indigo-200 border-gray-200':
+                        userAnswers[index] !== option,
+                      'bg-indigo-100 border-indigo-300':
+                        userAnswers[index] === option,
+                    }"
+                    @click="selectAnswer(index, option)"
                   >
                     <div
-                      class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-indigo-100 border border-indigo-200 text-xs font-medium text-indigo-700"
+                      class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-xs font-medium"
+                      :class="{
+                        'bg-indigo-100 border border-indigo-200 text-indigo-700':
+                          userAnswers[index] !== option,
+                        'bg-indigo-600 text-white':
+                          userAnswers[index] === option,
+                      }"
                     >
                       {{ String.fromCharCode(65 + optIndex) }}
                     </div>
@@ -236,9 +288,25 @@
                 </div>
               </div>
 
+              <!-- Text Answer for non-MCQ questions -->
+              <div v-else class="mt-4">
+                <h4 class="font-medium text-gray-700 flex items-center mb-2">
+                  <i class="fa-solid fa-pen-to-square mr-2 text-indigo-500"></i>
+                  Your Answer:
+                </h4>
+                <textarea
+                  v-model="userAnswers[index]"
+                  rows="3"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Type your answer here..."
+                ></textarea>
+              </div>
+
               <!-- Correct Answer (only visible to teachers and admins) -->
               <div
-                v-if="isTeacherOrAdmin && question.correctAnswer && !isExamActive"
+                v-if="
+                  isTeacherOrAdmin && question.correctAnswer && !isExamActive
+                "
                 class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg shadow-sm"
               >
                 <h4 class="font-medium text-green-700 flex items-center">
@@ -252,6 +320,22 @@
               </div>
             </div>
           </div>
+
+          <!-- Submit button -->
+          <div
+            class="mt-8 flex justify-end"
+            v-if="isExamActive && !examCompleted"
+          >
+            <button
+              @click="submitExam"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center"
+              :disabled="!hasAnsweredAny"
+              :class="{ 'opacity-50 cursor-not-allowed': !hasAnsweredAny }"
+            >
+              <i class="fa-solid fa-paper-plane mr-2"></i>
+              Submit Exam
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -259,7 +343,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { apolloClient } from "../../../apollo-client";
 import { getExamById } from "../../graphql/queries";
@@ -280,6 +364,11 @@ const error = ref(null);
 const examQuestions = ref([]);
 const timeRemaining = ref(0);
 const timerInterval = ref(null);
+const userAnswers = ref({});
+const examCompleted = ref(false);
+const score = ref(0);
+const totalPossibleScore = ref(0);
+const scorePercentage = ref(0);
 
 const isTeacherOrAdmin = computed(() => {
   const role = userStore.currentRole?.toLowerCase();
@@ -307,19 +396,26 @@ const isExamActive = computed(() => {
   return hasExamStarted.value && !hasExamEnded.value;
 });
 
+// Check if user has answered any questions
+const hasAnsweredAny = computed(() => {
+  return Object.values(userAnswers.value).some(
+    (answer) => answer !== undefined && answer !== ""
+  );
+});
+
 // Process exam questions to remove correct answers from non-admin/teacher view
 // or when exam is active (even for teachers/admins)
 const processedExamQuestions = computed(() => {
   if (!examQuestions.value) return [];
-  
+
   // If user is not teacher/admin or exam is active, remove correct answers
   if (!isTeacherOrAdmin.value || isExamActive.value) {
-    return examQuestions.value.map(question => {
+    return examQuestions.value.map((question) => {
       const { correctAnswer, ...rest } = question;
       return rest;
     });
   }
-  
+
   // Otherwise return questions with answers (for teachers/admins after exam)
   return examQuestions.value;
 });
@@ -328,31 +424,88 @@ const processedExamQuestions = computed(() => {
 const formatTimeRemaining = (seconds) => {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
-  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+    .toString()
+    .padStart(2, "0")}`;
+};
+
+// Select an answer for a question
+const selectAnswer = (questionIndex, option) => {
+  userAnswers.value[questionIndex] = option;
+};
+
+// Calculate score based on user answers
+const calculateScore = () => {
+  let userScore = 0;
+  let possibleScore = 0;
+
+  examQuestions.value.forEach((question, index) => {
+    // Add points to possible score
+    possibleScore += question.points || 1;
+
+    // Check if answer is correct
+    if (userAnswers.value[index] && question.correctAnswer) {
+      if (userAnswers.value[index] === question.correctAnswer) {
+        userScore += question.points || 1;
+      }
+    }
+  });
+
+  score.value = userScore;
+  totalPossibleScore.value = possibleScore;
+  scorePercentage.value = Math.round((userScore / possibleScore) * 100) || 0;
+
+  // Log the score for debugging
+  console.log(
+    "Exam completed with score:",
+    userScore,
+    "/",
+    possibleScore,
+    "(",
+    scorePercentage.value,
+    "%)"
+  );
+
+  // Here you would typically send the score to your backend
+  // saveExamResult(exam.value.id, userScore, possibleScore, userAnswers.value);
+};
+
+// Submit the exam
+const submitExam = () => {
+  examCompleted.value = true;
+  calculateScore();
+
+  notificationStore.addNotification({
+    type: "success",
+    message: "Exam submitted successfully!",
+  });
 };
 
 // Start the timer
 const startTimer = () => {
   if (!exam.value || !exam.value.endTime) return;
-  
+
   // Calculate initial time remaining
   const now = new Date();
   const endTime = new Date(exam.value.endTime);
   const initialTimeRemaining = Math.max(0, Math.floor((endTime - now) / 1000));
-  
+
   timeRemaining.value = initialTimeRemaining;
-  
+
   // Set up interval to update timer every second
   timerInterval.value = setInterval(() => {
     if (timeRemaining.value > 0) {
       timeRemaining.value--;
     } else {
-      // Time's up
+      // Time's up - auto submit
       clearInterval(timerInterval.value);
-      notificationStore.addNotification({
-        type: "info",
-        message: "Exam time has ended",
-      });
+      if (!examCompleted.value) {
+        submitExam();
+        notificationStore.addNotification({
+          type: "info",
+          message: "Time's up! Your exam has been automatically submitted.",
+        });
+      }
     }
   }, 1000);
 };
@@ -389,10 +542,27 @@ onMounted(async () => {
       } else {
         examQuestions.value = [];
       }
-      
+
+      // Initialize userAnswers object
+      examQuestions.value.forEach((_, index) => {
+        userAnswers.value[index] = "";
+      });
+
       // Start timer if exam is active
       if (isExamActive.value) {
         startTimer();
+      }
+
+      // If exam has ended, check if we have saved answers/score
+      if (hasExamEnded.value) {
+        // Here you would typically fetch saved results if they exist
+        // const savedResults = await fetchExamResults(exam.value.id);
+        // if (savedResults) {
+        //   examCompleted.value = true;
+        //   score.value = savedResults.score;
+        //   totalPossibleScore.value = savedResults.totalPossible;
+        //   scorePercentage.value = savedResults.percentage;
+        // }
       }
     } else {
       error.value = "Exam not found";
