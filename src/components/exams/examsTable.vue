@@ -19,7 +19,6 @@
               {{ item?.title }}
             </h3>
             <div class="flex items-center mt-1 text-indigo-100">
-              <!-- <i class="fa-solid fa-chalkboard-user mr-2"></i> -->
               <i class="fa-solid fa-book mr-2"></i>
               <span>{{ item?.subject?.name }}</span>
             </div>
@@ -77,8 +76,23 @@
           <button
             @click="viewExam(item.id)"
             class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center"
+            :disabled="
+              getExamStatus(item) === 'completed' ||
+              (role === 'super_admin' && getExamStatus(item) !== 'active')
+            "
           >
-            <i class="fa-solid fa-eye mr-1"></i> View
+            <i class="fa-solid fa-eye mr-1"></i>
+            {{
+              isCreator(item.id)
+                ? "View"
+                : getExamStatus(item) === "completed"
+                ? "Completed"
+                : role === "super_admin"
+                ? `Start Exam (${formatTime(item.startTime)} - ${formatTime(
+                    item.endTime
+                  )})`
+                : "View"
+            }}
           </button>
 
           <div class="flex gap-2">
@@ -129,6 +143,36 @@ const router = useRouter();
 const userStore = useUserStore();
 const role = userStore.currentRole;
 const modalStore = useModalStore();
+
+const userId = userStore.userInfo?.id;
+
+const teacherId = (examId) => {
+  const exam = props.data.find((e) => e.id === examId);
+  return exam?.teacher?.id;
+};
+
+const isCreator = (examId) => teacherId(examId) === userId;
+
+const getExamStatus = (exam) => {
+  const now = new Date();
+
+  // Use the full ISO strings directly since they already include date and time
+  const startDateTime = new Date(exam.startTime);
+  const endDateTime = new Date(exam.endTime);
+
+  if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
+    console.error("Invalid date format:", {
+      date: exam.date,
+      startTime: exam.startTime,
+      endTime: exam.endTime,
+    });
+    return "active"; // Default to active if we can't determine
+  }
+
+  if (now < startDateTime) return "upcoming";
+  if (now > endDateTime) return "completed";
+  return "active";
+};
 
 // Filter and sort exams
 const filteredData = computed(() => {

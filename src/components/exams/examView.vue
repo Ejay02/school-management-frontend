@@ -375,6 +375,30 @@ const isTeacherOrAdmin = computed(() => {
   return role === "teacher" || role === "admin" || role === "super_admin";
 });
 
+const isTeacherForSubject = () => {
+  if (!selectedSubject.value || !userId) return false;
+
+  // Instead of relying on the store's subject data, use the subject data from the class
+  // which contains the necessary teacher information
+  const classObj = classStore.allClasses.find(
+    (c) => c.name === selectedClass.value
+  );
+  const subject = classObj?.subjects?.find(
+    (s) => s.id === selectedSubject.value
+  );
+
+  // If we're the supervisor of the class, we can create exams for any subject
+  if (classObj?.supervisor?.id === userId) return true;
+
+  // Check if the subject exists in the selected class
+  return !!subject;
+};
+
+const isAssignedTeacher = computed(() => {
+  if (!isTeacher) return false;
+  return isTeacherForSubject();
+});
+
 // Compute if exam has started based on current time and exam start time
 const hasExamStarted = computed(() => {
   if (!exam.value || !exam.value.startTime) return false;
