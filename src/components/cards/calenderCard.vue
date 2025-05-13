@@ -32,7 +32,8 @@
     </div>
 
     <div class="flex flex-col gap-4">
-      <LoadingScreen v-if="eventStore.loading" message="Loading Events..." />
+      <ListSkeleton v-if="eventStore.loading" v-for="i in 3" :key="`skeleton-${i}`" />
+
       <ErrorScreen v-else-if="eventStore.error" />
 
       <!-- Empty state -->
@@ -125,7 +126,8 @@ import {
 } from "../../utils/date.holidays";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
-import LoadingScreen from "../loadingScreen.vue";
+import ListSkeleton from "../skeletonLoaders/listSkeleton.vue";
+
 
 const eventStore = useEventStore();
 

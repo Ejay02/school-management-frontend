@@ -8,7 +8,7 @@
     </div>
 
     <div class="flex flex-col gap-4">
-      <LoadingScreen v-if="loading" message="Loading announcements..." />
+      <ListSkeleton v-if="loading" v-for="i in 3" :key="`skeleton-${i}`" />
 
       <ErrorScreen v-else-if="error" :message="error" />
 
@@ -61,7 +61,8 @@ import { useUserStore } from "../../store/userStore";
 import { formatDate } from "../../utils/date.holidays";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
-import LoadingScreen from "../loadingScreen.vue";
+
+import ListSkeleton from "../skeletonLoaders/listSkeleton.vue";
 
 const userStore = useUserStore();
 const announcementStore = useAnnouncementStore();
