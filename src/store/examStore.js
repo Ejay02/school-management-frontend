@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 
 import { apolloClient } from "../../apollo-client";
+import { completeExam, startExam } from "../graphql/mutations";
 import { getAllExams, getClassExams } from "../graphql/queries";
 
 export const useExamStore = defineStore("examStore", {
@@ -90,6 +91,58 @@ export const useExamStore = defineStore("examStore", {
     async refreshClassExams(classId, { page = 1, limit = 10 } = {}) {
       this.resetExams();
       await this.fetchClassExams(classId, { page, limit });
+    },
+
+    async startExamSession(examId, studentId) {
+      this.loading = true;
+      try {
+        const { data } = await apolloClient.mutate({
+          mutation: startExam,
+          variables: {
+            input: { examId, studentId },
+          },
+        });
+
+        if (data && data.startExam) {
+          this.currentExamSession = data.startExam;
+          return data.startExam;
+        }
+        return null;
+      } catch (err) {
+        this.error = err;
+        throw err;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // Complete an exam session
+    async completeExamSession(examId, score, studentId) {
+      this.loading = true;
+      try {
+        const { data } = await apolloClient.mutate({
+          mutation: completeExam,
+          variables: {
+            input: {
+              examId,
+              score,
+              studentId,
+            },
+          },
+        });
+
+        if (data && data.completeExam) {
+          // Update the current exam session with completed data
+          this.currentExamSession = data.completeExam;
+          return data.completeExam;
+        }
+        return null;
+      } catch (err) {
+        this.error = err;
+        throw err;
+      } finally {
+        this.loading = false;
+      }
     },
   },
 });

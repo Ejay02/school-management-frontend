@@ -347,6 +347,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { apolloClient } from "../../../apollo-client";
 import { getExamById } from "../../graphql/queries";
+import { useExamStore } from "../../store/examStore";
 import { useNotificationStore } from "../../store/notification";
 import { useUserStore } from "../../store/userStore";
 import { formatDate, formatTime } from "../../utils/date.holidays";
@@ -355,6 +356,8 @@ import LoadingScreen from "../loadingScreen.vue";
 
 const route = useRoute();
 const router = useRouter();
+
+const examStore = useExamStore();
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
 
@@ -494,15 +497,38 @@ const calculateScore = () => {
   // saveExamResult(exam.value.id, userScore, possibleScore, userAnswers.value);
 };
 
-// Submit the exam
-const submitExam = () => {
-  examCompleted.value = true;
+const submitExam = async () => {
+  // Calculate the score first
   calculateScore();
 
-  notificationStore.addNotification({
-    type: "success",
-    message: "Exam submitted successfully!",
-  });
+  try {
+    // Call the completeExam mutation
+    await examStore.completeExamSession(
+      exam.value.id,
+      score.value,
+      userStore.userInfo?.id 
+    );
+
+    // Update UI state
+    examCompleted.value = true;
+  
+
+    // Clear the timer if it's running
+    if (timerInterval.value) {
+      clearInterval(timerInterval.value);
+    }
+
+    notificationStore.addNotification({
+      type: "success",
+      message: "Exam submitted successfully!",
+    });
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: "Failed to submit exam: " + (error.message || "Unknown error"),
+    });
+    console.error("Error submitting exam:", error);
+  }
 };
 
 // Start the timer

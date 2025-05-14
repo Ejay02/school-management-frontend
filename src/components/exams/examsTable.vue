@@ -45,7 +45,7 @@
 
         <!-- Card content -->
         <div class="p-4 flex-1 flex flex-col">
-          <div class="mb-3 text-sm text-gray-600 line-clamp-3 font-serif">
+          <div class="mb-3 text-sm text-gray-600 line-clamp-3 font-serif h-14">
             {{ item?.description || "No description provided" }}
           </div>
 
@@ -127,6 +127,8 @@
 <script setup>
 import { computed } from "vue";
 import { useRouter } from "vue-router";
+import { useExamStore } from "../../store/examStore";
+import { useNotificationStore } from "../../store/notification";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
 import { formatDate, formatTime } from "../../utils/date.holidays";
@@ -144,9 +146,11 @@ const props = defineProps({
 
 const router = useRouter();
 const userStore = useUserStore();
-const role = userStore.currentRole;
 const modalStore = useModalStore();
+const examStore = useExamStore();
+const notificationStore = useNotificationStore();
 
+const role = userStore.currentRole;
 const userId = userStore.userInfo?.id;
 
 const teacherId = (examId) => {
@@ -184,7 +188,26 @@ const filteredData = computed(() => {
   return exams;
 });
 
-const viewExam = (examId) => {
+const viewExam = async (examId) => {
+  // If user is a student and exam is active, start the exam session
+  if (
+    role.toLowerCase() === "student" &&
+    getExamStatus(props.data.find((e) => e.id === examId)) === "active"
+  ) {
+    try {
+      await examStore.startExamSession(examId, userId);
+      notificationStore.addNotification({
+        type: "success",
+        message: "Exam started successfully!",
+      });
+    } catch (error) {
+      notificationStore.addNotification({
+        type: "error",
+        message: "Failed to start exam: " + (error.message || "Unknown error"),
+      });
+      return;
+    }
+  }
   router.push(`/exams/${examId}`);
 };
 
