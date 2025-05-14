@@ -4,9 +4,31 @@
       <div
         class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-t-lg"
       >
-        <h1 class="text-2xl font-bold">
-          {{ isEditing ? "Edit Lesson" : "Create New Lesson" }}
-        </h1>
+        <div class="flex gap-2">
+          <button
+            @click="$router.back()"
+            class="top-4 left-4 bg-white/20 backdrop-blur-sm p-2 rounded-full text-white hover:bg-white/30 transition-all animate-bounce-once"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
+          </button>
+
+          <h1 class="text-2xl font-bold">
+            {{ isEditing ? "Edit Lesson" : "Create New Lesson" }}
+          </h1>
+        </div>
       </div>
 
       <div class="p-6">

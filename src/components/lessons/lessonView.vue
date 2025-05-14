@@ -10,48 +10,54 @@
         <div
           class="rounded-md bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 relative"
         >
-        <div class="absolute inset-0 pattern-dots opacity-10"></div>
+          <div class="absolute inset-0 pattern-dots opacity-10"></div>
           <!-- Back arrow button -->
-          <button
-            @click="goBack"
-            class="absolute top-4 left-4 bg-white/20 backdrop-blur-sm p-2 rounded-full text-white hover:bg-white/30 transition-all animate-bounce-once"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-          </button>
+          <div class="gap-10 flex">
+            <div class="">
+              <button
+                @click="goBack"
+                class="absolute top-4 left-4 bg-white/20 backdrop-blur-sm p-2 rounded-full text-white hover:bg-white/30 transition-all animate-bounce-once"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+              </button>
+            </div>
 
-          <h1 class="ml-8 text-2xl md:text-3xl font-bold mb-2">
-            {{ lesson?.name }}
-          </h1>
+            <div class="">
+              <h1 class="text-2xl md:text-3xl font-bold mb-2">
+                {{ lesson?.name }}
+              </h1>
 
-          <p class="ml-8 text-indigo-100 flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5 mr-2"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838l-2.328.996.002 1.069c0 .54.384 1.006.914 1.096l3.487.594a1 1 0 01.171.035l4.473 1.535a1 1 0 001.294-.95V10.01c0-.363-.196-.696-.504-.874L10.394 2.08z"
-              />
-              <path
-                d="M7.032 11.165a3 3 0 01.596-.541l4-1.714a1 1 0 01.788 0l7 3a1 1 0 010 1.84l-7 3a1 1 0 01-.788 0l-7-3a1 1 0 010-1.84l1.025-.439"
-              />
-            </svg>
-            {{ lesson?.class?.name || "No class assigned" }}
-          </p>
+              <p class="text-indigo-100 flex items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 mr-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838l-2.328.996.002 1.069c0 .54.384 1.006.914 1.096l3.487.594a1 1 0 01.171.035l4.473 1.535a1 1 0 001.294-.95V10.01c0-.363-.196-.696-.504-.874L10.394 2.08z"
+                  />
+                  <path
+                    d="M7.032 11.165a3 3 0 01.596-.541l4-1.714a1 1 0 01.788 0l7 3a1 1 0 010 1.84l-7 3a1 1 0 01-.788 0l-7-3a1 1 0 010-1.84l1.025-.439"
+                  />
+                </svg>
+                {{ lesson?.class?.name || "No class assigned" }}
+              </p>
+            </div>
+          </div>
         </div>
 
         <!-- Lesson Content -->
@@ -388,7 +394,6 @@ const loading = computed(() => lessonStore.loading);
 const error = computed(() => lessonStore.error);
 
 const { isTeacher, userId, isAssignedToSelection } = useTeacherAccessCheck();
-
 
 const formatTime = (timeString) => {
   if (!timeString) return "";
