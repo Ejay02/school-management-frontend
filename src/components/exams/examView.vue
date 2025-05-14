@@ -41,9 +41,9 @@
       <!-- Exam Ended -->
       <div
         v-else-if="exam && hasExamEnded"
-        class="bg-gray-100 p-4 rounded-lg shadow-sm mb-4"
+        class="p-4 rounded-lg shadow-sm mb-4 bg-amber-400"
       >
-        <div class="flex items-center text-gray-800">
+        <div class="flex items-center text-gray-800 ">
           <i class="fa-solid fa-flag-checkered mr-2"></i>
           <span class="font-medium">This exam has ended.</span>
         </div>
@@ -85,7 +85,8 @@
           class="bg-gradient-to-r from-indigo-600 to-purple-700 p-6 text-white relative overflow-hidden"
         >
           <div class="absolute inset-0 bg-black opacity-10 pattern-dots"></div>
-          <div class="flex items-start relative z-10">
+          <div class="flex items-start relative z-10 justify-between">
+            <div class="flex items-start">
             <button
               @click="$router.back()"
               class="bg-white/20 backdrop-blur-sm p-2.5 rounded-full text-white hover:bg-white/30 transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 mr-4"
@@ -118,6 +119,33 @@
                 <div class="flex items-center">
                   <i class="fa-solid fa-chalkboard-user mr-2"></i>
                   <span>{{ exam.class?.name || "No Class" }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+            <!--  -->
+            <div class=" flex items-center">
+              <div class="flex items-center space-x-3 bg-gray-50 p-3 rounded-lg">
+                <div class="relative">
+                  <img
+                    v-if="exam.teacher?.image"
+                    :src="exam.teacher.image"
+                    :alt="`${exam.teacher?.name} avatar`"
+                    class="w-12 h-12 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
+                  />
+                  <div
+                    v-else
+                    class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white border-2 border-indigo-200 shadow-sm capitalize"
+                  >
+                    {{ exam.teacher?.name?.[0] }}{{ exam.teacher?.surname?.[0] }}
+                  </div>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">Created by:</p>
+                  <p class="text-sm font-bold text-indigo-700 capitalize">
+                    {{ exam.teacher?.name || "Unknown" }}
+                    {{ exam.teacher?.surname || "" }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -179,31 +207,7 @@
             <p class="text-gray-700">{{ exam.instructions }}</p>
           </div>
 
-          <div class="mt-6 flex items-center">
-            <div class="flex items-center space-x-3 bg-gray-50 p-3 rounded-lg">
-              <div class="relative">
-                <img
-                  v-if="exam.teacher?.image"
-                  :src="exam.teacher.image"
-                  :alt="`${exam.teacher?.name} avatar`"
-                  class="w-12 h-12 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
-                />
-                <div
-                  v-else
-                  class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white border-2 border-indigo-200 shadow-sm capitalize"
-                >
-                  {{ exam.teacher?.name?.[0] }}{{ exam.teacher?.surname?.[0] }}
-                </div>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-gray-900">Created by:</p>
-                <p class="text-sm font-bold text-indigo-700 capitalize">
-                  {{ exam.teacher?.name || "Unknown" }}
-                  {{ exam.teacher?.surname || "" }}
-                </p>
-              </div>
-            </div>
-          </div>
+         
         </div>
 
         <!-- Questions section -->
