@@ -65,6 +65,21 @@
               ></textarea>
             </div>
 
+            <!-- Instructions -->
+            <div>
+              <label
+                for="instructions"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Instructions</label
+              >
+              <textarea
+                v-model="instructions"
+                rows="3"
+                class="cursor-pointer mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Enter exam instructions for students"
+              ></textarea>
+            </div>
+
             <!-- Class and Subject Selection -->
             <div class="flex gap-4">
               <Dropdown
