@@ -504,10 +504,7 @@ export const getAllAssignments = gql`
         points
       }
       createdAt
-      lesson {
-        id
-        name
-      }
+    
       teacher {
         id
         name

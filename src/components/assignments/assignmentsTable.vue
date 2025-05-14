@@ -19,13 +19,15 @@
       >
         <td class="flex items-center gap-4 p-2">
           <div class="flex flex-col">
-            <div class="font-semibold">{{ item?.subject }}</div>
+            <div class="font-semibold">{{ item?.subject?.name }}</div>
           </div>
         </td>
 
-        <td class="hidden md:table-cell">{{ item?.class }}</td>
-        <td class="hidden md:table-cell">{{ item?.teacher }}</td>
-        <td class="hidden md:table-cell">{{ item?.dueDate }}</td>
+        <td class="hidden md:table-cell">{{ item?.class?.name }}</td>
+        <td class="hidden md:table-cell">
+          {{ item?.teacher?.name }} {{ item?.teacher?.surname }}
+        </td>
+        <td class="hidden md:table-cell">{{ formatDate(item?.dueDate) }}</td>
 
         <td>
           <div class="flex items-center gap-2">
@@ -71,8 +73,10 @@
 </template>
 
 <script setup>
+import { useRouter } from "vue-router";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
+import { formatDate } from "../../utils/date.holidays";
 
 const props = defineProps({
   columns: {
@@ -84,6 +88,8 @@ const props = defineProps({
     required: true,
   },
 });
+
+const router = useRouter();
 
 const userStore = useUserStore();
 
@@ -98,12 +104,8 @@ const showDelModal = (id, title, type) => {
   modalStore.source = type;
 };
 
-const showEditModal = (id, title, data, type) => {
-  modalStore.editModal = true;
-  modalStore.modalId = id;
-  modalStore.modalTitle = title;
-  modalStore.data = data;
-  modalStore.source = type;
+const showEditModal = (id) => {
+  router.push(`dashboard/assignment/${id}/edit`);
 };
 </script>
 
