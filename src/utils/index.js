@@ -50,18 +50,12 @@ export const menuItems = [
         icon: "/subject.png",
         label: "Subjects",
         href: "/subjects",
-        visible: ["super_admin", "admin"],
+        visible: ["super_admin", "admin", "teacher", "student", "parent"],
       },
       {
         icon: "/lesson.png",
         label: "Lessons",
         href: "/lessons",
-        visible: ["super_admin", "admin", "teacher"],
-      },
-      {
-        icon: "/exam.png",
-        label: "Exams",
-        href: "/exams",
         visible: ["super_admin", "admin", "teacher", "student", "parent"],
       },
       {
@@ -69,6 +63,12 @@ export const menuItems = [
         label: "Assignments",
         href: "/assignments",
         visible: ["super_admin", "admin", "teacher", "student", "parent"],
+      },
+      {
+        icon: "/exam.png",
+        label: "Exams",
+        href: "/exams",
+        visible: ["super_admin", "admin", "teacher", "student"],
       },
       {
         icon: "/result.png",
