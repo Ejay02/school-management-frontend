@@ -90,6 +90,7 @@ import { apolloClient } from "../../../apollo-client";
 import {
   deleteClass,
   deleteEvent,
+  deleteExam,
   deleteFeeStructure,
   deleteLesson,
   deleteSubject,
@@ -102,20 +103,22 @@ import { useLessonStore } from "../../store/lessonStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 
-import { useUserStore } from "../../store/userStore";
 import { useFeeStructureStore } from "../../store/feeStructureStore";
+import { useUserStore } from "../../store/userStore";
+import { useExamStore } from "../../store/examStore";
 
+const examStore = useExamStore();
+const userStore = useUserStore();
 const modalStore = useModalStore();
 const classStore = useClassStore();
-const userStore = useUserStore();
 const eventStore = useEventStore();
 const lessonStore = useLessonStore();
 const subjectStore = useSubjectStore();
 const feeStructureStore = useFeeStructureStore();
+const notificationStore = useNotificationStore();
 
 const router = useRouter();
 
-const notificationStore = useNotificationStore();
 
 const isModalVisible = ref(modalStore.deleteModal);
 
@@ -203,8 +206,18 @@ const handleDelete = async () => {
         message: "Lesson deleted successfully",
       });
     } else if (source.value === "examList") {
-      console.log("hello from exams");
-      // TODO
+      await apolloClient.mutate({
+        mutation: deleteExam,
+        variables: {
+          examId: modalStore.modalId,
+        },
+      });
+      await examStore.refreshExams();
+
+      notificationStore.addNotification({
+        type: "success",
+        message: "Exam deleted successfully",
+      });
     } else if (source.value === "assignmentList") {
       console.log("hello from assignments");
     } else if (source.value === "resultList") {
@@ -272,9 +285,9 @@ const handleDelete = async () => {
 
       await feeStructureStore.refreshFeeStructures();
       notificationStore.addNotification({
-          type: "success",
-          message: "Fee structure deleted successfully",
-        });
+        type: "success",
+        message: "Fee structure deleted successfully",
+      });
     }
     modalStore.deleteModal = false;
   } catch (error) {
