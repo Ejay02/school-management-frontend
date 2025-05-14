@@ -12,7 +12,7 @@
       <div
         class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 relative"
       >
-      <div class="absolute inset-0 pattern-dots opacity-10"></div>
+        <div class="absolute inset-0 pattern-dots opacity-10"></div>
         <h3 class="text-xl font-medium capitalize items-center text-center">
           Edit {{ formatSourceTitle(source) }}
         </h3>
@@ -334,13 +334,35 @@
           </div>
 
           <div class="flex gap-2">
-            <Dropdown
-              class="w-1/2"
-              v-model="selectedTeacher"
-              label="Select Teacher"
-              :options="teacherNames"
-              emptyLabel="Select a teacher"
-            />
+            <div class="w-1/2">
+              <div
+                class=""
+                v-if="userStore.currentRole.toLowerCase() === 'teacher'"
+              >
+                <label
+                  for="teacher"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Teacher</label
+                >
+                <div>
+                  <input
+                    :value="
+                      userStore.userInfo.name + ' ' + userStore.userInfo.surname
+                    "
+                    readonly
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-not-allowed"
+                  />
+                </div>
+              </div>
+              <Dropdown
+                v-else
+                v-model="selectedTeacher"
+                label="Select Teacher"
+                :options="teacherNames"
+                emptyLabel="Select a teacher"
+              />
+            </div>
+            <!--  -->
 
             <Dropdown
               class="w-1/2"
@@ -675,19 +697,19 @@ import { computed, onMounted, ref, watch } from "vue";
 
 import { useModalStore } from "@/store/useModalStore";
 import { apolloClient } from "../../../apollo-client";
-import { useTeacherAccessCheck } from "../../composables/useTeacherAccessCheck";
 import {
   editAnnouncement,
   updateClass,
   updateSubject,
 } from "../../graphql/mutations";
+import { useAnnouncementStore } from "../../store/announcementStore";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
 import { availableTargetRoles } from "../../utils/utility";
-import { useAnnouncementStore } from "../../store/announcementStore";
 
+import { useUserStore } from "../../store/userStore";
 import Dropdown from "../dropdowns/dropdown.vue";
 
 const modalStore = useModalStore();
@@ -695,6 +717,7 @@ const modalStore = useModalStore();
 const classStore = useClassStore();
 const teacherStore = useTeacherStore();
 const subjectStore = useSubjectStore();
+const userStore = useUserStore();
 
 const announcementStore = useAnnouncementStore();
 
@@ -725,8 +748,6 @@ const className = ref("");
 const classCapacity = ref("");
 
 const transformedData = ref({});
-
-const { isTeacher, userId, isAssignedToSelection } = useTeacherAccessCheck();
 
 const toggleTargetRolesDropdown = () => {
   isTargetRolesDropdownOpen.value = !isTargetRolesDropdownOpen.value;
@@ -763,35 +784,6 @@ const removeTargetRole = (role) => {
     selectedTargetRoles.value.splice(index, 1);
   }
 };
-
-const fullTeacherName = computed({
-  get() {
-    // Returns both name and surname concatenated or NA if null
-    if (!data?.value?.teacher?.name && !data?.value?.teacher?.surname) {
-      return "NA";
-    }
-    return `${data?.value?.teacher?.name || ""} ${
-      data?.value?.teacher?.surname || ""
-    }`.trim();
-  },
-  set(newValue) {
-    // If NA is entered, set both name and surname to empty
-    if (newValue === "NA") {
-      if (data.value && data.value.teacher) {
-        data.value.teacher.name = "";
-        data.value.teacher.surname = "";
-      }
-      return;
-    }
-
-    // Split the input value into parts
-    const parts = newValue.split(" ");
-    if (data.value && data.value.teacher) {
-      data.value.teacher.name = parts.shift() || "";
-      data.value.teacher.surname = parts.join(" ");
-    }
-  },
-});
 
 const teacherNames = computed(() => {
   return teacherStore.getTeacherNames?.map((teacher) => teacher.name) || [];
@@ -858,6 +850,16 @@ const handleEdit = async () => {
         message: "Class updated successfully",
       });
     } else if (source.value === "subjectList") {
+      // Determine the teacher ID based on user role
+      let teacherId;
+      if (userStore.currentRole.toLowerCase() === "teacher") {
+        // If user is a teacher, use their own ID
+        teacherId = userStore.userInfo.id;
+      } else {
+        // For admins, use the selected teacher
+        teacherId = getTeacherIdByName(selectedTeacher.value);
+      }
+
       await apolloClient.mutate({
         mutation: updateSubject,
         variables: {
@@ -865,7 +867,7 @@ const handleEdit = async () => {
           input: {
             name: subjectName.value,
             classId: getClassIdByName(selectedClass.value),
-            teacherId: getTeacherIdByName(selectedTeacher.value),
+            teacherId: teacherId,
           },
         },
       });
@@ -881,7 +883,6 @@ const handleEdit = async () => {
       console.log("hello from assignments");
     } else if (source.value === "resultList") {
       console.log("hello from results");
-  
     } else if (source.value === "announcementList") {
       await apolloClient.mutate({
         mutation: editAnnouncement,
@@ -992,8 +993,8 @@ watch(
         }
       } else if (source.value === "announcementList") {
         // Initialize selected class if it exists in the data
-         announcementTitle.value = newVal.title || "";
-         content.value = newVal.content || "";
+        announcementTitle.value = newVal.title || "";
+        content.value = newVal.content || "";
         if (newVal.class) {
           selectedClass.value = newVal.class.name || "";
         }

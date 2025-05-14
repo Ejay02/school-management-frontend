@@ -31,8 +31,8 @@
               :key="teacher.id"
               class="teacher-tag capitalize"
             >
-              {{ teacher.name
-              }} {{teacher?.surname}}<span v-if="idx < item.teachers.length - 1">, </span>
+              {{ teacher.name }} {{ teacher?.surname
+              }}<span v-if="idx < item.teachers.length - 1">, </span>
             </span>
           </template>
           <template v-else>
@@ -43,7 +43,14 @@
         <!-- <td class="hidden md:table-cell">{{ item?.teachers.join(", ") }}</td> -->
 
         <td>
-          <div class="flex items-center gap-2">
+          <div
+            class="flex items-center gap-2"
+            v-if="
+              role.toLowerCase() === 'teacher' ||
+              role.toLowerCase() === 'admin' ||
+              role.toLowerCase() === 'super_admin'
+            "
+          >
             <div
               class="group relative"
               @click="showEditModal(item.id, item.name, item, 'subjectList')"
@@ -61,7 +68,6 @@
             </div>
 
             <button
-              v-if="role.toLowerCase() === 'super_admin'"
               @click="showDelModal(item.id, item.name, 'subjectList')"
               class="group relative w-6 h-6 flex items-center justify-center rounded-full"
             >

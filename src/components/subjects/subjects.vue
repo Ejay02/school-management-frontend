@@ -39,6 +39,7 @@ import Pagination from "../pagination.vue";
 
 import { computed, onMounted, ref, watch } from "vue";
 import { useSubjectStore } from "../../store/subjectStore";
+import { useUserStore } from "../../store/userStore";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
@@ -46,7 +47,12 @@ import SubjectTable from "./subjectTable.vue";
 
 const limit = 10;
 const currentPage = ref(1);
+
 const subjectStore = useSubjectStore();
+const userStore = useUserStore();
+
+const role = userStore.currentRole;
+
 const error = computed(() => subjectStore.error);
 
 const loading = computed(() => subjectStore.loading);
@@ -74,11 +80,16 @@ const columns = [
     accessor: "teachers",
     class: "hidden md:table-cell",
   },
-
-  {
-    header: "Actions",
-    accessor: "action",
-  },
+  ...(role.toLowerCase() === "teacher" ||
+  role.toLowerCase() === "admin" ||
+  role.toLowerCase() === "super_admin"
+    ? [
+        {
+          header: "Actions",
+          accessor: "action",
+        },
+      ]
+    : []),
 ];
 </script>
 
