@@ -2,8 +2,9 @@
   <div class="container mx-auto rounded border border-gray-300 p-2 w-full">
     <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-md">
       <div
-        class="flex gap-2 bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors text-white p-6 rounded-t-lg"
+        class="flex gap-2 bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors text-white p-6 rounded-t-lg relative"
       >
+      <div class="absolute inset-0 pattern-dots opacity-10"></div>
         <button
           @click="$router.back()"
           class="top-4 left-4 bg-white/20 backdrop-blur-sm p-2 rounded-full text-white hover:bg-white/30 transition-all animate-bounce-once"

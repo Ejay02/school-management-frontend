@@ -2,8 +2,9 @@
   <div class="container mx-auto rounded border border-gray-300 p-2 w-full">
     <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-md">
       <div
-        class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-t-lg"
+        class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-t-lg relative"
       >
+      <div class="absolute inset-0 pattern-dots opacity-10"></div>
         <div class="flex gap-2">
           <button
             @click="$router.back()"
