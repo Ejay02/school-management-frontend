@@ -421,7 +421,6 @@ import Dropdown from "../dropdowns/dropdown.vue";
 
 import { useTeacherAccessCheck } from "../../composables/useTeacherAccessCheck";
 import { useLessonStore } from "../../store/lessonStore";
-import { useTeacherStore } from "../../store/teacherStore";
 import { useUserStore } from "../../store/userStore";
 import { questionTypes } from "../../utils/utility";
 
@@ -431,10 +430,9 @@ const userStore = useUserStore();
 const classStore = useClassStore();
 const subjectStore = useSubjectStore();
 const lessonStore = useLessonStore();
-const teacherStore = useTeacherStore();
 const notificationStore = useNotificationStore();
 
-const { isTeacher, userId, isAssignedToSelection } = useTeacherAccessCheck();
+const { isTeacher, isAssignedToSelection } = useTeacherAccessCheck();
 
 const title = ref("");
 const description = ref("");
@@ -444,8 +442,6 @@ const dueDate = ref("");
 const selectedClass = ref("");
 const selectedSubject = ref("");
 const selectedLesson = ref("");
-const startTime = ref("");
-const endTime = ref("");
 
 const isAssignedTeacher = computed(() =>
   isAssignedToSelection(
@@ -606,54 +602,39 @@ onMounted(async () => {
   if (!lessonStore.lessons.length) lessonStore.fetchLessons();
 
   if (isEditing.value) {
-    try {
-      const { data } = await apolloClient.query({
-        query: getAssignmentById,
-        variables: { assignmentId: route.params.id },
-        fetchPolicy: "network-only",
-      });
+    const { data } = await apolloClient.query({
+      query: getAssignmentById,
+      variables: { assignmentId: route.params.id },
+      fetchPolicy: "network-only",
+    });
 
-      const assignment = data.getAssignmentById;
-      title.value = assignment.title;
-      description.value = assignment.description;
-      instructions.value = assignment.instructions;
-      questions.value = JSON.parse(assignment.content).questions;
-      startDate.value = assignment.startDate.split("T")[0]; // Adjusting format
-      dueDate.value = assignment.dueDate.split("T")[0];
+    const assignment = data.getAssignmentById;
+    title.value = assignment.title;
+    description.value = assignment.description;
+    instructions.value = assignment.instructions;
+    questions.value = JSON.parse(assignment.content).questions;
+    startDate.value = assignment.startDate.split("T")[0];
+    dueDate.value = assignment.dueDate.split("T")[0];
 
-      // Find and set the class by name instead of ID
-      if (assignment.class && assignment.class.name) {
-        selectedClass.value = assignment.class.name;
-      }
+    // Find and set the class by name instead of ID
+    if (assignment.class && assignment.class.name) {
+      selectedClass.value = assignment.class.name;
+    }
 
-      // Wait for subjects to load based on selected class
-      await nextTick();
+    // Wait for subjects to load based on selected class
+    await nextTick();
 
-      // Find and set the subject
-      if (assignment.subject && assignment.subject.id) {
-        selectedSubject.value = assignment.subject.id;
-      }
+    // Find and set the subject
+    if (assignment.subject && assignment.subject.id) {
+      selectedSubject.value = assignment.subject.id;
+    }
 
-      // Wait for lessons to load based on selected subject
-      await nextTick();
+    // Wait for lessons to load based on selected subject
+    await nextTick();
 
-      // Find and set the lesson
-      if (assignment.lesson && assignment.lesson.id) {
-        selectedLesson.value = assignment.lesson.id;
-      }
-
-      // Load existing questions
-      // if (assignment.questions && Array.isArray(assignment.questions)) {
-      //   questions.value = assignment.questions.map((q) => ({
-      //     type: q.type,
-      //     content: q.content,
-      //     options: q.options || [],
-      //     correctAnswer: q.correctAnswer,
-      //     points: q.points,
-      //   }));
-      // }
-    } catch (error) {
-      console.error("Error fetching assignment:", error);
+    // Find and set the lesson
+    if (assignment.lesson && assignment.lesson.id) {
+      selectedLesson.value = assignment.lesson.id;
     }
   }
 });
