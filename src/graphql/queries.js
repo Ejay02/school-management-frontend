@@ -542,6 +542,10 @@ export const getAssignmentById = gql`
         points
       }
       createdAt
+      classId
+      teacherId
+      subjectId
+      lessonId
       lesson {
         id
         name
@@ -555,7 +559,6 @@ export const getAssignmentById = gql`
         id
         name
       }
-
       subject {
         id
         name

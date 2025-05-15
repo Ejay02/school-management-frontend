@@ -4,7 +4,7 @@
       <div
         class="flex gap-2 bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors text-white p-6 rounded-t-lg relative"
       >
-      <div class="absolute inset-0 pattern-dots opacity-10"></div>
+        <div class="absolute inset-0 pattern-dots opacity-10"></div>
         <button
           @click="$router.back()"
           class="top-4 left-4 bg-white/20 backdrop-blur-sm p-2 rounded-full text-white hover:bg-white/30 transition-all animate-bounce-once"
@@ -408,7 +408,7 @@
 
 <script setup>
 import { QuillEditor } from "@vueup/vue-quill";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { apolloClient } from "../../../apollo-client";
 import { createAssignment } from "../../graphql/mutations";
@@ -444,6 +444,8 @@ const dueDate = ref("");
 const selectedClass = ref("");
 const selectedSubject = ref("");
 const selectedLesson = ref("");
+const startTime = ref("");
+const endTime = ref("");
 
 const isAssignedTeacher = computed(() =>
   isAssignedToSelection(
@@ -604,19 +606,55 @@ onMounted(async () => {
   if (!lessonStore.lessons.length) lessonStore.fetchLessons();
 
   if (isEditing.value) {
-    const { data } = await apolloClient.query({
-      query: getAssignmentById,
-      variables: { id: route.params.id },
-    });
+    try {
+      const { data } = await apolloClient.query({
+        query: getAssignmentById,
+        variables: { assignmentId: route.params.id },
+        fetchPolicy: "network-only",
+      });
 
-    const assignment = data.assignment;
-    title.value = assignment.title;
-    description.value = assignment.description;
-    instructions.value = assignment.instructions;
-    startDate.value = assignment.startDate;
-    dueDate.value = assignment.dueDate;
-    selectedClass.value = classStore.getClassNameById(assignment.classId);
-    selectedSubject.value = assignment.subjectId;
+      const assignment = data.getAssignmentById;
+      title.value = assignment.title;
+      description.value = assignment.description;
+      instructions.value = assignment.instructions;
+      questions.value = JSON.parse(assignment.content).questions;
+      startDate.value = assignment.startDate.split("T")[0]; // Adjusting format
+      dueDate.value = assignment.dueDate.split("T")[0];
+
+      // Find and set the class by name instead of ID
+      if (assignment.class && assignment.class.name) {
+        selectedClass.value = assignment.class.name;
+      }
+
+      // Wait for subjects to load based on selected class
+      await nextTick();
+
+      // Find and set the subject
+      if (assignment.subject && assignment.subject.id) {
+        selectedSubject.value = assignment.subject.id;
+      }
+
+      // Wait for lessons to load based on selected subject
+      await nextTick();
+
+      // Find and set the lesson
+      if (assignment.lesson && assignment.lesson.id) {
+        selectedLesson.value = assignment.lesson.id;
+      }
+
+      // Load existing questions
+      // if (assignment.questions && Array.isArray(assignment.questions)) {
+      //   questions.value = assignment.questions.map((q) => ({
+      //     type: q.type,
+      //     content: q.content,
+      //     options: q.options || [],
+      //     correctAnswer: q.correctAnswer,
+      //     points: q.points,
+      //   }));
+      // }
+    } catch (error) {
+      console.error("Error fetching assignment:", error);
+    }
   }
 });
 </script>
