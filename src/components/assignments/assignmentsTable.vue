@@ -55,7 +55,7 @@
                 role.toLowerCase() === 'admin' ||
                 role.toLowerCase() === 'teacher'
               "
-              @click="showDelModal(item.id, item.subject, 'assignmentList')"
+              @click="showDelModal(item?.id, item?.title, 'assignmentList')"
               class="group relative w-6 h-6 flex items-center justify-center rounded-full"
             >
               <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
