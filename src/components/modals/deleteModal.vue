@@ -104,9 +104,10 @@ import { useLessonStore } from "../../store/lessonStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 
+import { useExamStore } from "../../store/examStore";
 import { useFeeStructureStore } from "../../store/feeStructureStore";
 import { useUserStore } from "../../store/userStore";
-import { useExamStore } from "../../store/examStore";
+import { useAssignmentStore } from "../../store/assignmentStore";
 
 const examStore = useExamStore();
 const userStore = useUserStore();
@@ -115,11 +116,11 @@ const classStore = useClassStore();
 const eventStore = useEventStore();
 const lessonStore = useLessonStore();
 const subjectStore = useSubjectStore();
+const assignmentStore = useAssignmentStore();
 const feeStructureStore = useFeeStructureStore();
 const notificationStore = useNotificationStore();
 
 const router = useRouter();
-
 
 const isModalVisible = ref(modalStore.deleteModal);
 
@@ -226,11 +227,11 @@ const handleDelete = async () => {
           assignmentId: modalStore.modalId,
         },
       });
-      await assignmentStore.refreshExams();
+      await assignmentStore.refreshAssignments();
 
       notificationStore.addNotification({
         type: "success",
-        message: "Exam deleted successfully",
+        message: "Assignment deleted successfully",
       });
     } else if (source.value === "resultList") {
       console.log("hello from results");

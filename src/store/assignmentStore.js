@@ -30,6 +30,7 @@ export const useAssignmentStore = defineStore("assignmentStore", {
           const { data } = await apolloClient.query({
             query: getAllAssignments,
             variables: { pagination: { page: 1, limit: 1000 } },
+            fetchPolicy: "network-only",
           });
 
           this.allAssignments = data.getAllAssignments;
@@ -42,12 +43,18 @@ export const useAssignmentStore = defineStore("assignmentStore", {
         const end = start + limit;
         this.assignments = this.allAssignments.slice(start, end);
         this.hasMore = end < this.totalCount;
-
       } catch (err) {
         this.error = err;
       } finally {
         this.loading = false;
       }
+    },
+
+    async refreshAssignments() {
+      // Clear the cache to force a fresh fetch
+      this.allAssignments = [];
+
+      return this.fetchAssignments();
     },
   },
 });
