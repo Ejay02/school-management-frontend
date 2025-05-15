@@ -20,6 +20,7 @@ import Events from "../components/events/events.vue";
 import EventView from "../components/events/eventView.vue";
 import ExamForm from "../components/exams/examForm.vue";
 import Exams from "../components/exams/exams.vue";
+import ExamView from "../components/exams/examView.vue";
 import Lessons from "../components/lessons/lessons.vue";
 import Messages from "../components/messages/messages.vue";
 import Parents from "../components/parents/parents.vue";
@@ -40,7 +41,6 @@ import Admissions from "../views/infoPages/admissions.vue";
 import Calender from "../views/infoPages/calender.vue";
 import Contact from "../views/infoPages/contact.vue";
 import Settings from "../views/settings.vue";
-import ExamView from "../components/exams/examView.vue";
 
 const publicRoutes = [
   "Home",
@@ -212,7 +212,12 @@ const routes = [
         name: "Assignments",
         component: Assignments,
       },
-
+      {
+        path: "/assignment/:id",
+        name: "AssignmentView",
+        component: () => import("../components/assignments/assignmentView.vue"),
+        meta: { requiresAuth: true },
+      },
       {
         path: "assignment/new",
         name: "CreateAssignment",
