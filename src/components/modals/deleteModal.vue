@@ -88,6 +88,7 @@ import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { apolloClient } from "../../../apollo-client";
 import {
+  deleteAssignment,
   deleteClass,
   deleteEvent,
   deleteExam,
@@ -219,7 +220,18 @@ const handleDelete = async () => {
         message: "Exam deleted successfully",
       });
     } else if (source.value === "assignmentList") {
-      console.log("hello from assignments");
+      await apolloClient.mutate({
+        mutation: deleteAssignment,
+        variables: {
+          assignmentId: modalStore.modalId,
+        },
+      });
+      await assignmentStore.refreshExams();
+
+      notificationStore.addNotification({
+        type: "success",
+        message: "Exam deleted successfully",
+      });
     } else if (source.value === "resultList") {
       console.log("hello from results");
     } else if (source.value === "eventList") {
