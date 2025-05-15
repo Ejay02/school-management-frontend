@@ -411,7 +411,7 @@ import { QuillEditor } from "@vueup/vue-quill";
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { apolloClient } from "../../../apollo-client";
-import { createAssignment } from "../../graphql/mutations";
+import { createAssignment, editAssignment } from "../../graphql/mutations";
 import { getAssignmentById } from "../../graphql/queries";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
@@ -569,18 +569,32 @@ const handleSubmit = async () => {
         points: q.points,
       })),
     };
-
-    await apolloClient.mutate({
-      mutation: createAssignment,
-      variables: {
-        createAssignmentInput: assignmentData,
-      },
+    if (isEditing.value) {
+      await apolloClient.mutate({
+        mutation: editAssignment,
+        variables: {
+          assignmentId: route.params.id,
+          editAssignmentInput: assignmentData,
+        },
+      });
+      notificationStore.addNotification({
+      type: "success",
+      message: "Assignment updated successfully!",
     });
-
-    notificationStore.addNotification({
+    } else {
+      await apolloClient.mutate({
+        mutation: createAssignment,
+        variables: {
+          createAssignmentInput: assignmentData,
+        },
+      });
+      notificationStore.addNotification({
       type: "success",
       message: "Assignment created successfully!",
     });
+    }
+
+   
 
     router.push("/assignments");
   } catch (error) {
