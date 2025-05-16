@@ -472,10 +472,13 @@ const userRole = computed(() => userStore.currentRole.toLowerCase());
 
 // Role-based access control
 const isStudent = computed(() => userRole.value === "student");
+
 const isTeacher = computed(() => userRole.value === "teacher");
+
 const isAdmin = computed(() =>
   ["admin", "super_admin"].includes(userRole.value)
 );
+
 const isParent = computed(() => userRole.value === "parent");
 
 // Computed property to extract questions from assignment content
@@ -484,17 +487,57 @@ const questions = computed(() => {
 
   // Try to get questions from the questions array first
   if (assignment.value.questions && assignment.value.questions.length > 0) {
-    return assignment.value.questions;
+    return assignment.value.questions.map((q) => {
+      // Process the question to ensure correctAnswer is an index
+      return processQuestionCorrectAnswer(q);
+    });
   }
 
   // If no questions in the array, try to parse from content
   try {
     const content = JSON.parse(assignment.value.content);
-    return content.questions || [];
+    const parsedQuestions = content.questions || [];
+    // Process each question to ensure correctAnswer is an index
+    return parsedQuestions.map((q) => processQuestionCorrectAnswer(q));
   } catch (e) {
+    console.error("Error parsing content:", e);
     return [];
   }
 });
+
+// Helper function to process question correctAnswer
+const processQuestionCorrectAnswer = (question) => {
+  // Make a copy of the question to avoid mutating the original
+  const processedQuestion = { ...question };
+
+  // For MCQ questions, if correctAnswer is a string value instead of an index
+  if (
+    processedQuestion.type === "MCQ" &&
+    processedQuestion.options &&
+    typeof processedQuestion.correctAnswer === "string" &&
+    !Number.isInteger(Number(processedQuestion.correctAnswer))
+  ) {
+    // Find the index of the correct answer in the options array
+    const correctIndex = processedQuestion.options.findIndex(
+      (opt) =>
+        opt.toLowerCase() === processedQuestion.correctAnswer.toLowerCase()
+    );
+
+    // Set the correctAnswer to the found index (or 0 if not found)
+    processedQuestion.correctAnswer = correctIndex >= 0 ? correctIndex : 0;
+  }
+
+  // For True/False questions, convert string "true"/"false" to 0/1 index
+  if (
+    processedQuestion.type === "True/False" &&
+    typeof processedQuestion.correctAnswer === "string"
+  ) {
+    processedQuestion.correctAnswer =
+      processedQuestion.correctAnswer.toLowerCase() === "true" ? 0 : 1;
+  }
+
+  return processedQuestion;
+};
 
 // Computed property for total possible score
 const totalPossibleScore = computed(() => {
