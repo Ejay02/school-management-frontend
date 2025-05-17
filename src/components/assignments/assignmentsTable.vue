@@ -29,53 +29,57 @@
         </td>
         <td class="hidden md:table-cell">{{ formatDate(item?.dueDate) }}</td>
 
-        <td class="flex">
-          <router-link :to="`/assignment/${item?.id}`" class="group relative">
-            <button
-              class="group relative text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
-            >
-              <i class="fa-solid fa-arrow-right"></i>
-            </button>
-            <span
-              class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex"
-            >
-              View
-            </span>
-          </router-link>
-          <div
-            class="flex items-center gap-2"
-            v-if="role.toLowerCase() === 'teacher'"
-          >
-            <!-- edit -->
-            <div
-              class="group relative"
-              @click="
-                showEditModal(item.id, item.title, item, 'assignmentList')
-              "
-            >
+        <td class="">
+          <div class="flex">
+            <router-link :to="`/assignment/${item?.id}`" class="group relative">
               <button
-                class="w-6 h-6 flex items-center justify-center rounded-full"
+                class="group relative text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
               >
-                <i class="fa-solid fa-pen-to-square text-xs text-gray-500"></i>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+              <span
+                class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex"
+              >
+                View
+              </span>
+            </router-link>
+            <div
+              class="flex items-center gap-2"
+              v-if="role.toLowerCase() === 'teacher'"
+            >
+              <!-- edit -->
+              <div
+                class="group relative"
+                @click="
+                  showEditModal(item.id, item.title, item, 'assignmentList')
+                "
+              >
+                <button
+                  class="w-6 h-6 flex items-center justify-center rounded-full"
+                >
+                  <i
+                    class="fa-solid fa-pen-to-square text-xs text-gray-500"
+                  ></i>
+                  <span
+                    class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  >
+                    Edit
+                  </span>
+                </button>
+              </div>
+              <!-- del -->
+              <button
+                @click="showDelModal(item?.id, item?.title, 'assignmentList')"
+                class="group relative w-6 h-6 flex items-center justify-center rounded-full"
+              >
+                <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
                 <span
                   class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                 >
-                  Edit
+                  Delete
                 </span>
               </button>
             </div>
-            <!-- del -->
-            <button
-              @click="showDelModal(item?.id, item?.title, 'assignmentList')"
-              class="group relative w-6 h-6 flex items-center justify-center rounded-full"
-            >
-              <i class="fa-solid fa-trash-can text-red-600 text-xs"></i>
-              <span
-                class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-              >
-                Delete
-              </span>
-            </button>
           </div>
         </td>
       </tr>

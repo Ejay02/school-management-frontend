@@ -504,7 +504,7 @@ export const getAllAssignments = gql`
         points
       }
       createdAt
-    
+
       teacher {
         id
         name
@@ -579,6 +579,33 @@ export const getResultStatistics = gql`
         above80
         above70
         below50
+      }
+    }
+  }
+`;
+
+export const getClassResults = gql`
+  query getClassResults(
+    $classId: String!
+    $academicPeriod: String!
+    $params: PaginationInput
+  ) {
+    getClassResults(
+      classId: $classId
+      academicPeriod: $academicPeriod
+      params: $params
+    ) {
+      id
+      academicPeriod
+      student{
+        id
+        name
+        surname
+        image
+        result{
+          id
+          exam
+        }
       }
     }
   }
@@ -953,8 +980,6 @@ export const getBillingReportDashboard = gql`
     }
   }
 `;
-
-
 
 export const calculateFinalGrade = gql`
   query calculateFinalGrade($classId: String!, $studentId: String!) {
