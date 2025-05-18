@@ -44,7 +44,7 @@ export const menuItems = [
         icon: "/class.png",
         label: "Classes",
         href: "/classes",
-        visible: ["super_admin", "admin"],
+        visible: ["super_admin", "admin", "teacher"],
       },
       {
         icon: "/subject.png",

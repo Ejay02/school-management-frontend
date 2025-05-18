@@ -595,17 +595,79 @@ export const getClassResults = gql`
       academicPeriod: $academicPeriod
       params: $params
     ) {
-      id
-      academicPeriod
-      student{
+      data {
         id
         name
         surname
         image
-        result{
-          id
-          exam
+        termResults {
+          FIRST {
+            exams {
+              id
+              examId
+              examTitle
+              score
+              comments
+              createdAt
+            }
+            assignments {
+              id
+              assignmentId
+              assignmentTitle
+              score
+              comments
+              createdAt
+            }
+            averageScore
+          }
+          SECOND {
+            exams {
+              id
+              examId
+              examTitle
+              score
+              comments
+              createdAt
+            }
+            assignments {
+              id
+              assignmentId
+              assignmentTitle
+              score
+              comments
+              createdAt
+            }
+            averageScore
+          }
+          THIRD {
+            exams {
+              id
+              examId
+              examTitle
+              score
+              comments
+              createdAt
+            }
+            assignments {
+              id
+              assignmentId
+              assignmentTitle
+              score
+              comments
+              createdAt
+            }
+            averageScore
+          }
+          OVERALL {
+            score
+          }
         }
+      }
+      meta {
+        total
+        page
+        lastPage
+        limit
       }
     }
   }
