@@ -595,14 +595,16 @@ export const getClassResults = gql`
       academicPeriod: $academicPeriod
       params: $params
     ) {
-      data {
+      # These fields don't exist in the GraphQL schema but are returned by the resolver
+      # We need to use @client directive to tell Apollo this is client-side only
+      data @client {
         id
         name
         surname
         image
-        termResults {
-          FIRST {
-            exams {
+        termResults @client {
+          FIRST @client {
+            exams @client {
               id
               examId
               examTitle
@@ -610,7 +612,7 @@ export const getClassResults = gql`
               comments
               createdAt
             }
-            assignments {
+            assignments @client {
               id
               assignmentId
               assignmentTitle
@@ -620,8 +622,8 @@ export const getClassResults = gql`
             }
             averageScore
           }
-          SECOND {
-            exams {
+          SECOND @client {
+            exams @client {
               id
               examId
               examTitle
@@ -629,7 +631,7 @@ export const getClassResults = gql`
               comments
               createdAt
             }
-            assignments {
+            assignments @client {
               id
               assignmentId
               assignmentTitle
@@ -639,8 +641,8 @@ export const getClassResults = gql`
             }
             averageScore
           }
-          THIRD {
-            exams {
+          THIRD @client {
+            exams @client {
               id
               examId
               examTitle
@@ -648,7 +650,7 @@ export const getClassResults = gql`
               comments
               createdAt
             }
-            assignments {
+            assignments @client {
               id
               assignmentId
               assignmentTitle
@@ -658,12 +660,12 @@ export const getClassResults = gql`
             }
             averageScore
           }
-          OVERALL {
+          OVERALL @client {
             score
           }
         }
       }
-      meta {
+      meta @client {
         total
         page
         lastPage

@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 
-import { getResultStatistics } from "../graphql/queries";
 import { apolloClient } from "../../apollo-client";
+import { getClassResults, getResultStatistics } from "../graphql/queries";
 
 export const useResultStore = defineStore("resultStore", {
   state: () => ({
@@ -33,7 +33,35 @@ export const useResultStore = defineStore("resultStore", {
         }
       } catch (error) {
         this.error = error;
-        
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchClassResults(
+      classId,
+      academicPeriod,
+      params = { page: 1, limit: 10 }
+    ) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const res = await apolloClient.query({
+          query: getClassResults,
+          variables: { classId, academicPeriod, params },
+          fetchPolicy: "network-only",
+        });
+
+        if (res.data.getClassResults) {
+          this.classResults = res.data.getClassResults;
+        } else {
+          this.classResults = {
+            data: [],
+            meta: { total: 0, page: 1, lastPage: 1, limit: 10 },
+          };
+        }
+      } catch (error) {
+        this.error = error;
       } finally {
         this.loading = false;
       }
