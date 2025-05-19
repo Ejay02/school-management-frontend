@@ -15,7 +15,7 @@
           :profileImage="teacher?.image || ''"
           :name="teacherName"
           :surname="teacher?.surname || ''"
-          :description="teacher?.description || 'No description available.'"
+          :description="teacher?.aboutMe || 'No description available.'"
           :details="teacherDetails"
         />
       </div>
@@ -27,14 +27,14 @@
 </template>
 
 <script setup>
-import { useRoute } from "vue-router";
 import { computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import ErrorScreen from "../../components/errorScreen.vue";
-import { useTeacherStore } from "../../store/teacherStore";
 import LoadingScreen from "../../components/loadingScreen.vue";
+import { useTeacherStore } from "../../store/teacherStore";
+import { formatDate } from "../../utils/date.holidays";
 import LeftSingleView from "../../views/singleView/leftSingleView.vue";
 import RightSingleView from "../../views/singleView/rightSingleView.vue";
-import { formatDate } from "../../utils/date.holidays";
 
 const route = useRoute();
 const teacherId = route.params.id;
@@ -87,6 +87,11 @@ const teacherDetails = computed(() => {
   if (!teacher.value) return [];
 
   return [
+    {
+      icon: '<i class="fa-solid fa-at"></i>',
+      label: "Username",
+      value: teacher?.value.username,
+    },
     {
       icon: "/blood.png",
       label: "Blood Group",

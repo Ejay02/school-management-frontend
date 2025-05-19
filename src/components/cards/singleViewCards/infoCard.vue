@@ -5,8 +5,8 @@
         <img
           v-if="profileImage"
           :src="profileImage"
-          :alt="`${name} image`"
-          class="w-24 h-24 rounded-full object-cover"
+          :alt="`${name}`"
+          class="w-24 h-24 rounded-full object-cover mb-2"
         />
 
         <div

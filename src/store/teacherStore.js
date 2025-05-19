@@ -14,7 +14,6 @@ export const useTeacherStore = defineStore("teacherStore", {
     totalCount: 0,
   }),
 
-
   actions: {
     async fetchTeachers({
       page = 1,
@@ -50,7 +49,6 @@ export const useTeacherStore = defineStore("teacherStore", {
         this.teachers = this.allTeachers.slice(start, end);
         this.hasMore = end < this.totalCount;
       } catch (error) {
-        console.log('error:', error)
         this.error = error;
       } finally {
         this.loading = false;

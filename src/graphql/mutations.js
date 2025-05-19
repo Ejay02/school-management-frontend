@@ -86,6 +86,7 @@ export const parentSignupMutation = gql`
   }
 `;
 
+
 export const loginMutation = gql`
   mutation Login($input: BaseLoginInput!) {
     login(input: $input) {
@@ -131,6 +132,87 @@ export const resetPasswordMutation = gql`
     }
   }
 `;
+
+export const assignAdminRole = gql`
+  mutation assignAdminRole($role: String!, $targetId: String!) {
+    assignAdminRole(role: $role, targetId: $targetId) {
+      id
+      email
+      image
+      role
+      username
+    }
+  }
+`;
+
+export const updateAdminProfile = gql`
+  mutation UpdateAdminProfile($input: UpdateProfileInput!) {
+    updateAdminProfile(input: $input) {
+      id
+      name
+      surname
+      username
+      aboutMe
+      image
+      email
+      dateOfBirth
+    }
+  }
+`;
+
+export const updateTeacherProfile = gql`
+  mutation UpdateTeacherProfile($input: UpdateProfileInput!) {
+    updateTeacherProfile(input: $input) {
+      id
+      name
+      surname
+      username
+      email
+      address
+      bloodType
+      dateOfBirth
+      aboutMe
+      phone
+      image
+      sex
+    }
+  }
+`;
+
+export const updateStudentProfile = gql`
+  mutation UpdateStudentProfile($input: UpdateProfileInput!) {
+    updateStudentProfile(input: $input) {
+      id
+      name
+      surname
+      email
+      address
+      bloodType
+      dateOfBirth
+      aboutMe
+      image
+      phone
+      sex
+    }
+  }
+`;
+
+export const updateParentProfile = gql`
+  mutation UpdateParentProfile($input: UpdateProfileInput!) {
+    updateParentProfile(input: $input) {
+      id
+      name
+      surname
+      email
+      address
+      image
+      dateOfBirth
+      aboutMe
+      phone
+    }
+  }
+`;
+
 
 export const markAttendance = gql`
   mutation MarkAttendance(
@@ -737,79 +819,6 @@ export const deleteSubject = gql`
   }
 `;
 
-export const assignAdminRole = gql`
-  mutation assignAdminRole($role: String!, $targetId: String!) {
-    assignAdminRole(role: $role, targetId: $targetId) {
-      id
-      email
-      image
-      role
-      username
-    }
-  }
-`;
-
-export const updateAdminProfile = gql`
-  mutation UpdateAdminProfile($input: UpdateProfileInput!) {
-    updateAdminProfile(input: $input) {
-      id
-      name
-      surname
-      username
-      image
-      email
-      dateOfBirth
-    }
-  }
-`;
-
-export const updateTeacherProfile = gql`
-  mutation UpdateTeacherProfile($input: UpdateProfileInput!) {
-    updateTeacherProfile(input: $input) {
-      id
-      name
-      surname
-      username
-      email
-      address
-      bloodType
-      dateOfBirth
-      phone
-      image
-      sex
-    }
-  }
-`;
-
-export const updateStudentProfile = gql`
-  mutation UpdateStudentProfile($input: UpdateProfileInput!) {
-    updateStudentProfile(input: $input) {
-      id
-      name
-      surname
-      email
-      address
-      bloodType
-      dateOfBirth
-      image
-      phone
-      sex
-    }
-  }
-`;
-
-export const updateParentProfile = gql`
-  mutation UpdateParentProfile($input: UpdateProfileInput!) {
-    updateParentProfile(input: $input) {
-      id
-      name
-      surname
-      email
-      image
-      dateOfBirth
-    }
-  }
-`;
 
 export const cancelEvent = gql`
   mutation cancelEvent($id: String!, $reason: String!) {

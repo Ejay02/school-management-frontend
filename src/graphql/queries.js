@@ -35,6 +35,7 @@ export const getAllAdminsQuery = gql`
       role
       image
       dateOfBirth
+      aboutMe
     }
   }
 `;
@@ -52,6 +53,7 @@ export const getAllTeachers = gql`
       image
       phone
       dateOfBirth
+      aboutMe
       subjects {
         id
         name
@@ -71,6 +73,7 @@ export const getAllStudents = gql`
       email
       phone
       address
+      aboutMe
       dateOfBirth
       image
       sex
@@ -112,6 +115,7 @@ export const getAllParents = gql`
       dateOfBirth
       phone
       image
+      aboutMe
       students {
         id
         username
@@ -176,6 +180,7 @@ export const getTeacherById = gql`
       image
       bloodType
       sex
+      aboutMe
       createdAt
       subjects {
         id
@@ -207,6 +212,7 @@ export const getStudentById = gql`
       image
       bloodType
       sex
+      aboutMe
       createdAt
       class {
         id

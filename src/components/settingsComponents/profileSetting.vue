@@ -1,14 +1,9 @@
 <template>
   <div>
     <form @submit.prevent="saveSettings" class="p-6">
-      <!-- Profile Section -->
-      <div
-        class="flex flex-col md:flex-row justify-between space-y-6 md:space-y-0 md:space-x-6 p-2"
-      >
-        <!-- Profile Image Section -->
-        <div
-          class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6"
-        >
+      <!-- Profile Image Section - Moved to top -->
+      <div class="flex justify-center mb-6">
+        <div class="flex flex-col items-center space-y-2">
           <div class="relative">
             <!-- Use profile preview or user's image from userStore -->
             <img
@@ -40,77 +35,161 @@
               class="hidden"
             />
           </div>
-          <!-- File type text moved to center vertically -->
-          <div
-            class="text-center font-semibold text-gray-600 text-xs flex flex-col items-center"
-          >
+          <!-- File type text moved below image -->
+          <div class="text-center font-semibold text-gray-600 text-xs">
             <span>JPG, GIF or PNG</span>
-            <span>1MB max <span class="text-red-500">*</span></span>
+            <span class="block">1MB max <span class="text-red-500">*</span></span>
           </div>
         </div>
+      </div>
 
-        <!-- Form Fields Section -->
-        <div class="flex-1 max-w-2xl">
-          <div class="space-y-6">
-            <!-- Name Fields -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label
-                  for="name"
-                  class="block text-sm font-medium text-gray-500"
-                  >First Name</label
-                >
-                <input
-                  type="text"
-                  v-model="formData.name"
-                  required
-                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
-                />
-              </div>
-              <div>
-                <label
-                  for="surname"
-                  class="block text-sm font-medium text-gray-500"
-                  >Last Name</label
-                >
-                <input
-                  type="text"
-                  v-model="formData.surname"
-                  required
-                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
-                />
-              </div>
+      <!-- Form Fields Section - Now full width -->
+      <div class="max-w-3xl mx-auto">
+        <div class="space-y-6">
+          <!-- Name Fields -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label
+                for="name"
+                class="block text-sm font-medium text-gray-500"
+                >First Name</label
+              >
+              <input
+                type="text"
+                v-model="formData.name"
+                required
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-400 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+              />
             </div>
+            <div>
+              <label
+                for="surname"
+                class="block text-sm font-medium text-gray-500"
+                >Last Name</label
+              >
+              <input
+                type="text"
+                v-model="formData.surname"
+                required
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-400 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+              />
+            </div>
+          </div>
 
-            <!-- Username and DOB Fields -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="">
-                <label
-                  for="username"
-                  class="block text-sm font-medium text-gray-500"
-                  >Username</label
-                >
-                <input
-                  v-model="formData.username"
-                  type="text"
-                  required
-                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
-                  placeholder="Choose a username"
-                />
-              </div>
-              <div>
-                <label
-                  for="dateOfBirth"
-                  class="block text-sm font-medium text-gray-500"
-                  >Date of Birth</label
-                >
-                <input
-                  v-model="formData.dateOfBirth"
-                  type="date"
-                  required
-                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
-                />
-              </div>
+          <!-- Username and DOB Fields -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label
+                for="username"
+                class="block text-sm font-medium text-gray-500"
+                >Username</label
+              >
+              <input
+                v-model="formData.username"
+                type="text"
+                required
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-400 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+                placeholder="Choose a username"
+              />
+            </div>
+            <div>
+              <label
+                for="dateOfBirth"
+                class="block text-sm font-medium text-gray-500"
+                >Date of Birth</label
+              >
+              <input
+                v-model="formData.dateOfBirth"
+                type="date"
+                required
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-400 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+              />
+            </div>
+          </div>
+          
+          <!-- Additional Fields -->
+          <div>
+            <label
+              for="aboutMe"
+              class="block text-sm font-medium text-gray-500"
+              >About Me</label
+            >
+            <textarea
+              v-model="formData.aboutMe"
+              rows="3"
+              class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-400 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+              placeholder="Tell us about yourself"
+            ></textarea>
+          </div>
+          
+          <!-- Sex and Blood Type Fields -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label
+                for="sex"
+                class="block text-sm font-medium text-gray-500"
+                >Sex</label
+              >
+              <select
+                v-model="formData.sex"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-400 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+              >
+                <option value="">Select</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+            <div>
+              <label
+                for="bloodType"
+                class="block text-sm font-medium text-gray-500"
+                >Blood Type</label
+              >
+              <select
+                v-model="formData.bloodType"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-400 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+              >
+                <option value="">Select</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Address and Phone Fields -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label
+                for="address"
+                class="block text-sm font-medium text-gray-500"
+                >Address</label
+              >
+              <input
+                type="text"
+                v-model="formData.address"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-400 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+                placeholder="Your address"
+              />
+            </div>
+            <div>
+              <label
+                for="phone"
+                class="block text-sm font-medium text-gray-500"
+                >Phone</label
+              >
+              <input
+                type="tel"
+                v-model="formData.phone"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-400 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+                placeholder="Your phone number"
+              />
             </div>
           </div>
         </div>
@@ -197,6 +276,11 @@ const formData = reactive({
   dateOfBirth: formatDateForInput(userStore.userInfo.dateOfBirth) || "",
   emailNotifications: true,
   pushNotifications: false,
+  aboutMe: userStore.userInfo.aboutMe ?? "",
+  sex: userStore.userInfo.sex || "",
+  bloodType: userStore.userInfo.bloodType || "",
+  address: userStore.userInfo.address || "",
+  phone: userStore.userInfo.phone || "",
 });
 
 const handleImageChange = (event) => {
@@ -259,6 +343,11 @@ const prepareFormData = () => {
     surname: formData.surname,
     username: formData.username,
     dateOfBirth: formData.dateOfBirth,
+    aboutMe: formData.aboutMe,
+    sex: formData.sex,
+    bloodType: formData.bloodType,
+    address: formData.address,
+    phone: formData.phone,
   };
 
   // If an image file is selected, add the base64 string to the input

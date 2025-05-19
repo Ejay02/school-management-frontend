@@ -24,6 +24,7 @@ export const useUserStore = defineStore("user", () => {
           refreshToken: "",
           image: "",
           dateOfBirth: "",
+          aboutMe: "",
         };
   };
 
@@ -60,6 +61,7 @@ export const useUserStore = defineStore("user", () => {
       image: user.image,
       username: user.username,
       dateOfBirth: user.dateOfBirth,
+      aboutMe: user.aboutMe,
     };
 
     userInfo.value = userData;
@@ -251,6 +253,6 @@ export const useUserStore = defineStore("user", () => {
     findUserById,
     fetchAdminUsers,
     filteredMenuItems,
-    updateUserProfile, // Add the new method to the returned object
+    updateUserProfile,
   };
 });
