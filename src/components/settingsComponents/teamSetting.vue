@@ -237,29 +237,25 @@ const fetchUsers = async (page = 1) => {
 
     // If current user is not in the list, fetch them separately and add to the list
     if (!currentUserInList && userStore.userInfo.id) {
-      try {
-        const currentUser = await userStore.findUserById(
-          userStore.userInfo.id,
-          apolloClient
-        );
-        if (currentUser) {
-          const name =
-            currentUser.name || currentUser.username?.split(" ")[0] || "";
-          const surname =
-            currentUser.surname || currentUser.username?.split(" ")[1] || "";
+      const currentUser = await userStore.findUserById(
+        userStore.userInfo.id,
+        apolloClient
+      );
+      if (currentUser) {
+        const name =
+          currentUser.name || currentUser.username?.split(" ")[0] || "";
+        const surname =
+          currentUser.surname || currentUser.username?.split(" ")[1] || "";
 
-          combinedUsers.push({
-            id: currentUser.id,
-            name: currentUser.username || `${name} ${surname}`.trim(),
-            email: currentUser.email,
-            role: currentUser.role?.toLowerCase() || userStore.currentRole,
-            avatar: currentUser.image || null,
-            firstName: name,
-            lastName: surname,
-          });
-        }
-      } catch (err) {
-        console.error("Failed to fetch current user:", err);
+        combinedUsers.push({
+          id: currentUser.id,
+          name: currentUser.username || `${name} ${surname}`.trim(),
+          email: currentUser.email,
+          role: currentUser.role?.toLowerCase() || userStore.currentRole,
+          avatar: currentUser.image || null,
+          firstName: name,
+          lastName: surname,
+        });
       }
     }
 
