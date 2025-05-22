@@ -325,7 +325,6 @@ export const createAnnouncement = gql`
       targetRoles
       creatorId
       creatorRole
-      isArchived
       createdAt
     }
   }

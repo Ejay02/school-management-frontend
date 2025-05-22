@@ -100,6 +100,7 @@
 
           <div class="flex gap-2">
             <button
+              v-if="role.toLowerCase() === 'teacher'"
               @click="showEditModal(item.id, item.title, item, 'examList')"
               class="text-gray-600 hover:text-gray-800 text-sm flex items-center"
             >
@@ -107,11 +108,7 @@
             </button>
 
             <button
-              v-if="
-                role.toLowerCase() === 'super_admin' ||
-                role.toLowerCase() === 'admin' ||
-                role.toLowerCase() === 'teacher'
-              "
+              v-if="role.toLowerCase() === 'teacher'"
               @click="showDelModal(item.id, item.title, 'examList')"
               class="text-red-600 hover:text-red-800 text-sm flex items-center"
             >
