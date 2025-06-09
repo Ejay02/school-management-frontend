@@ -1,4 +1,4 @@
-# School Management System - Frontend
+# School Management System - Frontend 🎒
 
 A comprehensive school management system built with Vue 3 that helps educational institutions streamline their administrative processes, enhance communication between stakeholders, and manage academic activities efficiently.
 
