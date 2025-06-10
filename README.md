@@ -209,11 +209,11 @@ This project utilizes the following open-source libraries:
 
 - Unsplash: For high-quality placeholder images. [Explore here](https://unsplash.com/)
 - Hugging Face Gemma-2B Model: For any NLP capabilities integrated into the platform. [Explore the Gemma-2B model](https://huggingface.co/google/gemma-2-2b-it).
-- Pexels: For high quality videos. [Explore Pexels](https://www.pexels.com/)
+- Pexels: For high-quality videos. [Explore Pexels](https://www.pexels.com/)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the MIT License
 
 ---
 
