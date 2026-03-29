@@ -12,9 +12,7 @@ A comprehensive school management system built with Vue 3 that helps educational
 - Recent activities feed
 - Financial insights and fee collection status.
 
-
 ### User Management
-
 
 - Role-based access control (Admin, Teacher, Student, Parent)
 - Profile management with avatar customization
@@ -98,6 +96,22 @@ A comprehensive school management system built with Vue 3 that helps educational
 - **Tailwind CSS**: Utility-first styling
 - **Chart.js**: Data visualization
 - **VCalendar**: Calendar and date picking
+
+### Test Credentials
+
+- **Admin**:
+  - username: admin
+  - Password: password123
+
+- **Teacher**:
+  - Username: teacher
+  - Password: password123
+- **Student**:
+  - Username: student
+  - Password: password123
+- **Parent**:
+  - Email: parent
+  - Password: password123
 
 ### Development Tools
 
@@ -216,6 +230,3 @@ This project utilizes the following open-source libraries:
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
 ---
-
-
-
