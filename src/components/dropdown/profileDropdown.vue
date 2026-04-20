@@ -98,6 +98,7 @@ import { useMutation } from "@vue/apollo-composable";
 import { useUserStore } from "../../store/userStore";
 import { logoutMutation } from "../../graphql/mutations";
 import { useNotificationStore } from "../../store/notification";
+import { formatAuthErrorMessage } from "../../utils/graphqlError";
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -133,7 +134,7 @@ const logout = async () => {
     router.push("/");
     notificationStore.addNotification({
       type: "error",
-      message: `Logout error: ${e.message}`,
+      message: formatAuthErrorMessage(e, "Logged out locally"),
     });
   }
 };

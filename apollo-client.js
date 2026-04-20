@@ -9,18 +9,38 @@ import { onError } from "@apollo/client/link/error";
 import { setContext } from "@apollo/client/link/context";
 import { useUserStore } from "./src/store/userStore";
 import { useNotificationStore } from "./src/store/notification";
+import { isGraphQLAuthError } from "./src/utils/graphqlError";
 import router from "./src/router";
 
+const AUTH_EXEMPT_OPERATIONS = new Set([
+  "Login",
+  "AdminSignup",
+  "TeacherSignup",
+  "StudentSignup",
+  "ParentSignup",
+  "RefreshTokens",
+  "Logout",
+  "ResetPassword",
+]);
+
 // Error handling link
-const errorLink = onError(({ graphQLErrors, networkError }) => {
+const errorLink = onError(({ graphQLErrors, operation }) => {
   if (graphQLErrors) {
     graphQLErrors.forEach(({ message, extensions }) => {
       // Check for authentication errors
-      if (
-        extensions?.code === "UNAUTHENTICATED" ||
-        message.toLowerCase().includes("unauthorized") ||
-        message.toLowerCase().includes("unauthenticated")
-      ) {
+      if (isGraphQLAuthError(message, extensions?.code)) {
+        const hasSession = Boolean(localStorage.getItem("token"));
+        const isPublicAuthRoute = ["/login", "/signup"].includes(
+          router.currentRoute.value.path,
+        );
+        const isExemptOperation = AUTH_EXEMPT_OPERATIONS.has(
+          operation?.operationName,
+        );
+
+        if (!hasSession || isPublicAuthRoute || isExemptOperation) {
+          return;
+        }
+
         const userStore = useUserStore();
         const notificationStore = useNotificationStore();
 
@@ -52,12 +72,12 @@ const authLink = setContext((_, { headers }) => {
 
 const httpLink = createHttpLink({
   uri: `${import.meta.env.VITE_API_URL}/graphql`,
-    // Enable file uploads by setting these options
-    includeExtensions: true,
-    credentials: 'same-origin',
-    headers: {
-      'Apollo-Require-Preflight': 'true'
-    }
+  // Enable file uploads by setting these options
+  includeExtensions: true,
+  credentials: "same-origin",
+  headers: {
+    "Apollo-Require-Preflight": "true",
+  },
 });
 
 const cache = new InMemoryCache();

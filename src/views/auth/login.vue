@@ -167,6 +167,7 @@ import { useUserStore } from "../../store/userStore";
 import { loginMutation } from "../../graphql/mutations";
 import { useNavigation } from "../../composables/useNavigation";
 import { useNotificationStore } from "../../store/notification";
+import { formatAuthErrorMessage } from "../../utils/graphqlError";
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -211,7 +212,7 @@ const login = async () => {
   } catch (e) {
     notificationStore.addNotification({
       type: "error",
-      message: `Login unsuccessful: ${e.message}`,
+      message: formatAuthErrorMessage(e, "Unable to log in"),
     });
   }
 };

@@ -282,6 +282,7 @@ teacherSignupMutation,
 } from "../../graphql/mutations";
 import { useNotificationStore } from "../../store/notification";
 import { useUserStore } from "../../store/userStore";
+import { formatAuthErrorMessage } from "../../utils/graphqlError";
 import { availableTargetRoles } from "../../utils/utility";
 
 const router = useRouter();
@@ -438,7 +439,7 @@ const handleSubmit = async () => {
   } catch (error) {
     notificationStore.addNotification({
       type: "error",
-      message: `An error occurred during signup: ${error.message}`,
+      message: formatAuthErrorMessage(error, "Unable to sign up"),
     });
   }
 };
