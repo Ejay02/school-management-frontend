@@ -32,7 +32,7 @@
         Contact Us
       </h2>
       <p class="text-center text-gray-500 mb-6">
-        We'll get back to you within 24 hours
+        {{ contactStatusMessage }}
       </p>
 
       <div
@@ -57,6 +57,15 @@
             sent successfully.
           </p>
         </div>
+      </div>
+
+      <div
+        v-if="submissionError"
+        class="bg-red-50 border border-red-200 rounded-md p-4 mb-6"
+      >
+        <p class="text-red-700">
+          {{ submissionError }}
+        </p>
       </div>
 
       <form @submit.prevent="submitForm" class="space-y-4" v-else>
@@ -161,9 +170,11 @@
 
         <button
           type="submit"
-          :disabled="isSubmitting"
+          :disabled="isSubmitting || !canSubmit"
           class="w-full bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-3 px-4 rounded-md transition duration-300 font-medium flex justify-center items-center"
-          :class="{ 'opacity-75 cursor-not-allowed': isSubmitting }"
+          :class="{
+            'opacity-75 cursor-not-allowed': isSubmitting || !canSubmit,
+          }"
         >
           <span v-if="isSubmitting" class="mr-2">
             <svg
@@ -225,7 +236,8 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
+import axios from "axios";
+import { computed, nextTick, ref, watch } from "vue";
 import { useNavigation } from "../../composables/useNavigation";
 
 const { goBack } = useNavigation();
@@ -242,30 +254,65 @@ const nameError = ref("");
 const emailError = ref("");
 const messageError = ref("");
 const inquiryError = ref("");
+const submissionError = ref("");
 
 // Form submission states
 const isSubmitting = ref(false);
 const formSubmitted = ref(false);
 const submittedName = ref("");
+const isResettingForm = ref(false);
 
 // Character count for message
 const characterCount = computed(() => message.value.length);
+const isEmailValid = computed(() =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value),
+);
+const canSubmit = computed(() => {
+  return (
+    name.value.trim().length >= 2 &&
+    isEmailValid.value &&
+    inquiryType.value.trim().length > 0 &&
+    message.value.trim().length >= 10 &&
+    message.value.length <= 500 &&
+    agreeToTerms.value
+  );
+});
+const contactStatusMessage = computed(() => {
+  if (submissionError.value) {
+    return "We couldn't send your message yet. Please fix the issue below and try again.";
+  }
+
+  return "We'll get back to you within 24 hours";
+});
 
 // Watch for changes to validate in real-time
 watch(name, (newValue) => {
+  if (isResettingForm.value) return;
+  submissionError.value = "";
   validateName(newValue);
 });
 
 watch(email, (newValue) => {
+  if (isResettingForm.value) return;
+  submissionError.value = "";
   validateEmail(newValue);
 });
 
 watch(message, (newValue) => {
+  if (isResettingForm.value) return;
+  submissionError.value = "";
   validateMessage(newValue);
 });
 
 watch(inquiryType, (newValue) => {
+  if (isResettingForm.value) return;
+  submissionError.value = "";
   validateInquiry(newValue);
+});
+
+watch(agreeToTerms, () => {
+  if (isResettingForm.value) return;
+  submissionError.value = "";
 });
 
 function validateName(value) {
@@ -301,6 +348,7 @@ function validateInquiry(value) {
 
 function validateForm() {
   let isValid = true;
+  submissionError.value = "";
 
   validateName(name.value);
   validateEmail(email.value);
@@ -319,6 +367,26 @@ function validateForm() {
   return isValid;
 }
 
+function clearValidationErrors() {
+  nameError.value = "";
+  emailError.value = "";
+  messageError.value = "";
+  inquiryError.value = "";
+  submissionError.value = "";
+}
+
+async function resetForm() {
+  isResettingForm.value = true;
+  name.value = "";
+  email.value = "";
+  message.value = "";
+  inquiryType.value = "";
+  agreeToTerms.value = false;
+  clearValidationErrors();
+  await nextTick();
+  isResettingForm.value = false;
+}
+
 async function submitForm() {
   if (!validateForm()) {
     return;
@@ -327,10 +395,7 @@ async function submitForm() {
   isSubmitting.value = true;
 
   try {
-    // Simulate API call with a delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    console.log("Form Submitted", {
+    await axios.post(`${import.meta.env.VITE_API_URL}/contact`, {
       name: name.value,
       email: email.value,
       inquiryType: inquiryType.value,
@@ -344,18 +409,16 @@ async function submitForm() {
     // Show success state
     formSubmitted.value = true;
 
-    // Reset form after successful submission
+    await resetForm();
+
     setTimeout(() => {
-      name.value = "";
-      email.value = "";
-      message.value = "";
-      inquiryType.value = "";
-      agreeToTerms.value = false;
       formSubmitted.value = false;
     }, 5000);
   } catch (error) {
-    console.error("Error submitting form:", error);
-    // Handle error case here
+    submissionError.value =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Unable to send your message right now.";
   } finally {
     isSubmitting.value = false;
   }
