@@ -57,7 +57,7 @@
 import axios from "axios";
 import { nextTick, ref } from "vue";
 import ChatMessage from "../../components/chat/chatMessage.vue";
-import { generateSchoolPrompt, schoolProfile } from "../../utils/aiResponse";
+import { schoolProfile } from "../../utils/aiResponse";
 
 const isChatOpen = ref(false);
 const messages = ref([
@@ -66,6 +66,13 @@ const messages = ref([
 const newMessage = ref("");
 const chatContainer = ref(null);
 const isLoading = ref(false);
+
+const getFallbackResponse = (userMessage) => {
+  return (
+    schoolProfile.findResponse(userMessage) ||
+    "I may not have that information right now. Please contact the school office for more details."
+  );
+};
 
 const checkLocalData = (userMessage) => {
   // Convert user message to lowercase for better matching
@@ -96,7 +103,7 @@ const checkLocalData = (userMessage) => {
 
   // Check common queries using the existing findResponse method
   const matchedQuery = schoolProfile.commonQueries.find((item) =>
-    item.keywords.some((keyword) => lowercaseMessage.includes(keyword))
+    item.keywords.some((keyword) => lowercaseMessage.includes(keyword)),
   );
 
   // Only return if we have a specific match
@@ -119,43 +126,25 @@ const sendMessage = async () => {
       // If we have a local response, use it
       messages.value.push({ type: "bot", text: localResponse });
     } else {
-      // If no local response, make API call
       const response = await axios.post(
-        "https://api-inference.huggingface.co/models/google/gemma-2-2b-it",
+        `${import.meta.env.VITE_API_URL}/ai/chat`,
         {
-          inputs: `<start_of_turn>user\n${generateSchoolPrompt(
-            userMessage
-          )}<end_of_turn>\n<start_of_turn>model\n`,
-          parameters: {
-            max_new_tokens: 250,
-            temperature: 0.7,
-            top_p: 0.95,
-          },
+          message: userMessage,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_HUGGINGFACE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-        }
       );
 
-      const fullResponse = response.data[0].generated_text;
-      const botResponse = fullResponse
-        .replace(
-          `<start_of_turn>user\n${generateSchoolPrompt(
-            userMessage
-          )}<end_of_turn>\n<start_of_turn>model\n`,
-          ""
-        )
-        .trim();
+      const botResponse = response.data?.text?.trim();
 
-      messages.value.push({ type: "bot", text: botResponse });
+      messages.value.push({
+        type: "bot",
+        text: botResponse || getFallbackResponse(userMessage),
+      });
     }
   } catch (error) {
+    console.error("Chatbot request failed:", error);
     messages.value.push({
       type: "bot",
-      text: "Sorry, I encountered an error.",
+      text: getFallbackResponse(userMessage),
     });
   } finally {
     isLoading.value = false;

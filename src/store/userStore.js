@@ -108,6 +108,7 @@ export const useUserStore = defineStore("user", () => {
     currentRole.value = "";
     localStorage.removeItem("userInfo");
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
     localStorage.removeItem("bannerDismissed");
   };
 

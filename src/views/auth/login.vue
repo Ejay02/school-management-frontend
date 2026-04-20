@@ -197,7 +197,7 @@ const login = async () => {
       localStorage.setItem("token", userData.token);
       localStorage.setItem("refreshToken", userData.refreshToken);
 
-      updateToken(userData.token);
+      updateToken(userData.token, userData.refreshToken);
 
       const dashboardPath =
         role === "super_admin" ? "/dashboard/admin" : `/dashboard/${role}`;
