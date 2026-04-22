@@ -18,8 +18,35 @@
       </div>
 
       <div class="p-6 space-y-4 cursor-pointer">
+        <template v-if="canInviteUsers">
+          <div class="rounded-md border border-indigo-100 bg-indigo-50 p-4">
+            <p class="text-sm font-medium text-indigo-700">
+              Invite {{ inviteRoleLabel }}
+            </p>
+            <p class="mt-1 text-sm text-gray-600">
+              We will send a secure invite link by email so the
+              {{ inviteRoleLabel.toLowerCase() }} can set up their own account.
+            </p>
+          </div>
+
+          <div>
+            <label
+              for="email"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Email <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="email"
+              type="email"
+              placeholder="name@example.com"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+            />
+          </div>
+        </template>
+
         <!-- teacher list -->
-        <template v-if="source === 'teachers'">
+        <template v-else-if="source === 'teachers'">
           <!-- Name and Email row -->
           <div class="flex gap-2">
             <div class="w-1/2">
@@ -155,7 +182,7 @@
         </template>
 
         <!-- student List -->
-        <template v-if="source === 'students'">
+        <template v-else-if="source === 'students'">
           <div class="flex gap-2">
             <div class="w-1/2">
               <label
@@ -260,7 +287,7 @@
         </template>
 
         <!-- parent list -->
-        <template v-if="source === 'parents'">
+        <template v-else-if="source === 'parents'">
           <div class="flex gap-2">
             <div class="w-1/2">
               <label
@@ -858,7 +885,7 @@
               'opacity-50 cursor-not-allowed': !isFormValid || isLoading,
             }"
           >
-            <span v-if="!isLoading">Add</span>
+            <span v-if="!isLoading">{{ submitButtonLabel }}</span>
             <div v-else class="flex items-center">
               <svg
                 class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
@@ -880,7 +907,7 @@
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              Adding...
+              {{ submitLoadingLabel }}
             </div>
           </button>
         </div>
@@ -894,6 +921,7 @@ import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import { computed, onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
 import {
+  createInvitationMutation,
   createAnnouncement,
   createClass,
   createEvent,
@@ -907,6 +935,7 @@ import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
+import { extractGraphQLErrorMessage } from "../../utils/graphqlError";
 import {
   availableTargetRoles,
   eventVisibilityOptions,
@@ -967,6 +996,24 @@ const location = ref("");
 const role = computed(() => userStore.currentRole.toLowerCase());
 const selectedTargetRoles = ref([]);
 const isTargetRolesDropdownOpen = ref(false);
+const canInviteUsers = computed(() => {
+  return (
+    ["admin", "super_admin"].includes(role.value) &&
+    ["teachers", "parents"].includes(source.value)
+  );
+});
+const inviteRole = computed(() =>
+  source.value === "teachers" ? "TEACHER" : "PARENT"
+);
+const inviteRoleLabel = computed(() =>
+  inviteRole.value === "TEACHER" ? "Teacher" : "Parent"
+);
+const submitButtonLabel = computed(() =>
+  canInviteUsers.value ? "Send Invite" : "Add"
+);
+const submitLoadingLabel = computed(() =>
+  canInviteUsers.value ? "Sending..." : "Adding..."
+);
 
 const haveAccess = computed(() => {
   const allowedRoles = ["admin", "super_admin", "teacher"];
@@ -1044,6 +1091,9 @@ const pluralToSingular = (word) => {
 };
 
 const modalTitle = computed(() => {
+  if (canInviteUsers.value) {
+    return `Invite ${inviteRoleLabel.value}`;
+  }
   return `Add New ${pluralToSingular(source.value)}`;
 });
 
@@ -1080,7 +1130,9 @@ const handleCancel = () => {
 };
 
 const isFormValid = computed(() => {
-  if (source.value === "teachers") {
+  if (canInviteUsers.value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+  } else if (source.value === "teachers") {
     return name.value && surname.value && phone.value;
   } else if (source.value === "students") {
     return (
@@ -1131,7 +1183,22 @@ const handleAdd = async () => {
   try {
     isLoading.value = true;
 
-    if (source.value === "teachers") {
+    if (canInviteUsers.value) {
+      await apolloClient.mutate({
+        mutation: createInvitationMutation,
+        variables: {
+          input: {
+            email: email.value.trim(),
+            role: inviteRole.value,
+          },
+        },
+      });
+
+      notificationStore.addNotification({
+        type: "success",
+        message: `${inviteRoleLabel.value} invite sent successfully!`,
+      });
+    } else if (source.value === "teachers") {
       // Create teacher logic
       console.log("Creating teacher...");
       // Example: const result = await apolloClient.mutate({
@@ -1306,9 +1373,9 @@ const handleAdd = async () => {
   } catch (error) {
     notificationStore.addNotification({
       type: "error",
-      message: `Error creating ${pluralToSingular(source.value)}: ${
-        error.message
-      }`,
+      message: canInviteUsers.value
+        ? extractGraphQLErrorMessage(error, "Unable to send invitation")
+        : `Error creating ${pluralToSingular(source.value)}: ${error.message}`,
     });
   } finally {
     isLoading.value = false;

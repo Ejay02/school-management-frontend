@@ -4,6 +4,7 @@ import { useUserStore } from "../store/userStore";
 import NotFound from "../components/notFound.vue";
 import Login from "../views/auth/login.vue";
 import Signup from "../views/auth/signup.vue";
+import AcceptInvite from "../views/auth/acceptInvite.vue";
 import Home from "../views/home.vue";
 import AdminLayout from "../views/layout/adminLayout.vue";
 import Dashboard from "../views/layout/dashboard.vue";
@@ -46,6 +47,7 @@ const publicRoutes = [
   "Home",
   "Login",
   "Signup",
+  "AcceptInvite",
   "About",
   "Academics",
   "Admissions",
@@ -68,6 +70,11 @@ const routes = [
     path: "/signup",
     name: "Signup",
     component: Signup,
+  },
+  {
+    path: "/accept-invite",
+    name: "AcceptInvite",
+    component: AcceptInvite,
   },
   {
     path: "/about",

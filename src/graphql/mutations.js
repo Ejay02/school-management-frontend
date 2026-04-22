@@ -86,6 +86,67 @@ export const parentSignupMutation = gql`
   }
 `;
 
+export const createInvitationMutation = gql`
+  mutation CreateInvitation($input: CreateInvitationInput!) {
+    createInvitation(input: $input) {
+      id
+      email
+      role
+      status
+      sentCount
+      expiresAt
+    }
+  }
+`;
+
+export const acceptInvitationMutation = gql`
+  mutation AcceptInvitation($input: AcceptInvitationInput!) {
+    acceptInvitation(input: $input) {
+      token
+      refreshToken
+      userId
+      role
+      email
+      username
+      name
+      surname
+      dateOfBirth
+      image
+      address
+      phone
+      bloodType
+      sex
+    }
+  }
+`;
+
+export const resendInvitationMutation = gql`
+  mutation ResendInvitation($id: String!) {
+    resendInvitation(id: $id) {
+      id
+      email
+      role
+      status
+      sentCount
+      expiresAt
+      lastSentAt
+    }
+  }
+`;
+
+export const revokeInvitationMutation = gql`
+  mutation RevokeInvitation($id: String!) {
+    revokeInvitation(id: $id) {
+      id
+      email
+      role
+      status
+      sentCount
+      expiresAt
+      acceptedAt
+    }
+  }
+`;
 
 export const loginMutation = gql`
   mutation Login($input: BaseLoginInput!) {
@@ -212,7 +273,6 @@ export const updateParentProfile = gql`
     }
   }
 `;
-
 
 export const markAttendance = gql`
   mutation MarkAttendance(
@@ -562,7 +622,6 @@ export const assignExamToStudent = gql`
   }
 `;
 
-
 export const startExam = gql`
   mutation startExam($input: StartExamInput) {
     startExam(input: $input) {
@@ -818,7 +877,6 @@ export const deleteSubject = gql`
   }
 `;
 
-
 export const cancelEvent = gql`
   mutation cancelEvent($id: String!, $reason: String!) {
     cancelEvent(id: $id, reason: $reason) {
@@ -923,5 +981,3 @@ export const initiatePayment = gql`
     initiatePayment(invoiceId: $invoiceId, amount: $amount)
   }
 `;
-
-

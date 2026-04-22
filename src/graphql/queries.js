@@ -24,6 +24,33 @@ export const currentUserQuery = gql`
   }
 `;
 
+export const validateInvitationTokenQuery = gql`
+  query ValidateInvitationToken($token: String!) {
+    validateInvitationToken(token: $token) {
+      email
+      role
+      status
+      expiresAt
+    }
+  }
+`;
+
+export const invitationsQuery = gql`
+  query Invitations($status: InviteStatus) {
+    invitations(status: $status) {
+      id
+      email
+      role
+      status
+      sentCount
+      lastSentAt
+      expiresAt
+      acceptedAt
+      createdAt
+    }
+  }
+`;
+
 export const getAllAdminsQuery = gql`
   query getAllAdmins {
     getAllAdmins {
