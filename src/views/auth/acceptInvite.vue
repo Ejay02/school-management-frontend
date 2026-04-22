@@ -1,6 +1,10 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
-    <div class="w-full max-w-md bg-white rounded-xl shadow-lg border border-gray-100 p-8">
+  <div
+    class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10"
+  >
+    <div
+      class="w-full max-w-md bg-white rounded-xl shadow-lg border border-gray-100 p-8"
+    >
       <h1 class="text-2xl font-bold text-center text-gray-800 mb-2">
         Accept Invitation
       </h1>
@@ -25,7 +29,8 @@
       <template v-else>
         <div class="rounded-md border border-indigo-100 bg-indigo-50 p-4 mb-6">
           <p class="text-sm text-gray-700">
-            <span class="font-semibold">Invited email:</span> {{ invitation.email }}
+            <span class="font-semibold">Invited email:</span>
+            {{ invitation.email }}
           </p>
           <p class="text-sm text-gray-700 mt-1">
             <span class="font-semibold">Role:</span> {{ invitation.role }}
@@ -35,7 +40,9 @@
         <form class="space-y-4" @submit.prevent="submitAcceptance">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Name</label
+              >
               <input
                 v-model="form.name"
                 type="text"
@@ -43,7 +50,9 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Surname</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Surname</label
+              >
               <input
                 v-model="form.surname"
                 type="text"
@@ -53,7 +62,9 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Username</label
+            >
             <input
               v-model="form.username"
               type="text"
@@ -62,7 +73,9 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Password</label
+            >
             <input
               v-model="form.password"
               :type="showPassword ? 'text' : 'password'"
@@ -101,9 +114,7 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { apolloClient } from "../../../apollo-client";
-import {
-  acceptInvitationMutation,
-} from "../../graphql/mutations";
+import { acceptInvitationMutation } from "../../graphql/mutations";
 import { validateInvitationTokenQuery } from "../../graphql/queries";
 import { updateToken } from "../../socket/socket";
 import { useNotificationStore } from "../../store/notification";
@@ -163,7 +174,7 @@ const loadInvitation = async () => {
   } catch (error) {
     inviteError.value = formatAuthErrorMessage(
       error,
-      "This invitation is invalid or has expired."
+      "This invitation is invalid or has expired.",
     );
   } finally {
     loadingInvite.value = false;
@@ -202,17 +213,14 @@ const submitAcceptance = async () => {
 
     notificationStore.addNotification({
       type: "success",
-      message: "Invitation accepted successfully!",
+      message: "Invitation accepted. Please complete your profile details.",
     });
 
-    const role = userData.role.toLowerCase();
-    const dashboardPath =
-      role === "super_admin" ? "/dashboard/admin" : `/dashboard/${role}`;
-    await router.push(dashboardPath);
+    await router.push("/settings/profile");
   } catch (error) {
     submitError.value = formatAuthErrorMessage(
       error,
-      "Unable to accept this invitation."
+      "Unable to accept this invitation.",
     );
   } finally {
     isSubmitting.value = false;

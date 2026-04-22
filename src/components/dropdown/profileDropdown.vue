@@ -1,11 +1,11 @@
 <template>
   <div
-    class="absolute top-20 right-4 bg-white shadow-md rounded-md w-56 p-3 z-50"
+    class="absolute top-20 right-4 z-50 w-64 rounded-md bg-white p-3 shadow-md"
     style="isolation: isolate"
   >
     <!-- Profile -->
     <div
-      class="flex items-center gap-2 p-2 border-b border-gray-300 hover:bg-eduSkyLight rounded-md group"
+      class="flex items-center gap-3 rounded-md border-b border-gray-300 p-2 hover:bg-eduSkyLight group"
     >
       <div class="relative">
         <img
@@ -19,20 +19,23 @@
           v-else
           class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200 capitalize"
         >
-        {{ userStore?.userInfo?.name[0] }} {{ userStore?.userInfo?.surname[0] }}
+          {{ userStore?.userInfo?.name[0] }}
+          {{ userStore?.userInfo?.surname[0] }}
         </div>
       </div>
 
-      <div>
+      <div class="min-w-0 flex-1 space-y-1">
         <span
-          class="text-xs font-medium text-gray-800 group-hover:text-indigo-500 capitalize"
+          class="block text-sm font-medium leading-tight text-gray-800 group-hover:text-indigo-500 capitalize"
         >
-        {{ userStore?.userInfo?.name }} {{ userStore?.userInfo?.surname }}
+          {{ userStore?.userInfo?.name }} {{ userStore?.userInfo?.surname }}
         </span>
-        <br />
-        <span class="text-xs text-gray-400 group-hover:text-indigo-500">{{
-          userStore.userInfo.email
-        }}</span>
+        <span
+          class="block break-all text-xs leading-snug text-gray-400 group-hover:text-indigo-500"
+          :title="userStore?.userInfo?.email"
+        >
+          {{ userStore?.userInfo?.email }}
+        </span>
       </div>
     </div>
 
@@ -103,7 +106,6 @@ import { formatAuthErrorMessage } from "../../utils/graphqlError";
 const router = useRouter();
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
-
 
 const { mutate: logoutMutate } = useMutation(logoutMutation);
 
