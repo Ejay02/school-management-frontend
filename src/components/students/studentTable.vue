@@ -29,27 +29,27 @@
               v-else
               class="w-10 h-10 rounded-full mr-3 bg-eduPurple flex items-center justify-center font-bold"
             >
-              {{ item?.name[0].toUpperCase()
-              }}{{ item.surname[0].toUpperCase() }}
+              {{ getInitials(item?.name, item?.surname) }}
             </div>
           </div>
 
           <div class="flex flex-col">
             <div class="font-semibold capitalize">
-              {{ item?.name }} {{ item?.surname }}
+              {{ formatPersonName(item?.name, item?.surname) }}
             </div>
-            <div class="text-xs text-gray-400">{{ item?.email }}</div>
+            <div class="text-xs text-gray-400">{{ formatDisplayValue(item?.email) }}</div>
           </div>
         </td>
         <td class="hidden md:table-cell">
-          {{ item?.studentId?.slice(0, 8) }} ...
+          {{ formatDisplayValue(item?.studentId?.slice(0, 8)) }}
+          <template v-if="item?.studentId">...</template>
         </td>
 
-        <td class="hidden md:table-cell">{{ item?.class?.name }}</td>
+        <td class="hidden md:table-cell">{{ formatDisplayValue(item?.class?.name) }}</td>
 
-        <td class="hidden md:table-cell">{{ item?.phone || "NA" }}</td>
+        <td class="hidden md:table-cell">{{ formatDisplayValue(item?.phone) }}</td>
         <td class="hidden md:table-cell capitalize">
-          {{ item?.address || "NA" }}
+          {{ formatDisplayValue(item?.address) }}
         </td>
         <td>
           <div class="flex items-center gap-2 relative">
@@ -104,6 +104,11 @@
 
 <script setup>
 import { RouterLink } from "vue-router";
+import {
+  formatDisplayValue,
+  formatPersonName,
+  getInitials,
+} from "../../utils/displayValue";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
 

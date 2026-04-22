@@ -24,10 +24,10 @@
           </div>
         </td>
 
-        <td class="hidden md:table-cell">{{ item?.subject?.name }}</td>
-        <td class="hidden md:table-cell">{{ item?.class.name }}</td>
+        <td class="hidden md:table-cell">{{ formatDisplayValue(item?.subject?.name) }}</td>
+        <td class="hidden md:table-cell">{{ formatDisplayValue(item?.class?.name) }}</td>
         <td class="hidden md:table-cell capitalize">
-          {{ item?.teacher?.name || "NA" }} {{ item?.teacher?.surname }}
+          {{ formatPersonName(item?.teacher?.name, item?.teacher?.surname) }}
         </td>
 
         <!--  -->
@@ -88,6 +88,7 @@
 </template>
 
 <script setup>
+import { formatDisplayValue, formatPersonName } from "../../utils/displayValue";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
 

@@ -36,7 +36,7 @@
             </span>
           </template>
           <template v-else>
-            <span>N/A</span>
+            <span>{{ EMPTY_PLACEHOLDER }}</span>
           </template>
         </td>
 
@@ -86,6 +86,7 @@
 </template>
 
 <script setup>
+import { EMPTY_PLACEHOLDER } from "../../utils/displayValue";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
 

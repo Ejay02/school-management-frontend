@@ -2,6 +2,11 @@ import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { getAllAdminUsers, getUserById } from "../graphql/queries";
 import { menuItems } from "../utils";
+import {
+  PROFILE_COMPLETION_STORAGE_KEY,
+  getIncompleteProfileFieldLabels,
+  isProfileComplete,
+} from "../utils/profileCompletion";
 import { useNotificationStore } from "./notification";
 
 export const useUserStore = defineStore("user", () => {
@@ -29,6 +34,9 @@ export const useUserStore = defineStore("user", () => {
   };
 
   const userInfo = ref(getInitialUserState());
+  const requiresProfileCompletion = ref(
+    localStorage.getItem(PROFILE_COMPLETION_STORAGE_KEY) === "true",
+  );
 
   const currentRole = ref(userInfo.value.role.toLowerCase() || "");
 
@@ -43,6 +51,26 @@ export const useUserStore = defineStore("user", () => {
   const totalPages = ref(1);
   const hasMore = ref(false);
   const totalCount = ref(0);
+
+  const setProfileCompletionRequired = (required) => {
+    requiresProfileCompletion.value = required;
+
+    if (required) {
+      localStorage.setItem(PROFILE_COMPLETION_STORAGE_KEY, "true");
+      return;
+    }
+
+    localStorage.removeItem(PROFILE_COMPLETION_STORAGE_KEY);
+  };
+
+  const syncProfileCompletionState = (userData = userInfo.value) => {
+    if (
+      requiresProfileCompletion.value &&
+      isProfileComplete(userData, userData.role)
+    ) {
+      setProfileCompletionRequired(false);
+    }
+  };
 
   // Updated setUser to handle persistence and refresh token
   const setUser = (user) => {
@@ -69,6 +97,7 @@ export const useUserStore = defineStore("user", () => {
 
     // Persist to localStorage
     localStorage.setItem("userInfo", JSON.stringify(userData));
+    syncProfileCompletionState(userData);
   };
 
   // New method to update user profile after mutation
@@ -110,6 +139,7 @@ export const useUserStore = defineStore("user", () => {
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("bannerDismissed");
+    setProfileCompletionRequired(false);
   };
 
   // Updated to handle super_admin same as admin
@@ -175,7 +205,7 @@ export const useUserStore = defineStore("user", () => {
 
   const fetchAdminUsers = async (
     apolloClient,
-    { page = 1, limit = 10 } = {}
+    { page = 1, limit = 10 } = {},
   ) => {
     loading.value = true;
     error.value = null;
@@ -213,10 +243,10 @@ export const useUserStore = defineStore("user", () => {
 
       return {
         admins: paginatedCombined.filter(
-          (user) => user.role === "ADMIN" || user.role === "admin"
+          (user) => user.role === "ADMIN" || user.role === "admin",
         ),
         teachers: paginatedCombined.filter(
-          (user) => user.role === "TEACHER" || user.role === "teacher"
+          (user) => user.role === "TEACHER" || user.role === "teacher",
         ),
         totalPages: totalPages.value,
         hasMore: hasMore.value,
@@ -238,15 +268,23 @@ export const useUserStore = defineStore("user", () => {
     return await fetchAdminUsers(apolloClient, paginationOptions);
   };
 
+  const incompleteProfileFields = computed(() => {
+    if (!requiresProfileCompletion.value) return [];
+    return getIncompleteProfileFieldLabels(userInfo.value, currentRole.value);
+  });
+
   return {
     error,
     setUser,
     setRole,
     loading,
     clearUser,
+    incompleteProfileFields,
     totalPages,
     hasMore,
     totalCount,
+    requiresProfileCompletion,
+    setProfileCompletionRequired,
     userInfo,
     hasAccess,
     currentRole,

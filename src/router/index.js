@@ -362,6 +362,17 @@ router.beforeEach((to, from, next) => {
     return next("/dashboard");
   }
 
+  const isProfileCompletionRoute =
+    to.path === "/settings/profile" || to.path === "/settings";
+
+  if (
+    isAuthenticated &&
+    userStore.requiresProfileCompletion &&
+    !isProfileCompletionRoute
+  ) {
+    return next("/settings/profile");
+  }
+
   // Check role requirements for all matched route segments
   const hasValidRole = to.matched.every((record) => {
     if (!record.meta.role) return true;

@@ -26,13 +26,13 @@
         <td class="hidden md:table-cell">{{ item?.capacity }}</td>
         <td class="hidden md:table-cell">{{ item?.students?.length }}</td>
         <td v-if="item.supervisor" class="hidden md:table-cell capitalize">
-          {{ item?.supervisor?.name }} {{ item.supervisor?.surname }}
+          {{ formatPersonName(item?.supervisor?.name, item?.supervisor?.surname) }}
         </td>
-        <td v-else class="hidden md:table-cell">NA</td>
+        <td v-else class="hidden md:table-cell">-</td>
 
         <!-- <td class="hidden md:table-cell">{{ item?.supervisor?.name || 'NA' }}</td> -->
         <td class="hidden md:table-cell">
-          {{ item?.feeStructure?.academicYear ?? "NA" }}
+          {{ formatDisplayValue(item?.feeStructure?.academicYear) }}
         </td>
         <td
           class="hidden md:table-cell"
@@ -41,7 +41,7 @@
             role.toLowerCase() === 'super_admin'
           "
         >
-          {{ item?.feeStructure?.totalAmount ?? "NA" }}
+          {{ formatDisplayValue(item?.feeStructure?.totalAmount) }}
         </td>
 
         <td v-if="role.toLowerCase() === 'admin' || role.toLowerCase() === 'super_admin'">
@@ -82,6 +82,7 @@
 </template>
 
 <script setup>
+import { formatDisplayValue, formatPersonName } from "../../utils/displayValue";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
 

@@ -280,7 +280,7 @@ const showDelModal = (id, title, type) => {
 };
 
 const formatDate = (value) => {
-  if (!value) return "N/A";
+  if (!value) return "-";
   return new Date(value).toLocaleString();
 };
 

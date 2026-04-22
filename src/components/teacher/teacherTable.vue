@@ -29,16 +29,15 @@
               v-else
               class="w-10 h-10 rounded-full mr-3 bg-eduPurple flex items-center justify-center font-bold"
             >
-              {{ item?.name[0]?.toUpperCase() || "N"
-              }}{{ item?.surname[0].toUpperCase() || "A" }}
+              {{ getInitials(item?.name, item?.surname) }}
             </div>
           </div>
 
           <div class="flex flex-col">
             <div class="font-semibold capitalize">
-              {{ item?.name }} {{ item?.surname }}
+              {{ formatPersonName(item?.name, item?.surname) }}
             </div>
-            <div class="text-xs text-gray-400">{{ item?.email }}</div>
+            <div class="text-xs text-gray-400">{{ formatDisplayValue(item?.email) }}</div>
           </div>
         </td>
         <!-- <td class="hidden md:table-cell">
@@ -49,7 +48,7 @@
             class="copy-id relative cursor-pointer"
             @click="copyId(item.teacherId)"
           >
-            {{ item?.teacherId?.slice(0, 8) }}...
+            {{ formatDisplayValue(item?.teacherId?.slice(0, 8)) }}<template v-if="item?.teacherId">...</template>
             <span
               class="tooltip absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity duration-300 pointer-events-none"
             >
@@ -59,14 +58,14 @@
         </td>
 
         <td class="hidden md:table-cell">
-          {{ item?.subjects.join(", ") || "N/A" }}
+          {{ formatListDisplay(item?.subjects) }}
         </td>
         <td class="hidden md:table-cell">
-          {{ item?.classes.join(", ") || "N/A" }}
+          {{ formatListDisplay(item?.classes) }}
         </td>
-        <td class="hidden md:table-cell">{{ item?.phone || "N/A" }}</td>
+        <td class="hidden md:table-cell">{{ formatDisplayValue(item?.phone) }}</td>
         <td class="hidden md:table-cell capitalize">
-          {{ item?.address || "N/A" }}
+          {{ formatDisplayValue(item?.address) }}
         </td>
         <td>
           <div
@@ -127,6 +126,12 @@
 </template>
 
 <script setup>
+import {
+  formatDisplayValue,
+  formatListDisplay,
+  formatPersonName,
+  getInitials,
+} from "../../utils/displayValue";
 import { useNotificationStore } from "../../store/notification";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";

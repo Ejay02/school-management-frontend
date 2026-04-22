@@ -209,6 +209,7 @@ const submitAcceptance = async () => {
     userStore.setUser(userData);
     localStorage.setItem("token", userData.token);
     localStorage.setItem("refreshToken", userData.refreshToken);
+    userStore.setProfileCompletionRequired(true);
     updateToken(userData.token, userData.refreshToken);
 
     notificationStore.addNotification({

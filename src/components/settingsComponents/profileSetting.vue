@@ -383,7 +383,9 @@ const saveSettings = async () => {
 
       notificationStore.addNotification({
         type: "success",
-        message: "Profile updated successfully!",
+        message: userStore.requiresProfileCompletion
+          ? "Profile updated successfully!"
+          : "Profile updated successfully. Your account is now fully unlocked.",
       });
     }
   } catch (error) {

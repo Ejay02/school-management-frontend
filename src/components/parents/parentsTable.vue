@@ -29,21 +29,20 @@
               v-else
               class="w-10 h-10 rounded-full mr-3 bg-eduPurple flex items-center justify-center font-bold"
             >
-              {{ item?.name[0].toUpperCase()
-              }}{{ item?.surname[0].toUpperCase() }}
+              {{ getInitials(item?.name, item?.surname) }}
             </div>
           </div>
 
           <div class="flex flex-col">
             <div class="font-semibold capitalize">
-              {{ item?.name }} {{ item?.surname }}
+              {{ formatPersonName(item?.name, item?.surname) }}
             </div>
-            <div class="text-xs text-gray-400">{{ item?.email }}</div>
+            <div class="text-xs text-gray-400">{{ formatDisplayValue(item?.email) }}</div>
           </div>
         </td>
 
         <td class="hidden md:table-cell capitalize">
-          <div class="flex flex-wrap gap-2">
+          <div v-if="item?.students?.length" class="flex flex-wrap gap-2">
             <span
               v-for="(student, index) in item?.students"
               :key="index"
@@ -52,12 +51,13 @@
               {{ student }}
             </span>
           </div>
+          <span v-else class="text-gray-400">-</span>
         </td>
 
         <!-- <td class="hidden md:table-cell capitalize">{{ item?.students.join(", ") }}</td> -->
 
-        <td class="hidden md:table-cell">{{ item?.phone }}</td>
-        <td class="hidden md:table-cell">{{ item?.address }}</td>
+        <td class="hidden md:table-cell">{{ formatDisplayValue(item?.phone) }}</td>
+        <td class="hidden md:table-cell">{{ formatDisplayValue(item?.address) }}</td>
         <td>
           <div class="flex items-center gap-2">
             <!-- <div
@@ -97,6 +97,11 @@
 </template>
 
 <script setup>
+import {
+  formatDisplayValue,
+  formatPersonName,
+  getInitials,
+} from "../../utils/displayValue";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
 
