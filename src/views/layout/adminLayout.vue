@@ -13,6 +13,31 @@
         />
       </div>
 
+      <div class="mb-4 rounded-xl border border-gray-200 bg-white p-4">
+        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 class="text-base font-semibold text-gray-800">Invitations</h2>
+            <p class="mt-1 text-sm text-gray-500">
+              {{ inviteSummary.activationLabel }}
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 text-xs font-medium text-gray-700">
+            <span class="rounded-full bg-gray-100 px-3 py-1">
+              Sent: {{ inviteSummary.totalSent }}
+            </span>
+            <span class="rounded-full bg-green-100 px-3 py-1 text-green-700">
+              Accepted: {{ inviteSummary.accepted }}
+            </span>
+            <span class="rounded-full bg-amber-100 px-3 py-1 text-amber-700">
+              Pending: {{ inviteSummary.pending }}
+            </span>
+            <span class="rounded-full bg-gray-100 px-3 py-1 text-gray-700">
+              Expired: {{ inviteSummary.expired }}
+            </span>
+          </div>
+        </div>
+      </div>
+
       <!-- middle charts -->
       <div class="flex gap-4 flex-col lg:flex-row mb-4">
         <!-- count -->
@@ -46,12 +71,13 @@ import UserCard from "../../components/cards/userCard.vue";
 import CountCard from "../../components/cards/countCard.vue";
 import FinanceCard from "../../components/cards/financeCard.vue";
 import { useAttendanceStore } from "../../store/attendanceStore";
-import { getDashboardUserCardSummary } from "../../graphql/queries";
+import { getDashboardUserCardSummary, invitationSummaryQuery } from "../../graphql/queries";
 import AttendanceCard from "../../components/cards/attendanceCard.vue";
 
 const attendanceStore = useAttendanceStore();
 
 const { result, loading, error } = useQuery(getDashboardUserCardSummary);
+const { result: inviteSummaryResult } = useQuery(invitationSummaryQuery);
 
 const rolesData = computed(() => {
   if (!result.value || !result.value.getDashboardUserCardSummary) return [];
@@ -66,6 +92,21 @@ const rolesData = computed(() => {
     { role: "Student", count: summary.counts.students, academicYear, nextYear },
     { role: "Parent", count: summary.counts.parents, academicYear, nextYear },
   ];
+});
+
+const inviteSummary = computed(() => {
+  const summary = inviteSummaryResult.value?.invitationSummary;
+  if (!summary) {
+    return {
+      totalSent: 0,
+      accepted: 0,
+      pending: 0,
+      expired: 0,
+      activationLabel: "0 of 0 invited users activated",
+    };
+  }
+
+  return summary;
 });
 
 const startDate = ref(formatDateForInput(getMonday(new Date())));

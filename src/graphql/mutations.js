@@ -90,11 +90,15 @@ export const createInvitationMutation = gql`
   mutation CreateInvitation($input: CreateInvitationInput!) {
     createInvitation(input: $input) {
       id
+      name
       email
       role
       status
+      sentAt
       sentCount
+      lastSentAt
       expiresAt
+      revokedAt
     }
   }
 `;
@@ -124,12 +128,15 @@ export const resendInvitationMutation = gql`
   mutation ResendInvitation($id: String!) {
     resendInvitation(id: $id) {
       id
+      name
       email
       role
       status
+      sentAt
       sentCount
       expiresAt
       lastSentAt
+      revokedAt
     }
   }
 `;
@@ -138,12 +145,16 @@ export const revokeInvitationMutation = gql`
   mutation RevokeInvitation($id: String!) {
     revokeInvitation(id: $id) {
       id
+      name
       email
       role
       status
+      sentAt
       sentCount
       expiresAt
+      lastSentAt
       acceptedAt
+      revokedAt
     }
   }
 `;

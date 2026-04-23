@@ -61,7 +61,8 @@
                       v-else
                       class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200 capitalize"
                     >
-                      {{ user.firstName?.[0] || "" }}{{ user.lastName?.[0] || "" }}
+                      {{ user.firstName?.[0] || ""
+                      }}{{ user.lastName?.[0] || "" }}
                     </div>
                   </div>
 
@@ -83,7 +84,9 @@
                         class="cursor-pointer block w-32 rounded-md bg-white px-2 py-1 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
                       >
                         <option value="teacher" selected>Teacher</option>
-                        <option value="admin" class="text-gray-500">Admin</option>
+                        <option value="admin" class="text-gray-500">
+                          Admin
+                        </option>
                       </select>
                       <span
                         v-else
@@ -130,27 +133,125 @@
     </template>
 
     <template v-else>
-      <div class="flex items-center justify-between mb-4">
+      <div
+        class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"
+      >
         <div>
           <h2 class="text-xl font-semibold text-gray-800">Invitations</h2>
           <p class="text-sm text-gray-500">
-            Track invite status and resend or revoke pending invites.
+            Track invite status, monitor activation rates, and manage sent
+            invitations without leaving the platform.
           </p>
         </div>
 
-        <select
-          v-model="invitationStatusFilter"
-          class="cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-        >
-          <option value="">All statuses</option>
-          <option value="PENDING">Pending</option>
-          <option value="ACCEPTED">Accepted</option>
-          <option value="REVOKED">Revoked</option>
-          <option value="EXPIRED">Expired</option>
-        </select>
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <div class="relative">
+            <input
+              v-model="invitationSearch"
+              type="text"
+              placeholder="Search name or email"
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-64"
+            />
+          </div>
+
+          <select
+            v-model="invitationRoleFilter"
+            class="cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          >
+            <option value="">All roles</option>
+            <option value="TEACHER">Teachers</option>
+            <option value="PARENT">Parents</option>
+          </select>
+
+          <select
+            v-model="invitationStatusFilter"
+            class="cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          >
+            <option value="">All statuses</option>
+            <option value="PENDING">Pending</option>
+            <option value="ACCEPTED">Accepted</option>
+            <option value="REVOKED">Revoked</option>
+            <option value="EXPIRED">Expired</option>
+          </select>
+        </div>
       </div>
 
-      <LoadingScreen v-if="invitationLoading" message="Loading invitations..." />
+      <div class="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+        <div class="rounded-lg border border-indigo-100 bg-white p-4 shadow-sm">
+          <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+            Total Sent
+          </p>
+          <p class="mt-2 text-2xl font-semibold text-gray-800">
+            {{ invitationSummary.totalSent }}
+          </p>
+        </div>
+        <div class="rounded-lg border border-green-100 bg-white p-4 shadow-sm">
+          <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+            Accepted
+          </p>
+          <p class="mt-2 text-2xl font-semibold text-green-700">
+            {{ invitationSummary.accepted }}
+          </p>
+        </div>
+        <div class="rounded-lg border border-amber-100 bg-white p-4 shadow-sm">
+          <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+            Pending
+          </p>
+          <p class="mt-2 text-2xl font-semibold text-amber-700">
+            {{ invitationSummary.pending }}
+          </p>
+        </div>
+        <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+          <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+            Expired
+          </p>
+          <p class="mt-2 text-2xl font-semibold text-gray-700">
+            {{ invitationSummary.expired }}
+          </p>
+        </div>
+        <div class="rounded-lg border border-red-100 bg-white p-4 shadow-sm">
+          <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+            Revoked
+          </p>
+          <p class="mt-2 text-2xl font-semibold text-red-700">
+            {{ invitationSummary.revoked }}
+          </p>
+        </div>
+        <div class="rounded-lg border border-purple-100 bg-white p-4 shadow-sm">
+          <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+            Activation Rate
+          </p>
+          <p class="mt-2 text-2xl font-semibold text-purple-700">
+            {{ invitationSummary.activationRate }}%
+          </p>
+          <p class="mt-1 text-xs text-gray-500">
+            {{ invitationSummary.activationLabel }}
+          </p>
+        </div>
+      </div>
+
+      <div
+        v-if="invitationSummary.roleBreakdown.length"
+        class="mb-4 rounded-lg border border-indigo-100 bg-indigo-50 p-4"
+      >
+        <p class="text-sm font-medium text-indigo-700">Activation summary</p>
+        <div
+          class="mt-2 flex flex-col gap-2 text-sm text-gray-700 md:flex-row md:flex-wrap md:gap-4"
+        >
+          <span
+            v-for="roleSummary in invitationSummary.roleBreakdown"
+            :key="roleSummary.role"
+            class="rounded-full bg-white px-3 py-1.5 shadow-sm"
+          >
+            {{ roleSummary.activationLabel }}
+          </span>
+        </div>
+      </div>
+
+      <LoadingScreen
+        v-if="invitationLoading"
+        message="Loading invitations..."
+      />
 
       <div
         v-else-if="invitationError"
@@ -167,43 +268,57 @@
       />
 
       <div v-else class="bg-gray-200 rounded-lg shadow">
-        <div class="p-6 space-y-4">
+        <div class="p-6 space-y-3">
+          <div
+            class="hidden rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500 md:grid md:grid-cols-12 md:gap-3"
+          >
+            <div class="md:col-span-3">Name</div>
+            <div class="md:col-span-3">Email</div>
+            <div class="md:col-span-2">Role</div>
+            <div class="md:col-span-2">Status</div>
+            <div class="md:col-span-2 text-right">Actions</div>
+          </div>
           <div
             v-for="invite in invitations"
             :key="invite.id"
-            class="bg-white border rounded-lg p-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+            class="bg-white border rounded-lg p-4 flex flex-col gap-4 md:grid md:grid-cols-12 md:items-center md:gap-3"
           >
-            <div>
-              <div class="flex items-center gap-3">
-                <h3 class="text-sm font-semibold text-gray-800">
-                  {{ invite.email }}
-                </h3>
-                <span
-                  class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium"
-                  :class="statusBadgeClass(invite.status)"
-                >
-                  {{ invite.status }}
-                </span>
-              </div>
-              <p class="text-sm text-gray-600 mt-1">
-                Role: {{ invite.role }} · Sent {{ invite.sentCount }} time<span v-if="invite.sentCount !== 1">s</span>
+            <div class="min-w-0 md:col-span-3">
+              <p class="truncate text-sm font-semibold text-gray-800">
+                {{ invite.name || "Unnamed invite" }}
               </p>
-              <p class="text-xs text-gray-500 mt-1">
-                Last sent: {{ formatDate(invite.lastSentAt) }} · Expires:
-                {{ formatDate(invite.expiresAt) }}
-              </p>
-              <p
-                v-if="invite.acceptedAt"
-                class="text-xs text-green-600 mt-1"
-              >
-                Accepted: {{ formatDate(invite.acceptedAt) }}
+              <p class="mt-1 text-xs text-gray-500">
+                {{ getLastAction(invite) }}
               </p>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="min-w-0 md:col-span-3">
+              <p class="truncate text-sm text-gray-700">{{ invite.email }}</p>
+              <p class="mt-1 text-xs text-gray-500">
+                Sent {{ formatDate(invite.sentAt) }} · Expires {{ formatDate(invite.expiresAt) }}
+              </p>
+            </div>
+
+            <div class="md:col-span-2">
+              <p class="text-sm text-gray-700">{{ formatRole(invite.role) }}</p>
+              <p class="mt-1 text-xs text-gray-500">
+                Sent {{ invite.sentCount }} time<span v-if="invite.sentCount !== 1">s</span>
+              </p>
+            </div>
+
+            <div class="md:col-span-2">
+              <span
+                class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium"
+                :class="statusBadgeClass(invite.status)"
+              >
+                {{ formatStatus(invite.status) }}
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2 md:col-span-2 md:justify-end">
               <button
-                v-if="invite.status === 'PENDING'"
-                class="rounded-md border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-100"
+                v-if="canResendInvite(invite)"
+                class="rounded-md border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60"
                 :disabled="actionLoadingId === invite.id"
                 @click="resendInvite(invite.id)"
               >
@@ -226,6 +341,14 @@
             </div>
           </div>
         </div>
+
+        <Pagination
+          v-if="invitationTotalPages > 1"
+          :currentPage="invitationCurrentPage"
+          :hasMore="invitationHasMore"
+          :totalPages="invitationTotalPages"
+          @update:page="handleInvitationPageChange"
+        />
       </div>
     </template>
   </div>
@@ -239,7 +362,10 @@ import {
   resendInvitationMutation,
   revokeInvitationMutation,
 } from "../../graphql/mutations";
-import { invitationsQuery } from "../../graphql/queries";
+import {
+  invitationSummaryQuery,
+  invitationsQuery,
+} from "../../graphql/queries";
 import { extractGraphQLErrorMessage } from "../../utils/graphqlError";
 import { useNotificationStore } from "../../store/notification";
 import { useModalStore } from "../../store/useModalStore";
@@ -266,10 +392,30 @@ const invitations = ref([]);
 const invitationLoading = ref(false);
 const invitationError = ref("");
 const invitationStatusFilter = ref("");
+const invitationRoleFilter = ref("");
+const invitationSearch = ref("");
+const invitationCurrentPage = ref(1);
+const invitationLimit = 10;
+const invitationTotalPages = ref(1);
+const invitationHasMore = ref(false);
 const actionLoadingId = ref("");
+const invitationSummary = ref({
+  totalSent: 0,
+  accepted: 0,
+  pending: 0,
+  expired: 0,
+  revoked: 0,
+  activationRate: 0,
+  activationLabel: "0 of 0 invited users activated",
+  roleBreakdown: [],
+});
 
 const handlePageChange = (newPage) => {
   currentPage.value = newPage;
+};
+
+const handleInvitationPageChange = (newPage) => {
+  invitationCurrentPage.value = newPage;
 };
 
 const showDelModal = (id, title, type) => {
@@ -282,6 +428,20 @@ const showDelModal = (id, title, type) => {
 const formatDate = (value) => {
   if (!value) return "-";
   return new Date(value).toLocaleString();
+};
+
+const formatRole = (value) => {
+  if (!value) return "-";
+  return value
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+};
+
+const formatStatus = (value) => {
+  if (!value) return "-";
+  return value.charAt(0) + value.slice(1).toLowerCase();
 };
 
 const statusBadgeClass = (status) => {
@@ -297,6 +457,30 @@ const statusBadgeClass = (status) => {
     default:
       return "bg-indigo-100 text-indigo-700";
   }
+};
+
+const canResendInvite = (invite) => {
+  return invite.status === "PENDING" || invite.status === "EXPIRED";
+};
+
+const getLastAction = (invite) => {
+  if (invite.revokedAt) {
+    return `Revoked ${formatDate(invite.revokedAt)}`;
+  }
+
+  if (invite.acceptedAt) {
+    return `Accepted ${formatDate(invite.acceptedAt)}`;
+  }
+
+  if (invite.status === "EXPIRED") {
+    return `Expired ${formatDate(invite.expiresAt)}`;
+  }
+
+  if (invite.sentCount > 1) {
+    return `Resent ${formatDate(invite.lastSentAt)}`;
+  }
+
+  return `Sent ${formatDate(invite.sentAt)}`;
 };
 
 const updateUserRole = async (userId, newRole) => {
@@ -334,7 +518,7 @@ const updateUserRole = async (userId, newRole) => {
       type: "error",
       message: `Failed to update user role: ${extractGraphQLErrorMessage(
         error,
-        "Unable to update user role"
+        "Unable to update user role",
       )}`,
     });
   } finally {
@@ -380,13 +564,13 @@ const fetchUsers = async (page = 1) => {
     let combinedUsers = [...formattedAdmins, ...formattedTeachers];
 
     const currentUserInList = combinedUsers.some(
-      (user) => user.id === userStore.userInfo.id
+      (user) => user.id === userStore.userInfo.id,
     );
 
     if (!currentUserInList && userStore.userInfo.id) {
       const currentUser = await userStore.findUserById(
         userStore.userInfo.id,
-        apolloClient
+        apolloClient,
       );
       if (currentUser) {
         const name =
@@ -412,7 +596,7 @@ const fetchUsers = async (page = 1) => {
       type: "error",
       message: `Failed to load users. Please try again later: ${extractGraphQLErrorMessage(
         err,
-        "Unable to load users"
+        "Unable to load users",
       )}`,
     });
   }
@@ -423,24 +607,68 @@ const fetchInvitations = async () => {
   invitationError.value = "";
 
   try {
-    const variables = invitationStatusFilter.value
-      ? { status: invitationStatusFilter.value }
-      : {};
+    const variables = {
+      params: {
+        page: invitationCurrentPage.value,
+        limit: invitationLimit,
+      },
+    };
+
+    if (invitationStatusFilter.value) {
+      variables.status = invitationStatusFilter.value;
+    }
+
+    if (invitationRoleFilter.value) {
+      variables.role = invitationRoleFilter.value;
+    }
+
+    if (invitationSearch.value.trim()) {
+      variables.params.search = invitationSearch.value.trim();
+    }
+
     const { data } = await apolloClient.query({
       query: invitationsQuery,
       variables,
       fetchPolicy: "network-only",
     });
 
-    invitations.value = data?.invitations || [];
+    invitations.value = data?.invitations?.items || [];
+    invitationTotalPages.value = data?.invitations?.pageInfo?.totalPages || 1;
+    invitationHasMore.value = Boolean(data?.invitations?.pageInfo?.hasMore);
   } catch (error) {
     invitationError.value = extractGraphQLErrorMessage(
       error,
-      "Unable to load invitations"
+      "Unable to load invitations",
     );
   } finally {
     invitationLoading.value = false;
   }
+};
+
+const fetchInvitationSummary = async () => {
+  try {
+    const summaryVariables = invitationRoleFilter.value
+      ? { role: invitationRoleFilter.value }
+      : {};
+    const { data } = await apolloClient.query({
+      query: invitationSummaryQuery,
+      variables: summaryVariables,
+      fetchPolicy: "network-only",
+    });
+
+    if (data?.invitationSummary) {
+      invitationSummary.value = data.invitationSummary;
+    }
+  } catch (error) {
+    invitationError.value = extractGraphQLErrorMessage(
+      error,
+      "Unable to load invitation summary",
+    );
+  }
+};
+
+const refreshInvitationData = async () => {
+  await Promise.all([fetchInvitations(), fetchInvitationSummary()]);
 };
 
 const resendInvite = async (id) => {
@@ -456,7 +684,7 @@ const resendInvite = async (id) => {
       message: "Invitation resent successfully",
     });
 
-    await fetchInvitations();
+    await refreshInvitationData();
   } catch (error) {
     notificationStore.addNotification({
       type: "error",
@@ -480,7 +708,7 @@ const revokeInvite = async (id) => {
       message: "Invitation revoked successfully",
     });
 
-    await fetchInvitations();
+    await refreshInvitationData();
   } catch (error) {
     notificationStore.addNotification({
       type: "error",
@@ -495,12 +723,26 @@ watch(currentPage, (newPage) => {
   fetchUsers(newPage);
 });
 
-watch(invitationStatusFilter, () => {
+watch(invitationCurrentPage, () => {
   fetchInvitations();
+});
+
+watch([invitationStatusFilter, invitationRoleFilter], () => {
+  invitationCurrentPage.value = 1;
+  refreshInvitationData();
+});
+
+let invitationSearchTimeoutId;
+watch(invitationSearch, () => {
+  clearTimeout(invitationSearchTimeoutId);
+  invitationSearchTimeoutId = setTimeout(() => {
+    invitationCurrentPage.value = 1;
+    fetchInvitations();
+  }, 250);
 });
 
 onMounted(() => {
   fetchUsers(currentPage.value);
-  fetchInvitations();
+  refreshInvitationData();
 });
 </script>

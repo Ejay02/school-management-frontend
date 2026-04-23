@@ -36,17 +36,57 @@ export const validateInvitationTokenQuery = gql`
 `;
 
 export const invitationsQuery = gql`
-  query Invitations($status: InviteStatus) {
-    invitations(status: $status) {
-      id
-      email
-      role
-      status
-      sentCount
-      lastSentAt
-      expiresAt
-      acceptedAt
-      createdAt
+  query Invitations(
+    $params: PaginationInput
+    $status: InviteStatus
+    $role: Roles
+  ) {
+    invitations(params: $params, status: $status, role: $role) {
+      items {
+        id
+        name
+        email
+        role
+        status
+        sentAt
+        sentCount
+        lastSentAt
+        expiresAt
+        acceptedAt
+        revokedAt
+        createdAt
+      }
+      pageInfo {
+        page
+        limit
+        totalCount
+        totalPages
+        hasMore
+      }
+    }
+  }
+`;
+
+export const invitationSummaryQuery = gql`
+  query InvitationSummary($role: Roles) {
+    invitationSummary(role: $role) {
+      totalSent
+      accepted
+      pending
+      expired
+      revoked
+      activationRate
+      activationLabel
+      roleBreakdown {
+        role
+        totalSent
+        accepted
+        pending
+        expired
+        revoked
+        activationRate
+        activationLabel
+      }
     }
   }
 `;
