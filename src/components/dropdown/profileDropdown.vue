@@ -11,7 +11,7 @@
         <img
           v-if="userStore?.userInfo?.image"
           :src="userStore?.userInfo?.image"
-          :alt="`${userStore?.userInfo?.name} image`"
+          :alt="`${displayName} image`"
           class="w-12 h-12 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
         />
 
@@ -19,8 +19,7 @@
           v-else
           class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200 capitalize"
         >
-          {{ userStore?.userInfo?.name[0] }}
-          {{ userStore?.userInfo?.surname[0] }}
+          {{ initials }}
         </div>
       </div>
 
@@ -28,7 +27,7 @@
         <span
           class="block text-sm font-medium leading-tight text-gray-800 group-hover:text-indigo-500 capitalize"
         >
-          {{ userStore?.userInfo?.name }} {{ userStore?.userInfo?.surname }}
+          {{ displayName }}
         </span>
         <span
           class="block break-all text-xs leading-snug text-gray-400 group-hover:text-indigo-500"
@@ -101,11 +100,18 @@ import { useMutation } from "@vue/apollo-composable";
 import { useUserStore } from "../../store/userStore";
 import { logoutMutation } from "../../graphql/mutations";
 import { useNotificationStore } from "../../store/notification";
+import { formatPersonName, getInitials } from "../../utils/displayValue";
 import { formatAuthErrorMessage } from "../../utils/graphqlError";
 
 const router = useRouter();
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
+const displayName = computed(() =>
+  formatPersonName(userStore?.userInfo?.name, userStore?.userInfo?.surname, ""),
+);
+const initials = computed(() =>
+  getInitials(userStore?.userInfo?.name, userStore?.userInfo?.surname),
+);
 
 const { mutate: logoutMutate } = useMutation(logoutMutation);
 

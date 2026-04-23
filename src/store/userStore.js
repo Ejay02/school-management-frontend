@@ -146,14 +146,22 @@ export const useUserStore = defineStore("user", () => {
   const filteredMenuItems = computed(() => {
     return menuItems.map((section) => ({
       ...section,
-      items: section.items.filter((item) => {
-        const role = currentRole.value.toLowerCase();
+      items: section.items
+        .filter((item) => {
+          const role = currentRole.value.toLowerCase();
 
-        if (role.toLowerCase() === "super_admin") {
-          return item.visible.includes("admin");
-        }
-        return item.visible.includes(role);
-      }),
+          if (role.toLowerCase() === "super_admin") {
+            return item.visible.includes("admin");
+          }
+          return item.visible.includes(role);
+        })
+        .map((item) => {
+          const role = currentRole.value.toLowerCase();
+          return {
+            ...item,
+            label: item.roleLabels?.[role] || item.label,
+          };
+        }),
     }));
   });
 

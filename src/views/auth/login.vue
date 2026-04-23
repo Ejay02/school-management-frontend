@@ -167,6 +167,7 @@ import { useUserStore } from "../../store/userStore";
 import { loginMutation } from "../../graphql/mutations";
 import { useNavigation } from "../../composables/useNavigation";
 import { useNotificationStore } from "../../store/notification";
+import { formatNamePart } from "../../utils/displayValue";
 import { formatAuthErrorMessage } from "../../utils/graphqlError";
 
 const router = useRouter();
@@ -206,7 +207,7 @@ const login = async () => {
 
       notificationStore.addNotification({
         type: "success",
-        message: `Welcome back ${userStore.userInfo.name}!`,
+        message: `Welcome back ${formatNamePart(userStore.userInfo.name)}!`,
       });
     }
   } catch (e) {

@@ -346,9 +346,7 @@
                 >
                 <div>
                   <input
-                    :value="
-                      userStore.userInfo.name + ' ' + userStore.userInfo.surname
-                    "
+                    :value="currentUserDisplayName"
                     readonly
                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-not-allowed"
                   />
@@ -707,6 +705,7 @@ import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
+import { formatPersonName } from "../../utils/displayValue";
 import { availableTargetRoles } from "../../utils/utility";
 
 import { useUserStore } from "../../store/userStore";
@@ -748,6 +747,9 @@ const className = ref("");
 const classCapacity = ref("");
 
 const transformedData = ref({});
+const currentUserDisplayName = computed(() =>
+  formatPersonName(userStore.userInfo.name, userStore.userInfo.surname, ""),
+);
 
 const toggleTargetRolesDropdown = () => {
   isTargetRolesDropdownOpen.value = !isTargetRolesDropdownOpen.value;
@@ -755,7 +757,7 @@ const toggleTargetRolesDropdown = () => {
 
 const toggleTargetRole = (role) => {
   const index = selectedTargetRoles.value.findIndex(
-    (r) => r.value === role.value
+    (r) => r.value === role.value,
   );
   if (index === -1) {
     selectedTargetRoles.value.push(role);
@@ -778,7 +780,7 @@ const selectAllTargetRoles = () => {
 
 const removeTargetRole = (role) => {
   const index = selectedTargetRoles.value.findIndex(
-    (r) => r.value === role.value
+    (r) => r.value === role.value,
   );
   if (index !== -1) {
     selectedTargetRoles.value.splice(index, 1);
@@ -791,7 +793,7 @@ const teacherNames = computed(() => {
 
 const getTeacherIdByName = (teacherName) => {
   const teacher = teacherStore.allTeachers.find(
-    (t) => `${t.name} ${t.surname}` === teacherName
+    (t) => `${t.name} ${t.surname}` === teacherName,
   );
   return teacher?.id || null;
 };
@@ -918,11 +920,11 @@ watch(
   (newVal) => {
     if (newVal && availableTargetRoles) {
       selectedTargetRoles.value = availableTargetRoles.filter((role) =>
-        newVal.includes(role.value)
+        newVal.includes(role.value),
       );
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
@@ -935,7 +937,7 @@ watch(
       selectedTeacher.value = "";
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // Watchers to sync with modal store
@@ -944,28 +946,28 @@ watch(
   (newVal) => {
     isModalVisible.value = newVal;
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
   () => modalStore.modalTitle,
   (newVal) => {
     title.value = newVal;
-  }
+  },
 );
 
 watch(
   () => modalStore.source,
   (newVal) => {
     source.value = newVal;
-  }
+  },
 );
 
 watch(
   () => modalStore.data,
   (newVal) => {
     data.value = newVal;
-  }
+  },
 );
 
 // Update the watch to properly initialize the class data
@@ -1001,13 +1003,13 @@ watch(
         // Initialize target roles if they exist in the data
         if (newVal.targetRoles) {
           selectedTargetRoles.value = availableTargetRoles.filter((role) =>
-            newVal.targetRoles.includes(role.value)
+            newVal.targetRoles.includes(role.value),
           );
         }
       }
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 onMounted(async () => {

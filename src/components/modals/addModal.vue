@@ -416,14 +416,14 @@
           <div class="flex gap-2">
             <div class="w-1/2">
               <div class="" v-if="role === 'teacher'">
-                <label for="teacher" class="block text-sm font-medium text-gray-700 mb-1"
+                <label
+                  for="teacher"
+                  class="block text-sm font-medium text-gray-700 mb-1"
                   >Teacher <span class="text-red-500">*</span></label
                 >
                 <div>
                   <input
-                    :value="
-                      userStore.userInfo.name + ' ' + userStore.userInfo.surname
-                    "
+                    :value="currentUserDisplayName"
                     readonly
                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-not-allowed"
                   />
@@ -935,6 +935,7 @@ import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
+import { formatPersonName } from "../../utils/displayValue";
 import { extractGraphQLErrorMessage } from "../../utils/graphqlError";
 import {
   availableTargetRoles,
@@ -994,6 +995,9 @@ const privateVisibility = ref("PRIVATE");
 const location = ref("");
 
 const role = computed(() => userStore.currentRole.toLowerCase());
+const currentUserDisplayName = computed(() =>
+  formatPersonName(userStore.userInfo.name, userStore.userInfo.surname, ""),
+);
 const selectedTargetRoles = ref([]);
 const isTargetRolesDropdownOpen = ref(false);
 const canInviteUsers = computed(() => {
@@ -1003,16 +1007,16 @@ const canInviteUsers = computed(() => {
   );
 });
 const inviteRole = computed(() =>
-  source.value === "teachers" ? "TEACHER" : "PARENT"
+  source.value === "teachers" ? "TEACHER" : "PARENT",
 );
 const inviteRoleLabel = computed(() =>
-  inviteRole.value === "TEACHER" ? "Teacher" : "Parent"
+  inviteRole.value === "TEACHER" ? "Teacher" : "Parent",
 );
 const submitButtonLabel = computed(() =>
-  canInviteUsers.value ? "Send Invite" : "Add"
+  canInviteUsers.value ? "Send Invite" : "Add",
 );
 const submitLoadingLabel = computed(() =>
-  canInviteUsers.value ? "Sending..." : "Adding..."
+  canInviteUsers.value ? "Sending..." : "Adding...",
 );
 
 const haveAccess = computed(() => {
@@ -1038,7 +1042,7 @@ const toggleTargetRole = (role) => {
 
 const removeTargetRole = (role) => {
   selectedTargetRoles.value = selectedTargetRoles.value.filter(
-    (r) => r.value !== role.value
+    (r) => r.value !== role.value,
   );
 };
 
@@ -1057,7 +1061,7 @@ const currentTeacher = computed(() => {
 
   // Find the teacher in the teacher store that matches the current user ID
   const teacher = teacherStore.allTeachers.find(
-    (t) => t.userId === currentUser.id || t.id === currentUser.id
+    (t) => t.userId === currentUser.id || t.id === currentUser.id,
   );
 
   if (teacher) {
@@ -1103,7 +1107,7 @@ const teacherNames = computed(() => {
 
 const getTeacherIdByName = (teacherName) => {
   const teacher = teacherStore.allTeachers.find(
-    (t) => `${t.name} ${t.surname}` === teacherName
+    (t) => `${t.name} ${t.surname}` === teacherName,
   );
   return teacher?.id || null;
 };
@@ -1326,7 +1330,7 @@ const handleAdd = async () => {
             classId: eventClassId,
             location: location.value,
             startTime: new Date(
-              `${date.value}T${startTime.value}`
+              `${date.value}T${startTime.value}`,
             ).toISOString(),
             endTime: new Date(`${date.value}T${endTime.value}`).toISOString(),
             status: "SCHEDULED",
@@ -1388,14 +1392,14 @@ watch(
   (newVal) => {
     isModalVisible.value = newVal;
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
   () => modalStore.source,
   (newVal) => {
     source.value = newVal;
-  }
+  },
 );
 
 onMounted(async () => {

@@ -13,6 +13,7 @@ export const useAttendanceStore = defineStore("attendanceStore", {
     },
     allAttendanceRecords: [], // Store all attendance records
     attendanceRecords: [], // Store paginated records
+    activeStudentId: null,
     loading: false,
     error: null,
     hasMore: true,
@@ -21,6 +22,47 @@ export const useAttendanceStore = defineStore("attendanceStore", {
   }),
 
   actions: {
+    calculateAttendanceStats(startDate, endDate) {
+      const labels = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+      const present = [0, 0, 0, 0, 0];
+      const absent = [0, 0, 0, 0, 0];
+
+      const start = startDate ? new Date(startDate) : null;
+      const end = endDate ? new Date(endDate) : null;
+
+      if (end) {
+        end.setHours(23, 59, 59, 999);
+      }
+
+      const filteredRecords = this.allAttendanceRecords.filter((record) => {
+        const recordDate = new Date(record.date);
+
+        if (start && recordDate < start) return false;
+        if (end && recordDate > end) return false;
+
+        const dayIndex = recordDate.getDay();
+        return dayIndex >= 1 && dayIndex <= 5;
+      });
+
+      filteredRecords.forEach((record) => {
+        const dayIndex = new Date(record.date).getDay() - 1;
+        if (dayIndex < 0 || dayIndex > 4) return;
+
+        if (record.present) {
+          present[dayIndex] += 1;
+        } else {
+          absent[dayIndex] += 1;
+        }
+      });
+
+      this.stats = {
+        labels,
+        present,
+        absent,
+        studentCount: filteredRecords.length,
+      };
+    },
+
     async fetchSchoolAttendanceStats(startDate, endDate) {
       this.loading = true;
       this.error = null;
@@ -62,15 +104,29 @@ export const useAttendanceStore = defineStore("attendanceStore", {
       search = "",
       sortBy = "",
       sortOrder = "",
+      studentId = null,
     } = {}) {
       this.loading = true;
       this.error = null;
+
+      const normalizedStudentId = studentId || this.activeStudentId || null;
+      if (this.activeStudentId !== normalizedStudentId) {
+        this.allAttendanceRecords = [];
+        this.attendanceRecords = [];
+        this.totalCount = 0;
+        this.totalPages = 1;
+        this.hasMore = true;
+        this.activeStudentId = normalizedStudentId;
+      }
+
       try {
         // First fetch all attendance records if we haven't already
         if (this.allAttendanceRecords.length === 0) {
           const res = await apolloClient.query({
             query: getAttendances,
-            variables: { pagination: { page: 1, limit: 1000 } },
+            variables: {
+              studentId: this.activeStudentId,
+            },
             fetchPolicy: "no-cache",
           });
 
@@ -86,7 +142,7 @@ export const useAttendanceStore = defineStore("attendanceStore", {
               record?.student?.name?.toLowerCase().includes(searchLower) ||
               record?.student?.surname?.toLowerCase().includes(searchLower) ||
               record?.class?.name?.toLowerCase().includes(searchLower) ||
-              record?.lesson?.name?.toLowerCase().includes(searchLower)
+              record?.lesson?.name?.toLowerCase().includes(searchLower),
           );
         }
 
@@ -111,6 +167,11 @@ export const useAttendanceStore = defineStore("attendanceStore", {
       this.error = null;
 
       try {
+        if (this.activeStudentId) {
+          this.calculateAttendanceStats(start, end);
+          return;
+        }
+
         // Fetch weekly stats for chart
         await this.fetchSchoolAttendanceStats(start, end);
       } catch (err) {

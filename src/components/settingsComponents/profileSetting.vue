@@ -17,8 +17,7 @@
               v-else
               class="h-32 w-32 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200 text-2xl capitalize"
             >
-              {{ userStore?.userInfo?.name[0] }}
-              {{ userStore?.userInfo?.surname[0] }}
+              {{ initials }}
             </div>
             <button
               type="button"
@@ -38,7 +37,9 @@
           <!-- File type text moved below image -->
           <div class="text-center font-semibold text-gray-600 text-xs">
             <span>JPG, GIF or PNG</span>
-            <span class="block">1MB max <span class="text-red-500">*</span></span>
+            <span class="block"
+              >1MB max <span class="text-red-500">*</span></span
+            >
           </div>
         </div>
       </div>
@@ -49,9 +50,7 @@
           <!-- Name Fields -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label
-                for="name"
-                class="block text-sm font-medium text-gray-500"
+              <label for="name" class="block text-sm font-medium text-gray-500"
                 >First Name</label
               >
               <input
@@ -106,12 +105,10 @@
               />
             </div>
           </div>
-          
+
           <!-- Additional Fields -->
           <div>
-            <label
-              for="aboutMe"
-              class="block text-sm font-medium text-gray-500"
+            <label for="aboutMe" class="block text-sm font-medium text-gray-500"
               >About Me</label
             >
             <textarea
@@ -121,13 +118,11 @@
               placeholder="Tell us about yourself"
             ></textarea>
           </div>
-          
+
           <!-- Sex and Blood Type Fields -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label
-                for="sex"
-                class="block text-sm font-medium text-gray-500"
+              <label for="sex" class="block text-sm font-medium text-gray-500"
                 >Sex</label
               >
               <select
@@ -162,7 +157,7 @@
               </select>
             </div>
           </div>
-          
+
           <!-- Address and Phone Fields -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -179,9 +174,7 @@
               />
             </div>
             <div>
-              <label
-                for="phone"
-                class="block text-sm font-medium text-gray-500"
+              <label for="phone" class="block text-sm font-medium text-gray-500"
                 >Phone</label
               >
               <input
@@ -243,6 +236,7 @@ import {
 } from "../../graphql/mutations";
 import { useNotificationStore } from "../../store/notification";
 import { useUserStore } from "../../store/userStore";
+import { getInitials } from "../../utils/displayValue";
 
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
@@ -252,6 +246,10 @@ const profilePreview = ref(null);
 const fileInput = ref(null);
 const imageFile = ref(null);
 const imageBase64 = ref(null);
+const initials = getInitials(
+  userStore?.userInfo?.name,
+  userStore?.userInfo?.surname,
+);
 
 // Format date to YYYY-MM-DD for input[type="date"]
 const formatDateForInput = (dateString) => {

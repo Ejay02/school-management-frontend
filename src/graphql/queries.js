@@ -266,8 +266,8 @@ export const getStudentById = gql`
 `;
 
 export const getAllSubjects = gql`
-  query geAllStudents($pagination: PaginationInput) {
-    getAllSubjects(params: $pagination) {
+  query geAllStudents($pagination: PaginationInput, $studentId: String) {
+    getAllSubjects(params: $pagination, studentId: $studentId) {
       id
       name
       teachers {
@@ -323,8 +323,8 @@ export const getAllClasses = gql`
 `;
 
 export const getAllLessons = gql`
-  query geAllLessons($pagination: PaginationInput) {
-    getAllLessons(params: $pagination) {
+  query geAllLessons($pagination: PaginationInput, $studentId: String) {
+    getAllLessons(params: $pagination, studentId: $studentId) {
       id
       name
       day
@@ -519,8 +519,8 @@ export const getStudentExams = gql`
 `;
 
 export const getAllAssignments = gql`
-  query getAllAssignments($params: PaginationInput) {
-    getAllAssignments(params: $params) {
+  query getAllAssignments($params: PaginationInput, $studentId: String) {
+    getAllAssignments(params: $params, studentId: $studentId) {
       id
       title
       startDate
@@ -708,6 +708,42 @@ export const getClassResults = gql`
   }
 `;
 
+export const getStudentResults = gql`
+  query getStudentResults($studentId: String!) {
+    getStudentResults(studentId: $studentId) {
+      id
+      score
+      academicPeriod
+      term
+      type
+      comments
+      isOfficialResult
+      createdAt
+      exam {
+        id
+        title
+        subject {
+          id
+          name
+        }
+      }
+      assignment {
+        id
+        title
+        subject {
+          id
+          name
+        }
+      }
+      student {
+        id
+        name
+        surname
+      }
+    }
+  }
+`;
+
 export const getSchoolAttendanceStats = gql`
   query getSchoolAttendanceStats($startDate: DateTime!, $endDate: DateTime!) {
     getSchoolAttendanceStats(startDate: $startDate, endDate: $endDate) {
@@ -720,8 +756,8 @@ export const getSchoolAttendanceStats = gql`
 `;
 
 export const getAttendances = gql`
-  query getAttendances {
-    getAttendances {
+  query getAttendances($studentId: String) {
+    getAttendances(studentId: $studentId) {
       id
       date
       present

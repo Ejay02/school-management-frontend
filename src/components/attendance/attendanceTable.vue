@@ -325,6 +325,7 @@ import { useAttendanceStore } from "../../store/attendanceStore";
 import { useClassStore } from "../../store/classStore";
 import { useLessonStore } from "../../store/lessonStore";
 import { useNotificationStore } from "../../store/notification";
+import { useParentLinkedStudents } from "../../composables/useParentLinkedStudents";
 import { useStudentStore } from "../../store/studentStore";
 import { useUserStore } from "../../store/userStore";
 import { formatDate } from "../../utils/date.holidays";
@@ -340,6 +341,7 @@ const attendanceStore = useAttendanceStore();
 const classStore = useClassStore();
 const lessonStore = useLessonStore();
 const notificationStore = useNotificationStore();
+const { isParent, selectedStudentId } = useParentLinkedStudents();
 
 const userRole = computed(() => userStore.currentRole);
 const userHasAccess = computed(() =>
@@ -407,6 +409,7 @@ const handlePageChange = async (newPage) => {
     page: newPage,
     limit: pageSize,
     search: searchQuery.value,
+    studentId: selectedStudentId.value,
   });
 };
 
@@ -563,7 +566,7 @@ async function saveAttendance() {
     markAttendanceMode.value = false;
 
     // Refresh the attendance records
-    await attendanceStore.fetchAttendance();
+    await attendanceStore.fetchAttendance({ studentId: selectedStudentId.value });
   } catch (err) {
     attendanceStore.error = "Failed to save attendance";
   } finally {
@@ -605,12 +608,21 @@ watch(selectedLesson, () => {
 onMounted(async () => {
   await handlePageChange(1);
 
-  attendanceStore.fetchAttendance();
-
   // Fetch classes and lessons
   if (userHasAccess.value) {
     classStore.fetchClasses();
     lessonStore.fetchLessons();
   }
+});
+
+watch(selectedStudentId, async (studentId) => {
+  if (!isParent.value || !studentId) return;
+  currentPage.value = 1;
+  await attendanceStore.fetchAttendance({
+    page: 1,
+    limit: pageSize,
+    search: searchQuery.value,
+    studentId,
+  });
 });
 </script>

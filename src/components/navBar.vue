@@ -68,8 +68,8 @@
         <!-- user -->
         <div class="flex flex-col">
           <div class="relative inline-block">
-            <span class="text-sm leading-3 font-medium pr-1 capitalize">
-              {{ userStore?.userInfo?.name }} {{ userStore?.userInfo?.surname }}
+            <span class="text-sm leading-3 font-medium pr-1">
+              {{ displayName }}
             </span>
             <i
               class="fa-regular fa-copy text-xs absolute top-0"
@@ -90,7 +90,7 @@
             <img
               v-if="userStore?.userInfo?.image"
               :src="userStore?.userInfo?.image"
-              :alt="`${userStore?.userInfo?.name} avatar`"
+              :alt="`${displayName} avatar`"
               class="w-16 h-16 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
             />
 
@@ -98,8 +98,7 @@
               v-else
               class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-sm border-2 border-indigo-200 capitalize"
             >
-              {{ userStore?.userInfo?.name[0]
-              }}{{ userStore?.userInfo?.surname[0] }}
+              {{ initials }}
             </div>
           </div>
 
@@ -111,13 +110,20 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useAnnouncementStore } from "../store/announcementStore";
 import { useNotificationStore } from "../store/notification";
 import { useUserStore } from "../store/userStore";
+import { formatPersonName, getInitials } from "../utils/displayValue";
 import ProfileDropdown from "./dropdown/profileDropdown.vue";
 
 const userStore = useUserStore();
+const displayName = computed(() =>
+  formatPersonName(userStore?.userInfo?.name, userStore?.userInfo?.surname, "")
+);
+const initials = computed(() =>
+  getInitials(userStore?.userInfo?.name, userStore?.userInfo?.surname)
+);
 
 const notificationStore = useNotificationStore();
 const announcementStore = useAnnouncementStore();

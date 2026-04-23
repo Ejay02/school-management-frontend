@@ -6,6 +6,7 @@ export const useSubjectStore = defineStore("subjectStore", {
   state: () => ({
     allSubjects: [], // Store all subjects
     subjects: [], // Store paginated subjects
+    activeStudentId: null,
     loading: false,
     error: null,
     hasMore: true,
@@ -20,15 +21,30 @@ export const useSubjectStore = defineStore("subjectStore", {
       search = "",
       sortBy = "",
       sortOrder = "",
+      studentId = null,
     } = {}) {
       this.loading = true;
+      this.error = null;
+
+      const normalizedStudentId = studentId || null;
+      if (this.activeStudentId !== normalizedStudentId) {
+        this.allSubjects = [];
+        this.subjects = [];
+        this.totalCount = 0;
+        this.totalPages = 1;
+        this.hasMore = true;
+        this.activeStudentId = normalizedStudentId;
+      }
 
       try {
         // First fetch all subjects if we haven't already
         if (this.allSubjects.length === 0) {
           const { data } = await apolloClient.query({
             query: getAllSubjects,
-            variables: { pagination: { page: 1, limit: 1000 } }, // Get all subjects
+            variables: {
+              pagination: { page: 1, limit: 1000 },
+              studentId: this.activeStudentId,
+            },
             fetchPolicy: "network-only",
           });
           this.allSubjects = data.getAllSubjects;
@@ -53,6 +69,7 @@ export const useSubjectStore = defineStore("subjectStore", {
       await apolloClient.cache.evict({ fieldName: "getAllSubjects" });
       await apolloClient.cache.gc();
       this.allSubjects = [];
+      this.activeStudentId = null;
       await this.fetchSubjects();
     },
 

@@ -7,6 +7,7 @@ export const useAssignmentStore = defineStore("assignmentStore", {
   state: () => ({
     allAssignments: [], // Store all assignments
     assignments: [], // Store paginated assignments
+    activeStudentId: null,
     loading: false,
     error: null,
     hasMore: true,
@@ -21,15 +22,30 @@ export const useAssignmentStore = defineStore("assignmentStore", {
       search = "",
       sortBy = "",
       sortOrder = "",
+      studentId = null,
     } = {}) {
       this.loading = true;
+      this.error = null;
+
+      const normalizedStudentId = studentId || null;
+      if (this.activeStudentId !== normalizedStudentId) {
+        this.allAssignments = [];
+        this.assignments = [];
+        this.totalCount = 0;
+        this.totalPages = 1;
+        this.hasMore = true;
+        this.activeStudentId = normalizedStudentId;
+      }
 
       try {
         // First fetch all assignments if we haven't already
         if (this.allAssignments.length === 0) {
           const { data } = await apolloClient.query({
             query: getAllAssignments,
-            variables: { pagination: { page: 1, limit: 1000 } },
+            variables: {
+              params: { page: 1, limit: 1000 },
+              studentId: this.activeStudentId,
+            },
             fetchPolicy: "network-only",
           });
 
@@ -53,6 +69,7 @@ export const useAssignmentStore = defineStore("assignmentStore", {
     async refreshAssignments() {
       // Clear the cache to force a fresh fetch
       this.allAssignments = [];
+      this.activeStudentId = null;
 
       return this.fetchAssignments();
     },

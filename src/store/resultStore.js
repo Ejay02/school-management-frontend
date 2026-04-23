@@ -1,11 +1,17 @@
 import { defineStore } from "pinia";
 
 import { apolloClient } from "../../apollo-client";
-import { getClassResults, getResultStatistics } from "../graphql/queries";
+import {
+  getClassResults,
+  getResultStatistics,
+  getStudentResults,
+} from "../graphql/queries";
 
 export const useResultStore = defineStore("resultStore", {
   state: () => ({
     results: [],
+    studentResults: [],
+    activeStudentId: null,
     loading: false,
     error: null,
   }),
@@ -60,6 +66,33 @@ export const useResultStore = defineStore("resultStore", {
             meta: { total: 0, page: 1, lastPage: 1, limit: 10 },
           };
         }
+      } catch (error) {
+        this.error = error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchStudentResults(studentId) {
+      this.loading = true;
+      this.error = null;
+      this.activeStudentId = studentId || null;
+
+      try {
+        if (!studentId) {
+          this.studentResults = [];
+          return;
+        }
+
+        const res = await apolloClient.query({
+          query: getStudentResults,
+          variables: { studentId },
+          fetchPolicy: "network-only",
+        });
+
+        this.studentResults = Array.isArray(res?.data?.getStudentResults)
+          ? res.data.getStudentResults
+          : [];
       } catch (error) {
         this.error = error;
       } finally {
