@@ -23,14 +23,8 @@
       <ul v-for="menuItem in filteredMenuItems" :key="menuItem?.title" class="">
         <li v-for="item in menuItem?.items" :key="item?.label" class="mb-2">
           <router-link
-            :to="
-              item?.label === 'Home'
-                ? `/dashboard/${
-                    currentRole.toLowerCase() === 'super_admin' ? 'admin' : currentRole
-                  }`
-                : item?.href || '/'
-            "
-            active-class="bg-eduPurpleLight text-purple-600"
+            :to="getLinkTarget(item)"
+            exact-active-class="bg-eduPurpleLight text-purple-600"
             :class="isLinkActive(item?.href) ? 'bg-eduPurpleLight text-purple-600' : ''"
             class="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-eduSkyLight text-sm"
           >
@@ -52,6 +46,18 @@ const route = useRoute();
 const userStore = useUserStore();
 const { filteredMenuItems, currentRole } = storeToRefs(userStore);
 
+const getLinkTarget = (item) => {
+  if (item?.href === "/dashboard") {
+    return `/dashboard/${
+      currentRole.value.toLowerCase() === "super_admin"
+        ? "admin"
+        : currentRole.value.toLowerCase()
+    }`;
+  }
+
+  return item?.href || "/";
+};
+
 // Function to check if a link should be active based on current route
 const isLinkActive = (href) => {
   if (!href) return false;
@@ -61,6 +67,10 @@ const isLinkActive = (href) => {
   
   // Extract the current path from route
   const currentPath = route.path.split('/').filter(Boolean);
+
+  if (basePath === "dashboard") {
+    return route.path === getLinkTarget({ href });
+  }
   
   // Special case for dashboard paths
   if (currentPath[0] === 'dashboard') {
