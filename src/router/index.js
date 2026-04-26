@@ -30,6 +30,7 @@ import BillingSetting from "../components/settingsComponents/billingSetting.vue"
 import IntegrationSetting from "../components/settingsComponents/integrationSetting.vue";
 import NotificationSetting from "../components/settingsComponents/notificationSetting.vue";
 import ProfileSetting from "../components/settingsComponents/profileSetting.vue";
+import SchoolSetting from "../components/settingsComponents/schoolSetting.vue";
 import TeamSetting from "../components/settingsComponents/teamSetting.vue";
 import Students from "../components/students/students.vue";
 import StudentView from "../components/students/studentView.vue";
@@ -305,6 +306,11 @@ const routes = [
             path: "team",
             name: "team",
             component: TeamSetting,
+          },
+          {
+            path: "school",
+            name: "school",
+            component: SchoolSetting,
           },
           {
             path: "integrations",

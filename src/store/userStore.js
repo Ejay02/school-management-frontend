@@ -1,6 +1,11 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import { getAllAdminUsers, getUserById } from "../graphql/queries";
+import { apolloClient } from "../../apollo-client";
+import {
+  getAllAdminUsers,
+  getSetupStateQuery,
+  getUserById,
+} from "../graphql/queries";
 import { menuItems } from "../utils";
 import {
   PROFILE_COMPLETION_STORAGE_KEY,
@@ -39,6 +44,7 @@ export const useUserStore = defineStore("user", () => {
   );
 
   const currentRole = ref(userInfo.value.role.toLowerCase() || "");
+  const schoolInfo = ref({ schoolName: "", schoolLogo: "" });
 
   const notificationStore = useNotificationStore();
 
@@ -74,6 +80,10 @@ export const useUserStore = defineStore("user", () => {
 
   // Updated setUser to handle persistence and refresh token
   const setUser = (user) => {
+    const normalizedRole = String(user.role || "")
+      .trim()
+      .toLowerCase();
+
     const userData = {
       id: user.userId,
       name: user.name,
@@ -93,11 +103,55 @@ export const useUserStore = defineStore("user", () => {
     };
 
     userInfo.value = userData;
-    currentRole.value = user.role;
+    currentRole.value = normalizedRole;
 
     // Persist to localStorage
     localStorage.setItem("userInfo", JSON.stringify(userData));
     syncProfileCompletionState(userData);
+  };
+
+  const applySchoolBranding = (nextSchoolInfo = schoolInfo.value) => {
+    const title = nextSchoolInfo?.schoolName?.trim() || "EduHub Portal";
+    document.title = title;
+
+    const href = nextSchoolInfo?.schoolLogo?.trim();
+    if (!href) return;
+
+    const existing =
+      document.querySelector("link[rel='icon']") ||
+      document.querySelector("link[rel='shortcut icon']") ||
+      document.querySelector("link[rel*='icon']");
+
+    const link = existing || document.createElement("link");
+    link.setAttribute("rel", "icon");
+    link.setAttribute("href", href);
+    if (!existing) document.head.appendChild(link);
+  };
+
+  const setSchoolInfo = (setupState) => {
+    schoolInfo.value = {
+      schoolName: setupState?.schoolName || "",
+      schoolLogo: setupState?.schoolLogo || "",
+    };
+
+    applySchoolBranding(schoolInfo.value);
+  };
+
+  const fetchSchoolInfo = async () => {
+    const token = localStorage.getItem("token") || userInfo.value?.token;
+    if (!token) return null;
+
+    const { data } = await apolloClient.query({
+      query: getSetupStateQuery,
+      fetchPolicy: "network-only",
+    });
+
+    if (data?.getSetupState) {
+      setSchoolInfo(data.getSetupState);
+      return data.getSetupState;
+    }
+
+    return null;
   };
 
   // New method to update user profile after mutation
@@ -120,7 +174,7 @@ export const useUserStore = defineStore("user", () => {
       ["super_admin", "admin", "teacher", "student", "parent"].includes(role)
     ) {
       currentRole.value = role;
-      userInfo.value.role = role;
+      userInfo.value.role = role.toUpperCase();
       // Update persisted data
       localStorage.setItem("userInfo", JSON.stringify(userInfo.value));
     } else {
@@ -296,6 +350,9 @@ export const useUserStore = defineStore("user", () => {
     userInfo,
     hasAccess,
     currentRole,
+    schoolInfo,
+    setSchoolInfo,
+    fetchSchoolInfo,
     refreshUsers,
     findUserById,
     fetchAdminUsers,

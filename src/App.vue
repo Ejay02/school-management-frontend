@@ -26,6 +26,7 @@
 </template>
 
 <script setup>
+import { onMounted } from "vue";
 import AddModal from "./components/modals/addModal.vue";
 import DeleteModal from "./components/modals/deleteModal.vue";
 import EditModal from "./components/modals/editModal.vue";
@@ -34,8 +35,14 @@ import { useModalStore } from "./store/useModalStore";
 import CancelModal from "./components/modals/cancelModal.vue";
 import CreateFeeStructureModal from "./components/modals/CreateFeeStructureModal.vue";
 import ViewFeeDetailsModal from "./components/modals/viewFeeDetailsModal.vue";
+import { useUserStore } from "./store/userStore";
 
 const modalStore = useModalStore();
+const userStore = useUserStore();
+
+onMounted(async () => {
+  await userStore.fetchSchoolInfo().catch(() => null);
+});
 </script>
 
 <style scoped></style>

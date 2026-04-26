@@ -130,16 +130,16 @@ export const useFeeStructureStore = defineStore("feeStructureStore", {
           },
         });
 
-        if (data?.editFeeStructure) {
+        if (data?.updateFeeStructure) {
           // Update the fee structure in the store
-          this.updateFeeStructure(data.editFeeStructure);
+          this.updateFeeStructure(data.updateFeeStructure);
 
           notificationStore.addNotification({
             type: "success",
             message: "Fee structure updated successfully!",
           });
 
-          return data.editFeeStructure;
+          return data.updateFeeStructure;
         }
       } catch (error) {
         this.error = error.message || "Error updating fee structure";

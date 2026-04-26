@@ -91,6 +91,80 @@ export const invitationSummaryQuery = gql`
   }
 `;
 
+export const getSetupStateQuery = gql`
+  query GetSetupState {
+    getSetupState {
+      id
+      schoolName
+      schoolAddress
+      schoolLogo
+      schoolContactName
+      schoolEmail
+      schoolPhone
+      schoolTimezone
+      academicYearCurrent
+      academicYearNext
+      currentTerm
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const getSetupProgressQuery = gql`
+  query GetSetupProgress {
+    getSetupProgress {
+      completedSteps
+      totalSteps
+      completionPercentage
+      state {
+        id
+        schoolName
+        schoolAddress
+        schoolLogo
+        schoolContactName
+        schoolEmail
+        schoolPhone
+        schoolTimezone
+        academicYearCurrent
+        academicYearNext
+        currentTerm
+        createdAt
+        updatedAt
+      }
+      steps {
+        key
+        label
+        completed
+        value
+      }
+    }
+  }
+`;
+
+export const getOnboardingChecklistQuery = gql`
+  query GetOnboardingChecklist {
+    getOnboardingChecklist {
+      completedSteps
+      totalSteps
+      completionPercentage
+      steps {
+        key
+        label
+        complete
+        summary
+        meta {
+          count
+          total
+          accepted
+          pending
+          expired
+        }
+      }
+    }
+  }
+`;
+
 export const getAllAdminsQuery = gql`
   query getAllAdmins {
     getAllAdmins {

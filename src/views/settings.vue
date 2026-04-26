@@ -51,6 +51,14 @@
               Team
             </router-link>
             <router-link
+              v-if="role === 'super_admin' || role === 'admin'"
+              to="/settings/school"
+              class="hover:text-eduPurple"
+              :class="{ 'text-indigo-600': $route.name === 'school' }"
+            >
+              School
+            </router-link>
+            <router-link
               to="/settings/integrations"
               class="hover:text-eduPurple pr-4"
               :class="{ 'text-indigo-600': $route.name === 'integrations' }"
@@ -70,6 +78,7 @@
               <option value="/settings/notifications">Notifications</option>
               <option value="/settings/billing">Billing</option>
               <option v-if="role === 'super_admin' || role === 'admin'" value="/settings/team">Team</option>
+              <option v-if="role === 'super_admin' || role === 'admin'" value="/settings/school">School</option>
               <option value="/settings/integrations">Integrations</option>
             </select>
           </div>

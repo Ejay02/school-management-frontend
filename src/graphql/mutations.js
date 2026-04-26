@@ -159,6 +159,26 @@ export const revokeInvitationMutation = gql`
   }
 `;
 
+export const updateSetupStateMutation = gql`
+  mutation UpdateSetupState($input: UpdateSetupStateInput!) {
+    updateSetupState(input: $input) {
+      id
+      schoolName
+      schoolAddress
+      schoolLogo
+      schoolContactName
+      schoolEmail
+      schoolPhone
+      schoolTimezone
+      academicYearCurrent
+      academicYearNext
+      currentTerm
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 export const loginMutation = gql`
   mutation Login($input: BaseLoginInput!) {
     login(input: $input) {
