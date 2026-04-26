@@ -79,12 +79,15 @@
             <label class="block text-sm font-medium text-gray-500"
               >Timezone</label
             >
-            <input
+            <select
               v-model="formData.schoolTimezone"
-              type="text"
-              class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
-              placeholder="e.g. Africa/Lagos"
-            />
+              class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+            >
+              <option value="">Select</option>
+              <option v-for="tz in timezoneOptions" :key="tz" :value="tz">
+                {{ tz }}
+              </option>
+            </select>
           </div>
 
           <div>
@@ -107,7 +110,7 @@
                   v-model="formData.schoolLogo"
                   type="text"
                   class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
-                  placeholder="Paste logo URL (or upload)"
+                  placeholder="Paste logo URL"
                 />
               </div>
 
@@ -142,6 +145,7 @@
             <input
               v-model="formData.academicYearCurrent"
               type="text"
+              readonly
               class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
               placeholder="e.g. 2025"
             />
@@ -154,6 +158,7 @@
             <input
               v-model="formData.academicYearNext"
               type="text"
+              readonly
               class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
               placeholder="e.g. 2026"
             />
@@ -224,6 +229,35 @@ const formData = reactive({
   currentTerm: "",
 });
 
+const academicYearDefaults = computed(() => {
+  const year = new Date().getFullYear();
+  return {
+    current: String(year),
+    next: String(year + 1),
+  };
+});
+
+const timezoneOptions = computed(() => {
+  const supported = Intl?.supportedValuesOf?.("timeZone");
+  if (Array.isArray(supported) && supported.length) return supported;
+  return [
+    "Africa/Lagos",
+    "Africa/Accra",
+    "Africa/Nairobi",
+    "Africa/Johannesburg",
+    "Europe/London",
+    "Europe/Paris",
+    "America/New_York",
+    "America/Chicago",
+    "America/Los_Angeles",
+    "Asia/Dubai",
+    "Asia/Kolkata",
+    "Asia/Singapore",
+    "Asia/Tokyo",
+    "Australia/Sydney",
+  ];
+});
+
 const initialized = ref(false);
 
 watch(
@@ -236,9 +270,12 @@ watch(
     formData.schoolContactName = state.schoolContactName || "";
     formData.schoolEmail = state.schoolEmail || "";
     formData.schoolPhone = state.schoolPhone || "";
-    formData.schoolTimezone = state.schoolTimezone || "";
-    formData.academicYearCurrent = state.academicYearCurrent || "";
-    formData.academicYearNext = state.academicYearNext || "";
+    formData.schoolTimezone =
+      state.schoolTimezone ||
+      Intl?.DateTimeFormat?.().resolvedOptions?.().timeZone ||
+      "";
+    formData.academicYearCurrent = academicYearDefaults.value.current;
+    formData.academicYearNext = academicYearDefaults.value.next;
     formData.currentTerm = state.currentTerm || "";
     initialized.value = true;
   },
@@ -277,8 +314,8 @@ const saveSchoolSettings = async () => {
         schoolEmail: normalizeString(formData.schoolEmail),
         schoolPhone: normalizeString(formData.schoolPhone),
         schoolTimezone: normalizeString(formData.schoolTimezone),
-        academicYearCurrent: normalizeString(formData.academicYearCurrent),
-        academicYearNext: normalizeString(formData.academicYearNext),
+        academicYearCurrent: academicYearDefaults.value.current,
+        academicYearNext: academicYearDefaults.value.next,
         currentTerm: formData.currentTerm || null,
       },
     });
