@@ -5,9 +5,9 @@
   >
     <!-- Profile -->
     <div
-      class="flex items-center gap-3 rounded-md border-b border-gray-300 p-2 hover:bg-eduSkyLight group"
+      class="grid grid-cols-[auto,1fr] items-center gap-x-1 rounded-md border-b border-gray-300 px-2 py-1.5 hover:bg-eduSkyLight group"
     >
-      <div class="relative">
+      <div class="relative shrink-0">
         <img
           v-if="userStore?.userInfo?.image"
           :src="userStore?.userInfo?.image"
@@ -23,18 +23,29 @@
         </div>
       </div>
 
-      <div class="min-w-0 flex-1 space-y-1">
+      <div class="min-w-0 leading-none">
         <span
-          class="block text-sm font-medium leading-tight text-gray-800 group-hover:text-indigo-500 capitalize"
+          class="block text-sm font-medium text-gray-800 group-hover:text-indigo-500 capitalize"
         >
           {{ displayName }}
         </span>
         <span
-          class="block break-all text-xs leading-snug text-gray-400 group-hover:text-indigo-500"
+          class="mt-0.5 block break-all text-xs text-gray-400 group-hover:text-indigo-500"
           :title="userStore?.userInfo?.email"
         >
           {{ userStore?.userInfo?.email }}
         </span>
+        <div
+          v-if="roleId"
+          class="mt-0.5 flex items-center gap-2 text-[11px] text-gray-400 group-hover:text-indigo-500"
+          :title="roleId"
+        >
+          <span class="truncate">ID: {{ roleId }}</span>
+          <i
+            class="fa-regular fa-copy cursor-pointer text-xs"
+            @click.stop="copyRoleId"
+          ></i>
+        </div>
       </div>
     </div>
 
@@ -94,14 +105,15 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { useMutation } from "@vue/apollo-composable";
 import { useUserStore } from "../../store/userStore";
 import { logoutMutation } from "../../graphql/mutations";
 import { useNotificationStore } from "../../store/notification";
 import { formatPersonName, getInitials } from "../../utils/displayValue";
 import { formatAuthErrorMessage } from "../../utils/graphqlError";
+import { apolloClient } from "../../../apollo-client";
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -112,6 +124,38 @@ const displayName = computed(() =>
 const initials = computed(() =>
   getInitials(userStore?.userInfo?.name, userStore?.userInfo?.surname),
 );
+
+const roleId = computed(() => {
+  const role = String(userStore?.userInfo?.role || "").toLowerCase();
+  if (role === "admin" || role === "super_admin")
+    return userStore?.userInfo?.adminId;
+  if (role === "teacher") return userStore?.userInfo?.teacherId;
+  if (role === "student") return userStore?.userInfo?.studentId;
+  if (role === "parent") return userStore?.userInfo?.id;
+  return "";
+});
+
+const copyRoleId = async () => {
+  if (!roleId.value) return;
+  try {
+    await navigator.clipboard.writeText(roleId.value);
+    notificationStore.addNotification({
+      type: "info",
+      message: "ID copied to clipboard!",
+    });
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: `Failed to copy ID: ${error.message}`,
+    });
+  }
+};
+
+onMounted(() => {
+  if (!roleId.value) {
+    userStore.syncCurrentUser(apolloClient);
+  }
+});
 
 const { mutate: logoutMutate } = useMutation(logoutMutation);
 

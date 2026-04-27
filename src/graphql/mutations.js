@@ -21,6 +21,7 @@ export const adminSignupMutation = gql`
       token
       refreshToken
       userId
+      adminId
       role
       email
       username
@@ -39,6 +40,8 @@ export const teacherSignupMutation = gql`
       token
       refreshToken
       userId
+      teacherId
+      institutionalEmail
       role
       email
       username
@@ -57,6 +60,8 @@ export const studentSignupMutation = gql`
       token
       refreshToken
       userId
+      studentId
+      institutionalEmail
       role
       email
       username
@@ -109,6 +114,10 @@ export const acceptInvitationMutation = gql`
       token
       refreshToken
       userId
+      adminId
+      teacherId
+      studentId
+      institutionalEmail
       role
       email
       username
@@ -186,6 +195,10 @@ export const loginMutation = gql`
       token
       refreshToken
       userId
+      adminId
+      teacherId
+      studentId
+      institutionalEmail
       role
       email
       username

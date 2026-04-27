@@ -33,7 +33,7 @@ export const useTeacherStore = defineStore("teacherStore", {
 
           this.allTeachers = data.getAllTeachers.map((teacher) => ({
             ...teacher,
-            teacherId: teacher?.id,
+            teacherId: teacher?.teacherId || teacher?.id,
             photo: teacher?.image,
             subjects: teacher?.subjects.map((subject) => subject.name),
             classes: teacher?.classes || [],

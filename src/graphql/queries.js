@@ -171,6 +171,7 @@ export const getAllAdminsQuery = gql`
   query getAllAdmins {
     getAllAdmins {
       id
+      adminId
       username
       email
       name
@@ -187,10 +188,12 @@ export const getAllTeachers = gql`
   query getAllTeachers($pagination: PaginationInput) {
     getAllTeachers(params: $pagination) {
       id
+      teacherId
       username
       name
       surname
       email
+      institutionalEmail
       role
       address
       image
@@ -209,11 +212,13 @@ export const getAllStudents = gql`
   query getAllStudents($pagination: PaginationInput) {
     getAllStudents(params: $pagination) {
       id
+      studentId
       username
       role
       name
       surname
       email
+      institutionalEmail
       phone
       address
       aboutMe
@@ -313,11 +318,13 @@ export const getTeacherById = gql`
   query getTeacherById($teacherId: String!) {
     getTeacherById(teacherId: $teacherId) {
       id
+      teacherId
       username
       role
       name
       surname
       email
+      institutionalEmail
       phone
       address
       image
@@ -345,11 +352,13 @@ export const getStudentById = gql`
   query getStudentById($studentId: String!) {
     getStudentById(studentId: $studentId) {
       id
+      studentId
       username
       role
       name
       surname
       email
+      institutionalEmail
       phone
       address
       image
@@ -961,6 +970,7 @@ export const getUserById = gql`
     getUserById(id: $id) {
       ... on Admin {
         id
+        adminId
         username
         # name
         # surname
@@ -971,12 +981,14 @@ export const getUserById = gql`
       }
       ... on Student {
         id
+        studentId
         classId
         username
         name
         surname
         dateOfBirth
         email
+        institutionalEmail
         image
         studentRole: role
       }
@@ -996,10 +1008,12 @@ export const getUserById = gql`
       }
       ... on Teacher {
         id
+        teacherId
         username
         name
         surname
         email
+        institutionalEmail
         image
         teacherRole: role
       }

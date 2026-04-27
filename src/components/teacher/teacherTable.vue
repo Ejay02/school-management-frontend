@@ -17,17 +17,17 @@
         :key="item?.id"
         class="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-eduSkyLight"
       >
-        <td class="flex items-center gap-4 p-2">
+        <td class="flex items-center gap-2 p-2">
           <div class="">
             <img
               v-if="item?.photo"
               :src="item?.photo"
               alt="user"
-              class="w-10 h-10 rounded-full mr-3 xl:block object-cover"
+              class="w-10 h-10 rounded-full xl:block object-cover"
             />
             <div
               v-else
-              class="w-10 h-10 rounded-full mr-3 bg-eduPurple flex items-center justify-center font-bold"
+              class="w-10 h-10 rounded-full bg-eduPurple flex items-center justify-center font-bold"
             >
               {{ getInitials(item?.name, item?.surname) }}
             </div>
@@ -37,7 +37,9 @@
             <div class="font-semibold capitalize">
               {{ formatPersonName(item?.name, item?.surname) }}
             </div>
-            <div class="text-xs text-gray-400">{{ formatDisplayValue(item?.email) }}</div>
+            <div class="text-xs text-gray-400">
+              {{ formatDisplayValue(item?.institutionalEmail || item?.email) }}
+            </div>
           </div>
         </td>
         <!-- <td class="hidden md:table-cell">
@@ -48,7 +50,8 @@
             class="copy-id relative cursor-pointer"
             @click="copyId(item.teacherId)"
           >
-            {{ formatDisplayValue(item?.teacherId?.slice(0, 8)) }}<template v-if="item?.teacherId">...</template>
+            {{ formatDisplayValue(item?.teacherId?.slice(0, 8))
+            }}<template v-if="item?.teacherId">...</template>
             <span
               class="tooltip absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity duration-300 pointer-events-none"
             >
@@ -63,7 +66,9 @@
         <td class="hidden md:table-cell">
           {{ formatListDisplay(item?.classes) }}
         </td>
-        <td class="hidden md:table-cell">{{ formatDisplayValue(item?.phone) }}</td>
+        <td class="hidden md:table-cell">
+          {{ formatDisplayValue(item?.phone) }}
+        </td>
         <td class="hidden md:table-cell capitalize">
           {{ formatDisplayValue(item?.address) }}
         </td>
@@ -89,7 +94,7 @@
             </router-link>
 
             <!-- admin shouldnt updateother  user deets just assign classes etc -->
-             <!--  -->
+            <!--  -->
             <!-- <div
               class="group relative"
               @click="showEditModal(item.id, item.title, item, 'teacherList')"

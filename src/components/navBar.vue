@@ -19,7 +19,7 @@
       </div>
 
       <!-- right section -->
-      <div class="flex items-center gap-6 justify-end w-full text-center">
+      <div class="flex items-center gap-3 justify-end w-full text-center">
         <!-- msg -->
         <router-link
           to="/messages"
@@ -86,7 +86,7 @@
 
         <!-- fixed avatar section -->
         <div class="" @click="toggleDropdown">
-          <div class="mr-4 relative">
+          <div class="mr-2 relative">
             <img
               v-if="userStore?.userInfo?.image"
               :src="userStore?.userInfo?.image"
@@ -119,10 +119,10 @@ import ProfileDropdown from "./dropdown/profileDropdown.vue";
 
 const userStore = useUserStore();
 const displayName = computed(() =>
-  formatPersonName(userStore?.userInfo?.name, userStore?.userInfo?.surname, "")
+  formatPersonName(userStore?.userInfo?.name, userStore?.userInfo?.surname, ""),
 );
 const initials = computed(() =>
-  getInitials(userStore?.userInfo?.name, userStore?.userInfo?.surname)
+  getInitials(userStore?.userInfo?.name, userStore?.userInfo?.surname),
 );
 
 const notificationStore = useNotificationStore();
@@ -131,8 +131,6 @@ const announcementStore = useAnnouncementStore();
 const role = userStore.currentRole;
 
 const parentId = userStore?.userInfo.id;
-
-
 
 const showDropdown = ref(false);
 

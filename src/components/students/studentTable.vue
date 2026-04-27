@@ -17,17 +17,17 @@
         :key="item?.id"
         class="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-eduSkyLight"
       >
-        <td class="flex items-center gap-4 p-2">
+        <td class="flex items-center gap-2 p-2">
           <div class="">
             <img
               v-if="item?.photo"
               :src="item?.photo"
               alt="user"
-              class="w-10 h-10 rounded-full mr-3 xl:block object-cover"
+              class="w-10 h-10 rounded-full xl:block object-cover"
             />
             <div
               v-else
-              class="w-10 h-10 rounded-full mr-3 bg-eduPurple flex items-center justify-center font-bold"
+              class="w-10 h-10 rounded-full bg-eduPurple flex items-center justify-center font-bold"
             >
               {{ getInitials(item?.name, item?.surname) }}
             </div>
@@ -37,7 +37,9 @@
             <div class="font-semibold capitalize">
               {{ formatPersonName(item?.name, item?.surname) }}
             </div>
-            <div class="text-xs text-gray-400">{{ formatDisplayValue(item?.email) }}</div>
+            <div class="text-xs text-gray-400">
+              {{ formatDisplayValue(item?.institutionalEmail || item?.email) }}
+            </div>
           </div>
         </td>
         <td class="hidden md:table-cell">
@@ -45,9 +47,13 @@
           <template v-if="item?.studentId">...</template>
         </td>
 
-        <td class="hidden md:table-cell">{{ formatDisplayValue(item?.class?.name) }}</td>
+        <td class="hidden md:table-cell">
+          {{ formatDisplayValue(item?.class?.name) }}
+        </td>
 
-        <td class="hidden md:table-cell">{{ formatDisplayValue(item?.phone) }}</td>
+        <td class="hidden md:table-cell">
+          {{ formatDisplayValue(item?.phone) }}
+        </td>
         <td class="hidden md:table-cell capitalize">
           {{ formatDisplayValue(item?.address) }}
         </td>

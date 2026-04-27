@@ -22,6 +22,10 @@ export const useUserStore = defineStore("user", () => {
       ? JSON.parse(savedUser)
       : {
           id: null,
+          adminId: "",
+          teacherId: "",
+          studentId: "",
+          institutionalEmail: "",
           name: "",
           email: "",
           role: "",
@@ -86,6 +90,10 @@ export const useUserStore = defineStore("user", () => {
 
     const userData = {
       id: user.userId,
+      adminId: user.adminId || "",
+      teacherId: user.teacherId || "",
+      studentId: user.studentId || "",
+      institutionalEmail: user.institutionalEmail || "",
       name: user.name,
       surname: user.surname,
       email: user.email,
@@ -167,6 +175,33 @@ export const useUserStore = defineStore("user", () => {
     };
 
     setUser(updatedUserData);
+  };
+
+  const syncCurrentUser = async (apolloClient) => {
+    if (!userInfo.value?.id) return null;
+
+    const currentUser = await findUserById(userInfo.value.id, apolloClient);
+    if (!currentUser) return null;
+
+    const normalizedUser = {
+      ...currentUser,
+      role:
+        currentUser.role ||
+        currentUser.adminRole ||
+        currentUser.teacherRole ||
+        currentUser.studentRole ||
+        currentUser.parentRole ||
+        userInfo.value.role,
+      email:
+        currentUser.institutionalEmail ||
+        currentUser.email ||
+        userInfo.value.email,
+      institutionalEmail:
+        currentUser.institutionalEmail || userInfo.value.institutionalEmail,
+    };
+
+    updateUserProfile(normalizedUser);
+    return normalizedUser;
   };
 
   const setRole = (role) => {
@@ -355,6 +390,7 @@ export const useUserStore = defineStore("user", () => {
     fetchSchoolInfo,
     refreshUsers,
     findUserById,
+    syncCurrentUser,
     fetchAdminUsers,
     filteredMenuItems,
     updateUserProfile,

@@ -75,8 +75,8 @@
             </div>
           </div>
 
-          <!-- Username and DOB Fields -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Username, ID and DOB Fields -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label
                 for="username"
@@ -90,6 +90,28 @@
                 class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-400 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
                 placeholder="Choose a username"
               />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-500">
+                {{ roleIdLabel }}
+              </label>
+              <div class="mt-1 flex items-center gap-2">
+                <input
+                  type="text"
+                  readonly
+                  :value="roleId"
+                  placeholder="Generating..."
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-400 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+                />
+                <button
+                  type="button"
+                  class="h-10 w-10 shrink-0 flex items-center justify-center rounded-md bg-eduSky text-white hover:bg-eduPurple transition-colors"
+                  @click="copyRoleId"
+                  :disabled="!roleId"
+                >
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
             </div>
             <div>
               <label
@@ -226,7 +248,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { apolloClient } from "../../../apollo-client";
 import {
   updateAdminProfile,
@@ -250,6 +272,41 @@ const initials = getInitials(
   userStore?.userInfo?.name,
   userStore?.userInfo?.surname,
 );
+
+const roleId = computed(() => {
+  const role = String(userStore?.userInfo?.role || "").toLowerCase();
+  if (role === "admin" || role === "super_admin")
+    return userStore?.userInfo?.adminId || "";
+  if (role === "teacher") return userStore?.userInfo?.teacherId || "";
+  if (role === "student") return userStore?.userInfo?.studentId || "";
+  if (role === "parent") return userStore?.userInfo?.id || "";
+  return "";
+});
+
+const roleIdLabel = computed(() => {
+  const role = String(userStore?.userInfo?.role || "").toLowerCase();
+  if (role === "admin" || role === "super_admin") return "Admin ID";
+  if (role === "teacher") return "Teacher ID";
+  if (role === "student") return "Student ID";
+  if (role === "parent") return "Parent ID";
+  return "ID";
+});
+
+const copyRoleId = async () => {
+  if (!roleId.value) return;
+  try {
+    await navigator.clipboard.writeText(roleId.value);
+    notificationStore.addNotification({
+      type: "info",
+      message: "ID copied to clipboard!",
+    });
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: `Failed to copy ID: ${error.message}`,
+    });
+  }
+};
 
 // Format date to YYYY-MM-DD for input[type="date"]
 const formatDateForInput = (dateString) => {
@@ -400,6 +457,9 @@ const saveSettings = async () => {
 onMounted(() => {
   // Re-format the date in case it wasn't properly formatted initially
   formData.dateOfBirth = formatDateForInput(userStore.userInfo.dateOfBirth);
+  if (!roleId.value) {
+    userStore.syncCurrentUser(apolloClient);
+  }
 });
 </script>
 
