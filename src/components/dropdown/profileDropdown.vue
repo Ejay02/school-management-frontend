@@ -23,7 +23,7 @@
         </div>
       </div>
 
-      <div class="min-w-0 leading-none">
+      <div class="-ml-1 min-w-0 leading-none">
         <span
           class="block text-sm font-medium text-gray-800 group-hover:text-indigo-500 capitalize"
         >

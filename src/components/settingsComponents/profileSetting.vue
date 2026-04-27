@@ -95,7 +95,7 @@
               <label class="block text-sm font-medium text-gray-500">
                 {{ roleIdLabel }}
               </label>
-              <div class="mt-1 flex items-center gap-2">
+              <div class="flex items-center gap-2">
                 <input
                   type="text"
                   readonly
