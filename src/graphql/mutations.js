@@ -164,6 +164,7 @@ export const updateSetupStateMutation = gql`
     updateSetupState(input: $input) {
       id
       schoolName
+      schoolDomain
       schoolAddress
       schoolLogo
       schoolContactName

@@ -96,6 +96,7 @@ export const getSetupStateQuery = gql`
     getSetupState {
       id
       schoolName
+      schoolDomain
       schoolAddress
       schoolLogo
       schoolContactName
@@ -120,6 +121,7 @@ export const getSetupProgressQuery = gql`
       state {
         id
         schoolName
+        schoolDomain
         schoolAddress
         schoolLogo
         schoolContactName

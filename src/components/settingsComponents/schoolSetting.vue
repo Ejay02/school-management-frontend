@@ -42,14 +42,30 @@
           </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-500">Address</label>
-          <input
-            v-model="formData.schoolAddress"
-            type="text"
-            class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
-            placeholder="School address"
-          />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-500"
+              >Address</label
+            >
+            <input
+              v-model="formData.schoolAddress"
+              type="text"
+              class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+              placeholder="School address"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-500"
+              >School Domain (Optional)</label
+            >
+            <input
+              v-model="formData.schoolDomain"
+              type="text"
+              class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+              placeholder="e.g. eduhub.com"
+            />
+          </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,6 +234,7 @@ const { mutate: updateSetupState, loading: saving } = useMutation(
 
 const formData = reactive({
   schoolName: "",
+  schoolDomain: "",
   schoolAddress: "",
   schoolLogo: "",
   schoolContactName: "",
@@ -265,6 +282,7 @@ watch(
   (state) => {
     if (!state || initialized.value) return;
     formData.schoolName = state.schoolName || "";
+    formData.schoolDomain = state.schoolDomain || "";
     formData.schoolAddress = state.schoolAddress || "";
     formData.schoolLogo = state.schoolLogo || "";
     formData.schoolContactName = state.schoolContactName || "";
@@ -308,6 +326,7 @@ const saveSchoolSettings = async () => {
     const res = await updateSetupState({
       input: {
         schoolName: normalizeString(formData.schoolName),
+        schoolDomain: normalizeString(formData.schoolDomain),
         schoolAddress: normalizeString(formData.schoolAddress),
         schoolLogo: normalizeString(formData.schoolLogo),
         schoolContactName: normalizeString(formData.schoolContactName),
