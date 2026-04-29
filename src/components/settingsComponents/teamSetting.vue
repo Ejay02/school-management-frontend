@@ -295,14 +295,18 @@
             <div class="min-w-0 md:col-span-3">
               <p class="truncate text-sm text-gray-700">{{ invite.email }}</p>
               <p class="mt-1 text-xs text-gray-500">
-                Sent {{ formatDate(invite.sentAt) }} · Expires {{ formatDate(invite.expiresAt) }}
+                Sent {{ formatDate(invite.sentAt) }} · Expires
+                {{ formatDate(invite.expiresAt) }}
               </p>
             </div>
 
             <div class="md:col-span-2">
               <p class="text-sm text-gray-700">{{ formatRole(invite.role) }}</p>
               <p class="mt-1 text-xs text-gray-500">
-                Sent {{ invite.sentCount }} time<span v-if="invite.sentCount !== 1">s</span>
+                Sent {{ invite.sentCount }} time<span
+                  v-if="invite.sentCount !== 1"
+                  >s</span
+                >
               </p>
             </div>
 
@@ -357,6 +361,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
+import { useRoute } from "vue-router";
 import {
   assignAdminRole,
   resendInvitationMutation,
@@ -379,8 +384,17 @@ const userStore = useUserStore();
 const modalStore = useModalStore();
 const notificationStore = useNotificationStore();
 
+const route = useRoute();
+
 const role = userStore.currentRole.toLowerCase();
 const activeTab = ref("users");
+
+const syncTabFromRoute = () => {
+  const tab = String(route.query.tab || "");
+  if (tab === "invitations" || tab === "users") {
+    activeTab.value = tab;
+  }
+};
 
 const users = ref([]);
 const limit = 10;
@@ -742,7 +756,15 @@ watch(invitationSearch, () => {
 });
 
 onMounted(() => {
+  syncTabFromRoute();
   fetchUsers(currentPage.value);
   refreshInvitationData();
 });
+
+watch(
+  () => route.query.tab,
+  () => {
+    syncTabFromRoute();
+  },
+);
 </script>

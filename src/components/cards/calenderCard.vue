@@ -11,24 +11,7 @@
 
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-lg font-semibold">Events</h1>
-      <div
-        class="text-gray-600 hover:text-gray-800 p-1 rounded-full hover:bg-gray-100"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          class="size-6"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"
-          />
-        </svg>
-      </div>
+      <router-link to="/events" class="text-gray-400 text-xs">View All</router-link>
     </div>
 
     <div class="flex flex-col gap-4">
@@ -142,32 +125,12 @@ const latestEvents = computed(() => {
   const now = new Date();
 
   return [...eventStore.events]
-    .sort((a, b) => {
-      const aStart = new Date(a.startTime);
-      const bStart = new Date(b.startTime);
-      const aEnd = new Date(a.endTime);
-      const bEnd = new Date(b.endTime);
-
-      // Check if events are currently happening
-      const aIsNow = now >= aStart && now <= aEnd;
-      const bIsNow = now >= bStart && now <= bEnd;
-
-      if (aIsNow && !bIsNow) return -1; // a is happening now, show first
-      if (!aIsNow && bIsNow) return 1; // b is happening now, show first
-
-      // If neither is happening now, sort by closest upcoming
-      if (aStart > now && bStart > now) {
-        return aStart - bStart; // Show soonest upcoming first
-      }
-
-      // If one is past and one is upcoming, show upcoming first
-      if (aStart > now) return -1;
-      if (bStart > now) return 1;
-
-      // If both are past, show most recent first
-      return bEnd - aEnd;
+    .filter((event) => {
+      const endTime = new Date(event.endTime);
+      return endTime >= now;
     })
-    .slice(0, 3); // Keep only first 3 events
+    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+    .slice(0, 5);
 });
 
 onMounted(async () => {

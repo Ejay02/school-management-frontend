@@ -167,6 +167,23 @@ export const getOnboardingChecklistQuery = gql`
   }
 `;
 
+export const invoicesDueThisWeekQuery = gql`
+  query InvoicesDueThisWeek {
+    invoicesDueThisWeek {
+      id
+      invoiceNumber
+      parentId
+      feeStructureId
+      totalAmount
+      paidAmount
+      status
+      dueDate
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 export const getAllAdminsQuery = gql`
   query getAllAdmins {
     getAllAdmins {
