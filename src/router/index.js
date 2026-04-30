@@ -281,6 +281,7 @@ const routes = [
         path: "/attendance",
         name: "Attendance",
         component: Attendance,
+        meta: { requiresAuth: true },
       },
       {
         path: "/settings",
@@ -344,9 +345,13 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore();
-  const userRole = userStore.currentRole?.toLowerCase();
+  const userRole = String(
+    userStore.currentRole || userStore.userInfo?.role || "",
+  ).toLowerCase();
 
-  const token = userStore.userInfo.token;
+  const token = String(
+    userStore.userInfo?.token || localStorage.getItem("token") || "",
+  );
 
   const isAuthenticated = !!token;
 
@@ -382,7 +387,13 @@ router.beforeEach((to, from, next) => {
   // Check role requirements for all matched route segments
   const hasValidRole = to.matched.every((record) => {
     if (!record.meta.role) return true;
-    return record.meta.role.includes(userRole);
+    if (Array.isArray(record.meta.role)) {
+      return record.meta.role.includes(userRole);
+    }
+    if (typeof record.meta.role === "string") {
+      return record.meta.role === userRole;
+    }
+    return true;
   });
 
   if (!hasValidRole) {

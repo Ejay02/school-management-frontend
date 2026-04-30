@@ -3,6 +3,9 @@ import { apolloClient } from "../../apollo-client";
 import { markAttendance } from "../graphql/mutations";
 import { getAttendances, getSchoolAttendanceStats } from "../graphql/queries";
 
+const attendanceListRequests = new Map();
+const schoolStatsRequests = new Map();
+
 export const useAttendanceStore = defineStore("attendanceStore", {
   state: () => ({
     stats: {
@@ -75,11 +78,26 @@ export const useAttendanceStore = defineStore("attendanceStore", {
         // Make sure end date includes the full day by setting time to 23:59:59
         end.setHours(23, 59, 59);
 
-        const res = await apolloClient.query({
-          query: getSchoolAttendanceStats,
-          variables: { startDate: start, endDate: end },
-          fetchPolicy: "no-cache",
-        });
+        const requestKey = `${start.toISOString().slice(0, 10)}|${end
+          .toISOString()
+          .slice(0, 10)}`;
+
+        let requestPromise = schoolStatsRequests.get(requestKey);
+        if (!requestPromise) {
+          requestPromise = apolloClient
+            .query({
+              query: getSchoolAttendanceStats,
+              variables: { startDate: start, endDate: end },
+              fetchPolicy: "no-cache",
+            })
+            .finally(() => {
+              schoolStatsRequests.delete(requestKey);
+            });
+
+          schoolStatsRequests.set(requestKey, requestPromise);
+        }
+
+        const res = await requestPromise;
 
         if (!res.data.getSchoolAttendanceStats) {
           this.stats = {
@@ -122,13 +140,26 @@ export const useAttendanceStore = defineStore("attendanceStore", {
       try {
         // First fetch all attendance records if we haven't already
         if (this.allAttendanceRecords.length === 0) {
-          const res = await apolloClient.query({
-            query: getAttendances,
-            variables: {
-              studentId: this.activeStudentId,
-            },
-            fetchPolicy: "no-cache",
-          });
+          const requestKey = this.activeStudentId || "__school__";
+
+          let requestPromise = attendanceListRequests.get(requestKey);
+          if (!requestPromise) {
+            requestPromise = apolloClient
+              .query({
+                query: getAttendances,
+                variables: {
+                  studentId: this.activeStudentId,
+                },
+                fetchPolicy: "no-cache",
+              })
+              .finally(() => {
+                attendanceListRequests.delete(requestKey);
+              });
+
+            attendanceListRequests.set(requestKey, requestPromise);
+          }
+
+          const res = await requestPromise;
 
           this.allAttendanceRecords = res.data.getAttendances;
         }

@@ -118,11 +118,13 @@ const endDate = ref(formatDateForInput(getFriday(new Date())));
 // Move function outside onMounted
 const fetchAttendanceData = async () => {
   if (shouldShowParentLinkEmptyState.value) return;
-  await attendanceStore.fetchAttendance({
-    page: 1,
-    limit: 10,
-    studentId: selectedStudentId.value,
-  });
+  if (attendanceStore.allAttendanceRecords.length === 0) {
+    await attendanceStore.fetchAttendance({
+      page: 1,
+      limit: 10,
+      studentId: selectedStudentId.value,
+    });
+  }
   await attendanceStore.fetchAttendanceData(startDate.value, endDate.value);
 };
 

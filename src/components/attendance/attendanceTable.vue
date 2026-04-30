@@ -266,8 +266,8 @@
                       studentAttendance[student.id] === undefined
                         ? "Not marked"
                         : studentAttendance[student.id]
-                        ? "Present"
-                        : "Absent"
+                          ? "Present"
+                          : "Absent"
                     }}
                   </span>
                 </td>
@@ -345,7 +345,7 @@ const { isParent, selectedStudentId } = useParentLinkedStudents();
 
 const userRole = computed(() => userStore.currentRole);
 const userHasAccess = computed(() =>
-  ["teacher", "admin", "super_admin"].includes(userRole.value)
+  ["teacher", "admin", "super_admin"].includes(userRole.value),
 );
 
 // Regular attendance view
@@ -383,14 +383,14 @@ const filteredRecords = computed(() => {
         record?.student?.name?.toLowerCase().includes(query) ||
         record?.student?.surname?.toLowerCase().includes(query) ||
         record?.class?.name?.toLowerCase().includes(query) ||
-        record?.lesson?.name?.toLowerCase().includes(query)
+        record?.lesson?.name?.toLowerCase().includes(query),
     );
   }
 
   // Apply status filter
   if (filterStatus.value !== "all") {
     records = records.filter((record) =>
-      filterStatus.value === "present" ? record.present : !record.present
+      filterStatus.value === "present" ? record.present : !record.present,
     );
   }
 
@@ -419,7 +419,7 @@ const filteredLessons = computed(() => {
 
   // Find the selected class in the classes array
   const currentClass = classes.value.find(
-    (cls) => cls.id === selectedClass.value
+    (cls) => cls.id === selectedClass.value,
   );
 
   if (!currentClass || !currentClass.subjects) return [];
@@ -431,7 +431,7 @@ const filteredLessons = computed(() => {
       subjectId: subject.id,
       subjectName: subject.name,
       classId: currentClass.id,
-    }))
+    })),
   );
 });
 
@@ -446,7 +446,7 @@ const filteredAttendanceRecords = computed(() => {
         (record.student?.name || "").toLowerCase().includes(query) ||
         (record.student?.surname || "").toLowerCase().includes(query) ||
         (record.lesson?.name || "").toLowerCase().includes(query) ||
-        (record.class?.name || "").toLowerCase().includes(query)
+        (record.class?.name || "").toLowerCase().includes(query),
     );
   }
 
@@ -454,7 +454,7 @@ const filteredAttendanceRecords = computed(() => {
     filtered = filtered.filter(
       (record) =>
         (filterStatus.value === "present" && record.present) ||
-        (filterStatus.value === "absent" && !record.present)
+        (filterStatus.value === "absent" && !record.present),
     );
   }
 
@@ -467,7 +467,7 @@ const filteredStudents = computed(() => {
 
   // Find the class object in class store that matches the selected class ID
   const classObj = classStore.allClasses.find(
-    (cls) => cls.id === selectedClass.value
+    (cls) => cls.id === selectedClass.value,
   );
 
   // Return the students from that class if available
@@ -527,13 +527,13 @@ async function saveAttendance() {
 
   // Check if all students have attendance marked
   const unmarkedStudents = Object.entries(studentAttendance.value).filter(
-    ([_, status]) => status === undefined
+    ([_, status]) => status === undefined,
   ).length;
 
   if (
     unmarkedStudents > 0 &&
     !confirm(
-      `${unmarkedStudents} students have not been marked. Continue anyway?`
+      `${unmarkedStudents} students have not been marked. Continue anyway?`,
     )
   ) {
     return;
@@ -566,7 +566,9 @@ async function saveAttendance() {
     markAttendanceMode.value = false;
 
     // Refresh the attendance records
-    await attendanceStore.fetchAttendance({ studentId: selectedStudentId.value });
+    await attendanceStore.fetchAttendance({
+      studentId: selectedStudentId.value,
+    });
   } catch (err) {
     attendanceStore.error = "Failed to save attendance";
   } finally {
@@ -578,15 +580,6 @@ async function saveAttendance() {
 watch([searchQuery, filterStatus], () => {
   currentPage.value = 1; // Reset to first page
   handlePageChange(1);
-});
-
-watch(currentPage, (newPage) => {
-  classStore.fetchClasses({ page: newPage, limit });
-});
-
-// Reset pagination when filters change
-watch([searchQuery, filterStatus], () => {
-  currentPage.value = 1;
 });
 
 // Reset lesson when class changes
@@ -606,8 +599,6 @@ watch(selectedLesson, () => {
 
 // Initialize data on component mount
 onMounted(async () => {
-  await handlePageChange(1);
-
   // Fetch classes and lessons
   if (userHasAccess.value) {
     classStore.fetchClasses();
