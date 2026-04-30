@@ -5,9 +5,13 @@
         v-if="shouldShowSetupChecklist"
         class="mb-4 rounded-xl border border-gray-200 bg-white p-4"
       >
-        <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div
+          class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between"
+        >
           <div>
-            <h2 class="text-base font-semibold text-gray-800">Setup checklist</h2>
+            <h2 class="text-base font-semibold text-gray-800">
+              Setup checklist
+            </h2>
             <p class="mt-1 text-sm text-gray-500">
               {{ onboardingChecklist.completedSteps }} of
               {{ onboardingChecklist.totalSteps }} steps complete
@@ -47,12 +51,17 @@
                     : 'border-gray-200 bg-gray-50 text-gray-500'
                 "
               >
-                <i v-if="step.complete" class="fa-solid fa-check text-[10px]"></i>
+                <i
+                  v-if="step.complete"
+                  class="fa-solid fa-check text-[10px]"
+                ></i>
                 <i v-else class="fa-solid fa-arrow-right text-[10px]"></i>
               </div>
 
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium text-gray-800">{{ step.label }}</p>
+                <p class="text-sm font-medium text-gray-800">
+                  {{ step.label }}
+                </p>
                 <p class="mt-1 text-xs text-gray-500 line-clamp-2">
                   {{ step.summary }}
                 </p>
@@ -67,9 +76,13 @@
           to="/settings/team?tab=invitations"
           class="block rounded-xl border border-gray-200 bg-white p-4 hover:bg-gray-50"
         >
-          <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div
+            class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+          >
             <div>
-              <h2 class="text-base font-semibold text-gray-800">Pending invites</h2>
+              <h2 class="text-base font-semibold text-gray-800">
+                Pending invites
+              </h2>
               <p class="mt-1 text-sm text-gray-500">
                 {{ inviteSummary.activationLabel }}
               </p>
@@ -86,7 +99,9 @@
               </span>
             </div>
           </div>
-          <div class="mt-3 text-xs font-medium text-indigo-600">Manage invitations</div>
+          <div class="mt-3 text-xs font-medium text-indigo-600">
+            Manage invitations
+          </div>
         </router-link>
 
         <router-link
@@ -117,19 +132,16 @@
 
       <!-- user cards -->
       <div class="flex gap-4 justify-between flex-wrap mb-4 md:flex-row">
-        <router-link
+        <UserCard
           v-for="item in rolesData"
           :key="item.role"
-          :to="item.to"
+          :role="item.role"
+          :count="item.count"
+          :academicYear="item.academicYear"
+          :nextYear="item.nextYear"
           class="flex-1 min-w-[220px]"
-        >
-          <UserCard
-            :role="item.role"
-            :count="item.count"
-            :academicYear="item.academicYear"
-            :nextYear="item.nextYear"
-          />
-        </router-link>
+          @click="handleRoleCardClick(item.to)"
+        />
       </div>
 
       <!-- middle charts -->
@@ -167,6 +179,7 @@ import {
 } from "../../utils/date.holidays";
 import { computed, onMounted, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
+import { useRouter } from "vue-router";
 import UserCard from "../../components/cards/userCard.vue";
 import CountCard from "../../components/cards/countCard.vue";
 import FinanceCard from "../../components/cards/financeCard.vue";
@@ -179,12 +192,18 @@ import {
 } from "../../graphql/queries";
 import AttendanceCard from "../../components/cards/attendanceCard.vue";
 
+const router = useRouter();
+
 const attendanceStore = useAttendanceStore();
 
 const { result, loading, error } = useQuery(getDashboardUserCardSummary);
 const { result: inviteSummaryResult } = useQuery(invitationSummaryQuery);
-const { result: onboardingChecklistResult } = useQuery(getOnboardingChecklistQuery);
-const { result: invoicesDueThisWeekResult } = useQuery(invoicesDueThisWeekQuery);
+const { result: onboardingChecklistResult } = useQuery(
+  getOnboardingChecklistQuery,
+);
+const { result: invoicesDueThisWeekResult } = useQuery(
+  invoicesDueThisWeekQuery,
+);
 
 const rolesData = computed(() => {
   if (!result.value || !result.value.getDashboardUserCardSummary) return [];
@@ -224,6 +243,10 @@ const rolesData = computed(() => {
     },
   ];
 });
+
+const handleRoleCardClick = (to) => {
+  router.push(to);
+};
 
 const inviteSummary = computed(() => {
   const summary = inviteSummaryResult.value?.invitationSummary;
