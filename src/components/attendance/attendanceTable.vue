@@ -12,7 +12,7 @@
           <button
             v-if="
               !markAttendanceMode &&
-              ['teacher', 'admin', 'super_admin'].includes(userRole)
+              ['teacher', 'super_admin'].includes(userRole)
             "
             @click="toggleMarkAttendanceMode"
             class="px-3 py-1 bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
@@ -72,7 +72,7 @@
           description=""
         >
           <button
-            v-if="['teacher', 'admin', 'super_admin'].includes(userRole)"
+            v-if="['teacher', 'super_admin'].includes(userRole)"
             @click="toggleMarkAttendanceMode"
             class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
           >
@@ -345,7 +345,7 @@ const { isParent, selectedStudentId } = useParentLinkedStudents();
 
 const userRole = computed(() => userStore.currentRole);
 const userHasAccess = computed(() =>
-  ["teacher", "admin", "super_admin"].includes(userRole.value),
+  ["teacher", "super_admin"].includes(userRole.value),
 );
 
 // Regular attendance view
