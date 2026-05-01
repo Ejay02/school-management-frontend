@@ -10,10 +10,7 @@
       <div class="">
         <div v-if="userHasAccess" class="flex gap-2">
           <button
-            v-if="
-              !markAttendanceMode &&
-              ['teacher', 'super_admin'].includes(userRole)
-            "
+            v-if="!markAttendanceMode && ['teacher'].includes(userRole)"
             @click="toggleMarkAttendanceMode"
             class="px-3 py-1 bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
           >
@@ -72,7 +69,7 @@
           description=""
         >
           <button
-            v-if="['teacher', 'super_admin'].includes(userRole)"
+            v-if="['teacher'].includes(userRole)"
             @click="toggleMarkAttendanceMode"
             class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
           >
@@ -160,6 +157,33 @@
 
     <!-- Mark Attendance Mode -->
     <div v-else>
+      <div
+        class="mb-4 inline-flex rounded-lg border border-gray-200 bg-white p-1"
+      >
+        <button
+          class="px-4 py-2 text-sm font-medium rounded-md transition"
+          :class="
+            attendanceEntryMode === 'manual'
+              ? 'bg-indigo-600 text-white'
+              : 'text-gray-600 hover:text-indigo-600'
+          "
+          @click="setAttendanceEntryMode('manual')"
+        >
+          Manual
+        </button>
+        <button
+          class="px-4 py-2 text-sm font-medium rounded-md transition"
+          :class="
+            attendanceEntryMode === 'scan'
+              ? 'bg-indigo-600 text-white'
+              : 'text-gray-600 hover:text-indigo-600'
+          "
+          @click="setAttendanceEntryMode('scan')"
+        >
+          Scan QR
+        </button>
+      </div>
+
       <!-- Class and date selectors -->
       <div class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
@@ -202,108 +226,203 @@
         </div>
       </div>
 
-      <!-- Student list for marking attendance -->
       <div v-if="selectedClass && selectedLesson && selectedDate">
-        <div class="mb-4">
-          <input
-            v-model="studentSearchQuery"
-            placeholder="Search students..."
-            class="border rounded p-2 w-full focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
-          />
+        <div
+          v-if="attendanceEntryMode === 'scan'"
+          class="grid gap-4 lg:grid-cols-2"
+        >
+          <div class="rounded-lg border border-gray-200 bg-white p-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-gray-700">Camera</h3>
+              <div class="flex gap-2">
+                <button
+                  v-if="!isScanning"
+                  class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500"
+                  @click="startQrScan"
+                >
+                  Start scan
+                </button>
+                <button
+                  v-else
+                  class="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200"
+                  @click="stopQrScan"
+                >
+                  Stop
+                </button>
+              </div>
+            </div>
+
+            <div
+              v-if="cameraError"
+              class="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+            >
+              {{ cameraError }}
+            </div>
+
+            <div class="mt-4 overflow-hidden rounded-lg bg-black">
+              <video
+                ref="videoEl"
+                class="h-72 w-full object-cover"
+                autoplay
+                playsinline
+                muted
+              ></video>
+            </div>
+
+            <div class="mt-4 flex gap-2">
+              <input
+                v-model="manualStudentId"
+                placeholder="Or paste Student ID"
+                class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+              <button
+                class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                :disabled="!manualStudentId || actionLoadingId"
+                @click="submitScannedStudentId(manualStudentId)"
+              >
+                Mark
+              </button>
+            </div>
+          </div>
+
+          <div class="rounded-lg border border-gray-200 bg-white p-4">
+            <h3 class="text-sm font-semibold text-gray-700">Scanned</h3>
+            <div
+              v-if="!scannedStudents.length"
+              class="mt-4 text-sm text-gray-500"
+            >
+              No scans yet.
+            </div>
+            <div v-else class="mt-4 space-y-2">
+              <div
+                v-for="student in scannedStudents"
+                :key="student.id"
+                class="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2"
+              >
+                <div class="min-w-0">
+                  <div class="text-sm font-medium text-gray-800 truncate">
+                    {{ student.name }} {{ student.surname }}
+                  </div>
+                  <div class="text-xs text-gray-500 truncate">
+                    {{ student.id }}
+                  </div>
+                </div>
+                <span
+                  class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700"
+                >
+                  Present
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="overflow-x-auto">
-          <LoadingScreen v-if="loadingStudents" message="Loading students..." />
-          <EmptyState
-            v-else-if="filteredStudents.length === 0"
-            icon="fa-regular fa-user"
-            heading="No students found"
-            description="There are no students in this class or your search returned no results."
-          />
+        <!-- Student list for marking attendance -->
+        <div v-else>
+          <div class="mb-4">
+            <input
+              v-model="studentSearchQuery"
+              placeholder="Search students..."
+              class="border rounded p-2 w-full focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
+            />
+          </div>
 
-          <table v-else class="min-w-full bg-white">
-            <thead class="bg-gray-50">
-              <tr>
-                <th
-                  class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Student
-                </th>
-                <th
-                  class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Status
-                </th>
-                <th
-                  class="py-2 px-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr
-                v-for="student in filteredStudents"
-                :key="student.id"
-                class="hover:bg-gray-50"
-              >
-                <td class="py-2 px-3 text-sm capitalize">
-                  {{ student.name }} {{ student.surname }}
-                </td>
-                <td class="py-2 px-3 text-sm">
-                  <span
-                    :class="{
-                      'px-2 py-1 rounded-full text-xs': true,
-                      'bg-green-100 text-green-700':
-                        studentAttendance[student.id],
-                      'bg-red-100 text-red-700':
-                        studentAttendance[student.id] === false,
-                      'bg-gray-100 text-gray-600':
-                        studentAttendance[student.id] === undefined,
-                    }"
+          <div class="overflow-x-auto">
+            <LoadingScreen
+              v-if="loadingStudents"
+              message="Loading students..."
+            />
+            <EmptyState
+              v-else-if="filteredStudents.length === 0"
+              icon="fa-regular fa-user"
+              heading="No students found"
+              description="There are no students in this class or your search returned no results."
+            />
+
+            <table v-else class="min-w-full bg-white">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    {{
-                      studentAttendance[student.id] === undefined
-                        ? "Not marked"
-                        : studentAttendance[student.id]
-                          ? "Present"
-                          : "Absent"
-                    }}
-                  </span>
-                </td>
-                <td class="py-2 px-3 text-sm text-center">
-                  <div class="flex justify-center gap-2">
-                    <button
-                      @click="markStudentAttendance(student.id, true)"
-                      class="px-2 py-1 bg-green-200 text-green-700 text-xs rounded hover:bg-green-300 transition-colors"
+                    Student
+                  </th>
+                  <th
+                    class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Status
+                  </th>
+                  <th
+                    class="py-2 px-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <tr
+                  v-for="student in filteredStudents"
+                  :key="student.id"
+                  class="hover:bg-gray-50"
+                >
+                  <td class="py-2 px-3 text-sm capitalize">
+                    {{ student.name }} {{ student.surname }}
+                  </td>
+                  <td class="py-2 px-3 text-sm">
+                    <span
                       :class="{
-                        'ring-1 ring-inset ring-green-600/20':
-                          studentAttendance[student.id] === true,
-                      }"
-                    >
-                      Present
-                    </button>
-                    <button
-                      @click="markStudentAttendance(student.id, false)"
-                      class="px-2 py-1 bg-red-200 text-red-700 text-xs rounded hover:bg-red-300 transition-colors"
-                      :class="{
-                        'ring-1 ring-inset ring-red-600/10':
+                        'px-2 py-1 rounded-full text-xs': true,
+                        'bg-green-100 text-green-700':
+                          studentAttendance[student.id],
+                        'bg-red-100 text-red-700':
                           studentAttendance[student.id] === false,
+                        'bg-gray-100 text-gray-600':
+                          studentAttendance[student.id] === undefined,
                       }"
                     >
-                      Absent
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <Pagination
-            :currentPage="currentPage"
-            :hasMore="attendanceStore.hasMore"
-            :totalPages="attendanceStore.totalPages"
-            @update:page="handlePageChange"
-          />
+                      {{
+                        studentAttendance[student.id] === undefined
+                          ? "Not marked"
+                          : studentAttendance[student.id]
+                            ? "Present"
+                            : "Absent"
+                      }}
+                    </span>
+                  </td>
+                  <td class="py-2 px-3 text-sm text-center">
+                    <div class="flex justify-center gap-2">
+                      <button
+                        @click="markStudentAttendance(student.id, true)"
+                        class="px-2 py-1 bg-green-200 text-green-700 text-xs rounded hover:bg-green-300 transition-colors"
+                        :class="{
+                          'ring-1 ring-inset ring-green-600/20':
+                            studentAttendance[student.id] === true,
+                        }"
+                      >
+                        Present
+                      </button>
+                      <button
+                        @click="markStudentAttendance(student.id, false)"
+                        class="px-2 py-1 bg-red-200 text-red-700 text-xs rounded hover:bg-red-300 transition-colors"
+                        :class="{
+                          'ring-1 ring-inset ring-red-600/10':
+                            studentAttendance[student.id] === false,
+                        }"
+                      >
+                        Absent
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <Pagination
+              :currentPage="currentPage"
+              :hasMore="attendanceStore.hasMore"
+              :totalPages="attendanceStore.totalPages"
+              @update:page="handlePageChange"
+            />
+          </div>
         </div>
       </div>
 
@@ -320,7 +439,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useAttendanceStore } from "../../store/attendanceStore";
 import { useClassStore } from "../../store/classStore";
 import { useLessonStore } from "../../store/lessonStore";
@@ -344,9 +463,7 @@ const notificationStore = useNotificationStore();
 const { isParent, selectedStudentId } = useParentLinkedStudents();
 
 const userRole = computed(() => userStore.currentRole);
-const userHasAccess = computed(() =>
-  ["teacher", "super_admin"].includes(userRole.value),
-);
+const userHasAccess = computed(() => ["teacher"].includes(userRole.value));
 
 // Regular attendance view
 const limit = 10;
@@ -357,12 +474,19 @@ const pageSize = 10;
 
 // Mark attendance mode
 const markAttendanceMode = ref(false);
+const attendanceEntryMode = ref("manual");
 const selectedClass = ref("");
 const selectedLesson = ref("");
 const selectedDate = ref(new Date().toISOString().split("T")[0]); // Today's date
 const studentSearchQuery = ref("");
 const studentAttendance = ref({});
 const loadingStudents = ref(false);
+const actionLoadingId = ref("");
+const videoEl = ref(null);
+const isScanning = ref(false);
+const cameraError = ref("");
+const manualStudentId = ref("");
+const scannedIds = ref(new Set());
 
 const error = computed(() => attendanceStore.error);
 const lessons = computed(() => lessonStore.lessons);
@@ -474,16 +598,144 @@ const filteredStudents = computed(() => {
   return classObj && classObj.students ? classObj.students : [];
 });
 
+const scannedStudents = computed(() => {
+  if (!scannedIds.value.size) return [];
+  const ids = Array.from(scannedIds.value);
+  return ids
+    .map((id) => filteredStudents.value.find((student) => student.id === id))
+    .filter(Boolean);
+});
+
+const setAttendanceEntryMode = (mode) => {
+  attendanceEntryMode.value = mode;
+  if (mode !== "scan") {
+    stopQrScan();
+  }
+};
+
+let mediaStream = null;
+let scanRafId = null;
+let barcodeDetector = null;
+
+const startQrScan = async () => {
+  cameraError.value = "";
+  if (!selectedLesson.value || !selectedDate.value) return;
+
+  if (!("BarcodeDetector" in window)) {
+    cameraError.value =
+      "QR scanning is not supported in this browser. Use Chrome/Edge or paste the Student ID to mark attendance.";
+    return;
+  }
+
+  try {
+    barcodeDetector = new window.BarcodeDetector({ formats: ["qr_code"] });
+  } catch (e) {
+    cameraError.value =
+      "Unable to initialize QR scanning. Use Chrome/Edge or paste the Student ID to mark attendance.";
+    return;
+  }
+
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+      audio: false,
+    });
+
+    if (videoEl.value) {
+      videoEl.value.srcObject = mediaStream;
+      await videoEl.value.play();
+    }
+
+    isScanning.value = true;
+    scanLoop();
+  } catch (e) {
+    cameraError.value =
+      "Camera access was blocked or is unavailable. Allow camera permission, or paste the Student ID.";
+    stopQrScan();
+  }
+};
+
+const stopQrScan = () => {
+  isScanning.value = false;
+
+  if (scanRafId) {
+    cancelAnimationFrame(scanRafId);
+    scanRafId = null;
+  }
+
+  if (videoEl.value) {
+    videoEl.value.pause?.();
+    videoEl.value.srcObject = null;
+  }
+
+  if (mediaStream) {
+    mediaStream.getTracks().forEach((t) => t.stop());
+    mediaStream = null;
+  }
+};
+
+const scanLoop = async () => {
+  if (!isScanning.value || !videoEl.value || !barcodeDetector) return;
+
+  try {
+    const barcodes = await barcodeDetector.detect(videoEl.value);
+    if (Array.isArray(barcodes) && barcodes.length) {
+      const rawValue = String(barcodes[0].rawValue || "").trim();
+      if (rawValue) {
+        await submitScannedStudentId(rawValue);
+      }
+    }
+  } catch (e) {
+    cameraError.value =
+      "Scanning failed. Try again or paste the Student ID to mark attendance.";
+    stopQrScan();
+    return;
+  }
+
+  scanRafId = requestAnimationFrame(scanLoop);
+};
+
+const submitScannedStudentId = async (studentIdValue) => {
+  const studentId = String(studentIdValue || "").trim();
+  if (!studentId) return;
+  if (scannedIds.value.has(studentId)) return;
+  if (!selectedLesson.value || !selectedDate.value) return;
+
+  actionLoadingId.value = studentId;
+  try {
+    await attendanceStore.markAttendance(selectedLesson.value, {
+      studentId,
+      present: true,
+      date: selectedDate.value,
+    });
+
+    const next = new Set(scannedIds.value);
+    next.add(studentId);
+    scannedIds.value = next;
+    manualStudentId.value = "";
+  } catch (e) {
+    notificationStore.addNotification({
+      type: "error",
+      message: "Unable to mark attendance from scan.",
+    });
+  } finally {
+    actionLoadingId.value = "";
+  }
+};
+
 // Toggle mark attendance mode
 function toggleMarkAttendanceMode() {
   markAttendanceMode.value = !markAttendanceMode.value;
 
   if (markAttendanceMode.value) {
     // Reset the form when entering mark attendance mode
+    attendanceEntryMode.value = "manual";
     selectedClass.value = "";
     selectedLesson.value = "";
     selectedDate.value = new Date().toISOString().split("T")[0];
     studentAttendance.value = {};
+    scannedIds.value = new Set();
+    manualStudentId.value = "";
 
     // Fetch classes and lessons if not already loaded
     if (classes.value.length === 0) {
@@ -492,8 +744,14 @@ function toggleMarkAttendanceMode() {
     if (lessons.value.length === 0) {
       lessonStore.fetchLessons();
     }
+  } else {
+    stopQrScan();
   }
 }
+
+onUnmounted(() => {
+  stopQrScan();
+});
 
 // Initialize attendance object for all applicable students
 function initializeStudentAttendance() {
