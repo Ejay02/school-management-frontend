@@ -211,7 +211,7 @@
       </div>
 
       <div class="max-w-3xl mx-auto mt-10">
-        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="rounded-xl border border-gray-200 p-6 shadow-sm">
           <div
             class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
           >
@@ -230,152 +230,130 @@
               >
                 Download ID
               </button>
-              <a
-                v-if="qrUrl"
-                :href="qrUrl"
-                class="inline-flex items-center justify-center rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
-                target="_blank"
-                rel="noreferrer"
-              >
-                View QR
-              </a>
             </div>
           </div>
 
-          <div class="mt-6">
+          <div class="mt-6 flex justify-center">
             <div class="id-flip">
               <div class="id-flip-inner">
                 <div class="id-flip-face id-front">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                      <div
-                        class="h-10 w-10 overflow-hidden rounded-md bg-gray-100"
-                      >
+                  <div class="id-card">
+                    <div class="id-header">
+                      <div class="flex items-center gap-4 min-w-0">
+                        <div class="id-logo-box">
+                          <img
+                            v-if="userStore.schoolInfo.schoolLogo"
+                            :src="userStore.schoolInfo.schoolLogo"
+                            alt="School logo"
+                            class="h-full w-full object-cover"
+                          />
+                          <div v-else class="text-white text-sm font-bold">
+                            EDU
+                          </div>
+                        </div>
+                        <div class="min-w-0">
+                          <div class="id-school-name">
+                            {{
+                              userStore.schoolInfo.schoolName ||
+                              "EduHub Academy"
+                            }}
+                          </div>
+                          <div class="id-subtitle">Official ID Card</div>
+                        </div>
+                      </div>
+
+                      <div class="id-role-pill">
+                        {{
+                          String(userStore.userInfo.role || "")
+                            .replace("_", " ")
+                            .toUpperCase()
+                        }}
+                      </div>
+                    </div>
+
+                    <div class="id-front-body">
+                      <div class="id-avatar">
                         <img
-                          v-if="userStore.schoolInfo.schoolLogo"
-                          :src="userStore.schoolInfo.schoolLogo"
-                          alt="School logo"
+                          v-if="profilePreview || userStore?.userInfo?.image"
+                          :src="profilePreview || userStore?.userInfo?.image"
                           class="h-full w-full object-cover"
+                          alt="Profile avatar"
                         />
-                        <div
-                          v-else
-                          class="flex h-full w-full items-center justify-center text-xs font-semibold text-gray-500"
-                        >
-                          EDU
+                        <div v-else class="id-avatar-initials">
+                          {{ initials }}
                         </div>
                       </div>
-                      <div class="min-w-0">
-                        <div
-                          class="text-sm font-semibold text-gray-800 truncate"
-                        >
-                          {{
-                            userStore.schoolInfo.schoolName || "EduHub Portal"
-                          }}
+
+                      <div class="min-w-0 flex-1 id-front-content">
+                        <div class="id-user-name">
+                          {{ formData.name }} {{ formData.surname }}
                         </div>
-                        <div class="text-xs text-gray-500">
-                          Official ID Card
+                        <div class="id-username">@{{ formData.username }}</div>
+                        <div class="id-member-label">Member ID</div>
+                        <div class="id-member-id">
+                          {{ roleId || "Generating..." }}
                         </div>
                       </div>
                     </div>
-                    <span
-                      class="inline-flex items-center rounded-full bg-eduPurpleLight px-3 py-1 text-xs font-medium text-purple-700 capitalize"
-                    >
-                      {{
-                        userStore.userInfo.role?.toLowerCase().replace("_", " ")
-                      }}
-                    </span>
-                  </div>
 
-                  <div class="mt-5 flex items-center gap-4">
-                    <div
-                      class="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600"
-                    >
-                      <img
-                        v-if="profilePreview || userStore?.userInfo?.image"
-                        :src="profilePreview || userStore?.userInfo?.image"
-                        class="h-full w-full object-cover"
-                        alt="Profile avatar"
-                      />
-                      <div
-                        v-else
-                        class="flex h-full w-full items-center justify-center text-xl font-bold text-white capitalize"
-                      >
-                        {{ initials }}
-                      </div>
+                    <div class="id-sep"></div>
+                    <div class="id-footer">
+                      {{ userStore.schoolInfo.schoolName || "EduHub Academy" }}
+                      ·
+                      {{ cardYear }}
                     </div>
-
-                    <div class="min-w-0 flex-1">
-                      <div class="text-lg font-semibold text-gray-900 truncate">
-                        {{ formData.name }} {{ formData.surname }}
-                      </div>
-                      <div class="mt-1 text-sm text-gray-600 truncate">
-                        @{{ formData.username }}
-                      </div>
-                      <div class="mt-2 text-sm font-medium text-gray-700">
-                        {{ roleId || "Generating..." }}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    class="mt-6 flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3"
-                  >
-                    <div class="text-xs text-gray-600">
-                      <div class="font-semibold text-gray-700">Account ID</div>
-                      <div
-                        class="mt-1 font-mono text-[11px] text-gray-600 truncate max-w-[220px]"
-                      >
-                        {{ qrValue || "-" }}
-                      </div>
-                    </div>
-                    <div class="text-xs text-gray-500">Hover to flip</div>
                   </div>
                 </div>
 
                 <div class="id-flip-face id-back">
-                  <div class="flex items-center justify-between">
-                    <div class="text-sm font-semibold text-gray-800">
-                      Scan to verify
-                    </div>
-                    <div class="text-xs text-gray-500">
-                      {{ userStore.schoolInfo.schoolName || "EduHub Portal" }}
-                    </div>
-                  </div>
+                  <div class="id-card">
+                    <div class="id-header id-header-compact"></div>
+                    <div class="id-back-space"></div>
+                    <div class="id-magstripe"></div>
 
-                  <div class="mt-5 flex items-center justify-center">
-                    <div class="rounded-xl border border-gray-200 bg-white p-3">
-                      <img
-                        v-if="qrUrl"
-                        :src="qrUrl"
-                        alt="QR code"
-                        class="h-40 w-40"
-                      />
-                      <div
-                        v-else
-                        class="h-40 w-40 flex items-center justify-center text-sm text-gray-500"
-                      >
-                        QR unavailable
+                    <div class="id-back-body">
+                      <div class="grid grid-cols-2 gap-4">
+                        <div class="id-disclaimer">
+                          This card is property of
+                          {{
+                            userStore.schoolInfo.schoolName || "EduHub Academy"
+                          }}. If found, please return to the issuing office.
+                        </div>
+
+                        <div class="id-qr-box">
+                          <img
+                            v-if="cardQrUrl"
+                            :src="cardQrUrl"
+                            alt="QR code"
+                            class="h-full w-full object-contain"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="id-meta-row">
+                        <div class="id-meta-col">
+                          <div class="id-meta-item">
+                            <div class="id-meta-label">Issued</div>
+                            <div class="id-meta-value">{{ issuedLabel }}</div>
+                          </div>
+                          <div class="id-meta-item">
+                            <div class="id-meta-label">Valid Until</div>
+                            <div class="id-meta-value">
+                              {{ validUntilLabel }}
+                            </div>
+                          </div>
+                          <div class="id-meta-item">
+                            <div class="id-meta-label">Status</div>
+                            <div class="id-meta-value">Active</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div class="mt-5 text-center">
-                    <div class="text-sm font-semibold text-gray-800">
-                      {{ formData.name }} {{ formData.surname }}
-                    </div>
-                    <div class="mt-1 text-xs text-gray-500">
-                      Present this QR when requested.
-                    </div>
-                  </div>
-
-                  <div class="mt-6 rounded-lg bg-gray-50 px-4 py-3">
-                    <div class="text-xs font-medium text-gray-700">
-                      QR payload
-                    </div>
-                    <div
-                      class="mt-1 font-mono text-[11px] text-gray-600 break-all"
-                    >
-                      {{ qrValue || "-" }}
+                    <div class="id-sep"></div>
+                    <div class="id-footer">
+                      {{ userStore.schoolInfo.schoolName || "EduHub Academy" }}
+                      · Official Identification · {{ cardYear }}
                     </div>
                   </div>
                 </div>
@@ -488,12 +466,37 @@ const qrValue = computed(() => {
   if (!userId) return "";
   return `eduhub:v1:user:${userId}`;
 });
-const qrUrl = computed(() => {
-  if (!qrValue.value) return "";
-  const size = "220x220";
-  const data = encodeURIComponent(qrValue.value);
-  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}&data=${data}`;
+
+const qrEncodedValue = computed(() => {
+  const memberId = String(roleId.value || "").trim();
+  if (memberId) return memberId;
+  return String(userStore.userInfo?.id || "").trim();
 });
+
+const qrUrl = computed(() => {
+  if (!qrEncodedValue.value) return "";
+  const size = "220x220";
+  const data = encodeURIComponent(qrEncodedValue.value);
+  const color = "17-24-39";
+  const bgcolor = "255-255-255";
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}&ecc=H&color=${color}&bgcolor=${bgcolor}&data=${data}`;
+});
+
+const cardQrUrl = computed(() => {
+  if (!qrEncodedValue.value) return "";
+  const size = "96x96";
+  const data = encodeURIComponent(qrEncodedValue.value);
+  const color = "17-24-39";
+  const bgcolor = "255-255-255";
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}&ecc=H&color=${color}&bgcolor=${bgcolor}&data=${data}`;
+});
+
+const cardYear = computed(() => new Date().getFullYear());
+const issuedLabel = computed(() => {
+  const now = new Date();
+  return now.toLocaleString("en-US", { month: "short", year: "numeric" });
+});
+const validUntilLabel = computed(() => `Dec ${cardYear.value}`);
 
 const downloadIdCard = () => {
   const schoolName = userStore.schoolInfo.schoolName || "EduHub Portal";
@@ -507,7 +510,10 @@ const downloadIdCard = () => {
   const idLabel = roleIdLabel.value || "ID";
   const displayId = roleId.value || "";
   const accountId = qrValue.value || "";
-  const qr = qrUrl.value || "";
+  const qr = cardQrUrl.value || "";
+  const year = String(cardYear.value);
+  const issued = String(issuedLabel.value);
+  const validUntil = String(validUntilLabel.value);
 
   const w = window.open("", "_blank", "width=900,height=700");
   if (!w) return;
@@ -522,27 +528,38 @@ const downloadIdCard = () => {
         body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,"Noto Sans";margin:0;padding:24px;background:#f3f4f6;color:#111827}
         .wrap{max-width:900px;margin:0 auto}
         .row{display:flex;gap:16px;flex-wrap:wrap}
-        .card{width:360px;border:1px solid #e5e7eb;border-radius:16px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.06);overflow:hidden}
-        .pad{padding:16px}
-        .top{display:flex;justify-content:space-between;gap:12px;align-items:center}
-        .brand{display:flex;gap:10px;align-items:center;min-width:0}
-        .logo{width:40px;height:40px;border-radius:10px;background:#f3f4f6;overflow:hidden;flex:0 0 auto}
+        .card{width:380px;height:240px;border:1px solid #e5e7eb;border-radius:16px;background:#fff;box-shadow:0 14px 34px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column}
+        .header{height:52px;padding:10px 14px;background:linear-gradient(135deg,#6366f1,#9333ea);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px}
+        .brand{display:flex;gap:12px;align-items:center;min-width:0}
+        .logo{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.16);overflow:hidden;flex:0 0 auto;display:flex;align-items:center;justify-content:center}
         .logo img{width:100%;height:100%;object-fit:cover}
-        .school{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .meta{font-size:11px;color:#6b7280;margin-top:2px}
-        .pill{font-size:11px;padding:6px 10px;border-radius:999px;background:#f3e8ff;color:#6b21a8;font-weight:600;text-transform:capitalize;white-space:nowrap}
-        .mid{display:flex;gap:14px;align-items:center;margin-top:16px}
-        .avatar{width:84px;height:84px;border-radius:16px;background:linear-gradient(135deg,#6366f1,#a855f7);overflow:hidden;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px}
+        .school{font-weight:500;font-size:18px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .sub{font-size:12px;color:rgba(255,255,255,.75);margin-top:2px}
+        .pill{font-size:11px;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);font-weight:500;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+        .body{padding:14px;display:flex;gap:14px;align-items:center;flex:1}
+        .avatar{width:72px;height:90px;border-radius:16px;background:linear-gradient(135deg,#6366f1,#9333ea);overflow:hidden;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:500;font-size:22px}
         .avatar img{width:100%;height:100%;object-fit:cover}
-        .name{font-size:18px;font-weight:800;margin:0;line-height:1.2}
-        .user{font-size:13px;color:#4b5563;margin-top:4px}
-        .idline{margin-top:10px;font-size:13px;color:#374151;font-weight:700}
-        .box{margin-top:14px;border-radius:12px;background:#f9fafb;padding:12px;display:flex;justify-content:space-between;gap:12px;align-items:center}
-        .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New";font-size:11px;color:#4b5563;word-break:break-all}
-        .qrwrap{display:flex;justify-content:center;margin-top:14px}
-        .qr{width:180px;height:180px;border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff}
-        .qr img{width:100%;height:100%}
-        .hint{font-size:11px;color:#6b7280;margin-top:8px;text-align:center}
+        .name{font-size:20px;font-weight:500;line-height:1.2;margin:0;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .user{font-size:13px;color:#4f46e5;font-weight:400;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .label{font-size:12px;color:#888;margin-top:10px}
+        .mid{font-size:14px;font-weight:500;letter-spacing:.08em;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .sep{height:2px;background:#e5e7eb}
+        .footer{height:32px;padding:0 14px;background:#F1F0FF;color:#6b7280;font-size:10px;display:flex;align-items:center}
+        .backTop{height:24px;background:linear-gradient(135deg,#6366f1,#9333ea)}
+        .backSpace{height:10px;background:#fff}
+        .stripe{height:38px;background:#111827}
+        .backBody{padding:12px 14px;flex:1}
+        .note{font-size:11px;color:#6b7280;line-height:1.5}
+        .account{margin-top:10px;border:1px dashed rgba(108,99,255,.35);border-radius:12px;background:#F5F4FF;padding:10px 12px}
+        .account .k{font-size:10px;color:#888;font-weight:400}
+        .account .v{margin-top:6px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New";font-size:11px;color:#4f46e5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .qrBox{width:96px;height:96px;border-radius:6px;border:none;background:#fff;display:flex;align-items:center;justify-content:center;margin-left:auto;overflow:hidden}
+        .qrBox img{width:96px;height:96px;border-radius:6px;object-fit:contain}
+        .metaRow{margin-top:10px}
+        .metaCol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+        .metaK{font-size:10px;color:#888}
+        .metaV{margin-top:2px;font-size:12px;font-weight:500;color:#111827}
+        .hint{font-size:12px;color:#6b7280;margin-top:12px;text-align:center}
         @media print{body{background:#fff;padding:0}.wrap{max-width:none}.row{gap:24px}.hint{display:none}}
       </style>
     </head>
@@ -550,56 +567,64 @@ const downloadIdCard = () => {
       <div class="wrap">
         <div class="row">
           <div class="card">
-            <div class="pad">
-              <div class="top">
-                <div class="brand">
-                  <div class="logo">${schoolLogo ? `<img src="${schoolLogo}" alt="logo" />` : ""}</div>
-                  <div style="min-width:0">
-                    <div class="school">${escapeHtml(schoolName)}</div>
-                    <div class="meta">${escapeHtml(idLabel)}</div>
-                  </div>
-                </div>
-                <div class="pill">${escapeHtml(role)}</div>
-              </div>
-
-              <div class="mid">
-                <div class="avatar">${avatar ? `<img src="${avatar}" alt="avatar" />` : escapeHtml(initials)}</div>
-                <div style="min-width:0;flex:1">
-                  <p class="name">${escapeHtml(fullName)}</p>
-                  <div class="user">${escapeHtml(username)}</div>
-                  <div class="idline">${escapeHtml(displayId)}</div>
+            <div class="header">
+              <div class="brand">
+                <div class="logo">${schoolLogo ? `<img src="${schoolLogo}" alt="logo" />` : ""}</div>
+                <div style="min-width:0">
+                  <div class="school">${escapeHtml(schoolName || "EduHub Academy")}</div>
+                  <div class="sub">Official ID Card</div>
                 </div>
               </div>
+              <div class="pill">${escapeHtml(String(role).toUpperCase())}</div>
+            </div>
 
-              <div class="box">
-                <div>
-                  <div class="meta" style="font-weight:700;color:#374151">Account ID</div>
-                  <div class="mono">${escapeHtml(accountId)}</div>
-                </div>
+            <div class="body">
+              <div class="avatar">${avatar ? `<img src="${avatar}" alt="avatar" />` : escapeHtml(initials)}</div>
+              <div style="min-width:0;flex:1">
+                <p class="name">${escapeHtml(fullName)}</p>
+                <div class="user">${escapeHtml(username)}</div>
+                <div class="label">Member ID</div>
+                <div class="mid">${escapeHtml(displayId)}</div>
               </div>
             </div>
+
+            <div class="sep"></div>
+            <div class="footer">${escapeHtml(schoolName || "EduHub Academy")} · ${escapeHtml(year)}</div>
           </div>
 
           <div class="card">
-            <div class="pad">
-              <div class="top">
-                <div class="school">Scan to verify</div>
-                <div class="meta">${escapeHtml(schoolName)}</div>
+            <div class="backTop"></div>
+            <div class="backSpace"></div>
+            <div class="stripe"></div>
+
+            <div class="backBody">
+              <div style="display:flex;gap:18px;align-items:flex-start">
+                <div style="flex:1;min-width:0">
+                  <div class="note">This card is property of ${escapeHtml(schoolName || "EduHub Academy")}. If found, please return to the issuing office.</div>
+                </div>
+                <div class="qrBox">${qr ? `<img src="${qr}" alt="qr" />` : ""}</div>
               </div>
 
-              <div class="qrwrap">
-                <div class="qr">${qr ? `<img src="${qr}" alt="qr" />` : ""}</div>
-              </div>
-
-              <div class="hint">${escapeHtml(fullName)} • ${escapeHtml(role)}</div>
-
-              <div class="box">
-                <div style="min-width:0">
-                  <div class="meta" style="font-weight:700;color:#374151">QR payload</div>
-                  <div class="mono">${escapeHtml(accountId)}</div>
+              <div class="metaRow">
+                <div class="metaCol">
+                  <div>
+                    <div class="metaK">Issued</div>
+                    <div class="metaV">${escapeHtml(issued)}</div>
+                  </div>
+                  <div>
+                    <div class="metaK">Valid Until</div>
+                    <div class="metaV">${escapeHtml(validUntil)}</div>
+                  </div>
+                  <div>
+                    <div class="metaK">Status</div>
+                    <div class="metaV">Active</div>
+                  </div>
                 </div>
               </div>
             </div>
+
+            <div class="sep"></div>
+            <div class="footer">${escapeHtml(schoolName || "EduHub Academy")} · Official Identification · ${escapeHtml(year)}</div>
           </div>
         </div>
 
@@ -782,13 +807,13 @@ onMounted(() => {
 .id-flip {
   perspective: 1200px;
   width: 100%;
-  max-width: 520px;
+  max-width: 380px;
 }
 
 .id-flip-inner {
   position: relative;
   width: 100%;
-  height: 340px;
+  height: 240px;
   transition: transform 0.6s;
   transform-style: preserve-3d;
 }
@@ -806,15 +831,255 @@ onMounted(() => {
 }
 
 .id-front {
-  background: white;
-  border: 1px solid #e5e7eb;
-  padding: 16px;
+  background: transparent;
 }
 
 .id-back {
-  background: white;
-  border: 1px solid #e5e7eb;
-  padding: 16px;
+  background: transparent;
   transform: rotateY(180deg);
+}
+
+.id-card {
+  height: 100%;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.id-header {
+  height: 52px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #6366f1, #9333ea);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.id-header-compact {
+  height: 24px;
+  padding: 0;
+  background: linear-gradient(135deg, #6366f1, #9333ea);
+}
+
+.id-logo-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.id-school-name {
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.id-subtitle {
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.id-role-pill {
+  font-size: 11px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.id-front-body {
+  padding: 14px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex: 1;
+}
+
+.id-front-content {
+  padding-left: 6px;
+}
+
+.id-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #6366f1, #9333ea);
+  overflow: hidden;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.id-avatar-initials {
+  font-size: 22px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.id-user-name {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.id-username {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #4f46e5;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.id-member-label {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #888888;
+  font-weight: 400;
+}
+
+.id-member-id {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.id-sep {
+  height: 2px;
+  background: #e5e7eb;
+  margin-top: auto;
+}
+
+.id-footer {
+  height: 32px;
+  padding: 0 14px;
+  background: #f1f0ff;
+  color: #6b7280;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.id-back-space {
+  height: 10px;
+  background: #ffffff;
+}
+
+.id-magstripe {
+  height: 38px;
+  background: #111827;
+}
+
+.id-back-body {
+  padding: 12px 14px;
+  flex: 1;
+}
+
+.id-disclaimer {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+.id-account-box {
+  border: 1px dashed rgba(108, 99, 255, 0.35);
+  border-radius: 12px;
+  background: #f5f4ff;
+  padding: 10px 12px;
+}
+
+.id-account-label {
+  font-size: 10px;
+  color: #888888;
+  font-weight: 400;
+}
+
+.id-account-value {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #4f46e5;
+  font-weight: 400;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.id-qr-box {
+  width: 96px;
+  height: 96px;
+  border-radius: 6px;
+  border: none;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  overflow: hidden;
+}
+
+.id-qr-box img {
+  width: 96px;
+  height: 96px;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+.id-meta-row {
+  margin-top: 10px;
+}
+
+.id-meta-col {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.id-meta-item {
+  min-width: 0;
+}
+
+.id-meta-label {
+  font-size: 10px;
+  color: #888888;
+  font-weight: 400;
+}
+
+.id-meta-value {
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #111827;
 }
 </style>
