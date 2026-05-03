@@ -180,7 +180,18 @@
           "
           @click="setAttendanceEntryMode('scan')"
         >
-          Scan QR
+          Scan ID
+        </button>
+        <button
+          class="px-4 py-2 text-sm font-medium rounded-md transition"
+          :class="
+            attendanceEntryMode === 'session'
+              ? 'bg-indigo-600 text-white'
+              : 'text-gray-600 hover:text-indigo-600'
+          "
+          @click="setAttendanceEntryMode('session')"
+        >
+          Session QR
         </button>
       </div>
 
@@ -228,7 +239,102 @@
 
       <div v-if="selectedClass && selectedLesson && selectedDate">
         <div
-          v-if="attendanceEntryMode === 'scan'"
+          v-if="attendanceEntryMode === 'session'"
+          class="rounded-lg border border-gray-200 bg-white p-4"
+        >
+          <div
+            class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+          >
+            <div>
+              <h3 class="text-sm font-semibold text-gray-800">
+                Attendance Session QR
+              </h3>
+              <p class="mt-1 text-sm text-gray-500">
+                Students scan this QR to check in. The session token expires
+                quickly and rotates automatically.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-if="!sessionActive"
+                class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500"
+                @click="startAttendanceSession"
+              >
+                Start session
+              </button>
+              <button
+                v-else
+                class="rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                @click="stopAttendanceSession"
+              >
+                Stop
+              </button>
+            </div>
+          </div>
+
+          <div
+            v-if="sessionError"
+            class="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+          >
+            {{ sessionError }}
+          </div>
+
+          <div class="mt-5 grid gap-4 lg:grid-cols-2">
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <div class="flex items-center justify-between">
+                <div class="text-sm font-medium text-gray-700">Live QR</div>
+                <div class="text-xs text-gray-500">
+                  Expires in {{ sessionSecondsRemaining }}s
+                </div>
+              </div>
+              <div class="mt-4 flex items-center justify-center">
+                <div class="rounded-xl border border-gray-200 bg-white p-3">
+                  <img
+                    v-if="sessionQrUrl"
+                    :src="sessionQrUrl"
+                    alt="Attendance session QR"
+                    class="h-48 w-48"
+                  />
+                  <div
+                    v-else
+                    class="flex h-48 w-48 items-center justify-center text-sm text-gray-500"
+                  >
+                    Start a session to generate a QR
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 text-center text-xs text-gray-500">
+                Rotate interval: {{ sessionRotateSeconds }}s
+              </div>
+            </div>
+
+            <div class="rounded-lg border border-gray-200 bg-white p-4">
+              <div class="text-sm font-semibold text-gray-700">Fallback</div>
+              <div class="mt-2 text-sm text-gray-500">
+                If scanning fails, students can paste the payload in their
+                check-in screen.
+              </div>
+              <div class="mt-4 rounded-lg bg-gray-50 p-3">
+                <div class="font-mono text-[11px] text-gray-700 break-all">
+                  {{ sessionQrPayload || "-" }}
+                </div>
+              </div>
+              <div class="mt-3 flex gap-2">
+                <button
+                  class="rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60"
+                  :disabled="!sessionQrPayload"
+                  @click="copySessionPayload"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-else-if="attendanceEntryMode === 'scan'"
           class="grid gap-4 lg:grid-cols-2"
         >
           <div class="rounded-lg border border-gray-200 bg-white p-4">
@@ -448,6 +554,8 @@ import { useParentLinkedStudents } from "../../composables/useParentLinkedStuden
 import { useStudentStore } from "../../store/studentStore";
 import { useUserStore } from "../../store/userStore";
 import { formatDate } from "../../utils/date.holidays";
+import { apolloClient } from "../../../apollo-client";
+import { createAttendanceSession } from "../../graphql/mutations";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
@@ -487,6 +595,14 @@ const isScanning = ref(false);
 const cameraError = ref("");
 const manualStudentId = ref("");
 const scannedIds = ref(new Set());
+const sessionActive = ref(false);
+const sessionQrPayload = ref("");
+const sessionExpiresAt = ref(null);
+const sessionError = ref("");
+const sessionSecondsRemaining = ref(0);
+const sessionRotateSeconds = 20;
+let sessionRefreshIntervalId = null;
+let sessionTickIntervalId = null;
 
 const error = computed(() => attendanceStore.error);
 const lessons = computed(() => lessonStore.lessons);
@@ -611,6 +727,9 @@ const setAttendanceEntryMode = (mode) => {
   if (mode !== "scan") {
     stopQrScan();
   }
+  if (mode !== "session") {
+    stopAttendanceSession();
+  }
 };
 
 let mediaStream = null;
@@ -671,6 +790,98 @@ const stopQrScan = () => {
   if (mediaStream) {
     mediaStream.getTracks().forEach((t) => t.stop());
     mediaStream = null;
+  }
+};
+
+const sessionQrUrl = computed(() => {
+  if (!sessionQrPayload.value) return "";
+  const size = "260x260";
+  const data = encodeURIComponent(sessionQrPayload.value);
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}&data=${data}`;
+});
+
+const updateSessionRemaining = () => {
+  if (!sessionExpiresAt.value) {
+    sessionSecondsRemaining.value = 0;
+    return;
+  }
+  const ms = new Date(sessionExpiresAt.value).getTime() - Date.now();
+  sessionSecondsRemaining.value = Math.max(0, Math.floor(ms / 1000));
+};
+
+const refreshSessionToken = async () => {
+  sessionError.value = "";
+  if (!selectedLesson.value || !selectedDate.value) return;
+
+  try {
+    const { data } = await apolloClient.mutate({
+      mutation: createAttendanceSession,
+      variables: {
+        lessonId: selectedLesson.value,
+        date: new Date(selectedDate.value),
+      },
+      fetchPolicy: "no-cache",
+    });
+
+    sessionQrPayload.value = data?.createAttendanceSession?.qrPayload || "";
+    sessionExpiresAt.value = data?.createAttendanceSession?.expiresAt || null;
+    updateSessionRemaining();
+  } catch (e) {
+    sessionError.value = "Unable to create attendance session.";
+    stopAttendanceSession();
+  }
+};
+
+const startAttendanceSession = async () => {
+  sessionActive.value = true;
+  await refreshSessionToken();
+
+  if (!sessionQrPayload.value) {
+    sessionActive.value = false;
+    return;
+  }
+
+  clearInterval(sessionRefreshIntervalId);
+  clearInterval(sessionTickIntervalId);
+
+  sessionRefreshIntervalId = setInterval(
+    refreshSessionToken,
+    sessionRotateSeconds * 1000,
+  );
+
+  sessionTickIntervalId = setInterval(updateSessionRemaining, 250);
+};
+
+const stopAttendanceSession = () => {
+  sessionActive.value = false;
+  sessionQrPayload.value = "";
+  sessionExpiresAt.value = null;
+  sessionError.value = "";
+  sessionSecondsRemaining.value = 0;
+
+  if (sessionRefreshIntervalId) {
+    clearInterval(sessionRefreshIntervalId);
+    sessionRefreshIntervalId = null;
+  }
+  if (sessionTickIntervalId) {
+    clearInterval(sessionTickIntervalId);
+    sessionTickIntervalId = null;
+  }
+};
+
+const copySessionPayload = async () => {
+  if (!sessionQrPayload.value) return;
+  try {
+    await navigator.clipboard.writeText(sessionQrPayload.value);
+    notificationStore.addNotification({
+      type: "success",
+      message: "Copied session payload.",
+    });
+  } catch (e) {
+    notificationStore.addNotification({
+      type: "error",
+      message: "Unable to copy.",
+    });
   }
 };
 
@@ -742,6 +953,7 @@ function toggleMarkAttendanceMode() {
     studentAttendance.value = {};
     scannedIds.value = new Set();
     manualStudentId.value = "";
+    stopAttendanceSession();
 
     // Fetch classes and lessons if not already loaded
     if (classes.value.length === 0) {
@@ -752,11 +964,13 @@ function toggleMarkAttendanceMode() {
     }
   } else {
     stopQrScan();
+    stopAttendanceSession();
   }
 }
 
 onUnmounted(() => {
   stopQrScan();
+  stopAttendanceSession();
 });
 
 // Initialize attendance object for all applicable students

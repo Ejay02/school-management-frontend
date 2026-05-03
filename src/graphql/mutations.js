@@ -344,6 +344,29 @@ export const markAttendance = gql`
   }
 `;
 
+export const createAttendanceSession = gql`
+  mutation CreateAttendanceSession($lessonId: String!, $date: DateTime!) {
+    createAttendanceSession(lessonId: $lessonId, date: $date) {
+      token
+      expiresAt
+      qrPayload
+    }
+  }
+`;
+
+export const checkInAttendance = gql`
+  mutation CheckInAttendance($token: String!) {
+    checkInAttendance(token: $token) {
+      id
+      date
+      present
+      studentId
+      lessonId
+      classId
+    }
+  }
+`;
+
 export const createEvent = gql`
   mutation CreateEvent($data: CreateEventInput!) {
     createEvent(data: $data) {
