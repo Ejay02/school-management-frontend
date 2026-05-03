@@ -212,7 +212,9 @@
 
       <div class="max-w-3xl mx-auto mt-10">
         <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div
+            class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+          >
             <div>
               <h2 class="text-lg font-semibold text-gray-800">My ID Card</h2>
               <p class="mt-1 text-sm text-gray-500">
@@ -246,33 +248,48 @@
                 <div class="id-flip-face id-front">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                      <div class="h-10 w-10 overflow-hidden rounded-md bg-gray-100">
+                      <div
+                        class="h-10 w-10 overflow-hidden rounded-md bg-gray-100"
+                      >
                         <img
                           v-if="userStore.schoolInfo.schoolLogo"
                           :src="userStore.schoolInfo.schoolLogo"
                           alt="School logo"
                           class="h-full w-full object-cover"
                         />
-                        <div v-else class="flex h-full w-full items-center justify-center text-xs font-semibold text-gray-500">
+                        <div
+                          v-else
+                          class="flex h-full w-full items-center justify-center text-xs font-semibold text-gray-500"
+                        >
                           EDU
                         </div>
                       </div>
                       <div class="min-w-0">
-                        <div class="text-sm font-semibold text-gray-800 truncate">
-                          {{ userStore.schoolInfo.schoolName || "EduHub Portal" }}
+                        <div
+                          class="text-sm font-semibold text-gray-800 truncate"
+                        >
+                          {{
+                            userStore.schoolInfo.schoolName || "EduHub Portal"
+                          }}
                         </div>
                         <div class="text-xs text-gray-500">
-                          {{ roleIdLabel }}
+                          Official ID Card
                         </div>
                       </div>
                     </div>
-                    <span class="inline-flex items-center rounded-full bg-eduPurpleLight px-3 py-1 text-xs font-medium text-purple-700 capitalize">
-                      {{ userStore.userInfo.role?.toLowerCase().replace("_", " ") }}
+                    <span
+                      class="inline-flex items-center rounded-full bg-eduPurpleLight px-3 py-1 text-xs font-medium text-purple-700 capitalize"
+                    >
+                      {{
+                        userStore.userInfo.role?.toLowerCase().replace("_", " ")
+                      }}
                     </span>
                   </div>
 
                   <div class="mt-5 flex items-center gap-4">
-                    <div class="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600">
+                    <div
+                      class="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600"
+                    >
                       <img
                         v-if="profilePreview || userStore?.userInfo?.image"
                         :src="profilePreview || userStore?.userInfo?.image"
@@ -300,10 +317,14 @@
                     </div>
                   </div>
 
-                  <div class="mt-6 flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3">
+                  <div
+                    class="mt-6 flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3"
+                  >
                     <div class="text-xs text-gray-600">
                       <div class="font-semibold text-gray-700">Account ID</div>
-                      <div class="mt-1 font-mono text-[11px] text-gray-600 truncate max-w-[220px]">
+                      <div
+                        class="mt-1 font-mono text-[11px] text-gray-600 truncate max-w-[220px]"
+                      >
                         {{ qrValue || "-" }}
                       </div>
                     </div>
@@ -329,7 +350,10 @@
                         alt="QR code"
                         class="h-40 w-40"
                       />
-                      <div v-else class="h-40 w-40 flex items-center justify-center text-sm text-gray-500">
+                      <div
+                        v-else
+                        class="h-40 w-40 flex items-center justify-center text-sm text-gray-500"
+                      >
                         QR unavailable
                       </div>
                     </div>
@@ -345,8 +369,12 @@
                   </div>
 
                   <div class="mt-6 rounded-lg bg-gray-50 px-4 py-3">
-                    <div class="text-xs font-medium text-gray-700">QR payload</div>
-                    <div class="mt-1 font-mono text-[11px] text-gray-600 break-all">
+                    <div class="text-xs font-medium text-gray-700">
+                      QR payload
+                    </div>
+                    <div
+                      class="mt-1 font-mono text-[11px] text-gray-600 break-all"
+                    >
                       {{ qrValue || "-" }}
                     </div>
                   </div>
@@ -455,7 +483,11 @@ const copyRoleId = async () => {
   }
 };
 
-const qrValue = computed(() => String(userStore.userInfo?.id || "").trim());
+const qrValue = computed(() => {
+  const userId = String(userStore.userInfo?.id || "").trim();
+  if (!userId) return "";
+  return `eduhub:v1:user:${userId}`;
+});
 const qrUrl = computed(() => {
   if (!qrValue.value) return "";
   const size = "220x220";

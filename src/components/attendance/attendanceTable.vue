@@ -696,7 +696,13 @@ const scanLoop = async () => {
 };
 
 const submitScannedStudentId = async (studentIdValue) => {
-  const studentId = String(studentIdValue || "").trim();
+  const raw = String(studentIdValue || "").trim();
+  if (!raw) return;
+
+  const studentId = raw.startsWith("eduhub:v1:user:")
+    ? raw.replace("eduhub:v1:user:", "").trim()
+    : raw;
+
   if (!studentId) return;
   if (scannedIds.value.has(studentId)) return;
   if (!selectedLesson.value || !selectedDate.value) return;
