@@ -297,7 +297,7 @@
                     </div>
 
                     <div class="id-sep"></div>
-                    <div class="id-footer">
+                    <div class="id-footer justify-center">
                       {{ userStore.schoolInfo.schoolName || "EduHub Academy" }}
                       ·
                       {{ cardYear }}
@@ -351,7 +351,7 @@
                     </div>
 
                     <div class="id-sep"></div>
-                    <div class="id-footer">
+                    <div class="id-footer justify-center">
                       {{ userStore.schoolInfo.schoolName || "EduHub Academy" }}
                       · Official Identification · {{ cardYear }}
                     </div>
