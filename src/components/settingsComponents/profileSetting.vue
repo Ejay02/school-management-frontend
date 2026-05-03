@@ -344,7 +344,9 @@
                           </div>
                           <div class="id-meta-item">
                             <div class="id-meta-label">Status</div>
-                            <div class="id-meta-value">Active</div>
+                            <div class="id-meta-value">
+                              {{ cardStatusLabel }}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -498,6 +500,12 @@ const issuedLabel = computed(() => {
 });
 const validUntilLabel = computed(() => `Dec ${cardYear.value}`);
 
+const userExists = ref(true);
+
+const cardStatusLabel = computed(() => {
+  return userExists.value ? "Active" : "Inactive";
+});
+
 const downloadIdCard = () => {
   const schoolName = userStore.schoolInfo.schoolName || "EduHub Portal";
   const schoolLogo = userStore.schoolInfo.schoolLogo || "";
@@ -507,13 +515,14 @@ const downloadIdCard = () => {
   const role = String(userStore.userInfo?.role || "")
     .toLowerCase()
     .replace("_", " ");
-  const idLabel = roleIdLabel.value || "ID";
+
   const displayId = roleId.value || "";
-  const accountId = qrValue.value || "";
+
   const qr = cardQrUrl.value || "";
   const year = String(cardYear.value);
   const issued = String(issuedLabel.value);
   const validUntil = String(validUntilLabel.value);
+  const status = String(cardStatusLabel.value);
 
   const w = window.open("", "_blank", "width=900,height=700");
   if (!w) return;
@@ -617,7 +626,7 @@ const downloadIdCard = () => {
                   </div>
                   <div>
                     <div class="metaK">Status</div>
-                    <div class="metaV">Active</div>
+                    <div class="metaV">${escapeHtml(status)}</div>
                   </div>
                 </div>
               </div>
@@ -745,6 +754,10 @@ const prepareFormData = () => {
     phone: formData.phone,
   };
 
+  if (!input.sex) {
+    delete input.sex;
+  }
+
   // If an image file is selected, add the base64 string to the input
   if (imageBase64.value) {
     input.image = imageBase64.value;
@@ -800,6 +813,20 @@ onMounted(() => {
   if (!roleId.value) {
     userStore.syncCurrentUser(apolloClient);
   }
+
+  if (!userStore.userInfo?.id) {
+    userExists.value = false;
+    return;
+  }
+
+  userStore
+    .findUserById(userStore.userInfo.id, apolloClient)
+    .then((u) => {
+      userExists.value = Boolean(u);
+    })
+    .catch(() => {
+      userExists.value = false;
+    });
 });
 </script>
 
