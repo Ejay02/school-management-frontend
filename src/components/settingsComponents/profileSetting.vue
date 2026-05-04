@@ -109,7 +109,7 @@
                   @click="copyRoleId"
                   :disabled="!roleId"
                 >
-                  <i class="fa-regular fa-copy"></i>
+                  <i class="text-black fa-regular fa-copy "></i>
                 </button>
               </div>
             </div>
@@ -213,9 +213,9 @@
       <div class="max-w-3xl mx-auto mt-10">
         <div class="rounded-xl border border-gray-200 p-6 shadow-sm">
           <div
-            class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+            class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b border-gray-200 pb-2"
           >
-            <div>
+            <div class="">
               <h2 class="text-lg font-semibold text-gray-800">My ID Card</h2>
               <p class="mt-1 text-sm text-gray-500">
                 Hover to see the back. Download a copy when you need it.
