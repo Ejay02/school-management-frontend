@@ -74,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { Chart, registerables } from "chart.js";
 import { useStudentStore } from "../../store/studentStore";
 
@@ -84,6 +84,7 @@ Chart.register(...registerables);
 const radialChartCanvas = ref(null);
 const studentStore = useStudentStore();
 const genderStats = computed(() => studentStore.genderStats);
+let chartInstance = null;
 
 onMounted(async () => {
   // Fetch the gender stats from the API via the store
@@ -95,6 +96,11 @@ onMounted(async () => {
 });
 
 const createCircularChart = () => {
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+  }
+
   // Use the fetched gender statistics
   const malePercentage = genderStats.value.malePercentage || 0;
   const femalePercentage = genderStats.value.femalePercentage || 0;
@@ -146,8 +152,15 @@ const createCircularChart = () => {
   };
 
   // Create the chart
-  new Chart(radialChartCanvas.value, config);
+  chartInstance = new Chart(radialChartCanvas.value, config);
 };
+
+onUnmounted(() => {
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+  }
+});
 </script>
 
 <style scoped></style>

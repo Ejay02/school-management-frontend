@@ -25,13 +25,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { Chart, registerables } from "chart.js";
 
 // Register all Chart.js components
 Chart.register(...registerables);
 
 const radialChartCanvas = ref(null);
+let chartInstance = null;
 
 onMounted(() => {
   if (radialChartCanvas.value) {
@@ -40,6 +41,11 @@ onMounted(() => {
 });
 
 const createHalfDoughnutChart = () => {
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+  }
+
   const config = {
     type: "doughnut",
     data: {
@@ -70,8 +76,15 @@ const createHalfDoughnutChart = () => {
   };
 
   // Create the chart
-  new Chart(radialChartCanvas.value, config);
+  chartInstance = new Chart(radialChartCanvas.value, config);
 };
+
+onUnmounted(() => {
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+  }
+});
 </script>
 
 <style scoped></style>

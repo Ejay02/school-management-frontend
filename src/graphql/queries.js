@@ -323,6 +323,71 @@ export const getDashboardUserCardSummary = gql`
   }
 `;
 
+export const getAdminDashboardOverview = gql`
+  query getAdminDashboardOverview {
+    getAdminDashboardOverview {
+      dashboardSummary {
+        role
+        academicYear {
+          current
+          next
+        }
+        counts {
+          students
+          parents
+          teachers
+          admins
+        }
+      }
+      onboardingChecklist {
+        completedSteps
+        totalSteps
+        completionPercentage
+        steps {
+          key
+          label
+          complete
+          summary
+          meta
+        }
+      }
+      invitationSummary {
+        totalSent
+        accepted
+        pending
+        expired
+        revoked
+        activationRate
+        activationLabel
+        roleBreakdown {
+          role
+          totalSent
+          accepted
+          pending
+          expired
+          revoked
+          activationRate
+          activationLabel
+        }
+      }
+      invoicesDueThisWeek {
+        id
+        totalAmount
+        paidAmount
+        dueDate
+        status
+      }
+      financeOverview {
+        months
+        income
+        outstanding
+        totalIncome
+        totalOutstanding
+      }
+    }
+  }
+`;
+
 export const getIncomeGraphData = gql`
   query getIncomeGraphData {
     getIncomeGraphData {

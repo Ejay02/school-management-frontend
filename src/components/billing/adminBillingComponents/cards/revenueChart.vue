@@ -27,7 +27,7 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import EmptyState from "../../../emptyState.vue";
 import { useBillingDashboardStore } from "../../../../store/billingDashboardStore";
 
@@ -184,6 +184,13 @@ watch(
 onMounted(() => {
   if (hasData.value) {
     createChart();
+  }
+});
+
+onUnmounted(() => {
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
   }
 });
 </script>

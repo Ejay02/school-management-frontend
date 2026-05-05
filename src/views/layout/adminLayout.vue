@@ -164,7 +164,7 @@
       <!-- bottom -->
       <div class="w-full h-[500px]">
         <router-link to="/settings/billing" class="block h-full">
-          <FinanceCard />
+          <FinanceCard :overview="overview?.financeOverview" />
         </router-link>
       </div>
     </div>
@@ -184,31 +184,23 @@ import UserCard from "../../components/cards/userCard.vue";
 import CountCard from "../../components/cards/countCard.vue";
 import FinanceCard from "../../components/cards/financeCard.vue";
 import { useAttendanceStore } from "../../store/attendanceStore";
-import {
-  getDashboardUserCardSummary,
-  getOnboardingChecklistQuery,
-  invitationSummaryQuery,
-  invoicesDueThisWeekQuery,
-} from "../../graphql/queries";
+import { getAdminDashboardOverview } from "../../graphql/queries";
 import AttendanceCard from "../../components/cards/attendanceCard.vue";
 
 const router = useRouter();
 
 const attendanceStore = useAttendanceStore();
 
-const { result, loading, error } = useQuery(getDashboardUserCardSummary);
-const { result: inviteSummaryResult } = useQuery(invitationSummaryQuery);
-const { result: onboardingChecklistResult } = useQuery(
-  getOnboardingChecklistQuery,
-);
-const { result: invoicesDueThisWeekResult } = useQuery(
-  invoicesDueThisWeekQuery,
-);
+const { result: overviewResult } = useQuery(getAdminDashboardOverview);
+
+const overview = computed(() => {
+  return overviewResult.value?.getAdminDashboardOverview;
+});
 
 const rolesData = computed(() => {
-  if (!result.value || !result.value.getDashboardUserCardSummary) return [];
+  const summary = overview.value?.dashboardSummary;
+  if (!summary) return [];
 
-  const summary = result.value.getDashboardUserCardSummary;
   const academicYear = summary.academicYear.current;
   const nextYear = summary.academicYear.next.toString().slice(-2);
 
@@ -249,7 +241,7 @@ const handleRoleCardClick = (to) => {
 };
 
 const inviteSummary = computed(() => {
-  const summary = inviteSummaryResult.value?.invitationSummary;
+  const summary = overview.value?.invitationSummary;
   if (!summary) {
     return {
       totalSent: 0,
@@ -264,7 +256,7 @@ const inviteSummary = computed(() => {
 });
 
 const onboardingChecklist = computed(() => {
-  const checklist = onboardingChecklistResult.value?.getOnboardingChecklist;
+  const checklist = overview.value?.onboardingChecklist;
   if (!checklist) {
     return {
       completedSteps: 0,
@@ -301,7 +293,7 @@ const getOnboardingStepRoute = (stepKey) => {
 };
 
 const feesDue = computed(() => {
-  const invoices = invoicesDueThisWeekResult.value?.invoicesDueThisWeek || [];
+  const invoices = overview.value?.invoicesDueThisWeek || [];
 
   const amountDue = invoices.reduce((sum, invoice) => {
     const paidAmount = Number(invoice.paidAmount || 0);

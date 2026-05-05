@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import { useBillingDashboardStore } from "../../../../store/billingDashboardStore";
 import {
   Chart,
@@ -135,6 +135,13 @@ watch([paymentStatusDistribution, hasData], () => {
 onMounted(() => {
   if (hasData.value) {
     createChart();
+  }
+});
+
+onUnmounted(() => {
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
   }
 });
 </script>

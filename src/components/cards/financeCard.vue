@@ -68,7 +68,7 @@
 
     <div class="w-full h-64 relative">
       <div
-        v-if="loading"
+        v-if="isLoading"
         class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 z-10"
       >
         <div
@@ -96,7 +96,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import {
   Chart,
   LineController,
@@ -125,7 +125,25 @@ Chart.register(
 const chartRef = ref(null);
 let chartInstance = null;
 
-const { result, loading } = useQuery(getFinanceOverview);
+const props = defineProps({
+  overview: {
+    type: Object,
+    default: null,
+  },
+});
+
+const shouldQuery = computed(() => !props.overview);
+const { result, loading } = useQuery(getFinanceOverview, null, {
+  enabled: shouldQuery,
+});
+
+const effectiveOverview = computed(() => {
+  return props.overview || result.value?.getFinanceOverview || null;
+});
+
+const isLoading = computed(() => {
+  return props.overview ? false : loading.value;
+});
 
 const defaultMonths = [
   "Sep",
@@ -296,19 +314,25 @@ onMounted(() => {
   }
 });
 
+onUnmounted(() => {
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+  }
+});
+
 watch(
-  result,
+  effectiveOverview,
   (newVal) => {
     if (
       newVal &&
-      newVal.getFinanceOverview &&
-      Array.isArray(newVal.getFinanceOverview.months) &&
-      Array.isArray(newVal.getFinanceOverview.income) &&
-      Array.isArray(newVal.getFinanceOverview.outstanding)
+      Array.isArray(newVal.months) &&
+      Array.isArray(newVal.income) &&
+      Array.isArray(newVal.outstanding)
     ) {
-      chartData.labels = newVal.getFinanceOverview.months;
-      chartData.datasets[0].data = newVal.getFinanceOverview.income;
-      chartData.datasets[1].data = newVal.getFinanceOverview.outstanding;
+      chartData.labels = newVal.months;
+      chartData.datasets[0].data = newVal.income;
+      chartData.datasets[1].data = newVal.outstanding;
       if (chartInstance) {
         chartInstance.update();
       }

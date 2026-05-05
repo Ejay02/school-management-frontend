@@ -14,27 +14,20 @@
     </div>
 
     <div class="bg-gray-200 p-6 rounded-lg shadow-lg">
-      <!-- Show a loading spinner when fetching data or generating dummy data -->
+      <!-- Show a loading spinner when fetching data -->
       <LoadingScreen
-        v-if="loading || generatingDummy"
+        v-if="loading"
         message="Loading Data..."
       />
 
       <ErrorScreen v-else-if="error" />
 
       <EmptyState
-        v-else-if="hasNoData && !loading && !generatingDummy"
+        v-else-if="hasNoData && !loading"
         icon="fa-solid fa-chart-simple"
         heading="No data available"
         description="No scores have been recorded for this class yet."
-      >
-        <button
-          @click="generateDummyData"
-          class="mt-4 bg-indigo-500 hover:bg-indigo-400 text-white py-2 px-4 rounded-md transition-colors"
-        >
-          Generate Sample Data
-        </button>
-      </EmptyState>
+      />
 
       <!-- Chart container (only shown when we have data) -->
       <div class="chart-container" v-show="!hasNoData">
@@ -74,7 +67,7 @@
 
 <script setup>
 import Chart from "chart.js/auto";
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useClassStore } from "../../store/classStore";
 import { useResultStore } from "../../store/resultStore";
 
@@ -97,8 +90,6 @@ const userRole = computed(() => userStore.currentRole);
 
 const loading = computed(() => resultStore.loading);
 const error = computed(() => resultStore.error);
-
-const generatingDummy = ref(false);
 
 const selectedClass = ref("Primary 1");
 
@@ -153,26 +144,6 @@ const fetchData = async () => {
   } catch (err) {
     console.error("Failed to fetch data:", err);
   }
-};
-
-// Generate dummy data for demonstration with a simulated delay
-const generateDummyData = async () => {
-  generatingDummy.value = true;
-  // Simulate a network delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  const dummyData = {
-    distribution: {
-      above90: Math.floor(Math.random() * 15) + 5,
-      above80: Math.floor(Math.random() * 20) + 10,
-      above70: Math.floor(Math.random() * 25) + 15,
-      below50: Math.floor(Math.random() * 10) + 3,
-    },
-  };
-
-  // Update the store with dummy data
-  resultStore.results = dummyData;
-  generatingDummy.value = false;
 };
 
 // Function to initialize or update chart
@@ -315,6 +286,13 @@ onMounted(async () => {
   await fetchData();
 
   classes.value = classStore.getClassNames;
+});
+
+onUnmounted(() => {
+  if (myChart) {
+    myChart.destroy();
+    myChart = null;
+  }
 });
 </script>
 

@@ -51,31 +51,10 @@
 
             <div class="flex flex-wrap justify-center sm:justify-end gap-2">
               <button
-                v-if="integration.status === 'connected'"
-                @click="refreshIntegration(integration.id)"
-                class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                :disabled="integration.status === 'syncing'"
+                class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-400 bg-white cursor-not-allowed"
+                disabled
               >
-                <i class="fa-solid fa-rotate-right mr-1.5"></i>
-                Sync
-              </button>
-              <button
-                v-if="integration.status === 'not_connected'"
-                @click="connectIntegration(integration.id)"
-                class="inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                :disabled="integration.status === 'connecting'"
-              >
-                <i class="fa-solid fa-plug-circle-plus mr-1.5"></i>
-                Connect
-              </button>
-              <button
-                v-if="integration.status === 'connected'"
-                @click="disconnectIntegration(integration.id)"
-                class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                :disabled="integration.status === 'disconnecting'"
-              >
-                <i class="fa-solid fa-plug-circle-minus mr-1.5"></i>
-                Disconnect
+                Coming soon
               </button>
             </div>
           </div>
@@ -95,8 +74,8 @@ const integrations = ref([
     description:
       "Sync student data with Google Classroom, manage calendar events, and enable single sign-on.",
     icon: "/google-workspace.svg",
-    status: "connected",
-    lastSync: "2024-01-28T10:30:00",
+    status: "not_configured",
+    lastSync: null,
   },
   {
     id: 2,
@@ -104,7 +83,7 @@ const integrations = ref([
     description:
       "Enable virtual classrooms, assignments, and collaboration tools through Microsoft Teams.",
     icon: "/microsoft-teams.svg",
-    status: "not_connected",
+    status: "not_configured",
     lastSync: null,
   },
   {
@@ -113,15 +92,15 @@ const integrations = ref([
     description:
       "Schedule and manage virtual classes, parent-teacher meetings through Zoom.",
     icon: "/zoom-app.svg",
-    status: "connected",
-    lastSync: "2024-01-27T15:45:00",
+    status: "not_configured",
+    lastSync: null,
   },
   {
     id: 4,
     name: "PayStack",
     description: "Process school fees and other payments securely.",
     icon: "/paystack-2.svg",
-    status: "not_connected",
+    status: "not_configured",
     lastSync: null,
   },
   {
@@ -129,55 +108,15 @@ const integrations = ref([
     name: "SMS Gateway",
     description: "Send automated SMS notifications to parents and staff.",
     icon: "/gateway.svg",
-    status: "connected",
-    lastSync: "2024-01-28T09:15:00",
+    status: "not_configured",
+    lastSync: null,
   },
 ]);
 
-const connectIntegration = async (id) => {
-  // Simulating API call
-  const integration = integrations.value.find((i) => i.id === id);
-  integration.status = "connecting";
-
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
-  integration.status = "connected";
-  integration.lastSync = new Date().toISOString();
-};
-
-const disconnectIntegration = async (id) => {
-  // Simulating API call
-  const integration = integrations.value.find((i) => i.id === id);
-  integration.status = "disconnecting";
-
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
-  integration.status = "not_connected";
-  integration.lastSync = null;
-};
-
-const refreshIntegration = async (id) => {
-  // Simulating API call
-  const integration = integrations.value.find((i) => i.id === id);
-  integration.status = "syncing";
-
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
-  integration.status = "connected";
-  integration.lastSync = new Date().toISOString();
-};
-
 const getStatusColor = (status) => {
   switch (status) {
-    case "connected":
-      return "bg-green-50 text-green-700 ring-green-600/20";
-    case "not_connected":
+    case "not_configured":
       return "bg-gray-50 text-gray-600 ring-gray-500/10";
-    case "connecting":
-    case "syncing":
-      return "bg-blue-50 text-blue-700 ring-blue-700/10";
-    case "disconnecting":
-      return "bg-yellow-100 text-yellow-800 ring-yellow-600/20";
     default:
       return "bg-gray-50 text-gray-600 ring-gray-500/10";
   }
