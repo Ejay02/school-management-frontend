@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-white rounded-xl w-full h-full p-6 shadow-lg transition-all duration-300 hover:shadow-xl">
+  <div
+    class="bg-white rounded-xl w-full h-full p-6 shadow-lg transition-all duration-300 hover:shadow-xl"
+  >
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-lg font-semibold text-gray-800">Finance Overview</h1>
       <div
@@ -23,7 +25,9 @@
     </div>
 
     <div class="flex flex-wrap gap-4 justify-center mb-6">
-      <div class="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full transition-transform hover:scale-105">
+      <div
+        class="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full transition-transform hover:scale-105"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -40,8 +44,10 @@
         </svg>
         <h2 class="text-sm font-medium text-blue-600">Income</h2>
       </div>
-      
-      <div class="flex items-center gap-2 px-3 py-1.5 bg-purple-50 rounded-full transition-transform hover:scale-105">
+
+      <div
+        class="flex items-center gap-2 px-3 py-1.5 bg-purple-50 rounded-full transition-transform hover:scale-105"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -56,32 +62,41 @@
             d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"
           />
         </svg>
-        <h2 class="text-sm font-medium text-purple-600">Expense</h2>
+        <h2 class="text-sm font-medium text-purple-600">Outstanding</h2>
       </div>
     </div>
 
     <div class="w-full h-64 relative">
-      <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 z-10">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <div
+        v-if="loading"
+        class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 z-10"
+      >
+        <div
+          class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"
+        ></div>
       </div>
       <canvas ref="chartRef"></canvas>
     </div>
-    
+
     <div class="mt-4 grid grid-cols-2 gap-4 text-center">
       <div class="p-2 rounded-lg bg-blue-50">
         <p class="text-xs text-gray-500">Total Income</p>
-        <p class="text-lg font-semibold text-blue-600">${{ getTotalIncome() }}</p>
+        <p class="text-lg font-semibold text-blue-600">
+          ${{ getTotalIncome() }}
+        </p>
       </div>
       <div class="p-2 rounded-lg bg-purple-50">
-        <p class="text-xs text-gray-500">Total Expenses</p>
-        <p class="text-lg font-semibold text-purple-600">${{ getTotalExpenses() }}</p>
+        <p class="text-xs text-gray-500">Total Outstanding</p>
+        <p class="text-lg font-semibold text-purple-600">
+          ${{ getTotalOutstanding() }}
+        </p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, onMounted, watch } from "vue";
 import {
   Chart,
   LineController,
@@ -94,7 +109,7 @@ import {
   Filler,
 } from "chart.js";
 import { useQuery } from "@vue/apollo-composable";
-import { getIncomeGraphData } from "../../graphql/queries";
+import { getFinanceOverview } from "../../graphql/queries";
 
 Chart.register(
   LineController,
@@ -104,31 +119,16 @@ Chart.register(
   Title,
   CategoryScale,
   Tooltip,
-  Filler
+  Filler,
 );
 
 const chartRef = ref(null);
 let chartInstance = null;
 
-const { result, loading, error } = useQuery(getIncomeGraphData);
-
-const months = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+const { result, loading } = useQuery(getFinanceOverview);
 
 const chartData = {
-  labels: months,
+  labels: [],
   datasets: [
     {
       label: "Income",
@@ -145,8 +145,8 @@ const chartData = {
       pointHoverRadius: 6,
     },
     {
-      label: "Expenses",
-      data: [45, 0, 35, 60, 48, 72, 85, 76, 91, 68, 57, 32],
+      label: "Outstanding",
+      data: [],
       borderColor: "#8b5cf6", // Purple
       backgroundColor: "rgba(139, 92, 246, 0.1)",
       borderWidth: 2,
@@ -164,17 +164,22 @@ const chartData = {
 // Calculate totals for display in the summary cards
 const getTotalIncome = () => {
   if (chartData.datasets[0].data.length === 0) return 0;
-  return chartData.datasets[0].data.reduce((sum, value) => sum + value, 0).toLocaleString();
+  return chartData.datasets[0].data
+    .reduce((sum, value) => sum + value, 0)
+    .toLocaleString();
 };
 
-const getTotalExpenses = () => {
-  return chartData.datasets[1].data.reduce((sum, value) => sum + value, 0).toLocaleString();
+const getTotalOutstanding = () => {
+  if (chartData.datasets[1].data.length === 0) return 0;
+  return chartData.datasets[1].data
+    .reduce((sum, value) => sum + value, 0)
+    .toLocaleString();
 };
 
 onMounted(() => {
   if (chartRef.value) {
     const ctx = chartRef.value.getContext("2d");
-    
+
     chartInstance = new Chart(chartRef.value, {
       type: "line",
       data: chartData,
@@ -208,21 +213,21 @@ onMounted(() => {
             padding: 10,
             cornerRadius: 4,
             callbacks: {
-              label: function(context) {
-                let label = context.dataset.label || '';
+              label: function (context) {
+                let label = context.dataset.label || "";
                 if (label) {
-                  label += ': ';
+                  label += ": ";
                 }
                 if (context.parsed.y !== null) {
-                  label += new Intl.NumberFormat('en-US', { 
-                    style: 'currency', 
-                    currency: 'USD',
-                    minimumFractionDigits: 0
+                  label += new Intl.NumberFormat("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                    minimumFractionDigits: 0,
                   }).format(context.parsed.y);
                 }
                 return label;
-              }
-            }
+              },
+            },
           },
         },
         scales: {
@@ -238,9 +243,9 @@ onMounted(() => {
               font: {
                 size: 11,
               },
-              callback: function(value) {
-                return '$' + value;
-              }
+              callback: function (value) {
+                return "$" + value;
+              },
             },
           },
           x: {
@@ -269,8 +274,8 @@ onMounted(() => {
         },
         animation: {
           duration: 1000,
-          easing: 'easeOutQuart'
-        }
+          easing: "easeOutQuart",
+        },
       },
     });
   }
@@ -279,11 +284,14 @@ onMounted(() => {
 watch(result, (newVal) => {
   if (
     newVal &&
-    newVal.getIncomeGraphData &&
-    newVal.getIncomeGraphData.revenue
+    newVal.getFinanceOverview &&
+    Array.isArray(newVal.getFinanceOverview.months) &&
+    Array.isArray(newVal.getFinanceOverview.income) &&
+    Array.isArray(newVal.getFinanceOverview.outstanding)
   ) {
-    // Update the revenue dataset with the fetched data
-    chartData.datasets[0].data = newVal.getIncomeGraphData.revenue;
+    chartData.labels = newVal.getFinanceOverview.months;
+    chartData.datasets[0].data = newVal.getFinanceOverview.income;
+    chartData.datasets[1].data = newVal.getFinanceOverview.outstanding;
     if (chartInstance) {
       chartInstance.update();
     }
@@ -301,7 +309,7 @@ canvas {
   .flex-wrap {
     justify-content: space-around;
   }
-  
+
   .grid-cols-2 {
     grid-template-columns: 1fr;
     gap: 0.5rem;

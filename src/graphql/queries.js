@@ -331,6 +331,18 @@ export const getIncomeGraphData = gql`
   }
 `;
 
+export const getFinanceOverview = gql`
+  query getFinanceOverview {
+    getFinanceOverview {
+      months
+      income
+      outstanding
+      totalIncome
+      totalOutstanding
+    }
+  }
+`;
+
 export const getTeacherById = gql`
   query getTeacherById($teacherId: String!) {
     getTeacherById(teacherId: $teacherId) {
