@@ -1,9 +1,9 @@
 <template>
   <div>
  
-  <AdminBilling   v-if="role.toLowerCase() === 'super_admin'" />
+  <AdminBilling v-if="role.toLowerCase() === 'super_admin' || role.toLowerCase() === 'admin'" />
 
-  <ParentsBilling v-if="role.toLowerCase() === 'teacher'"/>
+  <ParentsBilling v-if="role.toLowerCase() === 'parent'" />
   </div>
 </template>
 

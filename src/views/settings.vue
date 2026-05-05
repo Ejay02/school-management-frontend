@@ -35,7 +35,7 @@
               Notifications
             </router-link>
             <router-link
-             v-if="role === 'super_admin' || role === 'parent'"
+             v-if="role === 'super_admin' || role === 'admin' || role === 'parent'"
               to="/settings/billing"
               class="hover:text-eduPurple"
               :class="{ 'text-indigo-600': $route.name === 'billing' }"
@@ -76,7 +76,7 @@
             >
               <option value="/settings/profile">Account</option>
               <option value="/settings/notifications">Notifications</option>
-              <option value="/settings/billing">Billing</option>
+              <option v-if="role === 'super_admin' || role === 'admin' || role === 'parent'" value="/settings/billing">Billing</option>
               <option v-if="role === 'super_admin' || role === 'admin'" value="/settings/team">Team</option>
               <option v-if="role === 'super_admin' || role === 'admin'" value="/settings/school">School</option>
               <option value="/settings/integrations">Integrations</option>
