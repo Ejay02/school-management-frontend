@@ -127,12 +127,27 @@ let chartInstance = null;
 
 const { result, loading } = useQuery(getFinanceOverview);
 
+const defaultMonths = [
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+];
+
 const chartData = {
-  labels: [],
+  labels: defaultMonths,
   datasets: [
     {
       label: "Income",
-      data: [],
+      data: Array(defaultMonths.length).fill(0),
       borderColor: "#3b82f6", // Blue
       backgroundColor: "rgba(59, 130, 246, 0.1)",
       borderWidth: 2,
@@ -146,7 +161,7 @@ const chartData = {
     },
     {
       label: "Outstanding",
-      data: [],
+      data: Array(defaultMonths.length).fill(0),
       borderColor: "#8b5cf6", // Purple
       backgroundColor: "rgba(139, 92, 246, 0.1)",
       borderWidth: 2,
@@ -281,22 +296,26 @@ onMounted(() => {
   }
 });
 
-watch(result, (newVal) => {
-  if (
-    newVal &&
-    newVal.getFinanceOverview &&
-    Array.isArray(newVal.getFinanceOverview.months) &&
-    Array.isArray(newVal.getFinanceOverview.income) &&
-    Array.isArray(newVal.getFinanceOverview.outstanding)
-  ) {
-    chartData.labels = newVal.getFinanceOverview.months;
-    chartData.datasets[0].data = newVal.getFinanceOverview.income;
-    chartData.datasets[1].data = newVal.getFinanceOverview.outstanding;
-    if (chartInstance) {
-      chartInstance.update();
+watch(
+  result,
+  (newVal) => {
+    if (
+      newVal &&
+      newVal.getFinanceOverview &&
+      Array.isArray(newVal.getFinanceOverview.months) &&
+      Array.isArray(newVal.getFinanceOverview.income) &&
+      Array.isArray(newVal.getFinanceOverview.outstanding)
+    ) {
+      chartData.labels = newVal.getFinanceOverview.months;
+      chartData.datasets[0].data = newVal.getFinanceOverview.income;
+      chartData.datasets[1].data = newVal.getFinanceOverview.outstanding;
+      if (chartInstance) {
+        chartInstance.update();
+      }
     }
-  }
-});
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped>
