@@ -38,6 +38,18 @@
               {{ formatPersonName(item?.name, item?.surname) }}
             </div>
             <div class="text-xs text-gray-400">{{ formatDisplayValue(item?.email) }}</div>
+            <div class="mt-1">
+              <span
+                class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
+                :class="
+                  item?.isActive === false
+                    ? 'bg-gray-100 text-gray-700'
+                    : 'bg-green-100 text-green-700'
+                "
+              >
+                {{ item?.isActive === false ? "Suspended" : "Active" }}
+              </span>
+            </div>
           </div>
         </td>
 
@@ -78,6 +90,23 @@
             <div class="p-2"></div>
 
             <button
+              v-if="
+                role.toLowerCase() === 'super_admin' ||
+                role.toLowerCase() === 'admin'
+              "
+              @click="toggleActiveStatus(item)"
+              class="group relative inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
+              :class="
+                item?.isActive === false
+                  ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
+                  : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+              "
+              :disabled="statusLoadingId === item.id"
+            >
+              {{ item?.isActive === false ? "Activate" : "Suspend" }}
+            </button>
+
+            <button
               v-if="role.toLowerCase() === 'super_admin'"
               @click="showDelModal(item.id, item.name, 'parentList')"
               class="group relative w-6 h-6 flex items-center justify-center rounded-full"
@@ -97,6 +126,7 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
 import {
   formatDisplayValue,
   formatPersonName,
@@ -104,6 +134,10 @@ import {
 } from "../../utils/displayValue";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
+import { apolloClient } from "../../../apollo-client";
+import { setUserActiveStatus } from "../../graphql/mutations";
+import { extractGraphQLErrorMessage } from "../../utils/graphqlError";
+import { useNotificationStore } from "../../store/notification";
 
 const props = defineProps({
   columns: {
@@ -117,8 +151,10 @@ const props = defineProps({
 });
 
 const userStore = useUserStore();
+const notificationStore = useNotificationStore();
 
 const role = userStore.currentRole;
+const statusLoadingId = ref("");
 
 const modalStore = useModalStore();
 
@@ -135,6 +171,42 @@ const showEditModal = (id, title, data, type) => {
   modalStore.modalTitle = title;
   modalStore.data = data;
   modalStore.source = type;
+};
+
+const toggleActiveStatus = async (item) => {
+  if (!item?.id) return;
+  const currentRole = String(role || "").toLowerCase();
+  if (currentRole !== "super_admin" && currentRole !== "admin") return;
+
+  statusLoadingId.value = item.id;
+  try {
+    const nextIsActive = item.isActive === false;
+    const { data } = await apolloClient.mutate({
+      mutation: setUserActiveStatus,
+      variables: { targetId: item.id, isActive: nextIsActive },
+    });
+
+    const updated = data?.setUserActiveStatus;
+    if (updated && typeof updated.isActive !== "undefined") {
+      item.isActive = Boolean(updated.isActive);
+      item.deactivatedAt = updated.deactivatedAt || null;
+    } else {
+      item.isActive = nextIsActive;
+      item.deactivatedAt = nextIsActive ? null : new Date().toISOString();
+    }
+
+    notificationStore.addNotification({
+      type: "success",
+      message: nextIsActive ? "Parent reactivated" : "Parent suspended",
+    });
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: extractGraphQLErrorMessage(error, "Unable to update status"),
+    });
+  } finally {
+    statusLoadingId.value = "";
+  }
 };
 </script>
 

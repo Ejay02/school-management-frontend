@@ -71,6 +71,14 @@
                       {{ user.name }}
                     </h3>
                     <p class="text-xs text-gray-500">{{ user.email }}</p>
+                    <div class="mt-1">
+                      <span
+                        class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
+                        :class="userStatusBadgeClass(user.isActive)"
+                      >
+                        {{ user.isActive ? "Active" : "Suspended" }}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -102,6 +110,20 @@
                       That's you
                     </span>
                   </div>
+
+                  <button
+                    v-if="canToggleUserStatus(user)"
+                    class="group relative inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
+                    :class="
+                      user.isActive
+                        ? 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                        : 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
+                    "
+                    :disabled="statusLoadingId === user.id"
+                    @click="toggleUserStatus(user)"
+                  >
+                    {{ user.isActive ? "Suspend" : "Activate" }}
+                  </button>
 
                   <button
                     v-if="role === 'super_admin'"
@@ -366,6 +388,7 @@ import {
   assignAdminRole,
   resendInvitationMutation,
   revokeInvitationMutation,
+  setUserActiveStatus,
 } from "../../graphql/mutations";
 import {
   invitationSummaryQuery,
@@ -413,6 +436,7 @@ const invitationLimit = 10;
 const invitationTotalPages = ref(1);
 const invitationHasMore = ref(false);
 const actionLoadingId = ref("");
+const statusLoadingId = ref("");
 const invitationSummary = ref({
   totalSent: 0,
   accepted: 0,
@@ -540,6 +564,54 @@ const updateUserRole = async (userId, newRole) => {
   }
 };
 
+const userStatusBadgeClass = (isActive) => {
+  return isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700";
+};
+
+const canToggleUserStatus = (user) => {
+  if (!user?.id) return false;
+  if (user.id === userStore.userInfo.id) return false;
+  if (role === "super_admin") return true;
+  if (role === "admin") return user.role === "teacher";
+  return false;
+};
+
+const toggleUserStatus = async (user) => {
+  if (!canToggleUserStatus(user)) return;
+  statusLoadingId.value = user.id;
+  try {
+    const nextIsActive = !Boolean(user.isActive);
+    const { data } = await apolloClient.mutate({
+      mutation: setUserActiveStatus,
+      variables: {
+        targetId: user.id,
+        isActive: nextIsActive,
+      },
+    });
+
+    const updated = data?.setUserActiveStatus;
+    if (updated && typeof updated.isActive !== "undefined") {
+      user.isActive = Boolean(updated.isActive);
+      user.deactivatedAt = updated.deactivatedAt || null;
+    }
+
+    notificationStore.addNotification({
+      type: "success",
+      message: nextIsActive ? "User reactivated" : "User deactivated",
+    });
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: extractGraphQLErrorMessage(
+        error,
+        "Unable to update user status",
+      ),
+    });
+  } finally {
+    statusLoadingId.value = "";
+  }
+};
+
 const fetchUsers = async (page = 1) => {
   try {
     const { admins, teachers } = await userStore.fetchAdminUsers(apolloClient, {
@@ -558,6 +630,8 @@ const fetchUsers = async (page = 1) => {
         avatar: admin.image || null,
         firstName: name,
         lastName: surname,
+        isActive: typeof admin.isActive === "boolean" ? admin.isActive : true,
+        deactivatedAt: admin.deactivatedAt || null,
       };
     });
 
@@ -572,6 +646,9 @@ const fetchUsers = async (page = 1) => {
         avatar: teacher.image || null,
         firstName: name,
         lastName: surname,
+        isActive:
+          typeof teacher.isActive === "boolean" ? teacher.isActive : true,
+        deactivatedAt: teacher.deactivatedAt || null,
       };
     });
 
@@ -600,6 +677,11 @@ const fetchUsers = async (page = 1) => {
           avatar: currentUser.image || null,
           firstName: name,
           lastName: surname,
+          isActive:
+            typeof currentUser.isActive === "boolean"
+              ? currentUser.isActive
+              : true,
+          deactivatedAt: currentUser.deactivatedAt || null,
         });
       }
     }

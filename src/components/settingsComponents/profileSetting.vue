@@ -109,7 +109,7 @@
                   @click="copyRoleId"
                   :disabled="!roleId"
                 >
-                  <i class="text-black fa-regular fa-copy "></i>
+                  <i class="text-black fa-regular fa-copy"></i>
                 </button>
               </div>
             </div>
@@ -501,9 +501,12 @@ const issuedLabel = computed(() => {
 const validUntilLabel = computed(() => `Dec ${cardYear.value}`);
 
 const userExists = ref(true);
+const userIsActive = ref(true);
 
 const cardStatusLabel = computed(() => {
-  return userExists.value ? "Active" : "Inactive";
+  if (!userExists.value) return "Inactive";
+  if (!userIsActive.value) return "Suspended";
+  return "Active";
 });
 
 const downloadIdCard = () => {
@@ -816,6 +819,7 @@ onMounted(() => {
 
   if (!userStore.userInfo?.id) {
     userExists.value = false;
+    userIsActive.value = false;
     return;
   }
 
@@ -823,9 +827,11 @@ onMounted(() => {
     .findUserById(userStore.userInfo.id, apolloClient)
     .then((u) => {
       userExists.value = Boolean(u);
+      userIsActive.value = u ? u.isActive !== false : false;
     })
     .catch(() => {
       userExists.value = false;
+      userIsActive.value = false;
     });
 });
 </script>

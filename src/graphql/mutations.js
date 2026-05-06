@@ -251,6 +251,37 @@ export const assignAdminRole = gql`
   }
 `;
 
+export const setUserActiveStatus = gql`
+  mutation setUserActiveStatus($targetId: String!, $isActive: Boolean!) {
+    setUserActiveStatus(targetId: $targetId, isActive: $isActive) {
+      ... on Admin {
+        id
+        role
+        isActive
+        deactivatedAt
+      }
+      ... on Teacher {
+        id
+        role
+        isActive
+        deactivatedAt
+      }
+      ... on Student {
+        id
+        role
+        isActive
+        deactivatedAt
+      }
+      ... on Parent {
+        id
+        role
+        isActive
+        deactivatedAt
+      }
+    }
+  }
+`;
+
 export const updateAdminProfile = gql`
   mutation UpdateAdminProfile($input: UpdateProfileInput!) {
     updateAdminProfile(input: $input) {

@@ -197,6 +197,8 @@ export const getAllAdminsQuery = gql`
       image
       dateOfBirth
       aboutMe
+      isActive
+      deactivatedAt
     }
   }
 `;
@@ -217,6 +219,8 @@ export const getAllTeachers = gql`
       phone
       dateOfBirth
       aboutMe
+      isActive
+      deactivatedAt
       subjects {
         id
         name
@@ -242,6 +246,8 @@ export const getAllStudents = gql`
       dateOfBirth
       image
       sex
+      isActive
+      deactivatedAt
       parent {
         name
         surname
@@ -281,6 +287,8 @@ export const getAllParents = gql`
       phone
       image
       aboutMe
+      isActive
+      deactivatedAt
       students {
         id
         username
@@ -1072,6 +1080,8 @@ export const getUserById = gql`
         image
         dateOfBirth
         adminRole: role
+        isActive
+        deactivatedAt
       }
       ... on Student {
         id
@@ -1085,6 +1095,8 @@ export const getUserById = gql`
         institutionalEmail
         image
         studentRole: role
+        isActive
+        deactivatedAt
       }
       ... on Parent {
         id
@@ -1094,6 +1106,8 @@ export const getUserById = gql`
         email
         image
         parentRole: role
+        isActive
+        deactivatedAt
         students {
           id
           name
@@ -1110,6 +1124,8 @@ export const getUserById = gql`
         institutionalEmail
         image
         teacherRole: role
+        isActive
+        deactivatedAt
       }
     }
   }
@@ -1173,6 +1189,8 @@ export const getAllAdminUsers = gql`
         dateOfBirth
         name
         surname
+        isActive
+        deactivatedAt
       }
       teachers {
         id
@@ -1183,6 +1201,8 @@ export const getAllAdminUsers = gql`
         surname
         email
         role
+        isActive
+        deactivatedAt
       }
     }
   }
