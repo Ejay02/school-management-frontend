@@ -164,7 +164,7 @@
       <!-- bottom -->
       <div class="w-full h-[500px]">
         <router-link to="/settings/billing" class="block h-full">
-          <FinanceCard :overview="overview?.financeOverview" />
+          <FinanceCard :overview="overview?.financeOverview" :disableQuery="true" />
         </router-link>
       </div>
     </div>

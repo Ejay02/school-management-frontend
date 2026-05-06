@@ -167,7 +167,9 @@ const routes = [
         path: "/subjects",
         name: "Subjects",
         component: Subjects,
-        meta: { role: ["admin", "super_admin", "teacher", "student", "parent"] },
+        meta: {
+          role: ["admin", "super_admin", "teacher", "student", "parent"],
+        },
       },
       {
         path: "/classes",
@@ -179,7 +181,9 @@ const routes = [
         path: "/lessons",
         name: "Lessons",
         component: Lessons,
-        meta: { role: ["admin", "super_admin", "teacher", "student", "parent"] },
+        meta: {
+          role: ["admin", "super_admin", "teacher", "student", "parent"],
+        },
       },
 
       {
@@ -234,7 +238,9 @@ const routes = [
         path: "/assignments",
         name: "Assignments",
         component: Assignments,
-        meta: { role: ["admin", "super_admin", "teacher", "student", "parent"] },
+        meta: {
+          role: ["admin", "super_admin", "teacher", "student", "parent"],
+        },
       },
       {
         path: "/assignment/:id",
@@ -261,20 +267,26 @@ const routes = [
         path: "/results",
         name: "Results",
         component: Results,
-        meta: { role: ["admin", "super_admin", "teacher", "student", "parent"] },
+        meta: {
+          role: ["admin", "super_admin", "teacher", "student", "parent"],
+        },
       },
 
       {
         path: "/events",
         name: "Events",
         component: Events,
-        meta: { role: ["admin", "super_admin", "teacher", "student", "parent"] },
+        meta: {
+          role: ["admin", "super_admin", "teacher", "student", "parent"],
+        },
       },
       {
         path: "/event/:id",
         name: "EventView",
         component: EventView,
-        meta: { role: ["admin", "super_admin", "teacher", "student", "parent"] },
+        meta: {
+          role: ["admin", "super_admin", "teacher", "student", "parent"],
+        },
       },
       {
         path: "/events/edit/:id",
@@ -286,13 +298,17 @@ const routes = [
         path: "/messages",
         name: "Messages",
         component: Messages,
-        meta: { role: ["admin", "super_admin", "teacher", "student", "parent"] },
+        meta: {
+          role: ["admin", "super_admin", "teacher", "student", "parent"],
+        },
       },
       {
         path: "/announcements",
         name: "Announcements",
         component: Announcements,
-        meta: { role: ["admin", "super_admin", "teacher", "student", "parent"] },
+        meta: {
+          role: ["admin", "super_admin", "teacher", "student", "parent"],
+        },
       },
       {
         path: "/announcement/:id",
@@ -321,13 +337,17 @@ const routes = [
             path: "profile",
             name: "profile",
             component: ProfileSetting,
-            meta: { role: ["admin", "super_admin", "teacher", "student", "parent"] },
+            meta: {
+              role: ["admin", "super_admin", "teacher", "student", "parent"],
+            },
           },
           {
             path: "notifications",
             name: "notifications",
             component: NotificationSetting,
-            meta: { role: ["admin", "super_admin", "teacher", "student", "parent"] },
+            meta: {
+              role: ["admin", "super_admin", "teacher", "student", "parent"],
+            },
           },
           {
             path: "billing",
@@ -339,7 +359,7 @@ const routes = [
             path: "team",
             name: "team",
             component: TeamSetting,
-            meta: { role: ["admin", "super_admin", "teacher"] },
+            meta: { role: ["admin", "super_admin"] },
           },
           {
             path: "school",
@@ -351,7 +371,9 @@ const routes = [
             path: "integrations",
             name: "integrations",
             component: IntegrationSetting,
-            meta: { role: ["admin", "super_admin", "teacher", "student", "parent"] },
+            meta: {
+              role: ["admin", "super_admin", "teacher", "student", "parent"],
+            },
           },
         ],
       },

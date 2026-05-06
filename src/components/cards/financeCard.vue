@@ -130,9 +130,13 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  disableQuery: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const shouldQuery = computed(() => !props.overview);
+const shouldQuery = computed(() => !props.disableQuery && !props.overview);
 const { result, loading } = useQuery(getFinanceOverview, null, {
   enabled: shouldQuery,
 });
@@ -142,6 +146,7 @@ const effectiveOverview = computed(() => {
 });
 
 const isLoading = computed(() => {
+  if (props.disableQuery) return false;
   return props.overview ? false : loading.value;
 });
 
