@@ -29,7 +29,7 @@ import Results from "../components/results/results.vue";
 import BillingSetting from "../components/settingsComponents/billingSetting.vue";
 import IntegrationSetting from "../components/settingsComponents/integrationSetting.vue";
 import NotificationSetting from "../components/settingsComponents/notificationSetting.vue";
-import ProfileSetting from "../components/settingsComponents/profileSetting.vue";
+import ProfileSetting from "../components/settingscomponents/profileSetting.vue";
 import SchoolSetting from "../components/settingsComponents/schoolSetting.vue";
 import TeamSetting from "../components/settingsComponents/teamSetting.vue";
 import Students from "../components/students/students.vue";
