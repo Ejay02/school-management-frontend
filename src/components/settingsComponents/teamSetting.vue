@@ -181,6 +181,7 @@
             class="cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           >
             <option value="">All roles</option>
+            <option value="ADMIN">Admins</option>
             <option value="TEACHER">Teachers</option>
             <option value="PARENT">Parents</option>
           </select>
@@ -195,6 +196,64 @@
             <option value="REVOKED">Revoked</option>
             <option value="EXPIRED">Expired</option>
           </select>
+        </div>
+      </div>
+
+      <div class="mb-6 rounded-lg border border-indigo-100 bg-white p-4 shadow-sm">
+        <div
+          class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
+        >
+          <div>
+            <p class="text-sm font-medium text-gray-800">Send an invitation</p>
+            <p class="mt-1 text-sm text-gray-500">
+              Invite a new user without switching tabs.
+            </p>
+          </div>
+
+          <form class="flex flex-col gap-3 sm:flex-row" @submit.prevent="sendInvitation">
+            <div class="sm:w-48">
+              <label class="sr-only" for="invite-name">Name</label>
+              <input
+                id="invite-name"
+                v-model="inviteName"
+                type="text"
+                placeholder="Name"
+                class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div class="sm:w-64">
+              <label class="sr-only" for="invite-email">Email</label>
+              <input
+                id="invite-email"
+                v-model="inviteEmail"
+                type="email"
+                placeholder="Email"
+                class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div class="sm:w-40">
+              <label class="sr-only" for="invite-role">Role</label>
+              <select
+                id="invite-role"
+                v-model="inviteRole"
+                class="w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              >
+                <option value="ADMIN">Admin</option>
+                <option value="TEACHER">Teacher</option>
+                <option value="PARENT">Parent</option>
+              </select>
+            </div>
+
+            <button
+              type="submit"
+              class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+              :disabled="inviteSubmitting || !isInviteFormValid"
+            >
+              {{ inviteSubmitting ? "Sending..." : "Send invite" }}
+            </button>
+          </form>
         </div>
       </div>
 
@@ -286,7 +345,7 @@
         v-else-if="!invitations.length"
         icon="fa-regular fa-envelope"
         heading="No invitations found"
-        description="Send a teacher or parent invite to see it here."
+        description="Send an invite to see it here."
       />
 
       <div v-else class="bg-gray-200 rounded-lg shadow">
@@ -386,6 +445,7 @@ import { apolloClient } from "../../../apollo-client";
 import { useRoute } from "vue-router";
 import {
   assignAdminRole,
+  createInvitationMutation,
   resendInvitationMutation,
   revokeInvitationMutation,
   setUserActiveStatus,
@@ -447,6 +507,54 @@ const invitationSummary = ref({
   activationLabel: "0 of 0 invited users activated",
   roleBreakdown: [],
 });
+
+const inviteName = ref("");
+const inviteEmail = ref("");
+const inviteRole = ref("TEACHER");
+const inviteSubmitting = ref(false);
+
+const isInviteFormValid = computed(() => {
+  return (
+    inviteName.value.trim().length > 0 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteEmail.value.trim()) &&
+    Boolean(inviteRole.value)
+  );
+});
+
+const sendInvitation = async () => {
+  if (!isInviteFormValid.value || inviteSubmitting.value) return;
+
+  inviteSubmitting.value = true;
+  try {
+    await apolloClient.mutate({
+      mutation: createInvitationMutation,
+      variables: {
+        input: {
+          name: inviteName.value.trim(),
+          email: inviteEmail.value.trim(),
+          role: inviteRole.value,
+        },
+      },
+    });
+
+    notificationStore.addNotification({
+      type: "success",
+      message: `${formatRole(inviteRole.value)} invite sent successfully`,
+    });
+
+    inviteName.value = "";
+    inviteEmail.value = "";
+    invitationCurrentPage.value = 1;
+    await refreshInvitationData();
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: extractGraphQLErrorMessage(error, "Unable to send invitation"),
+    });
+  } finally {
+    inviteSubmitting.value = false;
+  }
+};
 
 const handlePageChange = (newPage) => {
   currentPage.value = newPage;
