@@ -199,62 +199,65 @@
         </div>
       </div>
 
-      <div class="mb-6 rounded-lg border border-indigo-100 bg-white p-4 shadow-sm">
-        <div
-          class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
+      <div
+        class="mb-6 rounded-lg border border-indigo-100 bg-white p-4 shadow-sm"
+      >
+        <div>
+          <p class="text-sm font-medium text-gray-800">Send an invitation</p>
+          <p class="mt-1 text-sm text-gray-500">
+            Invite a new user without switching tabs.
+          </p>
+        </div>
+
+        <form
+          class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+          @submit.prevent="sendInvitation"
         >
-          <div>
-            <p class="text-sm font-medium text-gray-800">Send an invitation</p>
-            <p class="mt-1 text-sm text-gray-500">
-              Invite a new user without switching tabs.
-            </p>
+          <div class="lg:col-span-1">
+            <label class="sr-only" for="invite-name">Name</label>
+            <input
+              id="invite-name"
+              v-model="inviteName"
+              type="text"
+              placeholder="Name"
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
           </div>
 
-          <form class="flex flex-col gap-3 sm:flex-row" @submit.prevent="sendInvitation">
-            <div class="sm:w-48">
-              <label class="sr-only" for="invite-name">Name</label>
-              <input
-                id="invite-name"
-                v-model="inviteName"
-                type="text"
-                placeholder="Name"
-                class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              />
-            </div>
+          <div class="lg:col-span-1">
+            <label class="sr-only" for="invite-email">Email</label>
+            <input
+              id="invite-email"
+              v-model="inviteEmail"
+              type="email"
+              placeholder="Email"
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
 
-            <div class="sm:w-64">
-              <label class="sr-only" for="invite-email">Email</label>
-              <input
-                id="invite-email"
-                v-model="inviteEmail"
-                type="email"
-                placeholder="Email"
-                class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              />
-            </div>
+          <div class="lg:col-span-1">
+            <label class="sr-only" for="invite-role">Role</label>
+            <select
+              id="invite-role"
+              v-model="inviteRole"
+              class="w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            >
+              <option value="ADMIN">Admin</option>
+              <option value="TEACHER">Teacher</option>
+              <option value="PARENT">Parent</option>
+            </select>
+          </div>
 
-            <div class="sm:w-40">
-              <label class="sr-only" for="invite-role">Role</label>
-              <select
-                id="invite-role"
-                v-model="inviteRole"
-                class="w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              >
-                <option value="ADMIN">Admin</option>
-                <option value="TEACHER">Teacher</option>
-                <option value="PARENT">Parent</option>
-              </select>
-            </div>
-
+          <div class="lg:col-span-1">
             <button
               type="submit"
-              class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+              class="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
               :disabled="inviteSubmitting || !isInviteFormValid"
             >
               {{ inviteSubmitting ? "Sending..." : "Send invite" }}
             </button>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
 
       <div class="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
