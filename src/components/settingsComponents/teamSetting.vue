@@ -1,10 +1,14 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">Team Management</h1>
-      <div class="inline-flex rounded-lg border border-gray-200 bg-white p-1">
+    <div
+      class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <h1 class="text-2xl font-bold leading-tight">Team Management</h1>
+      <div
+        class="grid w-full max-w-sm grid-cols-2 rounded-lg border border-gray-200 bg-white p-1 sm:w-auto sm:max-w-none"
+      >
         <button
-          class="px-4 py-2 text-sm font-medium rounded-md transition"
+          class="w-full rounded-md px-4 py-2 text-center text-sm font-medium transition"
           :class="
             activeTab === 'users'
               ? 'bg-indigo-600 text-white'
@@ -15,7 +19,7 @@
           Users
         </button>
         <button
-          class="px-4 py-2 text-sm font-medium rounded-md transition"
+          class="w-full rounded-md px-4 py-2 text-center text-sm font-medium transition"
           :class="
             activeTab === 'invitations'
               ? 'bg-indigo-600 text-white'
@@ -47,9 +51,9 @@
               <div
                 v-for="user in users"
                 :key="user.id"
-                class="bg-white flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                class="bg-white flex flex-col gap-4 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer sm:flex-row sm:items-center sm:justify-between"
               >
-                <div class="flex items-center space-x-4">
+                <div class="flex min-w-0 items-center space-x-4">
                   <div class="relative">
                     <img
                       v-if="user.avatar"
@@ -66,11 +70,13 @@
                     </div>
                   </div>
 
-                  <div>
-                    <h3 class="font-medium text-gray-600 text-sm">
+                  <div class="min-w-0">
+                    <h3 class="truncate font-medium text-gray-600 text-sm">
                       {{ user.name }}
                     </h3>
-                    <p class="text-xs text-gray-500">{{ user.email }}</p>
+                    <p class="truncate text-xs text-gray-500">
+                      {{ user.email }}
+                    </p>
                     <div class="mt-1">
                       <span
                         class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
@@ -82,14 +88,16 @@
                   </div>
                 </div>
 
-                <div class="flex items-center space-x-4 justify-between">
-                  <div>
+                <div
+                  class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-4 sm:justify-between"
+                >
+                  <div class="w-full sm:w-auto">
                     <div v-if="user.id !== userStore.userInfo.id">
                       <select
                         v-if="role === 'super_admin'"
                         v-model="user.role"
                         @change="updateUserRole(user.id, user.role)"
-                        class="cursor-pointer block w-32 rounded-md bg-white px-2 py-1 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
+                        class="cursor-pointer block w-full rounded-md bg-white px-2 py-1 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:w-32"
                       >
                         <option value="teacher" selected>Teacher</option>
                         <option value="admin" class="text-gray-500">
@@ -98,14 +106,14 @@
                       </select>
                       <span
                         v-else
-                        class="block w-32 rounded-md bg-gray-100 px-2 py-1 text-sm text-purple-600 italic border border-gray-300 cursor-not-allowed"
+                        class="block w-full rounded-md bg-gray-100 px-2 py-1 text-sm text-purple-600 italic border border-gray-300 cursor-not-allowed sm:w-32"
                       >
                         {{ user.role }}
                       </span>
                     </div>
                     <span
                       v-else
-                      class="block w-32 rounded-md bg-gray-100 px-2 py-1 text-sm text-purple-600 italic border border-gray-300 cursor-not-allowed"
+                      class="block w-full rounded-md bg-gray-100 px-2 py-1 text-sm text-purple-600 italic border border-gray-300 cursor-not-allowed sm:w-32"
                     >
                       That's you
                     </span>
@@ -178,7 +186,7 @@
 
           <select
             v-model="invitationRoleFilter"
-            class="cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            class="w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-auto"
           >
             <option value="">All roles</option>
             <option value="ADMIN">Admins</option>
@@ -188,7 +196,7 @@
 
           <select
             v-model="invitationStatusFilter"
-            class="cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            class="w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-auto"
           >
             <option value="">All statuses</option>
             <option value="PENDING">Pending</option>
