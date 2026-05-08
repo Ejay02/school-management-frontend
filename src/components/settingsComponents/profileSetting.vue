@@ -1012,7 +1012,7 @@ onMounted(() => {
   margin-top: auto;
 }
 
-.id-footer {
+.id-footer { 
   height: 32px;
   padding: 0 14px;
   background: #f1f0ff;
