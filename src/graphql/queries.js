@@ -356,7 +356,13 @@ export const getAdminDashboardOverview = gql`
           label
           complete
           summary
-          meta
+          meta {
+            count
+            total
+            accepted
+            pending
+            expired
+          }
         }
       }
       invitationSummary {

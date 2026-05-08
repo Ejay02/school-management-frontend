@@ -4,7 +4,7 @@
     <LeftNav />
 
     <!-- right -->
-    <div class="w-full">
+    <div class="min-w-0 flex-1">
       <RightNav />
     </div>
   </div>
