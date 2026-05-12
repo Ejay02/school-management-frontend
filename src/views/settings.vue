@@ -44,9 +44,13 @@
             </router-link>
             <router-link
               v-if="role === 'super_admin' || role === 'admin' || role === 'teacher' "
-              to="/settings/team"
+              :to="role === 'teacher' ? '/teachers' : '/settings/team'"
               class="hover:text-eduPurple"
-              :class="{ 'text-indigo-600': $route.name === 'team' }"
+              :class="{
+                'text-indigo-600':
+                  (role === 'teacher' && $route.name === 'Teachers') ||
+                  (role !== 'teacher' && $route.name === 'team'),
+              }"
             >
               Team
             </router-link>
@@ -77,6 +81,7 @@
               <option value="/settings/profile">Account</option>
               <option value="/settings/notifications">Notifications</option>
               <option v-if="role === 'super_admin' || role === 'admin' || role === 'parent'" value="/settings/billing">Billing</option>
+              <option v-if="role === 'teacher'" value="/teachers">Team</option>
               <option v-if="role === 'super_admin' || role === 'admin'" value="/settings/team">Team</option>
               <option v-if="role === 'super_admin' || role === 'admin'" value="/settings/school">School</option>
               <option value="/settings/integrations">Integrations</option>
