@@ -18,11 +18,11 @@
         <div class="border-b border-gray-200">
           <!-- Desktop Navigation -->
           <div
-            class="hidden sm:flex bg-eduSkyLight justify-between text-gray-600 text-md font-semibold p-2"
+            class="hidden sm:flex bg-eduSkyLight justify-between text-gray-600 text-md font-semibold px-4 py-2"
           >
             <router-link
               to="/settings/profile"
-              class="hover:text-eduPurple pl-4"
+              class="hover:text-eduPurple"
               :class="{ 'text-indigo-600': $route.name === 'profile' }"
             >
               Account
@@ -69,7 +69,7 @@
             <router-link
               v-if="role === 'super_admin' || role === 'admin'"
               to="/settings/integrations"
-              class="hover:text-eduPurple pr-4"
+              class="hover:text-eduPurple"
               :class="{ 'text-indigo-600': $route.name === 'integrations' }"
             >
               Integrations
