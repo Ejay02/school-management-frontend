@@ -253,10 +253,7 @@
                         </div>
                         <div class="min-w-0">
                           <div class="id-school-name">
-                            {{
-                              userStore.schoolInfo.schoolName ||
-                              "EduHub Academy"
-                            }}
+                            {{ userStore.schoolInfo.schoolName || "My School" }}
                           </div>
                           <div class="id-subtitle">Official ID Card</div>
                         </div>
@@ -298,7 +295,7 @@
 
                     <div class="id-sep"></div>
                     <div class="id-footer justify-center">
-                      {{ userStore.schoolInfo.schoolName || "EduHub Academy" }}
+                      {{ userStore.schoolInfo.schoolName || "My School" }}
                       ·
                       {{ cardYear }}
                     </div>
@@ -315,9 +312,8 @@
                       <div class="grid grid-cols-2 gap-4">
                         <div class="id-disclaimer">
                           This card is property of
-                          {{
-                            userStore.schoolInfo.schoolName || "EduHub Academy"
-                          }}. If found, please return to the issuing office.
+                          {{ userStore.schoolInfo.schoolName || "My School" }}.
+                          If found, please return to the issuing office.
                         </div>
 
                         <div class="id-qr-box">
@@ -354,7 +350,7 @@
 
                     <div class="id-sep"></div>
                     <div class="id-footer justify-center">
-                      {{ userStore.schoolInfo.schoolName || "EduHub Academy" }}
+                      {{ userStore.schoolInfo.schoolName || "My School" }}
                       · Official Identification · {{ cardYear }}
                     </div>
                   </div>
@@ -466,7 +462,7 @@ const copyRoleId = async () => {
 const qrValue = computed(() => {
   const userId = String(userStore.userInfo?.id || "").trim();
   if (!userId) return "";
-  return `eduhub:v1:user:${userId}`;
+  return `school:v1:user:${userId}`;
 });
 
 const qrEncodedValue = computed(() => {
@@ -510,7 +506,7 @@ const cardStatusLabel = computed(() => {
 });
 
 const downloadIdCard = () => {
-  const schoolName = userStore.schoolInfo.schoolName || "EduHub Portal";
+  const schoolName = userStore.schoolInfo.schoolName || "My School";
   const schoolLogo = userStore.schoolInfo.schoolLogo || "";
   const avatar = profilePreview.value || userStore.userInfo?.image || "";
   const fullName = `${formData.name || ""} ${formData.surname || ""}`.trim();
@@ -583,7 +579,7 @@ const downloadIdCard = () => {
               <div class="brand">
                 <div class="logo">${schoolLogo ? `<img src="${schoolLogo}" alt="logo" />` : ""}</div>
                 <div style="min-width:0">
-                  <div class="school">${escapeHtml(schoolName || "EduHub Academy")}</div>
+                  <div class="school">${escapeHtml(schoolName || "My School")}</div>
                   <div class="sub">Official ID Card</div>
                 </div>
               </div>
@@ -601,7 +597,7 @@ const downloadIdCard = () => {
             </div>
 
             <div class="sep"></div>
-            <div class="footer">${escapeHtml(schoolName || "EduHub Academy")} · ${escapeHtml(year)}</div>
+            <div class="footer">${escapeHtml(schoolName || "My School")} · ${escapeHtml(year)}</div>
           </div>
 
           <div class="card">
@@ -612,7 +608,7 @@ const downloadIdCard = () => {
             <div class="backBody">
               <div style="display:flex;gap:18px;align-items:flex-start">
                 <div style="flex:1;min-width:0">
-                  <div class="note">This card is property of ${escapeHtml(schoolName || "EduHub Academy")}. If found, please return to the issuing office.</div>
+                  <div class="note">This card is property of ${escapeHtml(schoolName || "My School")}. If found, please return to the issuing office.</div>
                 </div>
                 <div class="qrBox">${qr ? `<img src="${qr}" alt="qr" />` : ""}</div>
               </div>
@@ -636,7 +632,7 @@ const downloadIdCard = () => {
             </div>
 
             <div class="sep"></div>
-            <div class="footer">${escapeHtml(schoolName || "EduHub Academy")} · Official Identification · ${escapeHtml(year)}</div>
+            <div class="footer">${escapeHtml(schoolName || "My School")} · Official Identification · ${escapeHtml(year)}</div>
           </div>
         </div>
 
@@ -1012,7 +1008,7 @@ onMounted(() => {
   margin-top: auto;
 }
 
-.id-footer { 
+.id-footer {
   height: 32px;
   padding: 0 14px;
   background: #f1f0ff;

@@ -9,7 +9,7 @@
         Accept Invitation
       </h1>
       <p class="text-center text-gray-500 mb-6">
-        Complete your account setup to join Eduhub.
+        Complete your account setup to join your school.
       </p>
 
       <div

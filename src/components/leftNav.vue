@@ -24,7 +24,7 @@
       </svg>
 
       <span class="hidden lg:block text-sm font-bold">{{
-        schoolInfo.schoolName || "EduHub Portal"
+        schoolInfo.schoolName || "My School"
       }}</span>
     </router-link>
     <menu class="m-2 text-sm">

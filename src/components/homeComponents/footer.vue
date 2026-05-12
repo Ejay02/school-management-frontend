@@ -85,7 +85,7 @@
       </div>
       <div class="mt-4 border-t border-gray-700 pt-2 text-center">
         <p>
-          Copyright &copy; {{ currentYear }} Eduhub Portal | All rights
+          Copyright &copy; {{ currentYear }} {{ schoolName }} | All rights
           reserved.
         </p>
       </div>
@@ -94,9 +94,20 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted } from "vue";
+import { useUserStore } from "../../store/userStore";
+import { storeToRefs } from "pinia";
 
 const currentYear = computed(() => new Date().getFullYear());
+
+const userStore = useUserStore();
+const { schoolInfo } = storeToRefs(userStore);
+
+const schoolName = computed(() => schoolInfo.value?.schoolName || "My School");
+
+onMounted(async () => {
+  await userStore.fetchSchoolInfo().catch(() => null);
+});
 </script>
 
 <style scoped></style>

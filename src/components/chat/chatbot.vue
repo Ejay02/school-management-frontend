@@ -14,7 +14,7 @@
       <div
         class="bg-eduPurple text-white p-4 rounded-t-lg flex justify-between items-center"
       >
-        <h3 class="text-lg font-semibold">Eduhub Assistant</h3>
+        <h3 class="text-lg font-semibold">School Assistant</h3>
       </div>
 
       <div
@@ -61,7 +61,7 @@ import { schoolProfile } from "../../utils/aiResponse";
 
 const isChatOpen = ref(false);
 const messages = ref([
-  { type: "bot", text: "Hi! I'm your Eduhub assistant. \n How can I help?" },
+  { type: "bot", text: "Hi! I'm your school assistant. \n How can I help?" },
 ]);
 const newMessage = ref("");
 const chatContainer = ref(null);

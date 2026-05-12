@@ -910,8 +910,8 @@ const submitScannedStudentId = async (studentIdValue) => {
   const raw = String(studentIdValue || "").trim();
   if (!raw) return;
 
-  const studentId = raw.startsWith("eduhub:v1:user:")
-    ? raw.replace("eduhub:v1:user:", "").trim()
+  const studentId = raw.startsWith("school:v1:user:")
+    ? raw.replace("school:v1:user:", "").trim()
     : raw;
 
   if (!studentId) return;

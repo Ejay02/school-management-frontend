@@ -119,7 +119,7 @@ export const useUserStore = defineStore("user", () => {
   };
 
   const applySchoolBranding = (nextSchoolInfo = schoolInfo.value) => {
-    const title = nextSchoolInfo?.schoolName?.trim() || "EduHub Portal";
+    const title = nextSchoolInfo?.schoolName?.trim() || "My School";
     document.title = title;
 
     const href = nextSchoolInfo?.schoolLogo?.trim();

@@ -1,5 +1,5 @@
 export const schoolProfile = {
-  name: "Eduhub Portal",
+  name: "My School",
   about: {
     founded: 2025,
     type: "Private",
@@ -33,7 +33,7 @@ export const schoolProfile = {
     },
     {
       keywords: ["number of students", "student population"],
-      response: "Eduhub has approximately 360 students.",
+      response: "The school has approximately 360 students.",
     },
   ],
 
@@ -55,7 +55,7 @@ export const schoolProfile = {
 
 export function generateSchoolPrompt(userMessage) {
   return `
-    You are an AI assistant for Eduhub Portal. 
+    You are an AI assistant for the school portal. 
     Provide accurate, concise information based on the school's profile.
     If the query is not clearly answerable, suggest contacting the school office.
     
@@ -66,7 +66,7 @@ export function generateSchoolPrompt(userMessage) {
     - Use **bold** for emphasis.
     
     **School Context:**
-    - Name: Eduhub Portal
+    - Name: My School
     - Location: 123 School Street
     - Grades: Primary 1-6, Junior Secondary 1 to Senior Secondary 3
     - Total Students: 360
