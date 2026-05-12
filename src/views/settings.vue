@@ -35,7 +35,9 @@
               Notifications
             </router-link>
             <router-link
-             v-if="role === 'super_admin' || role === 'admin' || role === 'parent'"
+              v-if="
+                role === 'super_admin' || role === 'admin' || role === 'parent'
+              "
               to="/settings/billing"
               class="hover:text-eduPurple"
               :class="{ 'text-indigo-600': $route.name === 'billing' }"
@@ -43,7 +45,9 @@
               Billing
             </router-link>
             <router-link
-              v-if="role === 'super_admin' || role === 'admin' || role === 'teacher' "
+              v-if="
+                role === 'super_admin' || role === 'admin' || role === 'teacher'
+              "
               :to="role === 'teacher' ? '/teachers' : '/settings/team'"
               class="hover:text-eduPurple"
               :class="{
@@ -63,6 +67,7 @@
               School
             </router-link>
             <router-link
+              v-if="role === 'super_admin' || role === 'admin'"
               to="/settings/integrations"
               class="hover:text-eduPurple pr-4"
               :class="{ 'text-indigo-600': $route.name === 'integrations' }"
@@ -70,21 +75,45 @@
               Integrations
             </router-link>
           </div>
-          
+
           <!-- Mobile Navigation -->
           <div class="sm:hidden bg-eduSkyLight p-2">
-            <select 
-              v-model="currentRoute" 
+            <select
+              v-model="currentRoute"
               @change="navigateTo"
               class="w-full p-2 bg-white border border-gray-300 rounded-md text-gray-600 font-semibold focus:outline-none focus:ring-2 focus:ring-eduPurple focus:border-transparent"
             >
               <option value="/settings/profile">Account</option>
               <option value="/settings/notifications">Notifications</option>
-              <option v-if="role === 'super_admin' || role === 'admin' || role === 'parent'" value="/settings/billing">Billing</option>
+              <option
+                v-if="
+                  role === 'super_admin' ||
+                  role === 'admin' ||
+                  role === 'parent'
+                "
+                value="/settings/billing"
+              >
+                Billing
+              </option>
               <option v-if="role === 'teacher'" value="/teachers">Team</option>
-              <option v-if="role === 'super_admin' || role === 'admin'" value="/settings/team">Team</option>
-              <option v-if="role === 'super_admin' || role === 'admin'" value="/settings/school">School</option>
-              <option value="/settings/integrations">Integrations</option>
+              <option
+                v-if="role === 'super_admin' || role === 'admin'"
+                value="/settings/team"
+              >
+                Team
+              </option>
+              <option
+                v-if="role === 'super_admin' || role === 'admin'"
+                value="/settings/school"
+              >
+                School
+              </option>
+              <option
+                v-if="role === 'super_admin' || role === 'admin'"
+                value="/settings/integrations"
+              >
+                Integrations
+              </option>
             </select>
           </div>
         </div>
@@ -97,8 +126,8 @@
 
 <script setup>
 import { useUserStore } from "../store/userStore";
-import { ref, onMounted, watch } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { ref, onMounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 
 const userStore = useUserStore();
 const role = userStore.currentRole.toLowerCase();
@@ -106,7 +135,7 @@ const router = useRouter();
 const route = useRoute();
 
 // For mobile dropdown navigation
-const currentRoute = ref('');
+const currentRoute = ref("");
 
 // Set initial value based on current route
 onMounted(() => {
@@ -114,9 +143,12 @@ onMounted(() => {
 });
 
 // Update dropdown when route changes
-watch(() => route.path, (newPath) => {
-  currentRoute.value = newPath;
-});
+watch(
+  () => route.path,
+  (newPath) => {
+    currentRoute.value = newPath;
+  },
+);
 
 // Navigate when dropdown changes
 const navigateTo = () => {

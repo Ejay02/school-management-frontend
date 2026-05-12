@@ -372,7 +372,7 @@ const routes = [
             name: "integrations",
             component: IntegrationSetting,
             meta: {
-              role: ["admin", "super_admin", "teacher", "student", "parent"],
+              role: ["admin", "super_admin"],
             },
           },
         ],
