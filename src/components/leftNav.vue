@@ -91,6 +91,10 @@ const isLinkActive = (href) => {
 
   // Special case for dashboard paths
   if (currentPath[0] === "dashboard") {
+    if (currentPath.length === 2) {
+      return false;
+    }
+
     // For paths like /dashboard/lesson/new, we need to check the second segment
     if (currentPath.length > 1) {
       const dashboardSubpath = currentPath[1];
