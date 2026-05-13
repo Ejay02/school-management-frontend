@@ -72,6 +72,18 @@ const socket = io(SOCKET_URL, {
 
 socket.on("connect", () => {
   console.log("Socket connected with id:", socket.id);
+  try {
+    const userStore = useUserStore();
+    const userId = userStore.userInfo?.id;
+    const role = userStore.userInfo?.role;
+    if (userId && role) {
+      socket.emit("joinRooms", {
+        role,
+        classId: userStore.userInfo?.classId,
+        userId,
+      });
+    }
+  } catch {}
 });
 
 socket.on("disconnect", (reason) => {
@@ -116,6 +128,13 @@ socket.on("error", (payload) => {
     clearStoredAuth();
     socket.disconnect();
   }
+});
+
+socket.on("forceLogout", () => {
+  allowReconnect = false;
+  clearStoredAuth();
+  socket.disconnect();
+  window.location.href = "/login";
 });
 
 const connectSocket = () => {

@@ -20,6 +20,7 @@
   <DeleteModal v-if="modalStore.deleteModal" />
   <AddModal v-if="modalStore.addModal" />
   <CancelModal v-if="modalStore.cancelModal" />
+  <SuspendModal v-if="modalStore.suspendModal" />
    <CreateFeeStructureModal v-if="modalStore.createFeeStructureModal" />
    <ViewFeeDetailsModal v-if="modalStore.viewFeeDetailsModal" />
   <NotificationContainer />
@@ -33,6 +34,7 @@ import EditModal from "./components/modals/editModal.vue";
 import NotificationContainer from "./components/notificationContainer.vue";
 import { useModalStore } from "./store/useModalStore";
 import CancelModal from "./components/modals/cancelModal.vue";
+import SuspendModal from "./components/modals/suspendModal.vue";
 import CreateFeeStructureModal from "./components/modals/CreateFeeStructureModal.vue";
 import ViewFeeDetailsModal from "./components/modals/viewFeeDetailsModal.vue";
 import { useUserStore } from "./store/userStore";

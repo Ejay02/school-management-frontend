@@ -252,29 +252,33 @@ export const assignAdminRole = gql`
 `;
 
 export const setUserActiveStatus = gql`
-  mutation setUserActiveStatus($targetId: String!, $isActive: Boolean!) {
-    setUserActiveStatus(targetId: $targetId, isActive: $isActive) {
+  mutation setUserActiveStatus(
+    $targetId: String!
+    $isActive: Boolean!
+    $reason: String
+  ) {
+    setUserActiveStatus(targetId: $targetId, isActive: $isActive, reason: $reason) {
       ... on Admin {
         id
-        role
+        adminRole: role
         isActive
         deactivatedAt
       }
       ... on Teacher {
         id
-        role
+        teacherRole: role
         isActive
         deactivatedAt
       }
       ... on Student {
         id
-        role
+        studentRole: role
         isActive
         deactivatedAt
       }
       ... on Parent {
         id
-        role
+        parentRole: role
         isActive
         deactivatedAt
       }

@@ -47,10 +47,15 @@ const errorLink = onError(({ graphQLErrors, operation }) => {
         // Clear user data
         userStore.clearUser();
 
+        const normalizedMessage = String(message || "").toLowerCase();
+        const displayMessage = normalizedMessage.includes("suspend")
+          ? "⚠️Account has been suspended, contact your admin for more info"
+          : "Session expired. Please log in again.";
+
         // Show notification
         notificationStore.addNotification({
           type: "error",
-          message: "Session expired. Please log in again.",
+          message: displayMessage,
         });
 
         // Redirect to login

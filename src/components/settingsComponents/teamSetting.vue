@@ -697,6 +697,16 @@ const canToggleUserStatus = (user) => {
 
 const toggleUserStatus = async (user) => {
   if (!canToggleUserStatus(user)) return;
+  if (user?.isActive) {
+    modalStore.suspendModal = true;
+    modalStore.modalId = user.id;
+    modalStore.modalTitle = user.name;
+    modalStore.modalMessage = `Are you sure you want to suspend "${user.name}"? They will be unable to log in until reactivated.`;
+    modalStore.confirmAction = "suspendUser";
+    modalStore.source = "teamSetting";
+    modalStore.data = user;
+    return;
+  }
   statusLoadingId.value = user.id;
   try {
     const nextIsActive = !Boolean(user.isActive);

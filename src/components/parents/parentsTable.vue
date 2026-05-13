@@ -178,6 +178,20 @@ const toggleActiveStatus = async (item) => {
   const currentRole = String(role || "").toLowerCase();
   if (currentRole !== "super_admin" && currentRole !== "admin") return;
 
+  if (item?.isActive !== false) {
+    modalStore.suspendModal = true;
+    modalStore.modalId = item.id;
+    modalStore.modalTitle = formatPersonName(item?.name, item?.surname);
+    modalStore.modalMessage = `Are you sure you want to suspend "${formatPersonName(
+      item?.name,
+      item?.surname,
+    )}"? They will be unable to log in until reactivated.`;
+    modalStore.confirmAction = "suspendUser";
+    modalStore.source = "parentsTable";
+    modalStore.data = item;
+    return;
+  }
+
   statusLoadingId.value = item.id;
   try {
     const nextIsActive = item.isActive === false;

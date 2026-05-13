@@ -25,6 +25,14 @@ export const formatAuthErrorMessage = (
   const rawMessage = extractGraphQLErrorMessage(error, fallbackMessage);
   const normalizedMessage = rawMessage.toLowerCase();
 
+  if (
+    normalizedMessage.includes("account is deactivated") ||
+    normalizedMessage.includes("account has been suspended") ||
+    normalizedMessage.includes("suspend")
+  ) {
+    return "⚠️Account has been suspended, contact your admin for more info";
+  }
+
   if (normalizedMessage.includes("invalid credentials")) {
     return "Incorrect username or password";
   }
