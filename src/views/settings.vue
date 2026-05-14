@@ -68,6 +68,14 @@
             </router-link>
             <router-link
               v-if="role === 'super_admin' || role === 'admin'"
+              to="/settings/activity-log"
+              class="hover:text-eduPurple"
+              :class="{ 'text-indigo-600': $route.name === 'activity-log' }"
+            >
+              Activity Log
+            </router-link>
+            <router-link
+              v-if="role === 'super_admin' || role === 'admin'"
               to="/settings/integrations"
               class="hover:text-eduPurple"
               :class="{ 'text-indigo-600': $route.name === 'integrations' }"
@@ -107,6 +115,12 @@
                 value="/settings/school"
               >
                 School
+              </option>
+              <option
+                v-if="role === 'super_admin' || role === 'admin'"
+                value="/settings/activity-log"
+              >
+                Activity Log
               </option>
               <option
                 v-if="role === 'super_admin' || role === 'admin'"

@@ -32,6 +32,7 @@ import NotificationSetting from "../components/settingsComponents/notificationSe
 import ProfileSetting from "../components/settingscomponents/profileSetting.vue";
 import SchoolSetting from "../components/settingsComponents/schoolSetting.vue";
 import TeamSetting from "../components/settingsComponents/teamSetting.vue";
+import AuditLogSetting from "../components/settingsComponents/auditLogSetting.vue";
 import Students from "../components/students/students.vue";
 import StudentView from "../components/students/studentView.vue";
 import Subjects from "../components/subjects/subjects.vue";
@@ -365,6 +366,12 @@ const routes = [
             path: "school",
             name: "school",
             component: SchoolSetting,
+            meta: { role: ["admin", "super_admin"] },
+          },
+          {
+            path: "activity-log",
+            name: "activity-log",
+            component: AuditLogSetting,
             meta: { role: ["admin", "super_admin"] },
           },
           {

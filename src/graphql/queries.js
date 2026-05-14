@@ -273,6 +273,38 @@ export const getAllStudents = gql`
   }
 `;
 
+export const securityLogsQuery = gql`
+  query SecurityLogs(
+    $params: PaginationInput
+    $action: String
+    $username: String
+    $ipAddress: String
+  ) {
+    securityLogs(
+      params: $params
+      action: $action
+      username: $username
+      ipAddress: $ipAddress
+    ) {
+      items {
+        id
+        action
+        username
+        ipAddress
+        timestamp
+        details
+      }
+      pageInfo {
+        page
+        limit
+        totalCount
+        totalPages
+        hasMore
+      }
+    }
+  }
+`;
+
 export const getAllParents = gql`
   query getAllParents($pagination: PaginationInput) {
     getAllParents(params: $pagination) {
