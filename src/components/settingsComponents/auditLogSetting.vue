@@ -90,7 +90,15 @@
               {{ formatAction(entry.action) }}
             </td>
             <td class="px-4 py-3 text-sm text-gray-700">
-              {{ formatActor(entry) }}
+              <div class="flex flex-col">
+                <span>{{ formatActorName(entry) }}</span>
+                <span
+                  v-if="formatActorEmail(entry)"
+                  class="text-xs text-gray-500"
+                >
+                  {{ formatActorEmail(entry) }}
+                </span>
+              </div>
             </td>
             <td class="px-4 py-3 text-sm text-gray-700">
               <div class="flex flex-col">
@@ -169,19 +177,34 @@ const actionKey = (value) =>
     .trim()
     .toUpperCase();
 
-const formatActor = (entry) => {
+const formatActorName = (entry) => {
   const key = actionKey(entry?.action);
   if (key === "FAILED_LOGIN" || key === "IP_BLOCKED") return "-";
-  return entry?.username || "-";
+
+  const actor = entry?.parsed?.performedBy;
+  if (!actor) return entry?.username || "-";
+
+  const fullName = [actor.name, actor.surname].filter(Boolean).join(" ").trim();
+  return fullName || actor.username || entry?.username || "-";
+};
+
+const formatActorEmail = (entry) => {
+  const key = actionKey(entry?.action);
+  if (key === "FAILED_LOGIN" || key === "IP_BLOCKED") return null;
+
+  const actor = entry?.parsed?.performedBy;
+  const email = actor?.email ? String(actor.email).trim() : "";
+  return email || null;
 };
 
 const formatTargetName = (entry) => {
   const key = actionKey(entry?.action);
+  if (key === "FAILED_LOGIN") return entry?.username || "-";
+  if (key === "IP_BLOCKED") return "-";
+
   const target = entry?.parsed?.target;
-  if (!target) {
-    if (key === "FAILED_LOGIN") return entry?.username || "-";
-    return "-";
-  }
+  if (!target) return "-";
+
   const fullName = [target.name, target.surname]
     .filter(Boolean)
     .join(" ")
