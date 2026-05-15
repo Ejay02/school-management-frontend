@@ -90,10 +90,18 @@
               {{ formatAction(entry.action) }}
             </td>
             <td class="px-4 py-3 text-sm text-gray-700">
-              {{ entry.username || "-" }}
+              {{ formatActor(entry) }}
             </td>
             <td class="px-4 py-3 text-sm text-gray-700">
-              {{ entry.parsed?.targetId || "-" }}
+              <div class="flex flex-col">
+                <span>{{ formatTargetName(entry) }}</span>
+                <span
+                  v-if="formatTargetEmail(entry)"
+                  class="text-xs text-gray-500"
+                >
+                  {{ formatTargetEmail(entry) }}
+                </span>
+              </div>
             </td>
             <td class="px-4 py-3 text-sm text-gray-700">
               {{ entry.parsed?.reason || "-" }}
@@ -154,6 +162,37 @@ const formatAction = (value) => {
   if (key === "FAILED_LOGIN") return "Failed login";
   if (key === "IP_BLOCKED") return "IP Blocked";
   return String(value || "");
+};
+
+const actionKey = (value) =>
+  String(value || "")
+    .trim()
+    .toUpperCase();
+
+const formatActor = (entry) => {
+  const key = actionKey(entry?.action);
+  if (key === "FAILED_LOGIN" || key === "IP_BLOCKED") return "-";
+  return entry?.username || "-";
+};
+
+const formatTargetName = (entry) => {
+  const key = actionKey(entry?.action);
+  const target = entry?.parsed?.target;
+  if (!target) {
+    if (key === "FAILED_LOGIN") return entry?.username || "-";
+    return "-";
+  }
+  const fullName = [target.name, target.surname]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  return fullName || target.username || "-";
+};
+
+const formatTargetEmail = (entry) => {
+  const target = entry?.parsed?.target;
+  const email = target?.email ? String(target.email).trim() : "";
+  return email || null;
 };
 
 const parseDetails = (details) => {
