@@ -6,29 +6,55 @@
       <div>
         <h1 class="text-2xl font-bold leading-tight">Activity Log</h1>
         <p class="text-sm text-gray-500">
-          View security/admin trails (suspensions, activations, failed logins).
+          View admin audit trails with before/after diffs.
         </p>
       </div>
 
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <select
+          v-model="entityType"
+          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-52"
+        >
+          <option value="">All entities</option>
+          <option v-for="t in entityTypeOptions" :key="t" :value="t">
+            {{ t }}
+          </option>
+        </select>
+
+        <input
+          v-model="actor"
+          type="text"
+          placeholder="Actor name/email"
+          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-52"
+        />
+
+        <input
+          v-model="startDate"
+          type="date"
+          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-40"
+        />
+
+        <input
+          v-model="endDate"
+          type="date"
+          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-40"
+        />
+
         <input
           v-model="search"
           type="text"
           placeholder="Search..."
-          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-64"
+          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-56"
         />
-        <input
-          v-model="username"
-          type="text"
-          placeholder="Username"
-          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-48"
-        />
-        <input
-          v-model="action"
-          type="text"
-          placeholder="Action"
-          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-48"
-        />
+
+        <button
+          type="button"
+          class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+          :disabled="loading || exporting"
+          @click="exportCsv"
+        >
+          {{ exporting ? "Exporting..." : "Export CSV" }}
+        </button>
       </div>
     </div>
 
@@ -57,22 +83,22 @@
             <th
               class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              Action
-            </th>
-            <th
-              class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
               Actor
             </th>
             <th
               class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              Target
+              Action
             </th>
             <th
               class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              Reason
+              Entity
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Changes
             </th>
             <th
               class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -86,36 +112,59 @@
             <td class="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
               {{ formatTimestamp(entry.timestamp) }}
             </td>
+            <td class="px-4 py-3 text-sm text-gray-700">
+              <div class="flex flex-col">
+                <span>{{ formatActorDisplay(entry) }}</span>
+                <span v-if="entry.actorEmail" class="text-xs text-gray-500">
+                  {{ entry.actorEmail }}
+                </span>
+              </div>
+            </td>
             <td class="px-4 py-3 text-sm font-medium text-gray-800">
               {{ formatAction(entry.action) }}
             </td>
             <td class="px-4 py-3 text-sm text-gray-700">
               <div class="flex flex-col">
-                <span>{{ formatActorName(entry) }}</span>
-                <span
-                  v-if="formatActorEmail(entry)"
-                  class="text-xs text-gray-500"
-                >
-                  {{ formatActorEmail(entry) }}
+                <span class="font-medium text-gray-800">
+                  {{ entry.entityType }}
+                </span>
+                <span class="text-xs text-gray-500">
+                  {{ entry.entityLabel || entry.entityId || "-" }}
                 </span>
               </div>
             </td>
             <td class="px-4 py-3 text-sm text-gray-700">
-              <div class="flex flex-col">
-                <span>{{ formatTargetName(entry) }}</span>
-                <span
-                  v-if="formatTargetEmail(entry)"
-                  class="text-xs text-gray-500"
+              <div
+                v-if="entry.changes && entry.changes.length"
+                class="flex flex-col gap-1"
+              >
+                <div
+                  v-for="change in visibleChanges(entry)"
+                  :key="change.field"
+                  class="flex flex-col"
                 >
-                  {{ formatTargetEmail(entry) }}
-                </span>
+                  <span class="text-xs font-medium text-gray-600">
+                    {{ change.field }}
+                  </span>
+                  <span class="text-xs text-gray-700">
+                    {{ formatDiff(change.before) }} →
+                    {{ formatDiff(change.after) }}
+                  </span>
+                </div>
+
+                <button
+                  v-if="entry.changes.length > changePreviewLimit"
+                  type="button"
+                  class="mt-1 text-left text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                  @click="toggleExpanded(entry.id)"
+                >
+                  {{ expanded.has(entry.id) ? "Show less" : "Show more" }}
+                </button>
               </div>
-            </td>
-            <td class="px-4 py-3 text-sm text-gray-700">
-              {{ entry.parsed?.reason || "-" }}
+              <span v-else class="text-sm text-gray-500">-</span>
             </td>
             <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
-              {{ entry.ipAddress }}
+              {{ entry.ipAddress || "-" }}
             </td>
           </tr>
         </tbody>
@@ -136,7 +185,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
-import { securityLogsQuery } from "../../graphql/queries";
+import { auditLogsQuery } from "../../graphql/queries";
 import Pagination from "../pagination.vue";
 import LoadingScreen from "../loadingScreen.vue";
 import ErrorScreen from "../errorScreen.vue";
@@ -145,13 +194,38 @@ import EmptyState from "../emptyState.vue";
 const limit = 20;
 const currentPage = ref(1);
 const search = ref("");
-const username = ref("");
-const action = ref("");
+const entityType = ref("");
+const actor = ref("");
+const startDate = ref("");
+const endDate = ref("");
 
 const loading = ref(false);
 const error = ref(null);
 const entries = ref([]);
 const pageInfo = ref({ hasMore: false, totalPages: 1 });
+const exporting = ref(false);
+
+const expanded = ref(new Set());
+const changePreviewLimit = 3;
+
+const entityTypeOptions = [
+  "Admin",
+  "Teacher",
+  "Student",
+  "Parent",
+  "Class",
+  "Subject",
+  "Lesson",
+  "Exam",
+  "Assignment",
+  "Invoice",
+  "Payment",
+  "FeeStructure",
+  "Event",
+  "Announcement",
+  "SetupState",
+  "Invitation",
+];
 
 const formatTimestamp = (value) => {
   try {
@@ -165,88 +239,69 @@ const formatAction = (value) => {
   const key = String(value || "")
     .trim()
     .toUpperCase();
-  if (key === "USER_SUSPENDED") return "User suspended";
-  if (key === "USER_ACTIVATED") return "User activated";
-  if (key === "FAILED_LOGIN") return "Failed login";
-  if (key === "IP_BLOCKED") return "IP Blocked";
+  if (key === "CREATE") return "Created";
+  if (key === "UPDATE") return "Updated";
+  if (key === "DELETE") return "Deleted";
   return String(value || "");
 };
 
-const actionKey = (value) =>
-  String(value || "")
-    .trim()
-    .toUpperCase();
-
-const formatActorName = (entry) => {
-  const key = actionKey(entry?.action);
-  if (key === "FAILED_LOGIN" || key === "IP_BLOCKED") return "-";
-
-  const actor = entry?.parsed?.performedBy;
-  if (!actor) return entry?.username || "-";
-
-  const fullName = [actor.name, actor.surname].filter(Boolean).join(" ").trim();
-  return fullName || actor.username || entry?.username || "-";
-};
-
-const formatActorEmail = (entry) => {
-  const key = actionKey(entry?.action);
-  if (key === "FAILED_LOGIN" || key === "IP_BLOCKED") return null;
-
-  const actor = entry?.parsed?.performedBy;
-  const email = actor?.email ? String(actor.email).trim() : "";
-  return email || null;
-};
-
-const formatTargetName = (entry) => {
-  const key = actionKey(entry?.action);
-  if (key === "FAILED_LOGIN") return entry?.username || "-";
-  if (key === "IP_BLOCKED") return "-";
-
-  const target = entry?.parsed?.target;
-  if (!target) return "-";
-
-  const fullName = [target.name, target.surname]
+const formatActorDisplay = (entry) => {
+  const fullName = [entry.actorName, entry.actorSurname]
     .filter(Boolean)
     .join(" ")
     .trim();
-  return fullName || target.username || "-";
+  return fullName || entry.actorUsername || "-";
 };
 
-const formatTargetEmail = (entry) => {
-  const target = entry?.parsed?.target;
-  const email = target?.email ? String(target.email).trim() : "";
-  return email || null;
+const formatDiff = (value) => {
+  if (value === null || value === undefined || value === "") return "-";
+  const str = String(value);
+  if (str.length <= 80) return str;
+  return `${str.slice(0, 77)}...`;
 };
 
-const parseDetails = (details) => {
-  if (!details) return null;
-  try {
-    return JSON.parse(details);
-  } catch {
-    return null;
-  }
+const toggleExpanded = (id) => {
+  const next = new Set(expanded.value);
+  if (next.has(id)) next.delete(id);
+  else next.add(id);
+  expanded.value = next;
 };
 
-const logs = computed(() =>
-  (entries.value || []).map((e) => ({ ...e, parsed: parseDetails(e.details) })),
-);
+const visibleChanges = (entry) => {
+  const changes = entry?.changes || [];
+  if (expanded.value.has(entry.id)) return changes;
+  return changes.slice(0, changePreviewLimit);
+};
+
+const logs = computed(() => entries.value || []);
+
+const parseDateRange = () => {
+  const start = startDate.value
+    ? new Date(`${startDate.value}T00:00:00`)
+    : null;
+  const end = endDate.value ? new Date(`${endDate.value}T23:59:59.999`) : null;
+  return { start, end };
+};
 
 const fetchLogs = async () => {
   loading.value = true;
   error.value = null;
   try {
+    const { start, end } = parseDateRange();
     const { data } = await apolloClient.query({
-      query: securityLogsQuery,
+      query: auditLogsQuery,
       fetchPolicy: "network-only",
       variables: {
         params: { page: currentPage.value, limit, search: search.value.trim() },
-        action: action.value.trim() || null,
-        username: username.value.trim() || null,
+        entityType: entityType.value || null,
+        actor: actor.value.trim() || null,
+        startDate: start,
+        endDate: end,
       },
     });
 
-    entries.value = data?.securityLogs?.items || [];
-    pageInfo.value = data?.securityLogs?.pageInfo || {
+    entries.value = data?.auditLogs?.items || [];
+    pageInfo.value = data?.auditLogs?.pageInfo || {
       hasMore: false,
       totalPages: 1,
     };
@@ -262,10 +317,101 @@ const handlePageChange = (newPage) => {
 };
 
 watch(currentPage, () => fetchLogs());
-watch([search, username, action], () => {
+watch([search, actor, entityType, startDate, endDate], () => {
   currentPage.value = 1;
   fetchLogs();
 });
 
 onMounted(() => fetchLogs());
+
+const escapeCsv = (value) => {
+  const v = value === null || value === undefined ? "" : String(value);
+  const escaped = v.replace(/"/g, '""');
+  return `"${escaped}"`;
+};
+
+const buildCsvRows = (items) => {
+  const header = [
+    "timestamp",
+    "actor",
+    "actorEmail",
+    "action",
+    "entityType",
+    "entityLabel",
+    "entityId",
+    "field",
+    "before",
+    "after",
+    "ipAddress",
+  ];
+
+  const rows = [header.map(escapeCsv).join(",")];
+
+  for (const entry of items || []) {
+    const actorDisplay = formatActorDisplay(entry);
+    const common = [
+      entry.timestamp,
+      actorDisplay,
+      entry.actorEmail || "",
+      formatAction(entry.action),
+      entry.entityType,
+      entry.entityLabel || "",
+      entry.entityId || "",
+    ];
+
+    const changes = Array.isArray(entry.changes) ? entry.changes : [];
+    if (!changes.length) {
+      rows.push(
+        [...common, "", "", "", entry.ipAddress || ""].map(escapeCsv).join(","),
+      );
+      continue;
+    }
+
+    for (const change of changes) {
+      rows.push(
+        [
+          ...common,
+          change.field,
+          change.before ?? "",
+          change.after ?? "",
+          entry.ipAddress || "",
+        ]
+          .map(escapeCsv)
+          .join(","),
+      );
+    }
+  }
+
+  return rows.join("\n");
+};
+
+const exportCsv = async () => {
+  exporting.value = true;
+  try {
+    const { start, end } = parseDateRange();
+    const { data } = await apolloClient.query({
+      query: auditLogsQuery,
+      fetchPolicy: "network-only",
+      variables: {
+        params: { page: 1, limit: 1000, search: search.value.trim() },
+        entityType: entityType.value || null,
+        actor: actor.value.trim() || null,
+        startDate: start,
+        endDate: end,
+      },
+    });
+
+    const items = data?.auditLogs?.items || [];
+    const csv = buildCsvRows(items);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "activity-log.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  } finally {
+    exporting.value = false;
+  }
+};
 </script>

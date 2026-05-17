@@ -305,6 +305,52 @@ export const securityLogsQuery = gql`
   }
 `;
 
+export const auditLogsQuery = gql`
+  query AuditLogs(
+    $params: PaginationInput
+    $entityType: String
+    $actor: String
+    $startDate: Date
+    $endDate: Date
+  ) {
+    auditLogs(
+      params: $params
+      entityType: $entityType
+      actor: $actor
+      startDate: $startDate
+      endDate: $endDate
+    ) {
+      items {
+        id
+        action
+        entityType
+        entityId
+        entityLabel
+        actorId
+        actorUsername
+        actorName
+        actorSurname
+        actorEmail
+        actorRole
+        ipAddress
+        timestamp
+        changes {
+          field
+          before
+          after
+        }
+      }
+      pageInfo {
+        page
+        limit
+        totalCount
+        totalPages
+        hasMore
+      }
+    }
+  }
+`;
+
 export const getAllParents = gql`
   query getAllParents($pagination: PaginationInput) {
     getAllParents(params: $pagination) {
