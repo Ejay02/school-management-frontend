@@ -40,20 +40,28 @@
         <form class="space-y-4" @submit.prevent="submitAcceptance">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Name</label
+              <label
+                for="invite-name"
+                class="block text-sm font-medium text-gray-700 mb-1"
               >
+                Name
+              </label>
               <input
+                id="invite-name"
                 v-model="form.name"
                 type="text"
                 class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Surname</label
+              <label
+                for="invite-surname"
+                class="block text-sm font-medium text-gray-700 mb-1"
               >
+                Surname
+              </label>
               <input
+                id="invite-surname"
                 v-model="form.surname"
                 type="text"
                 class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -62,10 +70,14 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Username</label
+            <label
+              for="invite-username"
+              class="block text-sm font-medium text-gray-700 mb-1"
             >
+              Username
+            </label>
             <input
+              id="invite-username"
               v-model="form.username"
               type="text"
               class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -73,10 +85,14 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Password</label
+            <label
+              for="invite-password"
+              class="block text-sm font-medium text-gray-700 mb-1"
             >
+              Password
+            </label>
             <input
+              id="invite-password"
               v-model="form.password"
               :type="showPassword ? 'text' : 'password'"
               class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
