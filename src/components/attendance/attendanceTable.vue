@@ -12,7 +12,9 @@
           <button
             v-if="!markAttendanceMode && ['teacher'].includes(userRole)"
             @click="toggleMarkAttendanceMode"
-            class="px-3 py-1 bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
+            :disabled="!canMarkAttendance"
+            :title="!canMarkAttendance ? markAttendanceDisabledMessage : ''"
+            class="px-3 py-1 bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-sm rounded hover:bg-indigo-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Mark Attendance
           </button>
@@ -71,7 +73,9 @@
           <button
             v-if="['teacher'].includes(userRole)"
             @click="toggleMarkAttendanceMode"
-            class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
+            :disabled="!canMarkAttendance"
+            :title="!canMarkAttendance ? markAttendanceDisabledMessage : ''"
+            class="px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Mark Attendance
           </button>
@@ -610,6 +614,24 @@ const classes = computed(() => classStore.allClasses);
 const students = computed(() => studentStore.students);
 const loading = computed(() => attendanceStore.loading);
 const attendanceRecords = computed(() => attendanceStore.attendanceRecords);
+const canMarkAttendance = computed(() => {
+  if (!["teacher"].includes(userRole.value)) return false;
+  if (classStore.loading) return false;
+  const all = classes.value || [];
+  if (!all.length) return false;
+  return all.some((cls) =>
+    Array.isArray(cls?.subjects)
+      ? cls.subjects.some(
+          (subject) =>
+            Array.isArray(subject?.lessons) && subject.lessons.length,
+        )
+      : false,
+  );
+});
+const markAttendanceDisabledMessage = computed(() => {
+  if (classStore.loading) return "Loading classes...";
+  return "No class assigned yet";
+});
 
 // Add computed property for filtered records
 const filteredRecords = computed(() => {
@@ -942,6 +964,13 @@ const submitScannedStudentId = async (studentIdValue) => {
 
 // Toggle mark attendance mode
 function toggleMarkAttendanceMode() {
+  if (!markAttendanceMode.value && !canMarkAttendance.value) {
+    notificationStore.addNotification({
+      type: "error",
+      message: markAttendanceDisabledMessage.value,
+    });
+    return;
+  }
   markAttendanceMode.value = !markAttendanceMode.value;
 
   if (markAttendanceMode.value) {
