@@ -59,7 +59,15 @@
 
       <!-- Table -->
       <div class="">
-        <LoadingScreen v-if="loading" message="Loading attendance records..." />
+        <div
+          v-if="loading"
+          class="flex items-center justify-center gap-2 py-10 text-sm text-gray-600"
+        >
+          <span
+            class="h-5 w-5 animate-spin rounded-full border-2 border-gray-200 border-t-indigo-500"
+          ></span>
+          Loading attendance records...
+        </div>
         <EmptyState
           v-else-if="
             studentStore?.students.length &&
@@ -438,10 +446,15 @@
           </div>
 
           <div class="overflow-x-auto">
-            <LoadingScreen
+            <div
               v-if="loadingStudents"
-              message="Loading students..."
-            />
+              class="flex items-center justify-center gap-2 py-10 text-sm text-gray-600"
+            >
+              <span
+                class="h-5 w-5 animate-spin rounded-full border-2 border-gray-200 border-t-indigo-500"
+              ></span>
+              Loading students...
+            </div>
             <EmptyState
               v-else-if="filteredStudents.length === 0"
               icon="fa-regular fa-user"
@@ -563,7 +576,6 @@ import { createAttendanceSession } from "../../graphql/mutations";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
-import LoadingScreen from "../loadingScreen.vue";
 import Pagination from "../pagination.vue";
 
 const userStore = useUserStore();
@@ -612,7 +624,7 @@ const error = computed(() => attendanceStore.error);
 const lessons = computed(() => lessonStore.lessons);
 const classes = computed(() => classStore.allClasses);
 const students = computed(() => studentStore.students);
-const loading = computed(() => attendanceStore.loading);
+const loading = computed(() => attendanceStore.listLoading);
 const attendanceRecords = computed(() => attendanceStore.attendanceRecords);
 const canMarkAttendance = computed(() => {
   if (!["teacher"].includes(userRole.value)) return false;

@@ -18,6 +18,7 @@ export const useAttendanceStore = defineStore("attendanceStore", {
     attendanceRecords: [], // Store paginated records
     activeStudentId: null,
     loading: false,
+    listLoading: false,
     error: null,
     hasMore: true,
     totalPages: 1,
@@ -124,8 +125,11 @@ export const useAttendanceStore = defineStore("attendanceStore", {
       sortOrder = "",
       studentId = null,
     } = {}) {
-      this.loading = true;
       this.error = null;
+      const shouldShowLoader = this.allAttendanceRecords.length === 0;
+      if (shouldShowLoader) {
+        this.listLoading = true;
+      }
 
       const normalizedStudentId = studentId || this.activeStudentId || null;
       if (this.activeStudentId !== normalizedStudentId) {
@@ -189,7 +193,9 @@ export const useAttendanceStore = defineStore("attendanceStore", {
       } catch (error) {
         this.error = error.message || "Error fetching attendance stats";
       } finally {
-        this.loading = false;
+        if (shouldShowLoader) {
+          this.listLoading = false;
+        }
       }
     },
 
