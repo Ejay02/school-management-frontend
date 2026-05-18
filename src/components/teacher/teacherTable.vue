@@ -105,19 +105,6 @@
               </span>
             </router-link>
 
-            <button
-              @click="toggleActiveStatus(item)"
-              class="group relative inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
-              :class="
-                item?.isActive === false
-                  ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
-                  : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-              "
-              :disabled="statusLoadingId === item.id"
-            >
-              {{ item?.isActive === false ? "Activate" : "Suspend" }}
-            </button>
-
             <!-- admin shouldnt updateother  user deets just assign classes etc -->
             <!--  -->
             <!-- <div
@@ -166,9 +153,6 @@ import {
 import { useNotificationStore } from "../../store/notification";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
-import { apolloClient } from "../../../apollo-client";
-import { setUserActiveStatus } from "../../graphql/mutations";
-import { extractGraphQLErrorMessage } from "../../utils/graphqlError";
 
 const props = defineProps({
   columns: {
@@ -186,7 +170,6 @@ const modalStore = useModalStore();
 const notificationStore = useNotificationStore();
 
 const role = userStore.currentRole;
-const statusLoadingId = ref("");
 
 const showDelModal = (id, title, type) => {
   modalStore.deleteModal = true;
@@ -219,56 +202,6 @@ const copyId = (id) => {
         message: `Error copying to clipboard - ${err.message}`,
       });
     });
-};
-
-const toggleActiveStatus = async (item) => {
-  if (!item?.id) return;
-  const currentRole = String(role || "").toLowerCase();
-  if (currentRole !== "super_admin" && currentRole !== "admin") return;
-
-  if (item?.isActive !== false) {
-    modalStore.suspendModal = true;
-    modalStore.modalId = item.id;
-    modalStore.modalTitle = formatPersonName(item?.name, item?.surname);
-    modalStore.modalMessage = `Are you sure you want to suspend "${formatPersonName(
-      item?.name,
-      item?.surname,
-    )}"? They will be unable to log in until reactivated.`;
-    modalStore.confirmAction = "suspendUser";
-    modalStore.source = "teacherTable";
-    modalStore.data = item;
-    return;
-  }
-
-  statusLoadingId.value = item.id;
-  try {
-    const nextIsActive = item.isActive === false;
-    const { data } = await apolloClient.mutate({
-      mutation: setUserActiveStatus,
-      variables: { targetId: item.id, isActive: nextIsActive },
-    });
-
-    const updated = data?.setUserActiveStatus;
-    if (updated && typeof updated.isActive !== "undefined") {
-      item.isActive = Boolean(updated.isActive);
-      item.deactivatedAt = updated.deactivatedAt || null;
-    } else {
-      item.isActive = nextIsActive;
-      item.deactivatedAt = nextIsActive ? null : new Date().toISOString();
-    }
-
-    notificationStore.addNotification({
-      type: "success",
-      message: nextIsActive ? "Teacher reactivated" : "Teacher suspended",
-    });
-  } catch (error) {
-    notificationStore.addNotification({
-      type: "error",
-      message: extractGraphQLErrorMessage(error, "Unable to update status"),
-    });
-  } finally {
-    statusLoadingId.value = "";
-  }
 };
 
 // const showAddModal = (id, title, type) => {

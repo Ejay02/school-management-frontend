@@ -140,11 +140,11 @@
 
 <script setup>
 import { useUserStore } from "../store/userStore";
-import { ref, onMounted, watch } from "vue";
+import { computed, ref, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
 const userStore = useUserStore();
-const role = userStore.currentRole.toLowerCase();
+const role = computed(() => String(userStore.currentRole || "").toLowerCase());
 const router = useRouter();
 const route = useRoute();
 
