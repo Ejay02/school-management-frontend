@@ -164,7 +164,10 @@
       <!-- bottom -->
       <div class="w-full h-[500px]">
         <router-link to="/settings/billing" class="block h-full">
-          <FinanceCard :overview="overview?.financeOverview" :disableQuery="true" />
+          <FinanceCard
+            :overview="overview?.financeOverview"
+            :disableQuery="true"
+          />
         </router-link>
       </div>
     </div>
@@ -323,5 +326,3 @@ onMounted(() => {
   attendanceStore.fetchAttendanceData(startDate.value, endDate.value);
 });
 </script>
-
-<style scoped></style>
