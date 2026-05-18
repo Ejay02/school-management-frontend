@@ -24,6 +24,23 @@ export const formatAuthErrorMessage = (
 ) => {
   const rawMessage = extractGraphQLErrorMessage(error, fallbackMessage);
   const normalizedMessage = rawMessage.toLowerCase();
+  const code =
+    error?.graphQLErrors?.[0]?.extensions?.code ||
+    error?.cause?.graphQLErrors?.[0]?.extensions?.code ||
+    error?.networkError?.result?.errors?.[0]?.extensions?.code;
+
+  if (
+    code === "INTERNAL_SERVER_ERROR" ||
+    normalizedMessage.includes("cannot read properties") ||
+    normalizedMessage.includes("undefined") ||
+    normalizedMessage.includes("typeerror") ||
+    normalizedMessage.includes("syntaxerror") ||
+    normalizedMessage.includes("findunique") ||
+    normalizedMessage.includes("getmetadata") ||
+    normalizedMessage.includes("reflect-metadata")
+  ) {
+    return fallbackMessage;
+  }
 
   if (
     normalizedMessage.includes("account is deactivated") ||

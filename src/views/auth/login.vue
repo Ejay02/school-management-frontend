@@ -213,7 +213,7 @@ const login = async () => {
   } catch (e) {
     notificationStore.addNotification({
       type: "error",
-      message: formatAuthErrorMessage(e, "Unable to log in"),
+      message: formatAuthErrorMessage(e, "Failed to Login."),
     });
   }
 };

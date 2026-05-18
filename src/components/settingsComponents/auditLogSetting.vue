@@ -326,7 +326,7 @@ onMounted(() => fetchLogs());
 
 const escapeCsv = (value) => {
   const v = value === null || value === undefined ? "" : String(value);
-  const escaped = v.replace(/"/g, '""');
+  const escaped = v.replaceAll('"', '""');
   return `"${escaped}"`;
 };
 
