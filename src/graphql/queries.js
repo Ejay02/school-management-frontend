@@ -314,8 +314,8 @@ export const auditLogsQuery = gql`
     $params: PaginationInput
     $entityType: String
     $actor: String
-    $startDate: Date
-    $endDate: Date
+    $startDate: DateTime
+    $endDate: DateTime
   ) {
     auditLogs(
       params: $params
