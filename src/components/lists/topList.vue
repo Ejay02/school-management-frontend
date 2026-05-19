@@ -19,7 +19,7 @@
           />
         </button>
 
-        <button @click="handleAddClick">
+        <button v-if="shouldShowAddButton" @click="handleAddClick">
           <img
             src="/plus.png"
             alt="filter icon"
@@ -32,9 +32,10 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useModalStore } from "../../store/useModalStore";
+import { useUserStore } from "../../store/userStore";
 import TableSearch from "../tableSearch.vue";
 
 const props = defineProps({
@@ -45,6 +46,7 @@ const props = defineProps({
 });
 
 const modalStore = useModalStore();
+const userStore = useUserStore();
 
 const router = useRouter();
 const route = useRoute();
@@ -60,7 +62,26 @@ const extractUrlPath = () => {
 // Extract URL path when component is mounted
 onMounted(extractUrlPath);
 
+const role = computed(() => String(userStore.currentRole || "").toLowerCase());
+const teacherAllowedCreatePages = new Set(["lessons", "assignments", "exams"]);
+const teacherHiddenAddPages = new Set([
+  "parents",
+  "students",
+  "classes",
+  "subjects",
+]);
+
+const shouldShowAddButton = computed(() => {
+  if (role.value === "admin" || role.value === "super_admin") return true;
+  if (role.value === "teacher") {
+    if (teacherHiddenAddPages.has(url.value)) return false;
+    return teacherAllowedCreatePages.has(url.value);
+  }
+  return false;
+});
+
 const handleAddClick = () => {
+  if (!shouldShowAddButton.value) return;
   if (url.value === "exams") {
     router.push("/dashboard/exam/new");
   } else if (url.value === "assignments") {

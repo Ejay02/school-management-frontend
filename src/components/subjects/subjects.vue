@@ -144,9 +144,7 @@ const columns = [
     accessor: "teachers",
     class: "hidden md:table-cell",
   },
-  ...(role.toLowerCase() === "teacher" ||
-  role.toLowerCase() === "admin" ||
-  role.toLowerCase() === "super_admin"
+  ...(role.toLowerCase() === "admin" || role.toLowerCase() === "super_admin"
     ? [
         {
           header: "Actions",

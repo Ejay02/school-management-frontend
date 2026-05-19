@@ -42,11 +42,10 @@
 
         <!-- <td class="hidden md:table-cell">{{ item?.teachers.join(", ") }}</td> -->
 
-        <td>
+        <td v-if="hasActionsColumn">
           <div
             class="flex items-center gap-2"
             v-if="
-              role.toLowerCase() === 'teacher' ||
               role.toLowerCase() === 'admin' ||
               role.toLowerCase() === 'super_admin'
             "
@@ -86,6 +85,7 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { EMPTY_PLACEHOLDER } from "../../utils/displayValue";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
@@ -104,6 +104,9 @@ const props = defineProps({
 const userStore = useUserStore();
 
 const role = userStore.currentRole;
+const hasActionsColumn = computed(() =>
+  (props.columns || []).some((c) => c?.accessor === "action"),
+);
 
 const modalStore = useModalStore();
 
