@@ -774,15 +774,16 @@ const startQrScan = async () => {
   cameraError.value = "";
   if (!selectedLesson.value || !selectedDate.value) return;
 
-  if (!("BarcodeDetector" in window)) {
+  if (!("BarcodeDetector" in globalThis)) {
     cameraError.value =
       "QR scanning is not supported in this browser. Use Chrome/Edge or paste the Student ID to mark attendance.";
     return;
   }
 
   try {
-    barcodeDetector = new window.BarcodeDetector({ formats: ["qr_code"] });
+    barcodeDetector = new globalThis.BarcodeDetector({ formats: ["qr_code"] });
   } catch (e) {
+    console.warn(e);
     cameraError.value =
       "Unable to initialize QR scanning. Use Chrome/Edge or paste the Student ID to mark attendance.";
     return;
@@ -802,6 +803,7 @@ const startQrScan = async () => {
     isScanning.value = true;
     scanLoop();
   } catch (e) {
+    console.warn(e);
     cameraError.value =
       "Camera access was blocked or is unavailable. Allow camera permission, or paste the Student ID.";
     stopQrScan();

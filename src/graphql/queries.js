@@ -484,6 +484,23 @@ export const getAdminDashboardOverview = gql`
   }
 `;
 
+export const getTeacherTodayOverview = gql`
+  query getTeacherTodayOverview {
+    getTeacherTodayOverview {
+      nextClasses {
+        id
+        name
+        className
+        subjectName
+        startTime
+        endTime
+      }
+      attendanceDueCount
+      assignmentsToGradeCount
+    }
+  }
+`;
+
 export const getIncomeGraphData = gql`
   query getIncomeGraphData {
     getIncomeGraphData {
