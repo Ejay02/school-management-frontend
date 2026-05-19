@@ -3,8 +3,11 @@
     <div
       class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
-      <h1 class="text-2xl font-bold leading-tight">Team Management</h1>
+      <h1 class="text-2xl font-bold leading-tight">
+        {{ role === "teacher" ? "Team" : "Team Management" }}
+      </h1>
       <div
+        v-if="role !== 'teacher'"
         class="grid w-full max-w-sm grid-cols-2 rounded-lg border border-gray-200 bg-white p-1 sm:w-auto sm:max-w-none"
       >
         <button
@@ -33,12 +36,12 @@
     </div>
 
     <template v-if="activeTab === 'users'">
-      <LoadingScreen v-if="loading" message="Loading team..." />
+      <LoadingScreen v-if="directoryLoading" message="Loading team..." />
 
-      <ErrorScreen v-else-if="error" />
+      <ErrorScreen v-else-if="directoryError" />
 
       <EmptyState
-        v-else-if="!users.length && !loading"
+        v-else-if="!users.length && !directoryLoading"
         icon="fa-solid fa-users"
         heading="No users found"
         description="There are no users to display."
@@ -77,7 +80,7 @@
                     <p class="truncate text-xs text-gray-500">
                       {{ user.email }}
                     </p>
-                    <div class="mt-1">
+                    <div v-if="role !== 'teacher'" class="mt-1">
                       <span
                         class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
                         :class="userStatusBadgeClass(user.isActive)"
@@ -91,60 +94,81 @@
                 <div
                   class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-4 sm:justify-between"
                 >
-                  <div class="w-full sm:w-auto">
-                    <div v-if="user.id !== userStore.userInfo.id">
-                      <select
-                        v-if="role === 'super_admin'"
-                        v-model="user.role"
-                        @change="updateUserRole(user.id, user.role)"
-                        class="cursor-pointer block w-full rounded-md bg-white px-2 py-1 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:w-32"
+                  <div
+                    v-if="role === 'teacher'"
+                    class="flex w-full items-center justify-end sm:w-auto"
+                  >
+                    <div class="group relative">
+                      <button
+                        :disabled="true"
+                        class="text-gray-400 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300 cursor-not-allowed opacity-70"
                       >
-                        <option value="teacher" selected>Teacher</option>
-                        <option value="admin" class="text-gray-500">
-                          Admin
-                        </option>
-                      </select>
+                        <i class="fa-solid fa-comment-dots"></i>
+                      </button>
+                      <span
+                        class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex whitespace-nowrap"
+                      >
+                        Chat coming soon
+                      </span>
+                    </div>
+                  </div>
+
+                  <template v-else>
+                    <div class="w-full sm:w-auto">
+                      <div v-if="user.id !== userStore.userInfo.id">
+                        <select
+                          v-if="role === 'super_admin'"
+                          v-model="user.role"
+                          @change="updateUserRole(user.id, user.role)"
+                          class="cursor-pointer block w-full rounded-md bg-white px-2 py-1 text-base text-gray-500 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:w-32"
+                        >
+                          <option value="teacher" selected>Teacher</option>
+                          <option value="admin" class="text-gray-500">
+                            Admin
+                          </option>
+                        </select>
+                        <span
+                          v-else
+                          class="block w-full rounded-md bg-gray-100 px-2 py-1 text-sm text-purple-600 italic border border-gray-300 cursor-not-allowed sm:w-32"
+                        >
+                          {{ user.role }}
+                        </span>
+                      </div>
                       <span
                         v-else
                         class="block w-full rounded-md bg-gray-100 px-2 py-1 text-sm text-purple-600 italic border border-gray-300 cursor-not-allowed sm:w-32"
                       >
-                        {{ user.role }}
+                        That's you
                       </span>
                     </div>
-                    <span
-                      v-else
-                      class="block w-full rounded-md bg-gray-100 px-2 py-1 text-sm text-purple-600 italic border border-gray-300 cursor-not-allowed sm:w-32"
-                    >
-                      That's you
-                    </span>
-                  </div>
 
-                  <button
-                    v-if="canToggleUserStatus(user)"
-                    class="group relative inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
-                    :class="
-                      user.isActive
-                        ? 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-                        : 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
-                    "
-                    :disabled="statusLoadingId === user.id"
-                    @click="toggleUserStatus(user)"
-                  >
-                    {{ user.isActive ? "Suspend" : "Activate" }}
-                  </button>
-
-                  <button
-                    v-if="role === 'super_admin'"
-                    @click="showDelModal(user.id, user.name, 'userList')"
-                    class="group relative w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600"
-                  >
-                    <i class="fa-regular fa-trash-can"></i>
-                    <span
-                      class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                    <button
+                      v-if="canToggleUserStatus(user)"
+                      class="group relative inline-flex h-8 items-center justify-center rounded-md border px-3 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
+                      :class="
+                        user.isActive
+                          ? 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                          : 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
+                      "
+                      :disabled="statusLoadingId === user.id"
+                      @click="toggleUserStatus(user)"
                     >
-                      Delete User
-                    </span>
-                  </button>
+                      {{ user.isActive ? "Suspend" : "Activate" }}
+                    </button>
+
+                    <button
+                      v-if="role === 'super_admin'"
+                      @click="showDelModal(user.id, user.name, 'userList')"
+                      class="group relative w-6 h-6 flex items-center justify-center rounded-full text-red-400 hover:text-red-600"
+                    >
+                      <i class="fa-regular fa-trash-can"></i>
+                      <span
+                        class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                      >
+                        Delete User
+                      </span>
+                    </button>
+                  </template>
                 </div>
               </div>
             </div>
@@ -154,8 +178,8 @@
         <div class="mt-6">
           <Pagination
             :currentPage="currentPage"
-            :hasMore="userStore.hasMore"
-            :totalPages="userStore.totalPages"
+            :hasMore="directoryHasMore"
+            :totalPages="directoryTotalPages"
             @update:page="handlePageChange"
           />
         </div>
@@ -468,6 +492,7 @@ import {
 import { extractGraphQLErrorMessage } from "../../utils/graphqlError";
 import { useNotificationStore } from "../../store/notification";
 import { useModalStore } from "../../store/useModalStore";
+import { useTeacherStore } from "../../store/teacherStore";
 import { useUserStore } from "../../store/userStore";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
@@ -475,26 +500,40 @@ import LoadingScreen from "../loadingScreen.vue";
 import Pagination from "../pagination.vue";
 
 const userStore = useUserStore();
+const teacherStore = useTeacherStore();
 const modalStore = useModalStore();
 const notificationStore = useNotificationStore();
 
 const route = useRoute();
 
 const role = userStore.currentRole.toLowerCase();
+const isTeacher = role === "teacher";
 const activeTab = ref("users");
 
 const syncTabFromRoute = () => {
   const tab = String(route.query.tab || "");
-  if (tab === "invitations" || tab === "users") {
-    activeTab.value = tab;
+  if (isTeacher) {
+    activeTab.value = "users";
+    return;
   }
+  if (tab === "invitations" || tab === "users") activeTab.value = tab;
 };
 
 const users = ref([]);
 const limit = 10;
 const currentPage = ref(1);
-const loading = computed(() => userStore.loading);
-const error = computed(() => userStore.error);
+const directoryLoading = computed(() =>
+  isTeacher ? teacherStore.loading : userStore.loading,
+);
+const directoryError = computed(() =>
+  isTeacher ? teacherStore.error : userStore.error,
+);
+const directoryHasMore = computed(() =>
+  isTeacher ? teacherStore.hasMore : userStore.hasMore,
+);
+const directoryTotalPages = computed(() =>
+  isTeacher ? teacherStore.totalPages : userStore.totalPages,
+);
 
 const invitations = ref([]);
 const invitationLoading = ref(false);
@@ -743,6 +782,28 @@ const toggleUserStatus = async (user) => {
 
 const fetchUsers = async (page = 1) => {
   try {
+    if (isTeacher) {
+      await teacherStore.fetchTeachers({ page, limit });
+
+      users.value = (teacherStore.teachers || []).map((teacher) => {
+        const name = teacher?.name || "";
+        const surname = teacher?.surname || "";
+        return {
+          id: teacher?.id,
+          name: `${name} ${surname}`.trim() || teacher?.username,
+          email: teacher?.institutionalEmail || teacher?.email || "",
+          role: "teacher",
+          avatar: teacher?.photo || teacher?.image || null,
+          firstName: name,
+          lastName: surname,
+          isActive:
+            typeof teacher?.isActive === "boolean" ? teacher.isActive : true,
+          deactivatedAt: teacher?.deactivatedAt || null,
+        };
+      });
+      return;
+    }
+
     const { admins, teachers } = await userStore.fetchAdminUsers(apolloClient, {
       page,
       limit,
@@ -949,16 +1010,19 @@ watch(currentPage, (newPage) => {
 });
 
 watch(invitationCurrentPage, () => {
+  if (isTeacher) return;
   fetchInvitations();
 });
 
 watch([invitationStatusFilter, invitationRoleFilter], () => {
+  if (isTeacher) return;
   invitationCurrentPage.value = 1;
   refreshInvitationData();
 });
 
 let invitationSearchTimeoutId;
 watch(invitationSearch, () => {
+  if (isTeacher) return;
   clearTimeout(invitationSearchTimeoutId);
   invitationSearchTimeoutId = setTimeout(() => {
     invitationCurrentPage.value = 1;
@@ -969,7 +1033,7 @@ watch(invitationSearch, () => {
 onMounted(() => {
   syncTabFromRoute();
   fetchUsers(currentPage.value);
-  refreshInvitationData();
+  if (!isTeacher) refreshInvitationData();
 });
 
 watch(

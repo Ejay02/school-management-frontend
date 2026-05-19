@@ -138,13 +138,13 @@ const routes = [
         path: "/teachers",
         name: "Teachers",
         component: Teachers,
-        meta: { role: ["admin", "super_admin", "teacher"] },
+        meta: { role: ["admin", "super_admin"] },
       },
       {
         path: "/teacher/:id",
         name: "TeacherView",
         component: TeacherView,
-        meta: { role: ["admin", "super_admin", "teacher"] },
+        meta: { role: ["admin", "super_admin"] },
       },
       {
         path: "/students",
@@ -360,7 +360,7 @@ const routes = [
             path: "team",
             name: "team",
             component: TeamSetting,
-            meta: { role: ["admin", "super_admin"] },
+            meta: { role: ["admin", "super_admin", "teacher"] },
           },
           {
             path: "school",

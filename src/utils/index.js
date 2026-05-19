@@ -29,7 +29,7 @@ export const menuItems = [
         icon: "/teacher.png",
         label: "Teachers",
         href: "/teachers",
-        visible: ["super_admin", "admin", "teacher"],
+        visible: ["super_admin", "admin"],
       },
       {
         icon: "/parent.png",

@@ -48,13 +48,9 @@
               v-if="
                 role === 'super_admin' || role === 'admin' || role === 'teacher'
               "
-              :to="role === 'teacher' ? '/teachers' : '/settings/team'"
+              to="/settings/team"
               class="hover:text-eduPurple"
-              :class="{
-                'text-indigo-600':
-                  (role === 'teacher' && $route.name === 'Teachers') ||
-                  (role !== 'teacher' && $route.name === 'team'),
-              }"
+              :class="{ 'text-indigo-600': $route.name === 'team' }"
             >
               Team
             </router-link>
@@ -103,9 +99,10 @@
               >
                 Billing
               </option>
-              <option v-if="role === 'teacher'" value="/teachers">Team</option>
               <option
-                v-if="role === 'super_admin' || role === 'admin'"
+                v-if="
+                  role === 'super_admin' || role === 'admin' || role === 'teacher'
+                "
                 value="/settings/team"
               >
                 Team

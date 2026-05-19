@@ -32,6 +32,7 @@ import { computed, onMounted } from "vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
 import { useStudentStore } from "../../store/studentStore";
+import { useUserStore } from "../../store/userStore";
 import LeftSingleView from "../../views/singleView/leftSingleView.vue";
 import RightSingleView from "../../views/singleView/rightSingleView.vue";
 import { formatDate } from "../../utils/date.holidays";
@@ -40,6 +41,7 @@ const route = useRoute();
 const studentId = route.params.id;
 
 const studentStore = useStudentStore();
+const userStore = useUserStore();
 
 onMounted(() => {
   studentStore.fetchStudentById(studentId);
@@ -49,6 +51,7 @@ const student = computed(() => studentStore.selectedStudent);
 
 const loading = computed(() => studentStore.loading);
 const error = computed(() => studentStore.error);
+const userRole = computed(() => String(userStore.currentRole || "").toLowerCase());
 
 const studentName = computed(() => {
   const name = student?.value?.name;
@@ -120,7 +123,7 @@ const studentShortcuts = computed(() => {
     },
     {
       text: `${studentName.value}'s Teachers`,
-      link: "/teachers",
+      link: userRole.value === "teacher" ? "/settings/team" : "/teachers",
       color: "bg-eduPurpleLight",
     },
 
