@@ -659,7 +659,7 @@
             @click="handleEdit"
             :disabled="isLoading"
           >
-            <span v-if="!isLoading">Edit</span>
+            <span v-if="!isLoading">{{ primaryActionLabel }}</span>
             <div v-else class="flex items-center">
               <svg
                 class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
@@ -681,7 +681,7 @@
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              Editing...
+              {{ primaryActionLoadingLabel }}
             </div>
           </button>
         </div>
@@ -706,6 +706,7 @@ import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
 import { formatPersonName } from "../../utils/displayValue";
+import { extractGraphQLErrorMessage } from "../../utils/graphqlError";
 import { availableTargetRoles } from "../../utils/utility";
 
 import { useUserStore } from "../../store/userStore";
@@ -791,6 +792,18 @@ const teacherNames = computed(() => {
   return teacherStore.getTeacherNames?.map((teacher) => teacher.name) || [];
 });
 
+const primaryActionLabel = computed(() => {
+  if (source.value === "announcementList") return "Update";
+  if (source.value === "subjectList") return "Update";
+  if (source.value === "classList") return "Update";
+  return "Save";
+});
+
+const primaryActionLoadingLabel = computed(() => {
+  if (primaryActionLabel.value === "Update") return "Updating...";
+  return "Saving...";
+});
+
 const getTeacherIdByName = (teacherName) => {
   const teacher = teacherStore.allTeachers.find(
     (t) => `${t.name} ${t.surname}` === teacherName,
@@ -833,19 +846,42 @@ const handleEdit = async () => {
     } else if (source.value === "studentList") {
       console.log("hello from students");
     } else if (source.value === "classList") {
+      const resolvedCapacity = Number.parseInt(String(classCapacity.value), 10);
+      if (!Number.isFinite(resolvedCapacity)) {
+        notificationStore.addNotification({
+          type: "error",
+          message: "Please enter a valid class capacity",
+        });
+        return;
+      }
+
+      const supervisorId =
+        selectedTeacher.value === ""
+          ? null
+          : getTeacherIdByName(selectedTeacher.value);
+
+      if (selectedTeacher.value !== "" && !supervisorId) {
+        notificationStore.addNotification({
+          type: "error",
+          message: "Please select a valid supervisor",
+        });
+        return;
+      }
+
       await apolloClient.mutate({
         mutation: updateClass,
         variables: {
           classId: modalStore.modalId,
           input: {
-            name: className.value,
-            capacity: parseInt(classCapacity.value),
-            supervisorId: getTeacherIdByName(selectedTeacher.value),
+            name: String(className.value || "").trim(),
+            capacity: resolvedCapacity,
+            supervisorId,
           },
         },
       });
 
       await classStore.refreshClasses();
+      await teacherStore.refreshAllTeachers();
 
       notificationStore.addNotification({
         type: "success",
@@ -906,9 +942,13 @@ const handleEdit = async () => {
     }
     modalStore.editModal = false;
   } catch (error) {
+    const fallback =
+      source.value === "classList"
+        ? "Unable to update class. Please try again."
+        : "Unable to save changes. Please try again.";
     notificationStore.addNotification({
       type: "error",
-      message: `Error creating ${source.value}: ${error.message}`,
+      message: extractGraphQLErrorMessage(error, fallback),
     });
   } finally {
     isLoading.value = false;

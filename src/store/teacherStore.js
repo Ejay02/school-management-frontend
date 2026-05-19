@@ -36,7 +36,7 @@ export const useTeacherStore = defineStore("teacherStore", {
             teacherId: teacher?.teacherId || teacher?.id,
             photo: teacher?.image,
             subjects: teacher?.subjects.map((subject) => subject.name),
-            classes: teacher?.classes || [],
+            classes: teacher?.classes?.map((c) => c?.name).filter(Boolean) || [],
           }));
 
           this.totalCount = this.allTeachers.length;
@@ -53,6 +53,15 @@ export const useTeacherStore = defineStore("teacherStore", {
       } finally {
         this.loading = false;
       }
+    },
+
+    async refreshAllTeachers() {
+      this.allTeachers = [];
+      this.teachers = [];
+      this.totalPages = 1;
+      this.totalCount = 0;
+      this.hasMore = true;
+      await this.fetchTeachers({ page: 1, limit: 10 });
     },
 
     async fetchTeacherById(teacherId) {

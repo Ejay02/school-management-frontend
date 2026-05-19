@@ -225,6 +225,10 @@ export const getAllTeachers = gql`
         id
         name
       }
+      classes {
+        id
+        name
+      }
     }
   }
 `;
