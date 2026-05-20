@@ -3,7 +3,7 @@
     <div class="bg-white p-4 rounded-md flex-1 m-1 mt-0 shadow-xl">
       <!-- top -->
       <div class="border-b p-4">
-        <TopList :txt="'All Parents'" />
+        <TopList :txt="pageTitle" />
       </div>
 
       <LoadingScreen v-if="loading" message="Loading Parents..." />
@@ -43,12 +43,16 @@ import ParentsTable from "./parentsTable.vue";
 import LoadingScreen from "../loadingScreen.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useParentStore } from "../../store/parentStore";
+import { useUserStore } from "../../store/userStore";
 
 const limit = 10;
 const currentPage = ref(1);
 const parentStore = useParentStore();
+const userStore = useUserStore();
 const error = computed(() => parentStore.error);
 const loading = computed(() => parentStore.loading);
+const role = computed(() => userStore.currentRole?.toLowerCase());
+const pageTitle = computed(() => (role.value === "teacher" ? "My Parents" : "All Parents"));
 
 watch(currentPage, (newPage) => {
   parentStore.fetchParents({ page: newPage, limit });

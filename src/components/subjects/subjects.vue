@@ -90,7 +90,9 @@ const loading = computed(() => subjectStore.loading);
 const pageTitle = computed(() =>
   role.toLowerCase() === "parent"
     ? `${parentLabel.value}'s Subjects`
-    : "All Subjects",
+    : role.toLowerCase() === "teacher"
+      ? "My Subjects"
+      : "All Subjects",
 );
 const parentLabel = computed(() => selectedStudentName.value || "My Child");
 const emptyStateHeading = computed(() =>

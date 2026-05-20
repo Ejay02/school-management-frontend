@@ -1,7 +1,7 @@
 <template>
   <div class="rounded-lg border border-gray-300 p-4 w-full bg-gray-50">
     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold text-gray-700">Class Results</h2>
+      <h2 class="text-xl font-bold text-gray-700">My Results</h2>
 
       <div class="flex space-x-4">
         <!-- Class selection dropdown -->

@@ -3,7 +3,7 @@
     <div class="bg-white p-4 rounded-md flex-1 m-1 mt-0 shadow-xl">
       <!-- top -->
       <div class="border-b p-4">
-        <TopList :txt="'All Exams'" />
+        <TopList :txt="pageTitle" />
       </div>
 
       <LoadingScreen v-if="loading" message="Loading Exams..." />
@@ -43,12 +43,16 @@ import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
 import ExamsTable from "./examsTable.vue";
+import { useUserStore } from "../../store/userStore";
 
 const limit = 10;
 const currentPage = ref(1);
 const examStore = useExamStore();
+const userStore = useUserStore();
 const loading = computed(() => examStore.loading);
 const error = computed(() => examStore.error);
+const role = computed(() => userStore.currentRole?.toLowerCase());
+const pageTitle = computed(() => (role.value === "teacher" ? "My Exams" : "All Exams"));
 
 function handlePageChange(newPage) {
   currentPage.value = newPage;

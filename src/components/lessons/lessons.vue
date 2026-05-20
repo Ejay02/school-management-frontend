@@ -84,7 +84,11 @@ const role = computed(() => userStore.currentRole?.toLowerCase());
 const loading = computed(() => lessonStore.loading);
 const error = computed(() => lessonStore.error);
 const pageTitle = computed(() =>
-  role.value === "parent" ? `${parentLabel.value}'s Timetable` : "All Lessons",
+  role.value === "parent"
+    ? `${parentLabel.value}'s Timetable`
+    : role.value === "teacher"
+      ? "My Lessons"
+      : "All Lessons",
 );
 const parentLabel = computed(() => selectedStudentName.value || "My Child");
 const emptyStateHeading = computed(() =>

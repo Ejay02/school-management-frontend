@@ -3,7 +3,7 @@
     <div class="bg-white p-4 rounded-md flex-1 m-1 mt-0 shadow-xl">
       <!-- top -->
       <div class="border-b p-4">
-        <TopList :txt="'All Classes'" />
+        <TopList :txt="pageTitle" />
       </div>
 
       <LoadingScreen v-if="loading" message="Loading Classes..." />
@@ -53,6 +53,9 @@ const classStore = useClassStore();
 const userStore = useUserStore();
 
 const role = computed(() => userStore.currentRole);
+const pageTitle = computed(() =>
+  role.value?.toLowerCase?.() === "teacher" ? "My Classes" : "All Classes",
+);
 
 const loading = computed(() => classStore.loading);
 const error = computed(() => classStore.error);

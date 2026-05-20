@@ -89,6 +89,8 @@ const error = computed(() => assignmentStore.error);
 const pageTitle = computed(() =>
   role.value === "parent"
     ? `${parentLabel.value}'s Schoolwork`
+    : role.value === "teacher"
+      ? "My Assignments"
     : "All Assignments",
 );
 const parentLabel = computed(() => selectedStudentName.value || "My Child");

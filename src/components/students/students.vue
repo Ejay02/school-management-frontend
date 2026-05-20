@@ -3,7 +3,7 @@
     <div class="bg-white p-4 rounded-md flex-1 m-1 mt-0 shadow-xl">
       <!-- top -->
       <div class="border-b p-4">
-        <TopList :txt="'All Students'" />
+        <TopList :txt="pageTitle" />
       </div>
 
       <LoadingScreen v-if="loading" message="Loading Students..." />
@@ -44,13 +44,19 @@ import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import LoadingScreen from "../loadingScreen.vue";
 import StudentTable from "./studentTable.vue";
+import { useUserStore } from "../../store/userStore";
 
 const limit = 10;
 const currentPage = ref(1);
 const studentStore = useStudentStore();
+const userStore = useUserStore();
 
 const loading = computed(() => studentStore.loading);
 const error = computed(() => studentStore.error);
+const role = computed(() => userStore.currentRole?.toLowerCase());
+const pageTitle = computed(() =>
+  role.value === "teacher" ? "My Students" : "All Students",
+);
 
 watch(currentPage, (newPage) => {
   studentStore.fetchStudents({ page: newPage, limit });
