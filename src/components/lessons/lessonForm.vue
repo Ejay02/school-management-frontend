@@ -266,12 +266,21 @@ const applyCalendarPrefill = () => {
   const startTimeParam = route.query?.startTime;
   const endTimeParam = route.query?.endTime;
   const dateParam = route.query?.date;
+  const classNameParam = route.query?.className;
+  const subjectIdParam = route.query?.subjectId;
 
   if (typeof startTimeParam === "string" && startTimeParam) {
     startTime.value = startTimeParam;
   }
   if (typeof endTimeParam === "string" && endTimeParam) {
     endTime.value = endTimeParam;
+  }
+
+  if (typeof classNameParam === "string" && classNameParam) {
+    selectedClass.value = classNameParam;
+  }
+  if (typeof subjectIdParam === "string" && subjectIdParam) {
+    selectedSubject.value = subjectIdParam;
   }
 
   if (typeof dayParam === "string" && dayParam) {
@@ -347,6 +356,9 @@ onMounted(async () => {
   }
   if (!subjectStore.subjects.length) {
     await subjectStore.fetchSubjects();
+  }
+  if (!isEditing.value && selectedClass.value && route.query?.subjectId) {
+    await nextTick();
   }
   if (isEditing.value) {
     const { data } = await apolloClient.query({

@@ -479,6 +479,8 @@ const applyCalendarPrefill = () => {
   const dateParam = route.query?.date;
   const startTimeParam = route.query?.startTime;
   const endTimeParam = route.query?.endTime;
+  const classNameParam = route.query?.className;
+  const subjectIdParam = route.query?.subjectId;
 
   if (typeof dateParam === "string" && dateParam) {
     date.value = dateParam;
@@ -488,6 +490,12 @@ const applyCalendarPrefill = () => {
   }
   if (typeof endTimeParam === "string" && endTimeParam) {
     endTime.value = endTimeParam;
+  }
+  if (typeof classNameParam === "string" && classNameParam) {
+    selectedClass.value = classNameParam;
+  }
+  if (typeof subjectIdParam === "string" && subjectIdParam) {
+    selectedSubject.value = subjectIdParam;
   }
 };
 

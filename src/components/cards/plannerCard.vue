@@ -35,21 +35,62 @@
             <div class="text-sm text-gray-600 mb-4">
               {{ quickCreateLabel }}
             </div>
+            <div v-if="isTeacher" class="grid grid-cols-1 gap-4 mb-5">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >Class</label
+                >
+                <select
+                  v-model="selectedClassName"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                >
+                  <option
+                    v-for="name in classOptions"
+                    :key="name"
+                    :value="name"
+                  >
+                    {{ name }}
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >Subject</label
+                >
+                <select
+                  v-model="selectedSubjectId"
+                  :disabled="!selectedClassName"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <option value="" disabled>Select a subject</option>
+                  <option
+                    v-for="subject in subjectOptions"
+                    :key="subject.value"
+                    :value="subject.value"
+                  >
+                    {{ subject.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
             <div class="grid grid-cols-1 gap-3">
               <button
                 @click="goToCreate('lesson')"
+                :disabled="!canCreateWithSelection"
                 class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none"
               >
                 Add Lesson
               </button>
               <button
                 @click="goToCreate('exam')"
+                :disabled="!canCreateWithSelection"
                 class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none"
               >
                 Add Exam
               </button>
               <button
                 @click="goToCreate('assignment')"
+                :disabled="!canCreateWithSelection"
                 class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none"
               >
                 Add Assignment
@@ -77,10 +118,11 @@ import listPlugin from "@fullcalendar/list";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import FullCalendar from "@fullcalendar/vue3";
 
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import { useEventStore } from "../../store/eventStore.js";
+import { useClassStore } from "../../store/classStore";
 import { useUserStore } from "../../store/userStore";
 import {
   fetchCountry,
@@ -94,16 +136,77 @@ const calendarRef = ref(null);
 const holidaysFetched = ref(false);
 const eventStore = useEventStore();
 const userStore = useUserStore();
+const classStore = useClassStore();
 const router = useRouter();
 
 const showQuickCreateModal = ref(false);
 const quickCreateStart = ref(null);
 const quickCreateEnd = ref(null);
+const selectedClassName = ref("");
+const selectedSubjectId = ref("");
 
 const role = computed(() => String(userStore.currentRole || "").toLowerCase());
 const canQuickCreate = computed(() =>
   ["teacher", "admin", "super_admin"].includes(role.value),
 );
+
+const isTeacher = computed(() => role.value === "teacher");
+
+const classOptions = computed(() => {
+  return classStore.getClassNames?.map((c) => c.name) || [];
+});
+
+const subjectOptions = computed(() => {
+  if (!selectedClassName.value) return [];
+  const classObj = classStore.allClasses.find(
+    (c) => c.name === selectedClassName.value,
+  );
+  if (!classObj?.subjects?.length) return [];
+
+  if (!isTeacher.value) {
+    return classObj.subjects.map((s) => ({ value: s.id, label: s.name }));
+  }
+
+  const userId = userStore.userInfo?.id;
+  const isSupervisor = Boolean(
+    classObj?.supervisor?.id && classObj.supervisor.id === userId,
+  );
+  const subjects = isSupervisor
+    ? classObj.subjects
+    : classObj.subjects.filter((s) =>
+        (s?.teachers || []).some((t) => t?.id === userId),
+      );
+
+  return subjects.map((s) => ({ value: s.id, label: s.name }));
+});
+
+const canCreateWithSelection = computed(() => {
+  if (!isTeacher.value) return true;
+  return Boolean(selectedClassName.value && selectedSubjectId.value);
+});
+
+const selectionStorageKey = "plannerQuickCreateSelection";
+
+const loadSavedSelection = () => {
+  const raw = localStorage.getItem(selectionStorageKey);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
+
+const saveSelection = () => {
+  if (!selectedClassName.value) return;
+  localStorage.setItem(
+    selectionStorageKey,
+    JSON.stringify({
+      className: selectedClassName.value,
+      subjectId: selectedSubjectId.value || "",
+    }),
+  );
+};
 
 const formatDateForQuery = (date) => {
   if (!date) return "";
@@ -132,28 +235,77 @@ const openQuickCreate = (start, end) => {
   if (!canQuickCreate.value) return;
   quickCreateStart.value = start || null;
   quickCreateEnd.value = end || null;
+
+  if (!classStore.allClasses.length) {
+    classStore.fetchClasses({ page: 1, limit: 1000 });
+  }
+
+  const saved = loadSavedSelection();
+  if (saved?.className && typeof saved.className === "string") {
+    selectedClassName.value = saved.className;
+  } else if (!selectedClassName.value) {
+    selectedClassName.value = classOptions.value?.[0] || "";
+  }
+
+  if (saved?.subjectId && typeof saved.subjectId === "string") {
+    selectedSubjectId.value = saved.subjectId;
+  }
+
+  ensureValidSelection();
   showQuickCreateModal.value = true;
+};
+
+const ensureValidSelection = () => {
+  if (!isTeacher.value) return;
+  if (!selectedClassName.value) {
+    selectedSubjectId.value = "";
+    return;
+  }
+
+  const subjects = subjectOptions.value;
+  if (!subjects.length) {
+    selectedSubjectId.value = "";
+    return;
+  }
+
+  const hasSelected = subjects.some((s) => s.value === selectedSubjectId.value);
+  if (!hasSelected) {
+    selectedSubjectId.value = subjects[0].value;
+  }
 };
 
 const closeQuickCreate = () => {
   showQuickCreateModal.value = false;
   quickCreateStart.value = null;
   quickCreateEnd.value = null;
+  selectedClassName.value = "";
+  selectedSubjectId.value = "";
 };
 
 const goToCreate = (type) => {
   if (!quickCreateStart.value) return;
+  if (!canCreateWithSelection.value) return;
   const date = formatDateForQuery(quickCreateStart.value);
   const startTime = formatTimeForQuery(quickCreateStart.value);
   const endTime = formatTimeForQuery(quickCreateEnd.value);
   const day = getDayName(quickCreateStart.value);
+  const className = selectedClassName.value;
+  const subjectId = selectedSubjectId.value;
 
+  saveSelection();
   closeQuickCreate();
 
   if (type === "lesson") {
     router.push({
       path: "/dashboard/lesson/new",
-      query: { date, day, startTime, endTime },
+      query: {
+        date,
+        day,
+        startTime,
+        endTime,
+        className,
+        subjectId,
+      },
     });
     return;
   }
@@ -161,7 +313,13 @@ const goToCreate = (type) => {
   if (type === "exam") {
     router.push({
       path: "/dashboard/exam/new",
-      query: { date, startTime, endTime },
+      query: {
+        date,
+        startTime,
+        endTime,
+        className,
+        subjectId,
+      },
     });
     return;
   }
@@ -169,10 +327,29 @@ const goToCreate = (type) => {
   if (type === "assignment") {
     router.push({
       path: "/dashboard/assignment/new",
-      query: { startDate: date, dueDate: date },
+      query: {
+        startDate: date,
+        dueDate: date,
+        className,
+        subjectId,
+      },
     });
   }
 };
+
+watch(
+  () => selectedClassName.value,
+  () => {
+    ensureValidSelection();
+  },
+);
+
+watch(
+  () => subjectOptions.value,
+  () => {
+    ensureValidSelection();
+  },
+);
 
 const getStatusColor = (status) => {
   if (status === "CANCELLED") return "#FDA4AF";
@@ -561,7 +738,9 @@ onMounted(async () => {
 
 .fc-popover {
   border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 .fc-popover-header {
@@ -602,7 +781,10 @@ onMounted(async () => {
   background: white;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
   overflow: hidden;
   animation: tooltip-fade-in 0.2s ease-out;
 }

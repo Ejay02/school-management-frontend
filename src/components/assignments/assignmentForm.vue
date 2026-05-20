@@ -511,12 +511,24 @@ const applyCalendarPrefill = () => {
   if (isEditing.value) return;
   const startDateParam = route.query?.startDate;
   const dueDateParam = route.query?.dueDate;
+  const classNameParam = route.query?.className;
+  const subjectIdParam = route.query?.subjectId;
+  const lessonIdParam = route.query?.lessonId;
 
   if (typeof startDateParam === "string" && startDateParam) {
     startDate.value = startDateParam;
   }
   if (typeof dueDateParam === "string" && dueDateParam) {
     dueDate.value = dueDateParam;
+  }
+  if (typeof classNameParam === "string" && classNameParam) {
+    selectedClass.value = classNameParam;
+  }
+  if (typeof subjectIdParam === "string" && subjectIdParam) {
+    selectedSubject.value = subjectIdParam;
+  }
+  if (typeof lessonIdParam === "string" && lessonIdParam) {
+    selectedLesson.value = lessonIdParam;
   }
 };
 
