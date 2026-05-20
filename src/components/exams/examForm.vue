@@ -474,12 +474,29 @@ const classOptions = computed(() => {
 
 const isEditing = computed(() => route.params.id !== undefined);
 
+const applyCalendarPrefill = () => {
+  if (isEditing.value) return;
+  const dateParam = route.query?.date;
+  const startTimeParam = route.query?.startTime;
+  const endTimeParam = route.query?.endTime;
+
+  if (typeof dateParam === "string" && dateParam) {
+    date.value = dateParam;
+  }
+  if (typeof startTimeParam === "string" && startTimeParam) {
+    startTime.value = startTimeParam;
+  }
+  if (typeof endTimeParam === "string" && endTimeParam) {
+    endTime.value = endTimeParam;
+  }
+};
+
 const filteredSubjects = computed(() => {
   if (!selectedClass.value) return [];
 
   // Find the selected class object
   const classObj = classStore.allClasses.find(
-    (c) => c.name === selectedClass.value
+    (c) => c.name === selectedClass.value,
   );
 
   // Return the subjects from the selected class if available
@@ -492,10 +509,10 @@ const isTeacherForSubject = () => {
   // Instead of relying on the store's subject data, use the subject data from the class
   // which contains the necessary teacher information
   const classObj = classStore.allClasses.find(
-    (c) => c.name === selectedClass.value
+    (c) => c.name === selectedClass.value,
   );
   const subject = classObj?.subjects?.find(
-    (s) => s.id === selectedSubject.value
+    (s) => s.id === selectedSubject.value,
   );
 
   // If we're the supervisor of the class, we can create exams for any subject
@@ -640,6 +657,7 @@ const handleSubmit = async () => {
 
 // Load exam data if editing
 onMounted(async () => {
+  applyCalendarPrefill();
   if (!classStore.classes.length) {
     await classStore.fetchClasses();
   }

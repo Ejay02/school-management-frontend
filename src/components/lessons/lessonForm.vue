@@ -4,7 +4,7 @@
       <div
         class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-t-lg relative"
       >
-      <div class="absolute inset-0 pattern-dots opacity-10"></div>
+        <div class="absolute inset-0 pattern-dots opacity-10"></div>
         <div class="flex gap-2">
           <button
             @click="$router.back()"
@@ -189,6 +189,7 @@ import { useClassStore } from "../../store/classStore";
 import { useLessonStore } from "../../store/lessonStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
+import { useUserStore } from "../../store/userStore";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
 
@@ -198,6 +199,7 @@ const classStore = useClassStore();
 const lessonStore = useLessonStore();
 const subjectStore = useSubjectStore();
 const notificationStore = useNotificationStore();
+const userStore = useUserStore();
 
 // Form fields
 const title = ref("");
@@ -218,10 +220,23 @@ const classOptions = computed(() => {
 const filteredSubjects = computed(() => {
   if (!selectedClass.value) return [];
   const classObj = classStore.allClasses.find(
-    (c) => c.name === selectedClass.value
+    (c) => c.name === selectedClass.value,
   );
+  const role = String(userStore.currentRole || "").toLowerCase();
+  const userId = userStore.userInfo?.id;
+  const isSupervisor = Boolean(
+    classObj?.supervisor?.id && classObj.supervisor.id === userId,
+  );
+
+  const subjects =
+    role === "teacher" && !isSupervisor
+      ? classObj?.subjects?.filter((subject) =>
+          (subject?.teachers || []).some((t) => t?.id === userId),
+        )
+      : classObj?.subjects;
+
   return (
-    classObj?.subjects?.map((subject) => ({
+    subjects?.map((subject) => ({
       value: subject.id,
       label: subject.name,
     })) || []
@@ -242,6 +257,34 @@ const isFormValid = computed(() => {
 const getClassIdByName = (className) => {
   const classItem = classStore.getClassNames.find((c) => c.name === className);
   return classItem ? classItem.id : null;
+};
+
+const applyCalendarPrefill = () => {
+  if (isEditing.value) return;
+
+  const dayParam = route.query?.day;
+  const startTimeParam = route.query?.startTime;
+  const endTimeParam = route.query?.endTime;
+  const dateParam = route.query?.date;
+
+  if (typeof startTimeParam === "string" && startTimeParam) {
+    startTime.value = startTimeParam;
+  }
+  if (typeof endTimeParam === "string" && endTimeParam) {
+    endTime.value = endTimeParam;
+  }
+
+  if (typeof dayParam === "string" && dayParam) {
+    day.value = dayParam;
+    return;
+  }
+
+  if (typeof dateParam === "string" && dateParam) {
+    const d = new Date(`${dateParam}T00:00:00`);
+    if (!Number.isNaN(d.getTime())) {
+      day.value = d.toLocaleDateString("en-US", { weekday: "long" });
+    }
+  }
 };
 
 const handleSubmit = async () => {
@@ -298,6 +341,7 @@ const handleSubmit = async () => {
 
 // Load lesson data if editing
 onMounted(async () => {
+  applyCalendarPrefill();
   if (!classStore.classes.length) {
     await classStore.fetchClasses();
   }

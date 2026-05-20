@@ -447,8 +447,8 @@ const isAssignedTeacher = computed(() =>
   isAssignedToSelection(
     selectedClass.value,
     selectedSubject.value,
-    selectedLesson.value
-  )
+    selectedLesson.value,
+  ),
 );
 
 const classOptions = computed(() => {
@@ -458,7 +458,7 @@ const classOptions = computed(() => {
 const filteredLessons = computed(() => {
   if (!selectedSubject.value) return [];
   const subject = subjectStore.subjects.find(
-    (s) => s.id === selectedSubject.value
+    (s) => s.id === selectedSubject.value,
   );
   return subject?.lessons || [];
 });
@@ -466,7 +466,7 @@ const filteredLessons = computed(() => {
 const filteredSubjects = computed(() => {
   if (!selectedClass.value) return [];
   const classObj = classStore.allClasses.find(
-    (c) => c.name === selectedClass.value
+    (c) => c.name === selectedClass.value,
   );
   return classObj?.subjects || [];
 });
@@ -506,6 +506,19 @@ const removeOption = (questionIndex, optionIndex) => {
 };
 
 const isEditing = computed(() => route.params.id !== undefined);
+
+const applyCalendarPrefill = () => {
+  if (isEditing.value) return;
+  const startDateParam = route.query?.startDate;
+  const dueDateParam = route.query?.dueDate;
+
+  if (typeof startDateParam === "string" && startDateParam) {
+    startDate.value = startDateParam;
+  }
+  if (typeof dueDateParam === "string" && dueDateParam) {
+    dueDate.value = dueDateParam;
+  }
+};
 
 const isFormValid = computed(() => {
   // Basic form validation
@@ -578,9 +591,9 @@ const handleSubmit = async () => {
         },
       });
       notificationStore.addNotification({
-      type: "success",
-      message: "Assignment updated successfully!",
-    });
+        type: "success",
+        message: "Assignment updated successfully!",
+      });
     } else {
       await apolloClient.mutate({
         mutation: createAssignment,
@@ -589,12 +602,10 @@ const handleSubmit = async () => {
         },
       });
       notificationStore.addNotification({
-      type: "success",
-      message: "Assignment created successfully!",
-    });
+        type: "success",
+        message: "Assignment created successfully!",
+      });
     }
-
-   
 
     router.push("/assignments");
   } catch (error) {
@@ -611,6 +622,7 @@ watch(selectedSubject, () => {
 });
 
 onMounted(async () => {
+  applyCalendarPrefill();
   if (!classStore.classes.length) await classStore.fetchClasses();
   if (!subjectStore.subjects.length) await subjectStore.fetchSubjects();
   if (!lessonStore.lessons.length) lessonStore.fetchLessons();

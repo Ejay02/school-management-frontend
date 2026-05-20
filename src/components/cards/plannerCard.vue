@@ -11,6 +11,62 @@
         />
       </div>
     </div>
+
+    <transition name="fade">
+      <div
+        v-if="showQuickCreateModal"
+        class="fixed top-0 left-0 w-full h-full bg-gray-900/80 flex justify-center items-center z-50 p-4"
+        @click.self="closeQuickCreate"
+        :key="showQuickCreateModal"
+      >
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
+          <div
+            class="bg-gradient-to-br from-indigo-500 to-purple-600 p-5 rounded-t-xl flex justify-between items-center"
+          >
+            <h2 class="text-lg font-bold text-white">Add to Calendar</h2>
+            <button
+              @click="closeQuickCreate"
+              class="text-white hover:text-gray-200 transition-colors duration-200 h-8 w-8 rounded-full flex items-center justify-center hover:bg-white/20"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="p-6">
+            <div class="text-sm text-gray-600 mb-4">
+              {{ quickCreateLabel }}
+            </div>
+            <div class="grid grid-cols-1 gap-3">
+              <button
+                @click="goToCreate('lesson')"
+                class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none"
+              >
+                Add Lesson
+              </button>
+              <button
+                @click="goToCreate('exam')"
+                class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none"
+              >
+                Add Exam
+              </button>
+              <button
+                @click="goToCreate('assignment')"
+                class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none"
+              >
+                Add Assignment
+              </button>
+            </div>
+            <div class="flex justify-end mt-5">
+              <button
+                @click="closeQuickCreate"
+                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -22,8 +78,10 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import FullCalendar from "@fullcalendar/vue3";
 
 import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
 import { useEventStore } from "../../store/eventStore.js";
+import { useUserStore } from "../../store/userStore";
 import {
   fetchCountry,
   fetchHolidays,
@@ -35,6 +93,86 @@ const currentEvents = ref([]);
 const calendarRef = ref(null);
 const holidaysFetched = ref(false);
 const eventStore = useEventStore();
+const userStore = useUserStore();
+const router = useRouter();
+
+const showQuickCreateModal = ref(false);
+const quickCreateStart = ref(null);
+const quickCreateEnd = ref(null);
+
+const role = computed(() => String(userStore.currentRole || "").toLowerCase());
+const canQuickCreate = computed(() =>
+  ["teacher", "admin", "super_admin"].includes(role.value),
+);
+
+const formatDateForQuery = (date) => {
+  if (!date) return "";
+  return date.toISOString().split("T")[0];
+};
+
+const formatTimeForQuery = (date) => {
+  if (!date) return "";
+  return date.toTimeString().slice(0, 5);
+};
+
+const getDayName = (date) => {
+  if (!date) return "";
+  return date.toLocaleDateString("en-US", { weekday: "long" });
+};
+
+const quickCreateLabel = computed(() => {
+  if (!quickCreateStart.value) return "";
+  const date = formatDateForQuery(quickCreateStart.value);
+  const start = formatTimeForQuery(quickCreateStart.value);
+  const end = formatTimeForQuery(quickCreateEnd.value);
+  return `${date} • ${start}${end ? ` - ${end}` : ""}`;
+});
+
+const openQuickCreate = (start, end) => {
+  if (!canQuickCreate.value) return;
+  quickCreateStart.value = start || null;
+  quickCreateEnd.value = end || null;
+  showQuickCreateModal.value = true;
+};
+
+const closeQuickCreate = () => {
+  showQuickCreateModal.value = false;
+  quickCreateStart.value = null;
+  quickCreateEnd.value = null;
+};
+
+const goToCreate = (type) => {
+  if (!quickCreateStart.value) return;
+  const date = formatDateForQuery(quickCreateStart.value);
+  const startTime = formatTimeForQuery(quickCreateStart.value);
+  const endTime = formatTimeForQuery(quickCreateEnd.value);
+  const day = getDayName(quickCreateStart.value);
+
+  closeQuickCreate();
+
+  if (type === "lesson") {
+    router.push({
+      path: "/dashboard/lesson/new",
+      query: { date, day, startTime, endTime },
+    });
+    return;
+  }
+
+  if (type === "exam") {
+    router.push({
+      path: "/dashboard/exam/new",
+      query: { date, startTime, endTime },
+    });
+    return;
+  }
+
+  if (type === "assignment") {
+    router.push({
+      path: "/dashboard/assignment/new",
+      query: { startDate: date, dueDate: date },
+    });
+  }
+};
 
 const getStatusColor = (status) => {
   if (status === "CANCELLED") return "#FDA4AF";
@@ -99,7 +237,17 @@ const calendarOptions = ref({
   weekends: true,
   dateClick: function (info) {
     const calendarApi = info.view.calendar;
-    calendarApi.changeView("timeGridDay", info.dateStr);
+    if (String(info.view.type || "").startsWith("dayGrid")) {
+      calendarApi.changeView("timeGridDay", info.dateStr);
+      return;
+    }
+
+    const start = info.date;
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
+    openQuickCreate(start, end);
+  },
+  select: function (info) {
+    openQuickCreate(info.start, info.end);
   },
   eventClick: handleEventClick,
   eventsSet: handleEvents,
