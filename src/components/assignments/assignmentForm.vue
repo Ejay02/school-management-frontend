@@ -49,13 +49,25 @@
             <!-- Class and Subject Selection -->
             <div class="flex gap-4">
               <Dropdown
+                v-if="showClassSelect"
                 class="w-1/2"
                 v-model="selectedClass"
                 label="Select Class <span class='text-red-500'>*</span>"
                 :options="classOptions"
                 emptyLabel="Select a class"
               />
+              <div v-else class="w-1/2">
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >Class <span class="text-red-500">*</span></label
+                >
+                <div
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-700"
+                >
+                  {{ selectedClass }}
+                </div>
+              </div>
               <CustomDropdown
+                v-if="showSubjectSelect"
                 class="w-1/2"
                 v-model="selectedSubject"
                 label="Select Subject <span class='text-red-500'>*</span>"
@@ -68,6 +80,16 @@
                 placeholder="Select a subject"
                 :disabled="!selectedClass"
               />
+              <div v-else class="w-1/2">
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >Subject <span class="text-red-500">*</span></label
+                >
+                <div
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-700"
+                >
+                  {{ filteredSubjects[0]?.name || "" }}
+                </div>
+              </div>
 
               <CustomDropdown
                 class="w-1/2"
@@ -443,6 +465,9 @@ const selectedClass = ref("");
 const selectedSubject = ref("");
 const selectedLesson = ref("");
 
+const role = computed(() => String(userStore.currentRole || "").toLowerCase());
+const isTeacherRole = computed(() => role.value === "teacher");
+
 const isAssignedTeacher = computed(() =>
   isAssignedToSelection(
     selectedClass.value,
@@ -454,6 +479,10 @@ const isAssignedTeacher = computed(() =>
 const classOptions = computed(() => {
   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
 });
+
+const showClassSelect = computed(
+  () => !isTeacherRole.value || classOptions.value.length > 1,
+);
 
 const filteredLessons = computed(() => {
   if (!selectedSubject.value) return [];
@@ -470,6 +499,10 @@ const filteredSubjects = computed(() => {
   );
   return classObj?.subjects || [];
 });
+
+const showSubjectSelect = computed(
+  () => !isTeacherRole.value || filteredSubjects.value.length > 1,
+);
 
 const questions = ref([
   {
@@ -638,6 +671,19 @@ onMounted(async () => {
   if (!classStore.classes.length) await classStore.fetchClasses();
   if (!subjectStore.subjects.length) await subjectStore.fetchSubjects();
   if (!lessonStore.lessons.length) lessonStore.fetchLessons();
+
+  if (!isEditing.value && isTeacherRole.value) {
+    if (!selectedClass.value && classOptions.value.length === 1) {
+      selectedClass.value = classOptions.value[0];
+    }
+    if (
+      selectedClass.value &&
+      !selectedSubject.value &&
+      filteredSubjects.value.length === 1
+    ) {
+      selectedSubject.value = filteredSubjects.value[0].id;
+    }
+  }
 
   if (isEditing.value) {
     const { data } = await apolloClient.query({

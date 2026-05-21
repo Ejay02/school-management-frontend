@@ -639,6 +639,11 @@ export const getAllClasses = gql`
       subjects {
         id
         name
+        teachers {
+          id
+          name
+          surname
+        }
         lessons {
           id
           name

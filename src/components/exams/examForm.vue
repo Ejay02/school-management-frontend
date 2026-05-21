@@ -83,25 +83,42 @@
             <!-- Class and Subject Selection -->
             <div class="flex gap-4">
               <Dropdown
+                v-if="showClassSelect"
                 class="w-1/2"
                 v-model="selectedClass"
                 label="Select Class <span class='text-red-500'>*</span>"
                 :options="classOptions"
                 emptyLabel="Select a class"
               />
+              <div v-else class="w-1/2">
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >Class <span class="text-red-500">*</span></label
+                >
+                <div
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-700"
+                >
+                  {{ selectedClass }}
+                </div>
+              </div>
               <CustomDropdown
+                v-if="showSubjectSelect"
                 class="w-1/2"
                 v-model="selectedSubject"
                 label="Select Subject <span class='text-red-500'>*</span>"
-                :options="
-                  filteredSubjects.map((subject) => ({
-                    value: subject.id,
-                    label: subject.name,
-                  }))
-                "
+                :options="mappedSubjectOptions"
                 placeholder="Select a subject"
                 :disabled="!selectedClass"
               />
+              <div v-else class="w-1/2">
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >Subject <span class="text-red-500">*</span></label
+                >
+                <div
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-700"
+                >
+                  {{ mappedSubjectOptions[0]?.label || "" }}
+                </div>
+              </div>
             </div>
 
             <!-- Date and Time -->
@@ -468,9 +485,16 @@ const date = ref("");
 const startTime = ref("");
 const endTime = ref("");
 
+const role = computed(() => String(userStore.currentRole || "").toLowerCase());
+const isTeacherRole = computed(() => role.value === "teacher");
+
 const classOptions = computed(() => {
   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
 });
+
+const showClassSelect = computed(
+  () => !isTeacherRole.value || classOptions.value.length > 1,
+);
 
 const isEditing = computed(() => route.params.id !== undefined);
 
@@ -510,6 +534,17 @@ const filteredSubjects = computed(() => {
   // Return the subjects from the selected class if available
   return classObj?.subjects || [];
 });
+
+const mappedSubjectOptions = computed(() =>
+  filteredSubjects.value.map((subject) => ({
+    value: subject.id,
+    label: subject.name,
+  })),
+);
+
+const showSubjectSelect = computed(
+  () => !isTeacherRole.value || mappedSubjectOptions.value.length > 1,
+);
 
 const isTeacherForSubject = () => {
   if (!selectedSubject.value || !userId) return false;
@@ -671,6 +706,19 @@ onMounted(async () => {
   }
   if (!subjectStore.subjects.length) {
     await subjectStore.fetchSubjects();
+  }
+
+  if (!isEditing.value && isTeacherRole.value) {
+    if (!selectedClass.value && classOptions.value.length === 1) {
+      selectedClass.value = classOptions.value[0];
+    }
+    if (
+      selectedClass.value &&
+      !selectedSubject.value &&
+      mappedSubjectOptions.value.length === 1
+    ) {
+      selectedSubject.value = mappedSubjectOptions.value[0].value;
+    }
   }
 
   if (isEditing.value) {

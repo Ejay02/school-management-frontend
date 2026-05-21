@@ -40,7 +40,14 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1"
                   >Class</label
                 >
+                <div
+                  v-if="classOptions.length === 1"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-700"
+                >
+                  {{ classOptions[0] }}
+                </div>
                 <select
+                  v-else
                   v-model="selectedClassName"
                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 >
@@ -57,7 +64,14 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1"
                   >Subject</label
                 >
+                <div
+                  v-if="subjectOptions.length === 1"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-700"
+                >
+                  {{ subjectOptions[0].label }}
+                </div>
                 <select
+                  v-else
                   v-model="selectedSubjectId"
                   :disabled="!selectedClassName"
                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
@@ -168,14 +182,9 @@ const subjectOptions = computed(() => {
   }
 
   const userId = userStore.userInfo?.id;
-  const isSupervisor = Boolean(
-    classObj?.supervisor?.id && classObj.supervisor.id === userId,
+  const subjects = classObj.subjects.filter((s) =>
+    (s?.teachers || []).some((t) => t?.id === userId),
   );
-  const subjects = isSupervisor
-    ? classObj.subjects
-    : classObj.subjects.filter((s) =>
-        (s?.teachers || []).some((t) => t?.id === userId),
-      );
 
   return subjects.map((s) => ({ value: s.id, label: s.name }));
 });
@@ -231,13 +240,22 @@ const quickCreateLabel = computed(() => {
   return `${date} • ${start}${end ? ` - ${end}` : ""}`;
 });
 
-const openQuickCreate = (start, end) => {
+const openQuickCreate = async (start, end) => {
   if (!canQuickCreate.value) return;
   quickCreateStart.value = start || null;
   quickCreateEnd.value = end || null;
 
   if (!classStore.allClasses.length) {
-    classStore.fetchClasses({ page: 1, limit: 1000 });
+    await classStore.fetchClasses({ page: 1, limit: 1000 });
+  } else if (isTeacher.value) {
+    const firstClass = classStore.allClasses[0];
+    const firstSubject = firstClass?.subjects?.[0];
+    if (
+      firstSubject &&
+      !Object.prototype.hasOwnProperty.call(firstSubject, "teachers")
+    ) {
+      await classStore.refreshClasses();
+    }
   }
 
   const saved = loadSavedSelection();
@@ -348,6 +366,17 @@ watch(
   () => subjectOptions.value,
   () => {
     ensureValidSelection();
+  },
+);
+
+watch(
+  () => classOptions.value,
+  (next) => {
+    if (!isTeacher.value) return;
+    if (selectedClassName.value) return;
+    if (next.length === 1) {
+      selectedClassName.value = next[0];
+    }
   },
 );
 
