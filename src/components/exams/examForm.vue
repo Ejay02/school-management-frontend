@@ -633,6 +633,36 @@ const getClassIdByName = (className) => {
 
 const handleSubmit = async () => {
   try {
+    if (date.value) {
+      const day = new Date(`${date.value}T00:00:00`).getDay();
+      if (day === 0 || day === 6) {
+        notificationStore.addNotification({
+          type: "error",
+          message: "Exams can only be scheduled Monday to Friday.",
+        });
+        return;
+      }
+    }
+    if (startTime.value && endTime.value) {
+      const [sh, sm] = startTime.value.split(":").map((v) => Number(v));
+      const [eh, em] = endTime.value.split(":").map((v) => Number(v));
+      const startMinutes = sh * 60 + sm;
+      const endMinutes = eh * 60 + em;
+      if (endMinutes <= startMinutes) {
+        notificationStore.addNotification({
+          type: "error",
+          message: "End time must be after start time.",
+        });
+        return;
+      }
+      if (startMinutes < 9 * 60 || endMinutes > 14 * 60) {
+        notificationStore.addNotification({
+          type: "error",
+          message: "School hours are 9:00am to 2:00pm (Mon-Fri).",
+        });
+        return;
+      }
+    }
     const formattedDate = formatEventDate(date.value);
 
     // Create proper datetime strings by combining date and time

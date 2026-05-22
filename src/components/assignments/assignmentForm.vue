@@ -607,6 +607,32 @@ const getClassIdByName = (className) => {
 
 const handleSubmit = async () => {
   try {
+    const start = new Date(`${startDate.value}T00:00:00`);
+    const due = new Date(`${dueDate.value}T00:00:00`);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(due.getTime())) {
+      notificationStore.addNotification({
+        type: "error",
+        message: "Please enter valid start and due dates.",
+      });
+      return;
+    }
+    if (due.getTime() < start.getTime()) {
+      notificationStore.addNotification({
+        type: "error",
+        message: "Due date must be on or after start date.",
+      });
+      return;
+    }
+    const startDay = start.getDay();
+    const dueDay = due.getDay();
+    if (startDay === 0 || startDay === 6 || dueDay === 0 || dueDay === 6) {
+      notificationStore.addNotification({
+        type: "error",
+        message: "Assignments must be scheduled Monday to Friday.",
+      });
+      return;
+    }
+
     const assignmentData = {
       title: title.value,
       description: description.value,

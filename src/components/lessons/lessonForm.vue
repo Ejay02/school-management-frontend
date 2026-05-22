@@ -293,6 +293,40 @@ const getClassIdByName = (className) => {
   return classItem ? classItem.id : null;
 };
 
+const toWeekdayIndex = (dayLabel) => {
+  const normalized = String(dayLabel || "").trim().toLowerCase();
+  const map = {
+    sunday: 0,
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+    sun: 0,
+    mon: 1,
+    tue: 2,
+    tues: 2,
+    wed: 3,
+    thu: 4,
+    thur: 4,
+    thurs: 4,
+    fri: 5,
+    sat: 6,
+  };
+  return Object.prototype.hasOwnProperty.call(map, normalized)
+    ? map[normalized]
+    : null;
+};
+
+const toMinutes = (hhmm) => {
+  const [h, m] = String(hhmm || "")
+    .split(":")
+    .map((v) => Number(v));
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
+  return h * 60 + m;
+};
+
 const applyCalendarPrefill = () => {
   if (isEditing.value) return;
 
@@ -332,6 +366,46 @@ const applyCalendarPrefill = () => {
 
 const handleSubmit = async () => {
   try {
+    const weekdayIndex = toWeekdayIndex(day.value);
+    if (weekdayIndex === null) {
+      notificationStore.addNotification({
+        type: "error",
+        message: "Please select a valid weekday (Monday to Friday).",
+      });
+      return;
+    }
+    if (weekdayIndex === 0 || weekdayIndex === 6) {
+      notificationStore.addNotification({
+        type: "error",
+        message: "Lessons can only be scheduled Monday to Friday.",
+      });
+      return;
+    }
+
+    const startMinutes = toMinutes(startTime.value);
+    const endMinutes = toMinutes(endTime.value);
+    if (startMinutes === null || endMinutes === null) {
+      notificationStore.addNotification({
+        type: "error",
+        message: "Please enter a valid start and end time.",
+      });
+      return;
+    }
+    if (endMinutes <= startMinutes) {
+      notificationStore.addNotification({
+        type: "error",
+        message: "End time must be after start time.",
+      });
+      return;
+    }
+    if (startMinutes < 9 * 60 || endMinutes > 14 * 60) {
+      notificationStore.addNotification({
+        type: "error",
+        message: "School hours are 9:00am to 2:00pm (Mon-Fri).",
+      });
+      return;
+    }
+
     const formattedContent = content.value || "";
     const formattedDescription = description.value || "";
 
