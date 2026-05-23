@@ -5,6 +5,25 @@ import { getAttendances, getSchoolAttendanceStats } from "../graphql/queries";
 
 const attendanceListRequests = new Map();
 const schoolStatsRequests = new Map();
+const pendingAttendanceStorageKey = "pendingAttendanceQueue";
+
+const readPendingQueue = () => {
+  const raw = localStorage.getItem(pendingAttendanceStorageKey);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const writePendingQueue = (queue) => {
+  localStorage.setItem(
+    pendingAttendanceStorageKey,
+    JSON.stringify(queue || []),
+  );
+};
 
 export const useAttendanceStore = defineStore("attendanceStore", {
   state: () => ({
@@ -26,6 +45,83 @@ export const useAttendanceStore = defineStore("attendanceStore", {
   }),
 
   actions: {
+    async flushPendingAttendance() {
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        return { flushed: 0, remaining: readPendingQueue().length };
+      }
+
+      const queue = readPendingQueue();
+      if (!queue.length) return { flushed: 0, remaining: 0 };
+
+      let flushed = 0;
+      const remaining = [];
+
+      for (const item of queue) {
+        try {
+          await apolloClient.mutate({
+            mutation: markAttendance,
+            variables: {
+              lessonId: item.lessonId,
+              attendanceData: item.attendanceData,
+            },
+          });
+          flushed += 1;
+        } catch {
+          remaining.push(item);
+        }
+      }
+
+      writePendingQueue(remaining);
+      if (flushed) {
+        await this.fetchAttendance();
+      }
+      return { flushed, remaining: remaining.length };
+    },
+
+    async markAttendanceBulk(lessonId, attendanceData) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const res = await apolloClient.mutate({
+          mutation: markAttendance,
+          variables: {
+            lessonId,
+            attendanceData,
+          },
+        });
+
+        await this.fetchAttendance();
+
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        await this.fetchSchoolAttendanceStats(thirtyDaysAgo, today);
+
+        return { queued: false, data: res.data.markAttendance };
+      } catch (error) {
+        const isOffline =
+          typeof navigator !== "undefined" && navigator.onLine === false;
+
+        const isNetworkError = Boolean(error && error.networkError);
+
+        if (isOffline || isNetworkError) {
+          const queue = readPendingQueue();
+          queue.push({
+            lessonId,
+            attendanceData,
+            createdAt: new Date().toISOString(),
+          });
+          writePendingQueue(queue);
+          return { queued: true, data: [] };
+        }
+
+        this.error = error.message || "Error marking attendance";
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
     calculateAttendanceStats(startDate, endDate) {
       const labels = ["Mon", "Tue", "Wed", "Thu", "Fri"];
       const present = [0, 0, 0, 0, 0];

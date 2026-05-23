@@ -140,11 +140,23 @@
                   <span
                     :class="{
                       'px-2 py-1 rounded-full text-xs': true,
-                      'bg-green-100 text-green-800': record?.present,
+                      'bg-green-100 text-green-800':
+                        record?.present &&
+                        record?.status !== 'LATE' &&
+                        record?.status !== 'EARLY_LEAVE',
+                      'bg-amber-100 text-amber-800':
+                        record?.status === 'LATE' ||
+                        record?.status === 'EARLY_LEAVE',
                       'bg-red-100 text-red-800': !record?.present,
                     }"
                   >
-                    {{ record?.present ? "Present" : "Absent" }}
+                    {{
+                      record?.status
+                        ? formatAttendanceStatus(record.status)
+                        : record?.present
+                          ? "Present"
+                          : "Absent"
+                    }}
                   </span>
                 </td>
               </tr>
@@ -204,6 +216,17 @@
           @click="setAttendanceEntryMode('session')"
         >
           Session QR
+        </button>
+        <button
+          class="px-4 py-2 text-sm font-medium rounded-md transition"
+          :class="
+            attendanceEntryMode === 'speed'
+              ? 'bg-indigo-600 text-white'
+              : 'text-gray-600 hover:text-indigo-600'
+          "
+          @click="setAttendanceEntryMode('speed')"
+        >
+          Speed
         </button>
       </div>
 
@@ -445,6 +468,21 @@
             />
           </div>
 
+          <div v-if="attendanceEntryMode === 'speed'" class="mb-4 flex gap-2">
+            <button
+              class="rounded-md bg-green-100 px-3 py-2 text-sm font-medium text-green-700 hover:bg-green-200"
+              @click="markAllPresent"
+            >
+              Mark all present
+            </button>
+            <button
+              class="rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+              @click="clearAllMarks"
+            >
+              Clear
+            </button>
+          </div>
+
           <div class="overflow-x-auto">
             <div
               v-if="loadingStudents"
@@ -476,6 +514,12 @@
                     Status
                   </th>
                   <th
+                    v-if="attendanceEntryMode === 'speed'"
+                    class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Reason
+                  </th>
+                  <th
                     class="py-2 px-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     Action
@@ -496,9 +540,12 @@
                       :class="{
                         'px-2 py-1 rounded-full text-xs': true,
                         'bg-green-100 text-green-700':
-                          studentAttendance[student.id],
+                          studentAttendance[student.id] === 'PRESENT',
+                        'bg-amber-100 text-amber-700':
+                          studentAttendance[student.id] === 'LATE' ||
+                          studentAttendance[student.id] === 'EARLY_LEAVE',
                         'bg-red-100 text-red-700':
-                          studentAttendance[student.id] === false,
+                          studentAttendance[student.id] === 'ABSENT',
                         'bg-gray-100 text-gray-600':
                           studentAttendance[student.id] === undefined,
                       }"
@@ -506,30 +553,90 @@
                       {{
                         studentAttendance[student.id] === undefined
                           ? "Not marked"
-                          : studentAttendance[student.id]
-                            ? "Present"
-                            : "Absent"
+                          : formatAttendanceStatus(
+                              studentAttendance[student.id],
+                            )
                       }}
                     </span>
+                  </td>
+                  <td
+                    v-if="attendanceEntryMode === 'speed'"
+                    class="py-2 px-3 text-sm"
+                  >
+                    <div class="flex gap-2">
+                      <select
+                        v-if="
+                          studentAttendance[student.id] === 'ABSENT' ||
+                          studentAttendance[student.id] === 'LATE' ||
+                          studentAttendance[student.id] === 'EARLY_LEAVE'
+                        "
+                        v-model="studentAttendanceReason[student.id]"
+                        class="w-full rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      >
+                        <option value="">Select reason (optional)</option>
+                        <option value="Sick">Sick</option>
+                        <option value="Family emergency">
+                          Family emergency
+                        </option>
+                        <option value="Transport issue">Transport issue</option>
+                        <option value="Permission/Excused">
+                          Permission/Excused
+                        </option>
+                        <option value="Other">Other</option>
+                      </select>
+                      <input
+                        v-if="
+                          (studentAttendance[student.id] === 'ABSENT' ||
+                            studentAttendance[student.id] === 'LATE' ||
+                            studentAttendance[student.id] === 'EARLY_LEAVE') &&
+                          studentAttendanceReason[student.id] === 'Other'
+                        "
+                        v-model="studentAttendanceReasonOther[student.id]"
+                        placeholder="Reason"
+                        class="w-full rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </div>
                   </td>
                   <td class="py-2 px-3 text-sm text-center">
                     <div class="flex justify-center gap-2">
                       <button
-                        @click="markStudentAttendance(student.id, true)"
+                        @click="setStudentStatus(student.id, 'PRESENT')"
                         class="px-2 py-1 bg-green-200 text-green-700 text-xs rounded hover:bg-green-300 transition-colors"
                         :class="{
                           'ring-1 ring-inset ring-green-600/20':
-                            studentAttendance[student.id] === true,
+                            studentAttendance[student.id] === 'PRESENT',
                         }"
                       >
                         Present
                       </button>
                       <button
-                        @click="markStudentAttendance(student.id, false)"
+                        v-if="attendanceEntryMode === 'speed'"
+                        @click="setStudentStatus(student.id, 'LATE')"
+                        class="px-2 py-1 bg-amber-200 text-amber-800 text-xs rounded hover:bg-amber-300 transition-colors"
+                        :class="{
+                          'ring-1 ring-inset ring-amber-600/20':
+                            studentAttendance[student.id] === 'LATE',
+                        }"
+                      >
+                        Late
+                      </button>
+                      <button
+                        v-if="attendanceEntryMode === 'speed'"
+                        @click="setStudentStatus(student.id, 'EARLY_LEAVE')"
+                        class="px-2 py-1 bg-amber-200 text-amber-800 text-xs rounded hover:bg-amber-300 transition-colors"
+                        :class="{
+                          'ring-1 ring-inset ring-amber-600/20':
+                            studentAttendance[student.id] === 'EARLY_LEAVE',
+                        }"
+                      >
+                        Left early
+                      </button>
+                      <button
+                        @click="setStudentStatus(student.id, 'ABSENT')"
                         class="px-2 py-1 bg-red-200 text-red-700 text-xs rounded hover:bg-red-300 transition-colors"
                         :class="{
                           'ring-1 ring-inset ring-red-600/10':
-                            studentAttendance[student.id] === false,
+                            studentAttendance[student.id] === 'ABSENT',
                         }"
                       >
                         Absent
@@ -604,6 +711,8 @@ const selectedLesson = ref("");
 const selectedDate = ref(new Date().toISOString().split("T")[0]); // Today's date
 const studentSearchQuery = ref("");
 const studentAttendance = ref({});
+const studentAttendanceReason = ref({});
+const studentAttendanceReasonOther = ref({});
 const loadingStudents = ref(false);
 const actionLoadingId = ref("");
 const videoEl = ref(null);
@@ -994,6 +1103,8 @@ function toggleMarkAttendanceMode() {
     selectedLesson.value = "";
     selectedDate.value = new Date().toISOString().split("T")[0];
     studentAttendance.value = {};
+    studentAttendanceReason.value = {};
+    studentAttendanceReasonOther.value = {};
     scannedIds.value = new Set();
     manualStudentId.value = "";
     stopAttendanceSession();
@@ -1011,9 +1122,20 @@ function toggleMarkAttendanceMode() {
   }
 }
 
+const handleOnline = async () => {
+  const result = await attendanceStore.flushPendingAttendance();
+  if (result?.flushed) {
+    notificationStore.addNotification({
+      type: "success",
+      message: "Offline attendance synced.",
+    });
+  }
+};
+
 onUnmounted(() => {
   stopQrScan();
   stopAttendanceSession();
+  window.removeEventListener("online", handleOnline);
 });
 
 // Initialize attendance object for all applicable students
@@ -1021,6 +1143,8 @@ function initializeStudentAttendance() {
   if (!selectedLesson.value) return;
 
   studentAttendance.value = {};
+  studentAttendanceReason.value = {};
+  studentAttendanceReasonOther.value = {};
 
   // Get students who should be marked for this lesson
   const relevantStudents = filteredStudents.value;
@@ -1028,13 +1152,47 @@ function initializeStudentAttendance() {
   // Initialize attendance state for each student
   relevantStudents.forEach((student) => {
     studentAttendance.value[student.id] = undefined;
+    studentAttendanceReason.value[student.id] = "";
+    studentAttendanceReasonOther.value[student.id] = "";
   });
 }
 
-// Mark a student's attendance
-function markStudentAttendance(studentId, isPresent) {
-  studentAttendance.value[studentId] = isPresent;
-}
+const formatAttendanceStatus = (status) => {
+  if (status === "PRESENT") return "Present";
+  if (status === "ABSENT") return "Absent";
+  if (status === "LATE") return "Late";
+  if (status === "EARLY_LEAVE") return "Left early";
+  return String(status || "");
+};
+
+const setStudentStatus = (studentId, status) => {
+  const nextStatus = String(status || "")
+    .trim()
+    .toUpperCase();
+  if (!nextStatus) {
+    studentAttendance.value[studentId] = undefined;
+    studentAttendanceReason.value[studentId] = "";
+    studentAttendanceReasonOther.value[studentId] = "";
+    return;
+  }
+  studentAttendance.value[studentId] = nextStatus;
+  if (nextStatus === "PRESENT") {
+    studentAttendanceReason.value[studentId] = "";
+    studentAttendanceReasonOther.value[studentId] = "";
+  }
+};
+
+const markAllPresent = () => {
+  filteredStudents.value.forEach((student) => {
+    setStudentStatus(student.id, "PRESENT");
+  });
+};
+
+const clearAllMarks = () => {
+  Object.keys(studentAttendance.value || {}).forEach((studentId) => {
+    setStudentStatus(studentId, "");
+  });
+};
 
 // Save attendance changes
 async function saveAttendance() {
@@ -1060,40 +1218,51 @@ async function saveAttendance() {
     return;
   }
 
-  attendanceStore.loading = true;
-
   try {
-    // Prepare data for backend
-    // Build attendance records array (each record for one student)
     const attendanceData = Object.entries(studentAttendance.value)
       .filter(([_, status]) => status !== undefined)
-      .map(([studentId, isPresent]) => ({
-        studentId,
-        lessonId: selectedLesson.value,
-        classId: selectedClass.value,
-        date: selectedDate.value,
-        present: isPresent,
-      }));
-
-    for (const record of attendanceData) {
-      await attendanceStore.markAttendance(record.lessonId, {
-        studentId: record.studentId,
-        present: record.present,
-        date: record.date,
+      .map(([studentId, status]) => {
+        const normalized = String(status || "")
+          .trim()
+          .toUpperCase();
+        const present = normalized === "ABSENT" ? false : true;
+        const reasonSelection =
+          studentAttendanceReason.value?.[studentId] || "";
+        const otherText = studentAttendanceReasonOther.value?.[studentId] || "";
+        const reason =
+          reasonSelection === "Other"
+            ? String(otherText || "").trim()
+            : String(reasonSelection || "").trim();
+        return {
+          studentId,
+          present,
+          status: normalized,
+          reason: reason || null,
+          date: selectedDate.value,
+        };
       });
-    }
+
+    const result = await attendanceStore.markAttendanceBulk(
+      selectedLesson.value,
+      attendanceData,
+    );
 
     // Reset form and exit mark attendance mode
     markAttendanceMode.value = false;
 
-    // Refresh the attendance records
     await attendanceStore.fetchAttendance({
       studentId: selectedStudentId.value,
+    });
+
+    notificationStore.addNotification({
+      type: "success",
+      message: result?.queued
+        ? "Saved offline. Attendance will sync when you're back online."
+        : "Attendance saved.",
     });
   } catch (err) {
     attendanceStore.error = "Failed to save attendance";
   } finally {
-    attendanceStore.loading = false;
   }
 }
 
@@ -1107,6 +1276,8 @@ watch([searchQuery, filterStatus], () => {
 watch(selectedClass, () => {
   selectedLesson.value = "";
   studentAttendance.value = {};
+  studentAttendanceReason.value = {};
+  studentAttendanceReasonOther.value = {};
 });
 
 // Update student attendance state when lesson changes
@@ -1115,6 +1286,8 @@ watch(selectedLesson, () => {
     initializeStudentAttendance();
   } else {
     studentAttendance.value = {};
+    studentAttendanceReason.value = {};
+    studentAttendanceReasonOther.value = {};
   }
 });
 
@@ -1125,6 +1298,9 @@ onMounted(async () => {
     classStore.fetchClasses();
     lessonStore.fetchLessons();
   }
+
+  window.addEventListener("online", handleOnline);
+  await handleOnline();
 });
 
 watch(selectedStudentId, async (studentId) => {

@@ -363,6 +363,8 @@ export const markAttendance = gql`
       id
       date
       present
+      status
+      reason
       studentId
       lessonId
       student {
@@ -395,6 +397,8 @@ export const checkInAttendance = gql`
       id
       date
       present
+      status
+      reason
       studentId
       lessonId
       classId

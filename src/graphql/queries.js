@@ -1098,6 +1098,8 @@ export const getAttendances = gql`
       id
       date
       present
+      status
+      reason
       studentId
       createdAt
       updatedAt
