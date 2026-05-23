@@ -806,12 +806,8 @@ const subjectOptions = computed(() => {
   if (!classObj?.subjects?.length) return [];
 
   const userId = userStore.userInfo?.id;
-  const isSupervisor = Boolean(
-    userId && classObj?.supervisor?.id && classObj.supervisor.id === userId,
-  );
-
   const subjects =
-    isTeacher.value && !isSupervisor && userId
+    isTeacher.value && userId
       ? classObj.subjects.filter((s) =>
           (s?.teachers || []).some((t) => t?.id === userId),
         )
