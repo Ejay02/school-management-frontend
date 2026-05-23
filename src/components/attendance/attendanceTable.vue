@@ -258,17 +258,22 @@
 
         <div>
           <CustomDropdown
-            v-model="selectedLesson"
-            label="Select Lesson"
-            :options="
-              filteredLessons.map((lesson) => ({
-                value: lesson.id,
-                label: lesson.name,
-              }))
-            "
-            placeholder="Select a lesson"
+            v-if="showSubjectSelect"
+            v-model="selectedSubject"
+            label="Select Subject"
+            :options="subjectOptions"
+            placeholder="Select a subject"
             :disabled="!selectedClass"
           />
+          <div v-else>
+            <label
+              class="block text-sm text-gray-600 mb-1 focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
+              >Subject</label
+            >
+            <div class="border rounded p-2 w-full bg-gray-50 text-gray-700">
+              {{ subjectOptions[0]?.label || "" }}
+            </div>
+          </div>
         </div>
 
         <div>
@@ -285,7 +290,7 @@
         </div>
       </div>
 
-      <div v-if="selectedClass && selectedLesson && selectedDate">
+      <div v-if="selectedClass && selectedSubject && selectedDate">
         <div
           v-if="attendanceEntryMode === 'session'"
           class="rounded-lg border border-gray-200 bg-white p-4"
@@ -675,7 +680,7 @@
         role="alert"
       >
         <p class="font-bold">Warning</p>
-        <p>Please select a class, lesson, and date to mark attendance.</p>
+        <p>Please select a class, subject, and date to mark attendance.</p>
       </div>
     </div>
   </div>
@@ -685,14 +690,13 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useAttendanceStore } from "../../store/attendanceStore";
 import { useClassStore } from "../../store/classStore";
-import { useLessonStore } from "../../store/lessonStore";
 import { useNotificationStore } from "../../store/notification";
 import { useParentLinkedStudents } from "../../composables/useParentLinkedStudents";
 import { useStudentStore } from "../../store/studentStore";
 import { useUserStore } from "../../store/userStore";
 import { formatDate } from "../../utils/date.holidays";
 import { apolloClient } from "../../../apollo-client";
-import { createAttendanceSession } from "../../graphql/mutations";
+import { createAttendanceSessionBySubject } from "../../graphql/mutations";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
@@ -702,7 +706,6 @@ const userStore = useUserStore();
 const studentStore = useStudentStore();
 const attendanceStore = useAttendanceStore();
 const classStore = useClassStore();
-const lessonStore = useLessonStore();
 const notificationStore = useNotificationStore();
 const { isParent, selectedStudentId } = useParentLinkedStudents();
 
@@ -723,7 +726,7 @@ const pageSize = 10;
 const markAttendanceMode = ref(false);
 const attendanceEntryMode = ref("manual");
 const selectedClass = ref("");
-const selectedLesson = ref("");
+const selectedSubject = ref("");
 const selectedDate = ref(new Date().toISOString().split("T")[0]); // Today's date
 const studentSearchQuery = ref("");
 const studentAttendance = ref({});
@@ -746,7 +749,6 @@ let sessionRefreshIntervalId = null;
 let sessionTickIntervalId = null;
 
 const error = computed(() => attendanceStore.error);
-const lessons = computed(() => lessonStore.lessons);
 const classes = computed(() => classStore.allClasses);
 const accessibleClasses = computed(() => {
   const all = classes.value || [];
@@ -787,23 +789,66 @@ const students = computed(() => studentStore.students);
 const loading = computed(() => attendanceStore.listLoading);
 const attendanceRecords = computed(() => attendanceStore.attendanceRecords);
 const canMarkAttendance = computed(() => {
-  if (!["teacher"].includes(userRole.value)) return false;
+  if (!isTeacher.value) return false;
   if (classStore.loading) return false;
-  const all = classes.value || [];
-  if (!all.length) return false;
-  return all.some((cls) =>
-    Array.isArray(cls?.subjects)
-      ? cls.subjects.some(
-          (subject) =>
-            Array.isArray(subject?.lessons) && subject.lessons.length,
-        )
-      : false,
-  );
+  return accessibleClasses.value.length > 0;
 });
 const markAttendanceDisabledMessage = computed(() => {
   if (classStore.loading) return "Loading classes...";
   return "No class assigned yet";
 });
+
+const subjectOptions = computed(() => {
+  if (!selectedClass.value) return [];
+  const classObj =
+    accessibleClasses.value.find((c) => c.id === selectedClass.value) ||
+    classes.value.find((c) => c.id === selectedClass.value);
+  if (!classObj?.subjects?.length) return [];
+
+  const userId = userStore.userInfo?.id;
+  const isSupervisor = Boolean(
+    userId && classObj?.supervisor?.id && classObj.supervisor.id === userId,
+  );
+
+  const subjects =
+    isTeacher.value && !isSupervisor && userId
+      ? classObj.subjects.filter((s) =>
+          (s?.teachers || []).some((t) => t?.id === userId),
+        )
+      : classObj.subjects;
+
+  return subjects.map((s) => ({ value: s.id, label: s.name }));
+});
+
+const showSubjectSelect = computed(
+  () => !isTeacher.value || subjectOptions.value.length > 1,
+);
+
+watch(
+  () => selectedClass.value,
+  () => {
+    selectedSubject.value = "";
+  },
+);
+
+watch(
+  () => subjectOptions.value,
+  (next) => {
+    if (!isTeacher.value) return;
+    if (!Array.isArray(next) || !next.length) {
+      selectedSubject.value = "";
+      return;
+    }
+
+    const selectedIsValid = next.some((s) => s.value === selectedSubject.value);
+    if (!selectedIsValid) {
+      selectedSubject.value = next.length === 1 ? next[0].value : "";
+    } else if (!selectedSubject.value && next.length === 1) {
+      selectedSubject.value = next[0].value;
+    }
+  },
+  { immediate: true },
+);
 
 // Add computed property for filtered records
 const filteredRecords = computed(() => {
@@ -846,28 +891,6 @@ const handlePageChange = async (newPage) => {
     studentId: selectedStudentId.value,
   });
 };
-
-// Get lessons for selected class
-const filteredLessons = computed(() => {
-  if (!selectedClass.value) return [];
-
-  // Find the selected class in the classes array
-  const currentClass = classes.value.find(
-    (cls) => cls.id === selectedClass.value,
-  );
-
-  if (!currentClass || !currentClass.subjects) return [];
-
-  // Flatten lessons from all subjects in the selected class
-  return currentClass.subjects.flatMap((subject) =>
-    subject.lessons.map((lesson) => ({
-      ...lesson,
-      subjectId: subject.id,
-      subjectName: subject.name,
-      classId: currentClass.id,
-    })),
-  );
-});
 
 // Filter attendance records
 const filteredAttendanceRecords = computed(() => {
@@ -932,7 +955,8 @@ let barcodeDetector = null;
 
 const startQrScan = async () => {
   cameraError.value = "";
-  if (!selectedLesson.value || !selectedDate.value) return;
+  if (!selectedClass.value || !selectedSubject.value || !selectedDate.value)
+    return;
 
   if (!("BarcodeDetector" in globalThis)) {
     cameraError.value =
@@ -1007,20 +1031,24 @@ const updateSessionRemaining = () => {
 
 const refreshSessionToken = async () => {
   sessionError.value = "";
-  if (!selectedLesson.value || !selectedDate.value) return;
+  if (!selectedClass.value || !selectedSubject.value || !selectedDate.value)
+    return;
 
   try {
     const { data } = await apolloClient.mutate({
-      mutation: createAttendanceSession,
+      mutation: createAttendanceSessionBySubject,
       variables: {
-        lessonId: selectedLesson.value,
+        classId: selectedClass.value,
+        subjectId: selectedSubject.value,
         date: new Date(selectedDate.value),
       },
       fetchPolicy: "no-cache",
     });
 
-    sessionQrPayload.value = data?.createAttendanceSession?.qrPayload || "";
-    sessionExpiresAt.value = data?.createAttendanceSession?.expiresAt || null;
+    sessionQrPayload.value =
+      data?.createAttendanceSessionBySubject?.qrPayload || "";
+    sessionExpiresAt.value =
+      data?.createAttendanceSessionBySubject?.expiresAt || null;
     updateSessionRemaining();
   } catch (e) {
     sessionError.value = "Unable to create attendance session.";
@@ -1112,15 +1140,25 @@ const submitScannedStudentId = async (studentIdValue) => {
 
   if (!studentId) return;
   if (scannedIds.value.has(studentId)) return;
-  if (!selectedLesson.value || !selectedDate.value) return;
+  if (!selectedClass.value || !selectedSubject.value || !selectedDate.value)
+    return;
 
   actionLoadingId.value = studentId;
   try {
-    await attendanceStore.markAttendance(selectedLesson.value, {
-      studentId,
-      present: true,
-      date: selectedDate.value,
-    });
+    await attendanceStore.markAttendanceBySubjectBulk(
+      selectedClass.value,
+      selectedSubject.value,
+      new Date(selectedDate.value),
+      [
+        {
+          studentId,
+          present: true,
+          status: "PRESENT",
+          reason: null,
+          date: new Date(selectedDate.value),
+        },
+      ],
+    );
 
     const next = new Set(scannedIds.value);
     next.add(studentId);
@@ -1151,7 +1189,7 @@ function toggleMarkAttendanceMode() {
     // Reset the form when entering mark attendance mode
     attendanceEntryMode.value = "manual";
     selectedClass.value = "";
-    selectedLesson.value = "";
+    selectedSubject.value = "";
     selectedDate.value = new Date().toISOString().split("T")[0];
     studentAttendance.value = {};
     studentAttendanceReason.value = {};
@@ -1160,12 +1198,9 @@ function toggleMarkAttendanceMode() {
     manualStudentId.value = "";
     stopAttendanceSession();
 
-    // Fetch classes and lessons if not already loaded
+    // Fetch classes if not already loaded
     if (classes.value.length === 0) {
       classStore.fetchClasses();
-    }
-    if (lessons.value.length === 0) {
-      lessonStore.fetchLessons();
     }
   } else {
     stopQrScan();
@@ -1191,7 +1226,7 @@ onUnmounted(() => {
 
 // Initialize attendance object for all applicable students
 function initializeStudentAttendance() {
-  if (!selectedLesson.value) return;
+  if (!selectedClass.value || !selectedSubject.value) return;
 
   studentAttendance.value = {};
   studentAttendanceReason.value = {};
@@ -1247,10 +1282,10 @@ const clearAllMarks = () => {
 
 // Save attendance changes
 async function saveAttendance() {
-  if (!selectedClass.value || !selectedLesson.value || !selectedDate.value) {
+  if (!selectedClass.value || !selectedSubject.value || !selectedDate.value) {
     notificationStore.addNotification({
       type: "error",
-      message: `Please select a class, lesson, and date`,
+      message: `Please select a class, subject, and date`,
     });
     return;
   }
@@ -1289,12 +1324,14 @@ async function saveAttendance() {
           present,
           status: normalized,
           reason: reason || null,
-          date: selectedDate.value,
+          date: new Date(selectedDate.value),
         };
       });
 
-    const result = await attendanceStore.markAttendanceBulk(
-      selectedLesson.value,
+    const result = await attendanceStore.markAttendanceBySubjectBulk(
+      selectedClass.value,
+      selectedSubject.value,
+      new Date(selectedDate.value),
       attendanceData,
     );
 
@@ -1323,17 +1360,17 @@ watch([searchQuery, filterStatus], () => {
   handlePageChange(1);
 });
 
-// Reset lesson when class changes
+// Reset subject when class changes
 watch(selectedClass, () => {
-  selectedLesson.value = "";
+  selectedSubject.value = "";
   studentAttendance.value = {};
   studentAttendanceReason.value = {};
   studentAttendanceReasonOther.value = {};
 });
 
-// Update student attendance state when lesson changes
-watch(selectedLesson, () => {
-  if (selectedLesson.value && students.value.length > 0) {
+// Update student attendance state when subject changes
+watch(selectedSubject, () => {
+  if (selectedSubject.value && students.value.length > 0) {
     initializeStudentAttendance();
   } else {
     studentAttendance.value = {};
@@ -1344,10 +1381,9 @@ watch(selectedLesson, () => {
 
 // Initialize data on component mount
 onMounted(async () => {
-  // Fetch classes and lessons
+  // Fetch classes
   if (userHasAccess.value) {
     await classStore.fetchClasses();
-    lessonStore.fetchLessons();
   }
 
   window.addEventListener("online", handleOnline);

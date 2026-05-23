@@ -257,7 +257,11 @@ export const setUserActiveStatus = gql`
     $isActive: Boolean!
     $reason: String
   ) {
-    setUserActiveStatus(targetId: $targetId, isActive: $isActive, reason: $reason) {
+    setUserActiveStatus(
+      targetId: $targetId
+      isActive: $isActive
+      reason: $reason
+    ) {
       ... on Admin {
         id
         adminRole: role
@@ -391,6 +395,24 @@ export const createAttendanceSession = gql`
   }
 `;
 
+export const createAttendanceSessionBySubject = gql`
+  mutation CreateAttendanceSessionBySubject(
+    $classId: String!
+    $subjectId: String!
+    $date: DateTime!
+  ) {
+    createAttendanceSessionBySubject(
+      classId: $classId
+      subjectId: $subjectId
+      date: $date
+    ) {
+      token
+      expiresAt
+      qrPayload
+    }
+  }
+`;
+
 export const checkInAttendance = gql`
   mutation CheckInAttendance($token: String!) {
     checkInAttendance(token: $token) {
@@ -402,6 +424,40 @@ export const checkInAttendance = gql`
       studentId
       lessonId
       classId
+    }
+  }
+`;
+
+export const markAttendanceBySubject = gql`
+  mutation MarkAttendanceBySubject(
+    $classId: String!
+    $subjectId: String!
+    $date: DateTime!
+    $attendanceData: [MarkAttendanceInput!]!
+  ) {
+    markAttendanceBySubject(
+      classId: $classId
+      subjectId: $subjectId
+      date: $date
+      attendanceData: $attendanceData
+    ) {
+      id
+      date
+      present
+      status
+      reason
+      studentId
+      lessonId
+      student {
+        name
+        surname
+      }
+      class {
+        name
+      }
+      lesson {
+        name
+      }
     }
   }
 `;

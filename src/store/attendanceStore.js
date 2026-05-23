@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { apolloClient } from "../../apollo-client";
-import { markAttendance } from "../graphql/mutations";
+import { markAttendance, markAttendanceBySubject } from "../graphql/mutations";
 import { getAttendances, getSchoolAttendanceStats } from "../graphql/queries";
 
 const attendanceListRequests = new Map();
@@ -58,13 +58,25 @@ export const useAttendanceStore = defineStore("attendanceStore", {
 
       for (const item of queue) {
         try {
-          await apolloClient.mutate({
-            mutation: markAttendance,
-            variables: {
-              lessonId: item.lessonId,
-              attendanceData: item.attendanceData,
-            },
-          });
+          if (item?.kind === "subject") {
+            await apolloClient.mutate({
+              mutation: markAttendanceBySubject,
+              variables: {
+                classId: item.classId,
+                subjectId: item.subjectId,
+                date: item.date,
+                attendanceData: item.attendanceData,
+              },
+            });
+          } else {
+            await apolloClient.mutate({
+              mutation: markAttendance,
+              variables: {
+                lessonId: item.lessonId,
+                attendanceData: item.attendanceData,
+              },
+            });
+          }
           flushed += 1;
         } catch {
           remaining.push(item);
@@ -107,6 +119,7 @@ export const useAttendanceStore = defineStore("attendanceStore", {
         if (isOffline || isNetworkError) {
           const queue = readPendingQueue();
           queue.push({
+            kind: "lesson",
             lessonId,
             attendanceData,
             createdAt: new Date().toISOString(),
@@ -338,6 +351,54 @@ export const useAttendanceStore = defineStore("attendanceStore", {
 
         return res.data.markAttendance;
       } catch (error) {
+        this.error = error.message || "Error marking attendance";
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async markAttendanceBySubjectBulk(classId, subjectId, date, attendanceData) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const res = await apolloClient.mutate({
+          mutation: markAttendanceBySubject,
+          variables: {
+            classId,
+            subjectId,
+            date,
+            attendanceData,
+          },
+        });
+
+        await this.fetchAttendance();
+
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        await this.fetchSchoolAttendanceStats(thirtyDaysAgo, today);
+
+        return { queued: false, data: res.data.markAttendanceBySubject };
+      } catch (error) {
+        const isOffline =
+          typeof navigator !== "undefined" && navigator.onLine === false;
+        const isNetworkError = Boolean(error && error.networkError);
+
+        if (isOffline || isNetworkError) {
+          const queue = readPendingQueue();
+          queue.push({
+            kind: "subject",
+            classId,
+            subjectId,
+            date,
+            attendanceData,
+            createdAt: new Date().toISOString(),
+          });
+          writePendingQueue(queue);
+          return { queued: true, data: [] };
+        }
+
         this.error = error.message || "Error marking attendance";
         throw error;
       } finally {
