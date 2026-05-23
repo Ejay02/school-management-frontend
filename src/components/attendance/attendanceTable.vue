@@ -234,13 +234,26 @@
       <div class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <CustomDropdown
+            v-if="showClassSelect"
             v-model="selectedClass"
             label="Select Class"
             :options="
-              classes.map((cls) => ({ value: cls.id, label: cls.name }))
+              accessibleClasses.map((cls) => ({
+                value: cls.id,
+                label: cls.name,
+              }))
             "
             placeholder="Select a class"
           />
+          <div v-else>
+            <label
+              class="block text-sm text-gray-600 mb-1 focus:outline-none focus:ring-0 focus:border-eduPurple cursor-pointer"
+              >Class</label
+            >
+            <div class="border rounded p-2 w-full bg-gray-50 text-gray-700">
+              {{ accessibleClasses[0]?.name || "" }}
+            </div>
+          </div>
         </div>
 
         <div>
@@ -695,6 +708,9 @@ const { isParent, selectedStudentId } = useParentLinkedStudents();
 
 const userRole = computed(() => userStore.currentRole);
 const userHasAccess = computed(() => ["teacher"].includes(userRole.value));
+const isTeacher = computed(
+  () => String(userRole.value || "").toLowerCase() === "teacher",
+);
 
 // Regular attendance view
 const limit = 10;
@@ -732,6 +748,41 @@ let sessionTickIntervalId = null;
 const error = computed(() => attendanceStore.error);
 const lessons = computed(() => lessonStore.lessons);
 const classes = computed(() => classStore.allClasses);
+const accessibleClasses = computed(() => {
+  const all = classes.value || [];
+  if (!isTeacher.value) return all;
+  const userId = userStore.userInfo?.id;
+  if (!userId) return all;
+
+  return all.filter((cls) => {
+    if (cls?.supervisor?.id && cls.supervisor.id === userId) return true;
+    const subjects = Array.isArray(cls?.subjects) ? cls.subjects : [];
+    return subjects.some((subject) => {
+      const teachers = Array.isArray(subject?.teachers) ? subject.teachers : [];
+      return teachers.some((t) => t?.id === userId);
+    });
+  });
+});
+
+const showClassSelect = computed(
+  () => !isTeacher.value || accessibleClasses.value.length > 1,
+);
+
+watch(
+  () => accessibleClasses.value,
+  (next) => {
+    if (!isTeacher.value) return;
+    if (!Array.isArray(next) || !next.length) return;
+
+    const selectedIsValid = next.some((c) => c.id === selectedClass.value);
+    if (!selectedIsValid) {
+      selectedClass.value = next.length === 1 ? next[0].id : "";
+    } else if (!selectedClass.value && next.length === 1) {
+      selectedClass.value = next[0].id;
+    }
+  },
+  { immediate: true },
+);
 const students = computed(() => studentStore.students);
 const loading = computed(() => attendanceStore.listLoading);
 const attendanceRecords = computed(() => attendanceStore.attendanceRecords);
@@ -1295,7 +1346,7 @@ watch(selectedLesson, () => {
 onMounted(async () => {
   // Fetch classes and lessons
   if (userHasAccess.value) {
-    classStore.fetchClasses();
+    await classStore.fetchClasses();
     lessonStore.fetchLessons();
   }
 
