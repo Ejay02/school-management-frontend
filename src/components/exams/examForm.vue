@@ -662,6 +662,13 @@ const handleSubmit = async () => {
         });
         return;
       }
+      if (startMinutes < 13 * 60 && endMinutes > 12 * 60) {
+        notificationStore.addNotification({
+          type: "error",
+          message: "Break time is 12:00pm to 1:00pm. Please choose another time.",
+        });
+        return;
+      }
     }
     const formattedDate = formatEventDate(date.value);
 

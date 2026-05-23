@@ -90,14 +90,14 @@
             <div class="grid grid-cols-1 gap-3">
               <button
                 @click="goToCreate('lesson')"
-                :disabled="!canCreateWithSelection"
+                :disabled="!canCreateWithSelection || isBreakSlot"
                 class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none"
               >
                 Add Lesson
               </button>
               <button
                 @click="goToCreate('exam')"
-                :disabled="!canCreateWithSelection"
+                :disabled="!canCreateWithSelection || isBreakSlot"
                 class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none"
               >
                 Add Exam
@@ -137,6 +137,7 @@ import { useRouter } from "vue-router";
 
 import { useEventStore } from "../../store/eventStore.js";
 import { useClassStore } from "../../store/classStore";
+import { useNotificationStore } from "../../store/notification";
 import { useUserStore } from "../../store/userStore";
 import {
   fetchCountry,
@@ -149,6 +150,7 @@ const currentEvents = ref([]);
 const calendarRef = ref(null);
 const holidaysFetched = ref(false);
 const eventStore = useEventStore();
+const notificationStore = useNotificationStore();
 const userStore = useUserStore();
 const classStore = useClassStore();
 const router = useRouter();
@@ -232,6 +234,50 @@ const getDayName = (date) => {
   return date.toLocaleDateString("en-US", { weekday: "long" });
 };
 
+const breakStartMinutes = 12 * 60;
+const breakEndMinutes = 13 * 60;
+
+const timeRangesOverlap = (aStart, aEnd, bStart, bEnd) => {
+  return aStart < bEnd && bStart < aEnd;
+};
+
+const isBreakOverlap = (rangeStart, rangeEnd) => {
+  if (!(rangeStart instanceof Date) || !(rangeEnd instanceof Date))
+    return false;
+  if (Number.isNaN(rangeStart.getTime()) || Number.isNaN(rangeEnd.getTime()))
+    return false;
+
+  const start = new Date(rangeStart);
+  const end = new Date(rangeEnd);
+  if (end.getTime() <= start.getTime()) return false;
+
+  const cursor = new Date(start);
+  cursor.setHours(0, 0, 0, 0);
+
+  while (cursor.getTime() < end.getTime()) {
+    const dayIndex = cursor.getDay();
+    const isWeekday = dayIndex >= 1 && dayIndex <= 5;
+    if (isWeekday) {
+      const breakStart = new Date(cursor);
+      breakStart.setHours(12, 0, 0, 0);
+      const breakEnd = new Date(cursor);
+      breakEnd.setHours(13, 0, 0, 0);
+
+      const aStart = Math.max(start.getTime(), breakStart.getTime());
+      const aEnd = Math.min(end.getTime(), breakEnd.getTime());
+      if (aStart < aEnd) return true;
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return false;
+};
+
+const isBreakSlot = computed(() => {
+  if (!quickCreateStart.value || !quickCreateEnd.value) return false;
+  return isBreakOverlap(quickCreateStart.value, quickCreateEnd.value);
+});
+
 const quickCreateLabel = computed(() => {
   if (!quickCreateStart.value) return "";
   const date = formatDateForQuery(quickCreateStart.value);
@@ -303,6 +349,13 @@ const closeQuickCreate = () => {
 const goToCreate = (type) => {
   if (!quickCreateStart.value) return;
   if (!canCreateWithSelection.value) return;
+  if (isBreakSlot.value && (type === "lesson" || type === "exam")) {
+    notificationStore.addNotification({
+      type: "error",
+      message: "Break time is 12:00pm to 1:00pm. Please choose another time.",
+    });
+    return;
+  }
   const date = formatDateForQuery(quickCreateStart.value);
   const startTime = formatTimeForQuery(quickCreateStart.value);
   const endTime = formatTimeForQuery(quickCreateEnd.value);
@@ -386,6 +439,73 @@ const getStatusColor = (status) => {
   return "#FAE27C";
 };
 
+const holidayEvents = ref([]);
+
+const getBreakEventsInRange = (rangeStart, rangeEnd) => {
+  const events = [];
+  if (!(rangeStart instanceof Date) || !(rangeEnd instanceof Date))
+    return events;
+  if (Number.isNaN(rangeStart.getTime()) || Number.isNaN(rangeEnd.getTime()))
+    return events;
+
+  const cursor = new Date(rangeStart);
+  cursor.setHours(0, 0, 0, 0);
+
+  while (cursor.getTime() < rangeEnd.getTime()) {
+    const dayIndex = cursor.getDay();
+    const isWeekday = dayIndex >= 1 && dayIndex <= 5;
+    if (isWeekday) {
+      const start = new Date(cursor);
+      start.setHours(12, 0, 0, 0);
+      const end = new Date(cursor);
+      end.setHours(13, 0, 0, 0);
+
+      const startMinutes = start.getHours() * 60 + start.getMinutes();
+      const endMinutes = end.getHours() * 60 + end.getMinutes();
+      if (
+        timeRangesOverlap(
+          startMinutes,
+          endMinutes,
+          breakStartMinutes,
+          breakEndMinutes,
+        )
+      ) {
+        events.push({
+          id: `break-${start.toISOString().split("T")[0]}`,
+          title: "Break",
+          start,
+          end,
+          backgroundColor: "#FDE68A",
+          borderColor: "#F59E0B",
+          textColor: "#92400E",
+          editable: false,
+          extendedProps: {
+            isBreak: true,
+          },
+        });
+      }
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return events;
+};
+
+const syncCalendarEvents = (rangeStart, rangeEnd) => {
+  const breakEvents = getBreakEventsInRange(rangeStart, rangeEnd);
+  const combined = [
+    ...holidayEvents.value,
+    ...userEvents.value,
+    ...breakEvents,
+  ];
+  calendarOptions.value.events = combined;
+
+  if (!calendarRef.value) return;
+  const calendarApi = calendarRef.value.getApi();
+  calendarApi.removeAllEvents();
+  calendarApi.addEventSource(combined);
+};
+
 // Fetch user events
 const userEvents = computed(() => {
   if (!eventStore.allEvents || eventStore.allEvents.length === 0) return [];
@@ -441,6 +561,9 @@ const calendarOptions = ref({
   },
 
   weekends: true,
+  datesSet: function (info) {
+    syncCalendarEvents(info.start, info.end);
+  },
   dateClick: function (info) {
     const calendarApi = info.view.calendar;
     if (String(info.view.type || "").startsWith("dayGrid")) {
@@ -589,18 +712,17 @@ onMounted(async () => {
     holidays.forEach((holiday) => {
       holiday.classNames = ["bg-green-300", "ring-green-600/20"]; // Add holiday styles
     });
+    holidayEvents.value = holidays;
 
     // Fetch events for the current user - only call fetchEvents once
     await eventStore.fetchEvents();
 
-    // Combine holidays and user events
-    calendarOptions.value.events = [...holidays, ...userEvents.value];
-
-    // Update the calendar with the latest events
     if (calendarRef.value) {
       const calendarApi = calendarRef.value.getApi();
-      calendarApi.removeAllEvents();
-      calendarApi.addEventSource(calendarOptions.value.events);
+      syncCalendarEvents(
+        calendarApi.view.activeStart,
+        calendarApi.view.activeEnd,
+      );
     }
 
     holidaysFetched.value = true;
@@ -608,6 +730,18 @@ onMounted(async () => {
     console.error("Error fetching calendar data:", error);
   }
 });
+
+watch(
+  () => userEvents.value,
+  () => {
+    if (!calendarRef.value) return;
+    const calendarApi = calendarRef.value.getApi();
+    syncCalendarEvents(
+      calendarApi.view.activeStart,
+      calendarApi.view.activeEnd,
+    );
+  },
+);
 </script>
 
 <style>
