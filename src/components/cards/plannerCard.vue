@@ -37,9 +37,18 @@
             </div>
             <div v-if="isTeacher" class="grid grid-cols-1 gap-4 mb-5">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
+                <label
+                  v-if="classOptions.length !== 1"
+                  for="quickCreateClass"
+                  class="block text-sm font-medium text-gray-700 mb-1"
                   >Class</label
                 >
+                <div
+                  v-else
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Class
+                </div>
                 <div
                   v-if="classOptions.length === 1"
                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-700"
@@ -48,6 +57,7 @@
                 </div>
                 <select
                   v-else
+                  id="quickCreateClass"
                   v-model="selectedClassName"
                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 >
@@ -61,9 +71,18 @@
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
+                <label
+                  v-if="subjectOptions.length !== 1"
+                  for="quickCreateSubject"
+                  class="block text-sm font-medium text-gray-700 mb-1"
                   >Subject</label
                 >
+                <div
+                  v-else
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Subject
+                </div>
                 <div
                   v-if="subjectOptions.length === 1"
                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-700"
@@ -72,6 +91,7 @@
                 </div>
                 <select
                   v-else
+                  id="quickCreateSubject"
                   v-model="selectedSubjectId"
                   :disabled="!selectedClassName"
                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
@@ -283,7 +303,8 @@ const quickCreateLabel = computed(() => {
   const date = formatDateForQuery(quickCreateStart.value);
   const start = formatTimeForQuery(quickCreateStart.value);
   const end = formatTimeForQuery(quickCreateEnd.value);
-  return `${date} • ${start}${end ? ` - ${end}` : ""}`;
+  const endPart = end ? ` - ${end}` : "";
+  return `${date} • ${start}${endPart}`;
 });
 
 const openQuickCreate = async (start, end) => {
@@ -296,10 +317,7 @@ const openQuickCreate = async (start, end) => {
   } else if (isTeacher.value) {
     const firstClass = classStore.allClasses[0];
     const firstSubject = firstClass?.subjects?.[0];
-    if (
-      firstSubject &&
-      !Object.prototype.hasOwnProperty.call(firstSubject, "teachers")
-    ) {
+    if (firstSubject && !Object.hasOwn(firstSubject, "teachers")) {
       await classStore.refreshClasses();
     }
   }
@@ -582,105 +600,7 @@ const calendarOptions = ref({
   eventsSet: handleEvents,
 
   eventDidMount: function (info) {
-    if (info.event.extendedProps.isUserEvent) {
-      const eventEl = info.el;
-
-      // Create tooltip element
-      const tooltip = document.createElement("div");
-      tooltip.className = "event-tooltip";
-      tooltip.style.display = "none";
-
-      // Get event data
-      const eventTitle = info.event.title;
-      const eventStatus = info.event.extendedProps.status || "";
-      const eventType = info.event.extendedProps.type || "";
-      const eventStart = info.event.start ? formatTime(info.event.start) : "";
-      const eventEnd = info.event.end ? formatTime(info.event.end) : "";
-      const eventLocation = info.event.extendedProps.location || "";
-
-      const statusColor = getStatusColor(eventStatus);
-
-      // Create tooltip content
-      tooltip.innerHTML = `
-      <div class="tooltip-container">
-        <div class="tooltip-header">
-          <div class="status-indicator" style="background-color: ${statusColor}"></div>
-          <div class="tooltip-title">${eventTitle}</div>
-        </div>
-        ${
-          eventStatus
-            ? `<div class="tooltip-detail"><i class="tooltip-icon status-icon"></i>Status: ${eventStatus}</div>`
-            : ""
-        }
-        ${
-          eventType
-            ? `<div class="tooltip-detail"><i class="tooltip-icon type-icon"></i>Type: ${eventType}</div>`
-            : ""
-        }
-        ${
-          eventStart
-            ? `<div class="tooltip-detail"><i class="tooltip-icon time-icon"></i>Start: ${eventStart}</div>`
-            : ""
-        }
-        ${
-          eventEnd
-            ? `<div class="tooltip-detail"><i class="tooltip-icon time-icon"></i>End: ${eventEnd}</div>`
-            : ""
-        }
-        ${
-          eventLocation
-            ? `<div class="tooltip-detail"><i class="tooltip-icon location-icon"></i>Location: ${eventLocation}</div>`
-            : ""
-        }
-      </div>
-    `;
-
-      document.body.appendChild(tooltip);
-
-      // Show tooltip on mouseover
-      eventEl.addEventListener("mouseover", function () {
-        const rect = eventEl.getBoundingClientRect();
-        tooltip.style.position = "absolute";
-        tooltip.style.left = rect.left + window.scrollX + "px";
-        tooltip.style.top = rect.bottom + window.scrollY + 5 + "px"; // 5px offset
-        tooltip.style.display = "block";
-      });
-
-      // Hide tooltip on mouseout
-      eventEl.addEventListener("mouseout", function () {
-        tooltip.style.display = "none";
-      });
-
-      // Clean up tooltip when event element is removed - REPLACE deprecated DOMNodeRemoved
-      // Create a MutationObserver to watch for the element being removed from DOM
-      const observer = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
-          // Check if our element was removed
-          if (
-            Array.from(mutation.removedNodes).includes(eventEl) ||
-            !document.body.contains(eventEl)
-          ) {
-            // Clean up the tooltip
-            if (tooltip && tooltip.parentNode) {
-              tooltip.parentNode.removeChild(tooltip);
-            }
-            // Disconnect the observer since we no longer need it
-            observer.disconnect();
-          }
-        });
-      });
-
-      // Start observing the parent element for child removals
-      if (eventEl.parentNode) {
-        observer.observe(eventEl.parentNode, {
-          childList: true,
-          subtree: true,
-        });
-
-        // Store the observer on the element for potential cleanup later
-        eventEl._tooltipObserver = observer;
-      }
-    }
+    mountUserEventTooltip(info);
   },
 
   eventTimeFormat: {
@@ -691,12 +611,122 @@ const calendarOptions = ref({
   },
 });
 
+function buildUserEventTooltipHtml({
+  title,
+  status,
+  type,
+  start,
+  end,
+  location,
+  statusColor,
+}) {
+  const details = [];
+  if (status) {
+    details.push(
+      `<div class="tooltip-detail"><i class="tooltip-icon status-icon"></i>Status: ${status}</div>`,
+    );
+  }
+  if (type) {
+    details.push(
+      `<div class="tooltip-detail"><i class="tooltip-icon type-icon"></i>Type: ${type}</div>`,
+    );
+  }
+  if (start) {
+    details.push(
+      `<div class="tooltip-detail"><i class="tooltip-icon time-icon"></i>Start: ${start}</div>`,
+    );
+  }
+  if (end) {
+    details.push(
+      `<div class="tooltip-detail"><i class="tooltip-icon time-icon"></i>End: ${end}</div>`,
+    );
+  }
+  if (location) {
+    details.push(
+      `<div class="tooltip-detail"><i class="tooltip-icon location-icon"></i>Location: ${location}</div>`,
+    );
+  }
+
+  return `<div class="tooltip-container">
+    <div class="tooltip-header">
+      <div class="status-indicator" style="background-color: ${statusColor}"></div>
+      <div class="tooltip-title">${title}</div>
+    </div>
+    ${details.join("")}
+  </div>`;
+}
+
+function mountUserEventTooltip(info) {
+  if (!info?.event?.extendedProps?.isUserEvent) return;
+  const eventEl = info.el;
+  if (!eventEl) return;
+
+  const tooltip = document.createElement("div");
+  tooltip.className = "event-tooltip";
+  tooltip.style.display = "none";
+
+  const eventTitle = info.event.title;
+  const eventStatus = info.event.extendedProps.status || "";
+  const eventType = info.event.extendedProps.type || "";
+  const eventStart = info.event.start ? formatTime(info.event.start) : "";
+  const eventEnd = info.event.end ? formatTime(info.event.end) : "";
+  const eventLocation = info.event.extendedProps.location || "";
+  const statusColor = getStatusColor(eventStatus);
+
+  tooltip.innerHTML = buildUserEventTooltipHtml({
+    title: eventTitle,
+    status: eventStatus,
+    type: eventType,
+    start: eventStart,
+    end: eventEnd,
+    location: eventLocation,
+    statusColor,
+  });
+
+  document.body.appendChild(tooltip);
+
+  const showTooltip = () => {
+    const rect = eventEl.getBoundingClientRect();
+    tooltip.style.position = "absolute";
+    tooltip.style.left = rect.left + globalThis.scrollX + "px";
+    tooltip.style.top = rect.bottom + globalThis.scrollY + 5 + "px";
+    tooltip.style.display = "block";
+  };
+
+  const hideTooltip = () => {
+    tooltip.style.display = "none";
+  };
+
+  eventEl.addEventListener("mouseover", showTooltip);
+  eventEl.addEventListener("mouseout", hideTooltip);
+
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (
+        Array.from(mutation.removedNodes).includes(eventEl) ||
+        !document.body.contains(eventEl)
+      ) {
+        tooltip.remove();
+        observer.disconnect();
+        break;
+      }
+    }
+  });
+
+  if (eventEl.parentNode) {
+    observer.observe(eventEl.parentNode, {
+      childList: true,
+      subtree: true,
+    });
+    eventEl._tooltipObserver = observer;
+  }
+}
+
 function handleEventClick(clickInfo) {
   // For user events, navigate to event details
   if (clickInfo.event.extendedProps.isUserEvent) {
     // Navigate to event details page
-    window.location.href = `/event/${clickInfo.event.id}`;
-    return;
+    globalThis.location.href = `/event/${clickInfo.event.id}`;
   }
 }
 
@@ -924,7 +954,6 @@ watch(
 }
 
 .fc-event {
-  /* border-radius: 4px; */
   border: none;
   padding: 0.25rem 0.5rem;
   border-radius: 0.375rem;
