@@ -114,7 +114,7 @@ export const useAttendanceStore = defineStore("attendanceStore", {
         const isOffline =
           typeof navigator !== "undefined" && navigator.onLine === false;
 
-        const isNetworkError = Boolean(error && error.networkError);
+        const isNetworkError = Boolean(error?.networkError);
 
         if (isOffline || isNetworkError) {
           const queue = readPendingQueue();
