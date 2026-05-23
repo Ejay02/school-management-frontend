@@ -251,7 +251,7 @@
               >Class</label
             >
             <div class="border rounded p-2 w-full bg-gray-50 text-gray-700">
-              {{ accessibleClasses[0]?.name || "" }}
+              {{ selectedClassLabel }}
             </div>
           </div>
         </div>
@@ -271,7 +271,7 @@
               >Subject</label
             >
             <div class="border rounded p-2 w-full bg-gray-50 text-gray-700">
-              {{ subjectOptions[0]?.label || "" }}
+              {{ selectedSubjectLabel }}
             </div>
           </div>
         </div>
@@ -824,6 +824,48 @@ const showSubjectSelect = computed(
   () => !isTeacher.value || subjectOptions.value.length > 1,
 );
 
+const selectedClassLabel = computed(() => {
+  if (!selectedClass.value) {
+    return accessibleClasses.value.length === 1
+      ? accessibleClasses.value[0].name
+      : "";
+  }
+  const cls =
+    accessibleClasses.value.find((c) => c.id === selectedClass.value) ||
+    classes.value.find((c) => c.id === selectedClass.value);
+  return cls?.name || "";
+});
+
+const selectedSubjectLabel = computed(() => {
+  if (!selectedSubject.value) {
+    return subjectOptions.value.length === 1
+      ? subjectOptions.value[0].label
+      : "";
+  }
+  const subj = subjectOptions.value.find(
+    (s) => s.value === selectedSubject.value,
+  );
+  return subj?.label || "";
+});
+
+const ensureDefaultSelections = () => {
+  if (!isTeacher.value) return;
+
+  const classList = accessibleClasses.value || [];
+  if (!selectedClass.value) {
+    if (classList.length === 1) selectedClass.value = classList[0].id;
+  } else if (!classList.some((c) => c.id === selectedClass.value)) {
+    selectedClass.value = classList.length === 1 ? classList[0].id : "";
+  }
+
+  const subjects = subjectOptions.value || [];
+  if (!selectedSubject.value) {
+    if (subjects.length === 1) selectedSubject.value = subjects[0].value;
+  } else if (!subjects.some((s) => s.value === selectedSubject.value)) {
+    selectedSubject.value = subjects.length === 1 ? subjects[0].value : "";
+  }
+};
+
 watch(
   () => selectedClass.value,
   () => {
@@ -848,6 +890,13 @@ watch(
     }
   },
   { immediate: true },
+);
+
+watch(
+  () => markAttendanceMode.value,
+  (open) => {
+    if (open) ensureDefaultSelections();
+  },
 );
 
 // Add computed property for filtered records
@@ -1175,7 +1224,7 @@ const submitScannedStudentId = async (studentIdValue) => {
 };
 
 // Toggle mark attendance mode
-function toggleMarkAttendanceMode() {
+async function toggleMarkAttendanceMode() {
   if (!markAttendanceMode.value && !canMarkAttendance.value) {
     notificationStore.addNotification({
       type: "error",
@@ -1200,8 +1249,9 @@ function toggleMarkAttendanceMode() {
 
     // Fetch classes if not already loaded
     if (classes.value.length === 0) {
-      classStore.fetchClasses();
+      await classStore.fetchClasses();
     }
+    ensureDefaultSelections();
   } else {
     stopQrScan();
     stopAttendanceSession();
