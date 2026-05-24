@@ -29,7 +29,12 @@
           <button
             v-if="markAttendanceMode"
             @click="saveAttendance"
+            :disabled="!canSubmitAttendanceForDate"
             class="px-3 py-1 bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-sm rounded hover:bg-indigo-300 transition-colors"
+            :class="{
+              'disabled:opacity-50 disabled:cursor-not-allowed':
+                !canSubmitAttendanceForDate,
+            }"
           >
             Save
           </button>
@@ -138,25 +143,12 @@
                 <td class="py-2 px-3 text-sm">{{ record?.lesson?.name }}</td>
                 <td class="py-2 px-3 text-sm">
                   <span
-                    :class="{
-                      'px-2 py-1 rounded-full text-xs': true,
-                      'bg-green-100 text-green-800':
-                        record?.present &&
-                        record?.status !== 'LATE' &&
-                        record?.status !== 'EARLY_LEAVE',
-                      'bg-amber-100 text-amber-800':
-                        record?.status === 'LATE' ||
-                        record?.status === 'EARLY_LEAVE',
-                      'bg-red-100 text-red-800': !record?.present,
-                    }"
+                    :class="[
+                      'px-2 py-1 rounded-full text-xs',
+                      getAttendanceChipClass(record),
+                    ]"
                   >
-                    {{
-                      record?.status
-                        ? formatAttendanceStatus(record.status)
-                        : record?.present
-                          ? "Present"
-                          : "Absent"
-                    }}
+                    {{ getAttendanceChipLabel(record) }}
                   </span>
                 </td>
               </tr>
@@ -290,6 +282,13 @@
         </div>
       </div>
 
+      <div
+        v-if="!canSubmitAttendanceForDate"
+        class="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
+      >
+        Attendance can only be marked Monday to Friday.
+      </div>
+
       <div v-if="selectedClass && selectedSubject && selectedDate">
         <div
           v-if="attendanceEntryMode === 'session'"
@@ -313,6 +312,11 @@
                 v-if="!sessionActive"
                 class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500"
                 @click="startAttendanceSession"
+                :disabled="!canSubmitAttendanceForDate"
+                :class="{
+                  'disabled:opacity-50 disabled:cursor-not-allowed':
+                    !canSubmitAttendanceForDate,
+                }"
               >
                 Start session
               </button>
@@ -398,6 +402,11 @@
                   v-if="!isScanning"
                   class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500"
                   @click="startQrScan"
+                  :disabled="!canSubmitAttendanceForDate"
+                  :class="{
+                    'disabled:opacity-50 disabled:cursor-not-allowed':
+                      !canSubmitAttendanceForDate,
+                  }"
                 >
                   Start scan
                 </button>
@@ -820,6 +829,14 @@ const showSubjectSelect = computed(
   () => !isTeacher.value || subjectOptions.value.length > 1,
 );
 
+const canSubmitAttendanceForDate = computed(() => {
+  if (!selectedDate.value) return false;
+  const d = new Date(selectedDate.value);
+  if (Number.isNaN(d.getTime())) return false;
+  const day = d.getDay();
+  return day >= 1 && day <= 5;
+});
+
 const selectedClassLabel = computed(() => {
   if (!selectedClass.value) {
     return accessibleClasses.value.length === 1
@@ -998,10 +1015,22 @@ let mediaStream = null;
 let scanRafId = null;
 let barcodeDetector = null;
 
+const getGraphQLErrorMessage = (err, fallback) => {
+  const msg =
+    err?.graphQLErrors?.[0]?.message ||
+    err?.networkError?.result?.errors?.[0]?.message ||
+    err?.message;
+  return String(msg || fallback || "").trim() || String(fallback || "").trim();
+};
+
 const startQrScan = async () => {
   cameraError.value = "";
   if (!selectedClass.value || !selectedSubject.value || !selectedDate.value)
     return;
+  if (!canSubmitAttendanceForDate.value) {
+    cameraError.value = "Attendance can only be marked Monday to Friday.";
+    return;
+  }
 
   if (!("BarcodeDetector" in globalThis)) {
     cameraError.value =
@@ -1078,6 +1107,11 @@ const refreshSessionToken = async () => {
   sessionError.value = "";
   if (!selectedClass.value || !selectedSubject.value || !selectedDate.value)
     return;
+  if (!canSubmitAttendanceForDate.value) {
+    sessionError.value = "Attendance can only be marked Monday to Friday.";
+    stopAttendanceSession();
+    return;
+  }
 
   try {
     const { data } = await apolloClient.mutate({
@@ -1096,12 +1130,20 @@ const refreshSessionToken = async () => {
       data?.createAttendanceSessionBySubject?.expiresAt || null;
     updateSessionRemaining();
   } catch (e) {
-    sessionError.value = "Unable to create attendance session.";
+    sessionError.value = getGraphQLErrorMessage(
+      e,
+      "Unable to create attendance session.",
+    );
     stopAttendanceSession();
   }
 };
 
 const startAttendanceSession = async () => {
+  if (!canSubmitAttendanceForDate.value) {
+    sessionError.value = "Attendance can only be marked Monday to Friday.";
+    sessionActive.value = false;
+    return;
+  }
   sessionActive.value = true;
   await refreshSessionToken();
 
@@ -1297,6 +1339,22 @@ const formatAttendanceStatus = (status) => {
   return String(status || "");
 };
 
+const getAttendanceChipClass = (record) => {
+  const present = Boolean(record && record.present);
+  const status = record && record.status;
+  if (!present) return "bg-red-100 text-red-800";
+  if (status === "LATE" || status === "EARLY_LEAVE") {
+    return "bg-amber-100 text-amber-800";
+  }
+  return "bg-green-100 text-green-800";
+};
+
+const getAttendanceChipLabel = (record) => {
+  const status = record && record.status;
+  if (status) return formatAttendanceStatus(status);
+  return record && record.present ? "Present" : "Absent";
+};
+
 const setStudentStatus = (studentId, status) => {
   const nextStatus = String(status || "")
     .trim()
@@ -1328,6 +1386,13 @@ const clearAllMarks = () => {
 
 // Save attendance changes
 async function saveAttendance() {
+  if (!canSubmitAttendanceForDate.value) {
+    notificationStore.addNotification({
+      type: "error",
+      message: "Attendance can only be marked Monday to Friday.",
+    });
+    return;
+  }
   if (!selectedClass.value || !selectedSubject.value || !selectedDate.value) {
     notificationStore.addNotification({
       type: "error",
