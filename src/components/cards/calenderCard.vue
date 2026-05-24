@@ -11,17 +11,23 @@
 
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-lg font-semibold">Events</h1>
-      <router-link to="/events" class="text-gray-400 text-xs">View All</router-link>
+      <router-link to="/events" class="text-gray-400 text-xs"
+        >View All</router-link
+      >
     </div>
 
     <div class="flex flex-col gap-4">
-      <ListSkeleton v-if="eventStore.loading" v-for="i in 3" :key="`skeleton-${i}`" />
+      <ListSkeleton
+        v-if="eventStore.loading"
+        v-for="i in 3"
+        :key="`skeleton-${i}`"
+      />
 
       <ErrorScreen v-else-if="eventStore.error" />
 
       <!-- Empty state -->
       <EmptyState
-        v-else-if="!eventStore.events.length"
+        v-else-if="!latestEvents.length"
         icon="fa-solid fa-calendar-days"
         heading="No Event Found"
         description="There are currently no events scheduled."
@@ -111,7 +117,6 @@ import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import ListSkeleton from "../skeletonLoaders/listSkeleton.vue";
 
-
 const eventStore = useEventStore();
 
 const selectedColor = ref("purple");
@@ -152,7 +157,7 @@ onMounted(async () => {
     if (data && data.eventId) {
       // Update the store by removing the deleted event
       eventStore.events = eventStore.events.filter(
-        (event) => event.id !== data.eventId
+        (event) => event.id !== data.eventId,
       );
     }
   });
@@ -161,7 +166,7 @@ onMounted(async () => {
     if (data && data.event && data.event.id) {
       // Find and update the event in the store
       const index = eventStore.events.findIndex(
-        (event) => event.id === data.event.id
+        (event) => event.id === data.event.id,
       );
       if (index !== -1) {
         eventStore.events[index] = data.event;
