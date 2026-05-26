@@ -171,6 +171,92 @@
                 />
               </div>
             </div>
+
+            <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-semibold text-gray-800">
+                  Lesson Media
+                </h3>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Video URL</label
+                  >
+                  <input
+                    v-model="videoUrl"
+                    type="url"
+                    placeholder="YouTube/Vimeo or any video link"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                  <div class="flex gap-2 mt-2">
+                    <button
+                      type="button"
+                      class="px-3 py-2 rounded-md text-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:text-gray-600"
+                      :disabled="!canInsertVideo"
+                      @click="addVideoToContent"
+                    >
+                      Add to lesson
+                    </button>
+                  </div>
+
+                  <div v-if="videoEmbedUrl" class="mt-3">
+                    <div
+                      class="relative w-full overflow-hidden rounded-lg border border-gray-200 bg-black"
+                      style="padding-bottom: 56.25%"
+                    >
+                      <iframe
+                        class="absolute inset-0 w-full h-full"
+                        :src="videoEmbedUrl"
+                        title="Video preview"
+                        frameborder="0"
+                        allow="
+                          accelerometer;
+                          autoplay;
+                          clipboard-write;
+                          encrypted-media;
+                          gyroscope;
+                          picture-in-picture;
+                          web-share;
+                        "
+                        allowfullscreen
+                      ></iframe>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Live Lesson Link</label
+                  >
+                  <input
+                    v-model="liveLessonUrl"
+                    type="url"
+                    placeholder="Zoom / Google Meet / Microsoft Teams link"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                  <div class="flex flex-wrap gap-2 mt-2">
+                    <button
+                      type="button"
+                      class="px-3 py-2 rounded-md text-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:text-gray-600"
+                      :disabled="!canInsertLive"
+                      @click="addLiveLinkToContent"
+                    >
+                      Save link to lesson
+                    </button>
+                    <button
+                      type="button"
+                      class="px-3 py-2 rounded-md text-sm border border-indigo-600 text-indigo-700 hover:bg-indigo-50 disabled:border-gray-300 disabled:text-gray-500 disabled:bg-gray-100"
+                      :disabled="!canInsertLive"
+                      @click="startLiveLesson"
+                    >
+                      Start live lesson
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -232,6 +318,8 @@ const selectedSubject = ref("");
 const day = ref("Monday");
 const startTime = ref("");
 const endTime = ref("");
+const videoUrl = ref("");
+const liveLessonUrl = ref("");
 
 const isEditing = computed(() => route.params.id !== undefined);
 
@@ -277,13 +365,106 @@ const isFormValid = computed(() => {
   );
 });
 
+const normalizeUrl = (raw) => {
+  const value = String(raw || "").trim();
+  if (!value) return "";
+  if (/^https?:\/\//i.test(value)) return value;
+  return `https://${value}`;
+};
+
+const toYoutubeEmbed = (url) => {
+  const u = normalizeUrl(url);
+  if (!u) return "";
+  const match =
+    u.match(
+      /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/)([A-Za-z0-9_-]{6,})/i,
+    ) || u.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]{6,})/i);
+  const id = match?.[1];
+  return id ? `https://www.youtube.com/embed/${id}` : "";
+};
+
+const toVimeoEmbed = (url) => {
+  const u = normalizeUrl(url);
+  if (!u) return "";
+  const match =
+    u.match(/vimeo\.com\/(?:video\/)?(\d{6,})/i) ||
+    u.match(/player\.vimeo\.com\/video\/(\d{6,})/i);
+  const id = match?.[1];
+  return id ? `https://player.vimeo.com/video/${id}` : "";
+};
+
+const videoEmbedUrl = computed(() => {
+  return toYoutubeEmbed(videoUrl.value) || toVimeoEmbed(videoUrl.value) || "";
+});
+
+const canInsertVideo = computed(() => Boolean(normalizeUrl(videoUrl.value)));
+const canInsertLive = computed(() =>
+  Boolean(normalizeUrl(liveLessonUrl.value)),
+);
+
+const buildResourceHtml = ({ label, url, embedUrl }) => {
+  const safeUrl = normalizeUrl(url);
+  const safeLabel = String(label || "").trim() || "Resource";
+
+  const embed = embedUrl
+    ? `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;border:1px solid #e5e7eb;background:#000;"><iframe src="${embedUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`
+    : "";
+
+  const link = `<div style="margin-top:10px;"><a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="color:#4f46e5;text-decoration:underline;">${safeLabel}</a></div>`;
+
+  return `<div style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin-top:12px;">${embed}${link}</div>`;
+};
+
+const ensureResourcesHeader = (html) => {
+  const value = String(html || "");
+  if (value.includes('data-lesson-resources="true"')) return value;
+  const header = `<div data-lesson-resources="true" style="margin-top:16px;"><h3 style="font-weight:700;font-size:16px;margin:0 0 8px 0;">Resources</h3></div>`;
+  if (!value.trim()) return header;
+  return `${value}${header}`;
+};
+
+const appendResourceToContent = ({ label, url, embedUrl }) => {
+  const next = ensureResourcesHeader(content.value);
+  const snippet = buildResourceHtml({ label, url, embedUrl });
+  content.value = `${next}${snippet}`;
+};
+
+const addVideoToContent = () => {
+  const url = normalizeUrl(videoUrl.value);
+  if (!url) return;
+  const embedUrl = videoEmbedUrl.value || "";
+  appendResourceToContent({
+    label: "Video",
+    url,
+    embedUrl,
+  });
+};
+
+const addLiveLinkToContent = () => {
+  const url = normalizeUrl(liveLessonUrl.value);
+  if (!url) return;
+  appendResourceToContent({
+    label: "Live lesson link",
+    url,
+    embedUrl: "",
+  });
+};
+
+const startLiveLesson = () => {
+  const url = normalizeUrl(liveLessonUrl.value);
+  if (!url) return;
+  globalThis.open(url, "_blank", "noopener,noreferrer");
+};
+
 const getClassIdByName = (className) => {
   const classItem = classStore.getClassNames.find((c) => c.name === className);
   return classItem ? classItem.id : null;
 };
 
 const toWeekdayIndex = (dayLabel) => {
-  const normalized = String(dayLabel || "").trim().toLowerCase();
+  const normalized = String(dayLabel || "")
+    .trim()
+    .toLowerCase();
   const map = {
     sunday: 0,
     monday: 1,
