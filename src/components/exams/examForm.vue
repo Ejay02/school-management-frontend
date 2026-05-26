@@ -438,7 +438,7 @@
 
 <script setup>
 import { QuillEditor } from "@vueup/vue-quill";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { apolloClient } from "../../../apollo-client";
 import { createExam, updateExam } from "../../graphql/mutations";
@@ -461,9 +461,8 @@ const examStore = useExamStore();
 const subjectStore = useSubjectStore();
 const notificationStore = useNotificationStore();
 
-const userId = userStore.userInfo?.id;
-
-const isTeacher = userStore.userInfo?.role === "TEACHER";
+const userId = computed(() => userStore.userInfo?.id);
+const isTeacher = computed(() => userStore.userInfo?.role === "TEACHER");
 
 const title = ref("");
 const description = ref("");
@@ -485,8 +484,12 @@ const date = ref("");
 const startTime = ref("");
 const endTime = ref("");
 
-const role = computed(() => String(userStore.currentRole || "").toLowerCase());
-const isTeacherRole = computed(() => role.value === "teacher");
+const effectiveRole = computed(() => {
+  const current = String(userStore.currentRole || "").trim();
+  if (current) return current.toLowerCase();
+  return String(userStore.userInfo?.role || "").toLowerCase();
+});
+const isTeacherRole = computed(() => effectiveRole.value === "teacher");
 
 const classOptions = computed(() => {
   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
@@ -526,13 +529,14 @@ const applyCalendarPrefill = () => {
 const filteredSubjects = computed(() => {
   if (!selectedClass.value) return [];
 
-  // Find the selected class object
-  const classObj = classStore.allClasses.find(
-    (c) => c.name === selectedClass.value,
-  );
+  if (isTeacherRole.value) {
+    return classStore.getTeacherSubjectsForClass(
+      selectedClass.value,
+      userId.value,
+    );
+  }
 
-  // Return the subjects from the selected class if available
-  return classObj?.subjects || [];
+  return classStore.getSubjectsForClass(selectedClass.value);
 });
 
 const mappedSubjectOptions = computed(() =>
@@ -547,10 +551,8 @@ const showSubjectSelect = computed(
 );
 
 const isTeacherForSubject = () => {
-  if (!selectedSubject.value || !userId) return false;
+  if (!selectedSubject.value || !userId.value) return false;
 
-  // Instead of relying on the store's subject data, use the subject data from the class
-  // which contains the necessary teacher information
   const classObj = classStore.allClasses.find(
     (c) => c.name === selectedClass.value,
   );
@@ -558,17 +560,39 @@ const isTeacherForSubject = () => {
     (s) => s.id === selectedSubject.value,
   );
 
-  // If we're the supervisor of the class, we can create exams for any subject
-  if (classObj?.supervisor?.id === userId) return true;
-
-  // Check if the subject exists in the selected class
-  return !!subject;
+  return Boolean(
+    subject && (subject?.teachers || []).some((t) => t?.id === userId.value),
+  );
 };
 
 const isAssignedTeacher = computed(() => {
-  if (!isTeacher) return false;
+  if (!isTeacher.value) return false;
   return isTeacherForSubject();
 });
+
+watch(
+  [selectedClass, mappedSubjectOptions, isTeacherRole, isEditing],
+  () => {
+    if (isEditing.value) return;
+
+    if (!selectedClass.value) {
+      selectedSubject.value = "";
+      return;
+    }
+
+    const options = mappedSubjectOptions.value;
+    if (isTeacherRole.value && options.length === 1) {
+      selectedSubject.value = options[0].value;
+      return;
+    }
+
+    const stillValid = options.some((o) => o.value === selectedSubject.value);
+    if (!stillValid) {
+      selectedSubject.value = "";
+    }
+  },
+  { immediate: true },
+);
 
 const basicFieldsValid = computed(() => {
   return (
@@ -665,7 +689,8 @@ const handleSubmit = async () => {
       if (startMinutes < 13 * 60 && endMinutes > 12 * 60) {
         notificationStore.addNotification({
           type: "error",
-          message: "Break time is 12:00pm to 1:00pm. Please choose another time.",
+          message:
+            "Break time is 12:00pm to 1:00pm. Please choose another time.",
         });
         return;
       }

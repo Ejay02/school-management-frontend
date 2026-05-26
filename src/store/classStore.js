@@ -67,8 +67,42 @@ export const useClassStore = defineStore("classStore", {
     getClassNames: (state) => {
       return state.allClasses.map((classItem) => ({
         id: classItem.id,
-        name: classItem.name
+        name: classItem.name,
       }));
+    },
+    getClassByName: (state) => (className) => {
+      if (!className) return null;
+      return state.allClasses.find((c) => c?.name === className) || null;
+    },
+    getClassById: (state) => (classId) => {
+      if (!classId) return null;
+      return state.allClasses.find((c) => c?.id === classId) || null;
+    },
+    getSubjectsForClass: (state) => (className) => {
+      if (!className) return [];
+      const classObj = state.allClasses.find((c) => c?.name === className);
+      return classObj?.subjects || [];
+    },
+    getSubjectsForClassById: (state) => (classId) => {
+      if (!classId) return [];
+      const classObj = state.allClasses.find((c) => c?.id === classId);
+      return classObj?.subjects || [];
+    },
+    getTeacherSubjectsForClass: (state) => (className, teacherId) => {
+      if (!className || !teacherId) return [];
+      const classObj = state.allClasses.find((c) => c?.name === className);
+      const subjects = classObj?.subjects || [];
+      return subjects.filter((subject) =>
+        (subject?.teachers || []).some((t) => t?.id === teacherId),
+      );
+    },
+    getTeacherSubjectsForClassById: (state) => (classId, teacherId) => {
+      if (!classId || !teacherId) return [];
+      const classObj = state.allClasses.find((c) => c?.id === classId);
+      const subjects = classObj?.subjects || [];
+      return subjects.filter((subject) =>
+        (subject?.teachers || []).some((t) => t?.id === teacherId),
+      );
     },
   },
 });

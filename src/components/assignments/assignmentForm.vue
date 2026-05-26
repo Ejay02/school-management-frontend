@@ -465,8 +465,12 @@ const selectedClass = ref("");
 const selectedSubject = ref("");
 const selectedLesson = ref("");
 
-const role = computed(() => String(userStore.currentRole || "").toLowerCase());
-const isTeacherRole = computed(() => role.value === "teacher");
+const effectiveRole = computed(() => {
+  const current = String(userStore.currentRole || "").trim();
+  if (current) return current.toLowerCase();
+  return String(userStore.userInfo?.role || "").toLowerCase();
+});
+const isTeacherRole = computed(() => effectiveRole.value === "teacher");
 
 const isAssignedTeacher = computed(() =>
   isAssignedToSelection(
@@ -494,10 +498,13 @@ const filteredLessons = computed(() => {
 
 const filteredSubjects = computed(() => {
   if (!selectedClass.value) return [];
-  const classObj = classStore.allClasses.find(
-    (c) => c.name === selectedClass.value,
-  );
-  return classObj?.subjects || [];
+
+  const userId = userStore.userInfo?.id;
+  if (isTeacherRole.value) {
+    return classStore.getTeacherSubjectsForClass(selectedClass.value, userId);
+  }
+
+  return classStore.getSubjectsForClass(selectedClass.value);
 });
 
 const showSubjectSelect = computed(
@@ -691,6 +698,30 @@ const handleSubmit = async () => {
 watch(selectedSubject, () => {
   selectedLesson.value = "";
 });
+
+watch(
+  [selectedClass, filteredSubjects, isTeacherRole, isEditing],
+  () => {
+    if (isEditing.value) return;
+
+    if (!selectedClass.value) {
+      selectedSubject.value = "";
+      return;
+    }
+
+    const subjects = filteredSubjects.value || [];
+    if (isTeacherRole.value && subjects.length === 1) {
+      selectedSubject.value = subjects[0].id;
+      return;
+    }
+
+    const stillValid = subjects.some((s) => s.id === selectedSubject.value);
+    if (!stillValid) {
+      selectedSubject.value = "";
+    }
+  },
+  { immediate: true },
+);
 
 onMounted(async () => {
   applyCalendarPrefill();

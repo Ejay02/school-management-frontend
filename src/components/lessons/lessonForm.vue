@@ -249,21 +249,10 @@ const showClassSelect = computed(
 
 const filteredSubjects = computed(() => {
   if (!selectedClass.value) return [];
-  const classObj = classStore.allClasses.find(
-    (c) => c.name === selectedClass.value,
-  );
-  const role = String(userStore.currentRole || "").toLowerCase();
   const userId = userStore.userInfo?.id;
-  const isSupervisor = Boolean(
-    classObj?.supervisor?.id && classObj.supervisor.id === userId,
-  );
-
-  const subjects =
-    role === "teacher" && !isSupervisor
-      ? classObj?.subjects?.filter((subject) =>
-          (subject?.teachers || []).some((t) => t?.id === userId),
-        )
-      : classObj?.subjects;
+  const subjects = isTeacher.value
+    ? classStore.getTeacherSubjectsForClass(selectedClass.value, userId)
+    : classStore.getSubjectsForClass(selectedClass.value);
 
   return (
     subjects?.map((subject) => ({

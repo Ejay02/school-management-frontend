@@ -194,21 +194,17 @@ const classOptions = computed(() => {
 
 const subjectOptions = computed(() => {
   if (!selectedClassName.value) return [];
-  const classObj = classStore.allClasses.find(
-    (c) => c.name === selectedClassName.value,
-  );
-  if (!classObj?.subjects?.length) return [];
 
   if (!isTeacher.value) {
-    return classObj.subjects.map((s) => ({ value: s.id, label: s.name }));
+    return classStore
+      .getSubjectsForClass(selectedClassName.value)
+      .map((s) => ({ value: s.id, label: s.name }));
   }
 
   const userId = userStore.userInfo?.id;
-  const subjects = classObj.subjects.filter((s) =>
-    (s?.teachers || []).some((t) => t?.id === userId),
-  );
-
-  return subjects.map((s) => ({ value: s.id, label: s.name }));
+  return classStore
+    .getTeacherSubjectsForClass(selectedClassName.value, userId)
+    .map((s) => ({ value: s.id, label: s.name }));
 });
 
 const canCreateWithSelection = computed(() => {

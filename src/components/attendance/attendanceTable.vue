@@ -809,18 +809,12 @@ const markAttendanceDisabledMessage = computed(() => {
 
 const subjectOptions = computed(() => {
   if (!selectedClass.value) return [];
-  const classObj =
-    accessibleClasses.value.find((c) => c.id === selectedClass.value) ||
-    classes.value.find((c) => c.id === selectedClass.value);
-  if (!classObj?.subjects?.length) return [];
 
   const userId = userStore.userInfo?.id;
   const subjects =
     isTeacher.value && userId
-      ? classObj.subjects.filter((s) =>
-          (s?.teachers || []).some((t) => t?.id === userId),
-        )
-      : classObj.subjects;
+      ? classStore.getTeacherSubjectsForClassById(selectedClass.value, userId)
+      : classStore.getSubjectsForClassById(selectedClass.value);
 
   return subjects.map((s) => ({ value: s.id, label: s.name }));
 });
