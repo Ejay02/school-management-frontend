@@ -365,15 +365,42 @@ const isFormValid = computed(() => {
   );
 });
 
-const normalizeUrl = (raw) => {
+const escapeHtml = (value) => {
+  const text = String(value ?? "");
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+};
+
+const escapeAttribute = (value) => {
+  const text = String(value ?? "");
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+};
+
+const normalizeHttpUrl = (raw) => {
   const value = String(raw || "").trim();
   if (!value) return "";
-  if (/^https?:\/\//i.test(value)) return value;
-  return `https://${value}`;
+
+  const hasScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(value);
+  const candidate = hasScheme ? value : `https://${value}`;
+
+  try {
+    const url = new URL(candidate);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return "";
+    return url.toString();
+  } catch {
+    return "";
+  }
 };
 
 const toYoutubeEmbed = (url) => {
-  const u = normalizeUrl(url);
+  const u = normalizeHttpUrl(url);
   if (!u) return "";
   const match =
     u.match(
@@ -384,7 +411,7 @@ const toYoutubeEmbed = (url) => {
 };
 
 const toVimeoEmbed = (url) => {
-  const u = normalizeUrl(url);
+  const u = normalizeHttpUrl(url);
   if (!u) return "";
   const match =
     u.match(/vimeo\.com\/(?:video\/)?(\d{6,})/i) ||
@@ -397,20 +424,20 @@ const videoEmbedUrl = computed(() => {
   return toYoutubeEmbed(videoUrl.value) || toVimeoEmbed(videoUrl.value) || "";
 });
 
-const canInsertVideo = computed(() => Boolean(normalizeUrl(videoUrl.value)));
-const canInsertLive = computed(() =>
-  Boolean(normalizeUrl(liveLessonUrl.value)),
-);
+const canInsertVideo = computed(() => Boolean(normalizeHttpUrl(videoUrl.value)));
+const canInsertLive = computed(() => Boolean(normalizeHttpUrl(liveLessonUrl.value)));
 
 const buildResourceHtml = ({ label, url, embedUrl }) => {
-  const safeUrl = normalizeUrl(url);
-  const safeLabel = String(label || "").trim() || "Resource";
+  const safeUrl = normalizeHttpUrl(url);
+  const safeLabel = escapeHtml(String(label || "").trim() || "Resource");
+  const safeUrlAttr = escapeAttribute(safeUrl);
+  const safeEmbedAttr = embedUrl ? escapeAttribute(embedUrl) : "";
 
   const embed = embedUrl
-    ? `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;border:1px solid #e5e7eb;background:#000;"><iframe src="${embedUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`
+    ? `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;border:1px solid #e5e7eb;background:#000;"><iframe src="${safeEmbedAttr}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`
     : "";
 
-  const link = `<div style="margin-top:10px;"><a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="color:#4f46e5;text-decoration:underline;">${safeLabel}</a></div>`;
+  const link = `<div style="margin-top:10px;"><a href="${safeUrlAttr}" target="_blank" rel="noopener noreferrer" style="color:#4f46e5;text-decoration:underline;">${safeLabel}</a></div>`;
 
   return `<div style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin-top:12px;">${embed}${link}</div>`;
 };
@@ -430,7 +457,7 @@ const appendResourceToContent = ({ label, url, embedUrl }) => {
 };
 
 const addVideoToContent = () => {
-  const url = normalizeUrl(videoUrl.value);
+  const url = normalizeHttpUrl(videoUrl.value);
   if (!url) return;
   const embedUrl = videoEmbedUrl.value || "";
   appendResourceToContent({
@@ -441,7 +468,7 @@ const addVideoToContent = () => {
 };
 
 const addLiveLinkToContent = () => {
-  const url = normalizeUrl(liveLessonUrl.value);
+  const url = normalizeHttpUrl(liveLessonUrl.value);
   if (!url) return;
   appendResourceToContent({
     label: "Live lesson link",
@@ -451,7 +478,7 @@ const addLiveLinkToContent = () => {
 };
 
 const startLiveLesson = () => {
-  const url = normalizeUrl(liveLessonUrl.value);
+  const url = normalizeHttpUrl(liveLessonUrl.value);
   if (!url) return;
   globalThis.open(url, "_blank", "noopener,noreferrer");
 };

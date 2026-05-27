@@ -316,7 +316,7 @@
             >
               <div
                 class="prose max-w-none max-h-[500px] overflow-y-auto custom-scrollbar"
-                v-html="lesson?.content || 'No content available.'"
+                v-html="lessonContentHtml || 'No content available.'"
               ></div>
             </div>
           </div>
@@ -394,6 +394,114 @@ const loading = computed(() => lessonStore.loading);
 const error = computed(() => lessonStore.error);
 
 const { isTeacher, userId, isAssignedToSelection } = useTeacherAccessCheck();
+
+const normalizeHttpUrl = (raw, { allowRelative = false } = {}) => {
+  const value = String(raw || "").trim();
+  if (!value) return "";
+  if (allowRelative && (value.startsWith("/") || value.startsWith("#"))) {
+    return value;
+  }
+
+  const hasScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(value);
+  const candidate = hasScheme ? value : `https://${value}`;
+
+  try {
+    const url = new URL(candidate);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return "";
+    return url.toString();
+  } catch {
+    return "";
+  }
+};
+
+const isAllowedEmbed = (src) => {
+  const normalized = normalizeHttpUrl(src);
+  if (!normalized) return false;
+  try {
+    const url = new URL(normalized);
+    const host = url.hostname.toLowerCase();
+    const path = url.pathname.toLowerCase();
+    if (
+      (host === "www.youtube.com" || host === "youtube.com") &&
+      path.startsWith("/embed/")
+    )
+      return true;
+    if (host === "player.vimeo.com" && path.startsWith("/video/")) return true;
+    return false;
+  } catch {
+    return false;
+  }
+};
+
+const sanitizeLessonHtml = (html) => {
+  const raw = String(html || "");
+  if (!raw.trim()) return "";
+
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(raw, "text/html");
+
+    const blockedTags = new Set([
+      "script",
+      "object",
+      "embed",
+      "link",
+      "meta",
+      "base",
+      "form",
+      "input",
+      "button",
+      "textarea",
+    ]);
+
+    const nodes = Array.from(doc.body.querySelectorAll("*"));
+    for (const el of nodes) {
+      const tag = el.tagName.toLowerCase();
+      if (blockedTags.has(tag)) {
+        el.remove();
+        continue;
+      }
+
+      for (const attr of Array.from(el.attributes)) {
+        const name = attr.name.toLowerCase();
+        if (name.startsWith("on") || name === "srcdoc") {
+          el.removeAttribute(attr.name);
+          continue;
+        }
+
+        if (name === "href") {
+          const safe = normalizeHttpUrl(attr.value, { allowRelative: true });
+          if (!safe) el.removeAttribute(attr.name);
+          else el.setAttribute(attr.name, safe);
+        }
+
+        if (name === "src") {
+          if (tag === "iframe") {
+            if (!isAllowedEmbed(attr.value)) {
+              el.remove();
+              break;
+            }
+          } else {
+            const safe = normalizeHttpUrl(attr.value);
+            if (!safe) el.removeAttribute(attr.name);
+            else el.setAttribute(attr.name, safe);
+          }
+        }
+      }
+
+      if (tag === "a") {
+        el.setAttribute("target", "_blank");
+        el.setAttribute("rel", "noopener noreferrer");
+      }
+    }
+
+    return doc.body.innerHTML;
+  } catch {
+    return "";
+  }
+};
+
+const lessonContentHtml = computed(() => sanitizeLessonHtml(lesson.value?.content));
 
 const formatTime = (timeString) => {
   if (!timeString) return "";

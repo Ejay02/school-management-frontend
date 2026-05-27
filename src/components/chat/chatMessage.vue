@@ -19,7 +19,21 @@ import { computed } from "vue";
 import MarkdownIt from "markdown-it";
 
 // Initialize the markdown parser
-const md = new MarkdownIt();
+const md = new MarkdownIt({ html: false, linkify: true, breaks: true });
+const baseValidateLink = md.validateLink.bind(md);
+md.validateLink = (url) => {
+  if (!baseValidateLink(url)) return false;
+  try {
+    const parsed = new URL(url, "https://example.com");
+    return (
+      parsed.protocol === "http:" ||
+      parsed.protocol === "https:" ||
+      parsed.protocol === "mailto:"
+    );
+  } catch {
+    return false;
+  }
+};
 
 const props = defineProps({
   message: {
