@@ -1422,7 +1422,7 @@ export const getPaymentById = gql`
   query getPaymentById($paymentId: String!) {
     getPaymentById(paymentId: $paymentId) {
       id
-      Amount
+      amount
       classId
       className
       createdAt
