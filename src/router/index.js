@@ -244,6 +244,14 @@ const routes = [
         },
       },
       {
+        path: "/submissions",
+        name: "Submissions",
+        component: () => import("../components/submissions/submissions.vue"),
+        meta: {
+          role: ["teacher"],
+        },
+      },
+      {
         path: "/assignment/:id",
         name: "AssignmentView",
         component: () => import("../components/assignments/assignmentView.vue"),

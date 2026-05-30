@@ -697,6 +697,7 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import { useAttendanceStore } from "../../store/attendanceStore";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
@@ -710,6 +711,8 @@ import CustomDropdown from "../dropdowns/customDropdown.vue";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
 import Pagination from "../pagination.vue";
+
+const route = useRoute();
 
 const userStore = useUserStore();
 const studentStore = useStudentStore();
@@ -1493,7 +1496,42 @@ onMounted(async () => {
 
   window.addEventListener("online", handleOnline);
   await handleOnline();
+
+  applyRouteMode();
 });
+
+function applyRouteMode() {
+  const mode = String(route.query?.mode || "").toLowerCase();
+  const mark = String(route.query?.mark || "").toLowerCase();
+  const entry = String(route.query?.entry || "").toLowerCase();
+
+  const wantsMarkMode = mode === "mark" || mark === "1" || mark === "true";
+  if (wantsMarkMode && !markAttendanceMode.value) {
+    if (canMarkAttendance.value) {
+      toggleMarkAttendanceMode();
+    }
+  }
+
+  if (wantsMarkMode && entry && markAttendanceMode.value) {
+    const normalized =
+      entry === "speed" ||
+      entry === "manual" ||
+      entry === "scan" ||
+      entry === "session"
+        ? entry
+        : "";
+    if (normalized) {
+      setAttendanceEntryMode(normalized);
+    }
+  }
+}
+
+watch(
+  () => route.query,
+  () => {
+    applyRouteMode();
+  },
+);
 
 watch(selectedStudentId, async (studentId) => {
   if (!isParent.value || !studentId) return;
