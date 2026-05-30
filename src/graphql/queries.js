@@ -51,6 +51,8 @@ export const invitationsQuery = gql`
         sentAt
         sentCount
         lastSentAt
+        reminderCount
+        lastReminderSentAt
         expiresAt
         acceptedAt
         revokedAt

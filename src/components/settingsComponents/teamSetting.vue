@@ -414,6 +414,9 @@
                 Sent {{ formatDate(invite.sentAt) }} · Expires
                 {{ formatDate(invite.expiresAt) }}
               </p>
+              <p class="mt-1 text-xs text-gray-500">
+                Last reminder {{ formatDate(invite.lastReminderSentAt) }}
+              </p>
             </div>
 
             <div class="md:col-span-2">
