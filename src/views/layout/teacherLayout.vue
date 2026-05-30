@@ -15,13 +15,11 @@
             <div
               class="mb-6 grid gap-4 md:grid-cols-3 items-stretch auto-rows-fr"
             >
-              <router-link
-                :to="attendanceDueLink"
-                class="block h-full md:col-span-2"
-              >
+              <div class="block h-full md:col-span-2">
                 <div
-                  class="h-full min-h-[160px] rounded-xl border p-4 flex transition-colors"
+                  class="h-full min-h-[160px] rounded-xl border p-4 flex transition-colors cursor-pointer"
                   :class="attendanceDueCardClass"
+                  @click="openAttendanceDashboard"
                 >
                   <div class="flex w-full items-start justify-between gap-3">
                     <div class="min-w-0">
@@ -34,32 +32,44 @@
                       <p class="mt-3 text-3xl font-semibold text-gray-900">
                         {{ todayOverview.attendanceDueCount }}
                       </p>
-                      <p class="mt-1 text-sm font-medium text-indigo-700">
-                        Speed-mode attendance
-                      </p>
-                      <p
-                        v-if="
-                          todayOverview.attendanceDueCount === 0 &&
-                          !todayLoading
-                        "
-                        class="mt-2 text-xs text-gray-600"
-                      >
-                        All set. No classes need attendance right now.
-                      </p>
+
+                      <div class="mt-3 flex flex-wrap items-center gap-3">
+                        <router-link
+                          v-if="attendanceSpeedEnabled"
+                          :to="attendanceDueLink"
+                          class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500"
+                          @click.stop
+                        >
+                          Speed-mode <i class="fa-solid fa-bolt"></i>
+                        </router-link>
+                        <button
+                          v-else
+                          class="inline-flex items-center gap-2 rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-500 cursor-not-allowed"
+                          type="button"
+                          :title="attendanceSpeedDisabledLabel"
+                          @click.stop
+                          disabled
+                        >
+                          Speed-mode <i class="fa-solid fa-bolt"></i>
+                        </button>
+
+                        <div class="text-xs text-gray-500">
+                          {{
+                            attendanceSpeedEnabled
+                              ? "Open speed-mode attendance."
+                              : attendanceSpeedDisabledLabel
+                          }}
+                        </div>
+                      </div>
                     </div>
                     <div
-                      class="h-10 w-10 shrink-0 rounded-lg flex items-center justify-center"
-                      :class="
-                        todayOverview.attendanceDueCount > 0
-                          ? 'bg-red-100 text-red-700'
-                          : 'bg-eduSkyLight text-gray-700'
-                      "
+                      class="h-10 w-10 shrink-0 rounded-lg flex items-center justify-center bg-gray-100 text-gray-500"
                     >
                       <i class="fa-solid fa-clipboard-check"></i>
                     </div>
                   </div>
                 </div>
-              </router-link>
+              </div>
 
               <router-link to="/lessons" class="block h-full">
                 <div
@@ -288,6 +298,7 @@
 <script setup>
 import { computed } from "vue";
 import { useQuery } from "@vue/apollo-composable";
+import { useRouter } from "vue-router";
 import PlannerCard from "../../components/cards/plannerCard.vue";
 import {
   getAllAnnouncements,
@@ -298,6 +309,7 @@ import {
 const { result: todayResult, loading: todayLoading } = useQuery(
   getTeacherTodayOverview,
 );
+const router = useRouter();
 
 const todayOverview = computed(() => {
   return (
@@ -308,6 +320,10 @@ const todayOverview = computed(() => {
     }
   );
 });
+
+const openAttendanceDashboard = () => {
+  router.push("/attendance");
+};
 
 const { result: unreadCountResult } = useQuery(getUnreadAnnouncementsCount);
 const { result: announcementsResult, loading: announcementsLoading } = useQuery(
@@ -363,6 +379,29 @@ const nextClassSubtitle = computed(() => {
 });
 
 const attendanceDueLink = computed(() => "/attendance?mode=mark&entry=speed");
+
+const fridayCloseMinutes = 14 * 60;
+
+const attendanceSpeedEnabled = computed(() => {
+  const now = new Date();
+  const day = now.getDay();
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  if (day === 0 || day === 6) return false;
+  if (day === 5 && minutes >= fridayCloseMinutes) return false;
+  return true;
+});
+
+const attendanceSpeedDisabledLabel = computed(() => {
+  const now = new Date();
+  const day = now.getDay();
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  if (day === 0 || day === 6)
+    return "Attendance is closed for the weekend. Opens Monday.";
+  if (day === 5 && minutes >= fridayCloseMinutes) {
+    return "School is closed for the weekend. Speed-mode opens Monday.";
+  }
+  return "Speed-mode attendance is currently unavailable.";
+});
 
 const attendanceDueCardClass = computed(() => {
   if (todayLoading.value) return "border-gray-200 bg-white hover:bg-gray-50";
