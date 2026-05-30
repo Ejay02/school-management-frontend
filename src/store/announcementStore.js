@@ -119,7 +119,12 @@ export const useAnnouncementStore = defineStore("announcement", {
       try {
         const res = await apolloClient.mutate({
           mutation: createAnnouncement,
-          variables: { input },
+          variables: {
+            title: input?.title,
+            content: input?.content,
+            classId: input?.classId,
+            targetRoles: input?.targetRoles || [],
+          },
         });
         this.announcements.unshift(res.data.createAnnouncement);
         return res.data.createAnnouncement;
@@ -140,14 +145,16 @@ export const useAnnouncementStore = defineStore("announcement", {
             targetRoles,
           },
         });
-        const index = this.announcements.findIndex((a) => a.id === id);
+        const index = this.announcements.findIndex(
+          (a) => a.id === announcementId
+        );
         if (index !== -1) {
           this.announcements[index] = {
             ...this.announcements[index],
-            ...res.data.updateAnnouncement,
+            ...res.data.editAnnouncement,
           };
         }
-        return res.data.updateAnnouncement;
+        return res.data.editAnnouncement;
       } catch (error) {
         this.error = error.message;
         throw error;
@@ -212,14 +219,12 @@ export const useAnnouncementStore = defineStore("announcement", {
           mutation: archiveAnnouncement,
           variables: { announcementId },
         });
+        if (!res?.data?.archiveAnnouncement) return;
         const announcement = this.announcements.find(
           (a) => a.id === announcementId
         );
         if (announcement) {
-          this.archivedAnnouncements.unshift({
-            ...announcement,
-            archivedAt: res.data.archiveAnnouncement.archivedAt,
-          });
+          this.archivedAnnouncements.unshift(announcement);
           this.announcements = this.announcements.filter(
             (a) => a.id !== announcementId
           );
