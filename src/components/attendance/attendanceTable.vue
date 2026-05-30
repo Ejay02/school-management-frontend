@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="rootEl"
     class="bg-white rounded-lg shadow border border-gray-200 p-4 cursor-pointer hover:shadow-lg transition-shadow duration-300"
   >
     <div class="flex justify-between items-center mb-4">
@@ -696,7 +697,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useAttendanceStore } from "../../store/attendanceStore";
 import { useClassStore } from "../../store/classStore";
@@ -713,6 +714,7 @@ import ErrorScreen from "../errorScreen.vue";
 import Pagination from "../pagination.vue";
 
 const route = useRoute();
+const rootEl = ref(null);
 
 const userStore = useUserStore();
 const studentStore = useStudentStore();
@@ -1500,7 +1502,7 @@ onMounted(async () => {
   applyRouteMode();
 });
 
-function applyRouteMode() {
+async function applyRouteMode() {
   const mode = String(route.query?.mode || "").toLowerCase();
   const mark = String(route.query?.mark || "").toLowerCase();
   const entry = String(route.query?.entry || "").toLowerCase();
@@ -1512,17 +1514,17 @@ function applyRouteMode() {
     }
   }
 
-  if (wantsMarkMode && entry && markAttendanceMode.value) {
-    const normalized =
-      entry === "speed" ||
-      entry === "manual" ||
-      entry === "scan" ||
-      entry === "session"
-        ? entry
-        : "";
+  if (wantsMarkMode && entry) {
+    const allowed = ["speed", "manual", "scan", "session"];
+    const normalized = allowed.includes(entry) ? entry : "";
     if (normalized) {
       setAttendanceEntryMode(normalized);
     }
+  }
+
+  if (wantsMarkMode) {
+    await nextTick();
+    rootEl.value?.scrollIntoView?.({ behavior: "smooth", block: "start" });
   }
 }
 
