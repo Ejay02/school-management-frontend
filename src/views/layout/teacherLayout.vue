@@ -52,13 +52,11 @@
                         >
                           Speed-mode <i class="fa-solid fa-bolt"></i>
                         </button>
-
-                        <div class="text-xs text-gray-500">
-                          {{
-                            attendanceSpeedEnabled
-                              ? "Open speed-mode attendance."
-                              : attendanceSpeedDisabledLabel
-                          }}
+                        <div
+                          v-if="!attendanceSpeedEnabled"
+                          class="text-xs text-gray-500"
+                        >
+                          {{ attendanceSpeedDisabledLabel }}
                         </div>
                       </div>
                     </div>
@@ -78,7 +76,7 @@
                   <div class="flex w-full items-start justify-between gap-3">
                     <div class="min-w-0">
                       <p class="text-sm font-medium text-gray-800">
-                        Next class
+                        Next classes today
                       </p>
                       <p class="mt-1 text-xs text-gray-500">
                         {{ nextClassSubtitle }}
@@ -95,6 +93,24 @@
                       >
                         {{ nextClassTime }}
                       </p>
+
+                      <div v-if="moreClasses.length" class="mt-3 space-y-2">
+                        <div
+                          v-for="cls in moreClasses"
+                          :key="cls.id"
+                          class="flex items-center justify-between gap-3"
+                        >
+                          <div class="min-w-0 text-xs text-gray-600 truncate">
+                            {{ cls.subjectName || cls.name }}
+                            <span v-if="cls.className" class="text-gray-400">
+                              • {{ cls.className }}
+                            </span>
+                          </div>
+                          <div class="shrink-0 text-xs text-gray-500">
+                            {{ cls.startTime }} - {{ cls.endTime }}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                     <div
                       class="h-9 w-9 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"
@@ -132,74 +148,6 @@
                   </div>
                 </div>
               </router-link>
-            </div>
-
-            <div class="grid gap-6">
-              <div>
-                <h2 class="text-xl font-semibold mb-4 text-gray-500">
-                  Next classes today
-                </h2>
-                <div class="rounded-xl border border-gray-200 bg-white">
-                  <div
-                    v-if="todayLoading"
-                    class="flex items-center gap-2 p-4 text-sm text-gray-600"
-                  >
-                    <span
-                      class="h-5 w-5 animate-spin rounded-full border-2 border-gray-200 border-t-indigo-500"
-                    ></span>
-                    Loading schedule...
-                  </div>
-                  <div
-                    v-else-if="!todayOverview.nextClasses?.length"
-                    class="p-4"
-                  >
-                    <div class="text-sm font-semibold text-gray-800">
-                      No more classes today
-                    </div>
-                    <div class="mt-1 text-sm text-gray-500">
-                      Enjoy the break. New lessons will show up here when your
-                      timetable updates.
-                    </div>
-                    <router-link
-                      to="/lessons"
-                      class="mt-3 inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                    >
-                      View all lessons <i class="fa-solid fa-arrow-right"></i>
-                    </router-link>
-                  </div>
-                  <div v-else class="divide-y divide-gray-100">
-                    <router-link
-                      v-for="cls in nextClassesPreview"
-                      :key="cls.id"
-                      to="/lessons"
-                      class="block p-4 hover:bg-gray-50"
-                    >
-                      <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                          <div class="text-sm font-semibold text-gray-800">
-                            {{ cls.subjectName || cls.name }}
-                          </div>
-                          <div class="mt-1 text-sm text-gray-500 truncate">
-                            {{ cls.className }}
-                          </div>
-                        </div>
-                        <div class="text-sm font-medium text-indigo-600">
-                          {{ cls.startTime }} - {{ cls.endTime }}
-                        </div>
-                      </div>
-                    </router-link>
-                    <div class="p-4">
-                      <router-link
-                        to="/lessons"
-                        class="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                      >
-                        View full timetable
-                        <i class="fa-solid fa-arrow-right"></i>
-                      </router-link>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
 
             <h2 class="text-xl font-semibold mb-4 mt-8 text-gray-500">
@@ -250,6 +198,11 @@ const nextClass = computed(() => {
 const nextClassesPreview = computed(() => {
   const classes = todayOverview.value?.nextClasses || [];
   return Array.isArray(classes) ? classes.slice(0, 4) : [];
+});
+
+const moreClasses = computed(() => {
+  const classes = nextClassesPreview.value || [];
+  return classes.length > 1 ? classes.slice(1, 3) : [];
 });
 
 const nextClassTitle = computed(() => {
