@@ -15,7 +15,7 @@
             <div
               class="mb-6 grid gap-4 md:grid-cols-3 items-stretch auto-rows-fr"
             >
-              <div class="block h-full md:col-span-2">
+              <div class="block h-full">
                 <div
                   class="h-full min-h-[160px] rounded-xl border p-4 flex transition-colors cursor-pointer"
                   :class="attendanceDueCardClass"
