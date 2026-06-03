@@ -17,23 +17,35 @@
             >
               <div class="block h-full">
                 <div
-                  class="h-full min-h-[160px] rounded-xl border p-4 flex transition-colors cursor-pointer"
+                  class="h-full min-h-[180px] rounded-xl border p-4 transition-colors cursor-pointer"
                   :class="attendanceDueCardClass"
                   @click="openAttendanceDashboard"
                 >
-                  <div class="flex w-full items-start justify-between gap-3">
-                    <div class="min-w-0">
-                      <p class="text-sm font-semibold text-gray-900">
-                        Attendance due
-                      </p>
-                      <p class="mt-1 text-xs text-gray-600">
-                        Lessons today without marked attendance.
-                      </p>
-                      <p class="mt-3 text-3xl font-semibold text-gray-900">
+                  <div class="flex h-full w-full flex-col">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold text-gray-900">
+                          Attendance due
+                        </p>
+                        <p class="mt-1 text-xs text-gray-600">
+                          Lessons today without marked attendance.
+                        </p>
+                      </div>
+                      <div
+                        class="h-10 w-10 shrink-0 rounded-lg flex items-center justify-center bg-gray-100 text-gray-500"
+                      >
+                        <i class="fa-solid fa-clipboard-check"></i>
+                      </div>
+                    </div>
+
+                    <div class="mt-5">
+                      <p class="text-3xl font-semibold text-gray-900">
                         {{ todayOverview.attendanceDueCount }}
                       </p>
+                    </div>
 
-                      <div class="mt-3 flex flex-wrap items-center gap-3">
+                    <div class="mt-auto pt-4">
+                      <div class="flex flex-wrap items-center gap-3">
                         <router-link
                           v-if="attendanceSpeedEnabled"
                           :to="attendanceDueLink"
@@ -60,62 +72,66 @@
                         </div>
                       </div>
                     </div>
-                    <div
-                      class="h-10 w-10 shrink-0 rounded-lg flex items-center justify-center bg-gray-100 text-gray-500"
-                    >
-                      <i class="fa-solid fa-clipboard-check"></i>
-                    </div>
                   </div>
                 </div>
               </div>
 
               <router-link to="/lessons" class="block h-full">
                 <div
-                  class="h-full min-h-[160px] rounded-xl border border-gray-200 bg-white p-4 hover:bg-gray-50 flex"
+                  class="h-full min-h-[180px] rounded-xl border border-gray-200 bg-white p-4 hover:bg-gray-50"
                 >
-                  <div class="flex w-full items-start justify-between gap-3">
-                    <div class="min-w-0">
-                      <p class="text-sm font-medium text-gray-800">
-                        Next classes today
-                      </p>
-                      <p class="mt-1 text-xs text-gray-500">
-                        {{ nextClassSubtitle }}
-                      </p>
+                  <div class="flex h-full flex-col">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold text-gray-900">
+                          Next classes today
+                        </p>
+                        <p class="mt-1 text-xs text-gray-500">
+                          {{ nextClassSubtitle }}
+                        </p>
+                      </div>
+                      <div
+                        class="h-9 w-9 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"
+                      >
+                        <i class="fa-regular fa-clock"></i>
+                      </div>
+                    </div>
+
+                    <div class="mt-5 min-h-[56px]">
                       <p
                         v-if="nextClassTitle"
-                        class="mt-2 text-sm font-semibold text-gray-700 truncate"
+                        class="text-base font-semibold text-gray-800 truncate"
                       >
                         {{ nextClassTitle }}
                       </p>
                       <p
                         v-if="nextClassTime"
-                        class="mt-1 text-xs font-medium text-indigo-600"
+                        class="mt-1 text-sm font-medium text-indigo-600"
                       >
                         {{ nextClassTime }}
                       </p>
+                    </div>
 
-                      <div v-if="moreClasses.length" class="mt-3 space-y-2">
-                        <div
-                          v-for="cls in moreClasses"
-                          :key="cls.id"
-                          class="flex items-center justify-between gap-3"
-                        >
-                          <div class="min-w-0 text-xs text-gray-600 truncate">
-                            {{ cls.subjectName || cls.name }}
-                            <span v-if="cls.className" class="text-gray-400">
-                              • {{ cls.className }}
-                            </span>
-                          </div>
-                          <div class="shrink-0 text-xs text-gray-500">
-                            {{ cls.startTime }} - {{ cls.endTime }}
-                          </div>
+                    <div v-if="moreClasses.length" class="mt-3 space-y-2">
+                      <div
+                        v-for="cls in moreClasses"
+                        :key="cls.id"
+                        class="flex items-center justify-between gap-3"
+                      >
+                        <div class="min-w-0 text-xs text-gray-600 truncate">
+                          {{ cls.subjectName || cls.name }}
+                          <span v-if="cls.className" class="text-gray-400">
+                            • {{ cls.className }}
+                          </span>
+                        </div>
+                        <div class="shrink-0 text-xs text-gray-500">
+                          {{ cls.startTime }} - {{ cls.endTime }}
                         </div>
                       </div>
                     </div>
-                    <div
-                      class="h-9 w-9 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"
-                    >
-                      <i class="fa-regular fa-clock"></i>
+
+                    <div class="mt-auto pt-4 text-sm font-medium text-indigo-600">
+                      View lessons
                     </div>
                   </div>
                 </div>
@@ -123,27 +139,33 @@
 
               <router-link to="/submissions" class="block h-full">
                 <div
-                  class="h-full min-h-[160px] rounded-xl border border-gray-200 bg-white p-4 hover:bg-gray-50 flex"
+                  class="h-full min-h-[180px] rounded-xl border border-gray-200 bg-white p-4 hover:bg-gray-50"
                 >
-                  <div class="flex w-full items-start justify-between gap-3">
-                    <div class="min-w-0">
-                      <p class="text-sm font-medium text-gray-800">
-                        Assignments to grade
-                      </p>
-                      <p class="mt-1 text-xs text-gray-500">
-                        Student submissions waiting for grading.
-                      </p>
-                      <p class="mt-3 text-2xl font-semibold text-gray-900">
+                  <div class="flex h-full flex-col">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold text-gray-900">
+                          Assignments to grade
+                        </p>
+                        <p class="mt-1 text-xs text-gray-500">
+                          Student submissions waiting for grading.
+                        </p>
+                      </div>
+                      <div
+                        class="h-9 w-9 shrink-0 rounded-lg bg-eduYellowLight text-gray-700 flex items-center justify-center"
+                      >
+                        <i class="fa-solid fa-pen-nib"></i>
+                      </div>
+                    </div>
+
+                    <div class="mt-5">
+                      <p class="text-3xl font-semibold text-gray-900">
                         {{ todayOverview.assignmentsToGradeCount }}
                       </p>
-                      <p class="mt-1 text-xs font-medium text-indigo-600">
-                        View submissions
-                      </p>
                     </div>
-                    <div
-                      class="h-9 w-9 shrink-0 rounded-lg bg-eduYellowLight text-gray-700 flex items-center justify-center"
-                    >
-                      <i class="fa-solid fa-pen-nib"></i>
+
+                    <div class="mt-auto pt-4 text-sm font-medium text-indigo-600">
+                      View submissions
                     </div>
                   </div>
                 </div>
