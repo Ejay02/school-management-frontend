@@ -5,7 +5,7 @@
         <TopList txt="Submissions to Grade" />
       </div>
 
-      <div class="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div class="mt-4 mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div class="text-sm text-gray-500">
           {{ summaryText }}
         </div>
