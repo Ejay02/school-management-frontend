@@ -2,7 +2,34 @@
   <div class="rounded border border-gray-300 p-2 w-full">
     <div class="bg-white p-4 rounded-md flex-1 m-1 mt-0 shadow-xl">
       <div class="border-b p-4">
-        <TopList txt="Submissions to Grade" />
+        <TopList txt="Teacher Submissions" />
+      </div>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button
+          v-for="tab in submissionTabs"
+          :key="tab.key"
+          type="button"
+          class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-colors"
+          :class="
+            activeTab === tab.key
+              ? 'bg-indigo-600 text-white'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          "
+          @click="setActiveTab(tab.key)"
+        >
+          {{ tab.label }}
+          <span
+            class="rounded-full px-2 py-0.5 text-xs"
+            :class="
+              activeTab === tab.key
+                ? 'bg-white/20 text-white'
+                : 'bg-white text-gray-600'
+            "
+          >
+            {{ tab.count }}
+          </span>
+        </button>
       </div>
 
       <div
@@ -33,8 +60,8 @@
       <EmptyState
         v-else-if="!filteredSubmissions.length"
         icon="fa-solid fa-pen-to-square"
-        heading="Nothing to grade right now"
-        description="When students submit assignments, they’ll show up here for review."
+        :heading="emptyState.heading"
+        :description="emptyState.description"
       >
         <router-link
           to="/assignments"
@@ -119,14 +146,32 @@
                 >
                   {{ normalizeStatus(submission.status) }}
                 </span>
+                <div
+                  v-if="typeof submission.result?.score === 'number'"
+                  class="mt-1 text-xs text-gray-500"
+                >
+                  {{ submission.result.score }}% saved
+                </div>
               </td>
               <td class="py-2 px-3 text-sm text-right">
                 <div class="flex items-center justify-end gap-2">
                   <button
-                    class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500"
+                    class="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-white"
+                    :class="
+                      isGraded(submission)
+                        ? 'bg-emerald-600 hover:bg-emerald-500'
+                        : 'bg-indigo-600 hover:bg-indigo-500'
+                    "
                     @click="openGradeReview(submission)"
                   >
-                    Grade <i class="fa-solid fa-check"></i>
+                    {{ isGraded(submission) ? "View grade" : "Grade" }}
+                    <i
+                      :class="
+                        isGraded(submission)
+                          ? 'fa-solid fa-pen-to-square'
+                          : 'fa-solid fa-check'
+                      "
+                    ></i>
                   </button>
                   <router-link
                     :to="`/assignment/${submission.assignment?.id}`"
@@ -160,10 +205,11 @@
         class="flex items-center justify-between border-b border-gray-200 px-6 py-4"
       >
         <div>
-          <h2 class="text-lg font-semibold text-gray-900">Grade submission</h2>
+          <h2 class="text-lg font-semibold text-gray-900">
+            {{ selectedSubmissionModeTitle }}
+          </h2>
           <p class="mt-1 text-sm text-gray-500">
-            Review the student's work, record a score, and publish teacher
-            feedback.
+            {{ selectedSubmissionModeDescription }}
           </p>
         </div>
         <button
@@ -223,10 +269,19 @@
                 <div
                   class="text-xs font-medium uppercase tracking-wide text-gray-400"
                 >
-                  Submitted
+                  {{
+                    isGraded(selectedSubmission) ? "Last updated" : "Submitted"
+                  }}
                 </div>
                 <div class="mt-1">
-                  {{ formatSubmittedDate(selectedSubmission.submissionDate) }}
+                  {{
+                    formatSubmittedDate(
+                      isGraded(selectedSubmission)
+                        ? selectedSubmission.updatedAt ||
+                            selectedSubmission.submissionDate
+                        : selectedSubmission.submissionDate,
+                    )
+                  }}
                 </div>
               </div>
               <div>
@@ -278,11 +333,27 @@
         <div class="rounded-xl border border-gray-200 bg-white p-4">
           <h3 class="text-sm font-semibold text-gray-900">Grade details</h3>
           <p class="mt-1 text-sm text-gray-500">
-            Save a score and optional feedback. This marks the submission as
-            graded and records an official result.
+            Save or revise a score and optional feedback. This keeps the
+            submission record and official result in sync.
           </p>
 
           <div class="mt-4 space-y-4">
+            <div
+              v-if="selectedSubmission?.result"
+              class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800"
+            >
+              Existing grade:
+              <span class="font-semibold">
+                {{ selectedSubmission.result.score }}%
+              </span>
+              <span v-if="selectedSubmission.result.term">
+                • {{ selectedSubmission.result.term }}
+              </span>
+              <span v-if="selectedSubmission.result.academicPeriod">
+                • {{ selectedSubmission.result.academicPeriod }}
+              </span>
+            </div>
+
             <div>
               <label
                 for="submission-score"
@@ -367,7 +438,13 @@
                   v-if="grading"
                   class="h-4 w-4 animate-spin rounded-full border-2 border-indigo-200 border-t-white"
                 ></span>
-                {{ grading ? "Saving grade..." : "Save grade" }}
+                {{
+                  grading
+                    ? "Saving grade..."
+                    : isGraded(selectedSubmission)
+                      ? "Update grade"
+                      : "Save grade"
+                }}
               </button>
             </div>
           </div>
@@ -387,7 +464,7 @@ import EmptyState from "../emptyState.vue";
 import Pagination from "../pagination.vue";
 import {
   getSetupStateQuery,
-  getTeacherPendingSubmissions,
+  getTeacherSubmissions,
 } from "../../graphql/queries";
 import { gradeSubmissionMutation } from "../../graphql/mutations";
 import { useNotificationStore } from "../../store/notification";
@@ -396,6 +473,7 @@ import { extractGraphQLErrorMessage } from "../../utils/graphqlError";
 const pageSize = 10;
 const currentPage = ref(1);
 const searchQuery = ref("");
+const activeTab = ref("pending");
 const selectedSubmission = ref(null);
 const gradeForm = ref({
   score: "",
@@ -405,7 +483,7 @@ const gradeFormError = ref("");
 const notificationStore = useNotificationStore();
 
 const { result, loading, error, refetch } = useQuery(
-  getTeacherPendingSubmissions,
+  getTeacherSubmissions,
   {
     params: {
       page: 1,
@@ -424,22 +502,55 @@ const { mutate: gradeSubmission, loading: grading } = useMutation(
 );
 
 const submissions = computed(() => {
-  const items = result.value?.getTeacherPendingSubmissions || [];
+  const items = result.value?.getTeacherSubmissions || [];
   return Array.isArray(items) ? items : [];
 });
 
+const isGraded = (submission) =>
+  normalizeStatus(submission?.status) === "GRADED";
+
+const tabCounts = computed(() => {
+  const items = submissions.value;
+  return {
+    pending: items.filter(
+      (item) => normalizeStatus(item.status) === "SUBMITTED",
+    ).length,
+    graded: items.filter((item) => normalizeStatus(item.status) === "GRADED")
+      .length,
+    all: items.length,
+  };
+});
+
+const submissionTabs = computed(() => [
+  { key: "pending", label: "Pending", count: tabCounts.value.pending },
+  { key: "graded", label: "Graded", count: tabCounts.value.graded },
+  { key: "all", label: "All", count: tabCounts.value.all },
+]);
+
 const filteredSubmissions = computed(() => {
+  const baseItems = submissions.value.filter((submission) => {
+    const status = normalizeStatus(submission.status);
+    if (activeTab.value === "pending") return status === "SUBMITTED";
+    if (activeTab.value === "graded") return status === "GRADED";
+    return true;
+  });
+
   const q = String(searchQuery.value || "")
     .trim()
     .toLowerCase();
-  if (!q) return submissions.value;
+  if (!q) return baseItems;
 
-  return submissions.value.filter((s) => {
+  return baseItems.filter((s) => {
     const studentName = `${s?.student?.name || ""} ${s?.student?.surname || ""}`
       .trim()
       .toLowerCase();
     const assignmentTitle = String(s?.assignment?.title || "").toLowerCase();
-    return studentName.includes(q) || assignmentTitle.includes(q);
+    const teacherFeedback = String(s?.result?.comments || "").toLowerCase();
+    return (
+      studentName.includes(q) ||
+      assignmentTitle.includes(q) ||
+      teacherFeedback.includes(q)
+    );
   });
 });
 
@@ -456,10 +567,42 @@ const paginatedSubmissions = computed(() => {
 });
 
 const summaryText = computed(() => {
-  if (loading.value) return "Loading grading queue...";
+  if (loading.value) return "Loading submissions...";
   const count = filteredSubmissions.value.length;
-  if (!count) return "No pending submissions.";
+  if (!count) {
+    if (activeTab.value === "graded") return "No graded submissions yet.";
+    if (activeTab.value === "all") return "No submissions found.";
+    return "No pending submissions.";
+  }
+  if (activeTab.value === "graded") {
+    return `${count} graded submission${count === 1 ? "" : "s"} in history.`;
+  }
+  if (activeTab.value === "all") {
+    return `${count} submission${count === 1 ? "" : "s"} across pending and graded work.`;
+  }
   return `${count} submission${count === 1 ? "" : "s"} waiting for grading.`;
+});
+
+const emptyState = computed(() => {
+  if (activeTab.value === "graded") {
+    return {
+      heading: "No graded submissions yet",
+      description:
+        "Once you grade student work, it will stay here so you can revisit or update feedback later.",
+    };
+  }
+  if (activeTab.value === "all") {
+    return {
+      heading: "No submissions yet",
+      description:
+        "Student submissions will appear here as soon as work starts coming in.",
+    };
+  }
+  return {
+    heading: "Nothing to grade right now",
+    description:
+      "When students submit assignments, they’ll show up here for review.",
+  };
 });
 
 const setupState = computed(() => setupResult.value?.getSetupState || null);
@@ -494,6 +637,11 @@ watch(searchQuery, () => {
   currentPage.value = 1;
 });
 
+const setActiveTab = (tabKey) => {
+  activeTab.value = tabKey;
+  currentPage.value = 1;
+};
+
 const openGradeReview = (submission) => {
   selectedSubmission.value = submission;
   gradeForm.value = {
@@ -519,6 +667,18 @@ const studentLabel = (submission) =>
 
 const submissionLooksLikeLink = (value) =>
   /^https?:\/\//i.test(String(value || "").trim());
+
+const selectedSubmissionModeTitle = computed(() =>
+  isGraded(selectedSubmission.value)
+    ? "Review graded submission"
+    : "Grade submission",
+);
+
+const selectedSubmissionModeDescription = computed(() =>
+  isGraded(selectedSubmission.value)
+    ? "Revisit the saved score and feedback, then update them if needed."
+    : "Review the student's work, record a score, and publish teacher feedback.",
+);
 
 const normalizeStatus = (status) => {
   const s = String(status || "")

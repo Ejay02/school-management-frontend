@@ -533,6 +533,45 @@ export const getTeacherPendingSubmissions = gql`
   }
 `;
 
+export const getTeacherSubmissions = gql`
+  query getTeacherSubmissions($params: PaginationInput) {
+    getTeacherSubmissions(params: $params) {
+      id
+      status
+      submissionDate
+      content
+      updatedAt
+      student {
+        id
+        name
+        surname
+        image
+      }
+      assignment {
+        id
+        title
+        dueDate
+        class {
+          id
+          name
+        }
+        subject {
+          id
+          name
+        }
+      }
+      result {
+        id
+        score
+        comments
+        academicPeriod
+        term
+        isOfficialResult
+      }
+    }
+  }
+`;
+
 export const getIncomeGraphData = gql`
   query getIncomeGraphData {
     getIncomeGraphData {
