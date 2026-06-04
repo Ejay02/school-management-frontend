@@ -150,7 +150,8 @@
                   v-if="typeof submission.result?.score === 'number'"
                   class="mt-1 text-xs text-gray-500"
                 >
-                  {{ submission.result.score }}% saved
+                  {{ submission.result.score }}% • Graded at
+                  {{ formatGradedAt(submission) }}
                 </div>
               </td>
               <td class="py-2 px-3 text-sm text-right">
@@ -269,18 +270,13 @@
                 <div
                   class="text-xs font-medium uppercase tracking-wide text-gray-400"
                 >
-                  {{
-                    isGraded(selectedSubmission) ? "Last updated" : "Submitted"
-                  }}
+                  {{ isGraded(selectedSubmission) ? "Graded at" : "Submitted" }}
                 </div>
                 <div class="mt-1">
                   {{
-                    formatSubmittedDate(
-                      isGraded(selectedSubmission)
-                        ? selectedSubmission.updatedAt ||
-                            selectedSubmission.submissionDate
-                        : selectedSubmission.submissionDate,
-                    )
+                    isGraded(selectedSubmission)
+                      ? formatGradedAt(selectedSubmission)
+                      : formatSubmittedDate(selectedSubmission.submissionDate)
                   }}
                 </div>
               </div>
@@ -345,6 +341,9 @@
               Existing grade:
               <span class="font-semibold">
                 {{ selectedSubmission.result.score }}%
+              </span>
+              <span>
+                • Graded at {{ formatGradedAt(selectedSubmission) }}
               </span>
               <span v-if="selectedSubmission.result.term">
                 • {{ selectedSubmission.result.term }}
@@ -714,6 +713,9 @@ const formatShortDate = (value) => {
     year: "numeric",
   });
 };
+
+const formatGradedAt = (submission) =>
+  formatSubmittedDate(submission?.updatedAt || submission?.submissionDate);
 
 const submitGrade = async () => {
   if (!selectedSubmission.value) return;
