@@ -995,6 +995,44 @@ export const deleteAssignment = gql`
   }
 `;
 
+export const gradeSubmissionMutation = gql`
+  mutation GradeSubmission($input: GradeSubmissionInput!) {
+    gradeSubmission(input: $input) {
+      id
+      status
+      submissionDate
+      content
+      student {
+        id
+        name
+        surname
+        image
+      }
+      assignment {
+        id
+        title
+        dueDate
+        class {
+          id
+          name
+        }
+        subject {
+          id
+          name
+        }
+      }
+      result {
+        id
+        score
+        comments
+        academicPeriod
+        term
+        isOfficialResult
+      }
+    }
+  }
+`;
+
 export const createSubject = gql`
   mutation CreateSubject($input: CreateSubjectInput!) {
     createSubject(input: $input) {
