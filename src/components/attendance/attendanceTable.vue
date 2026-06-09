@@ -496,19 +496,45 @@
             />
           </div>
 
-          <div v-if="attendanceEntryMode === 'speed'" class="mb-4 flex gap-2">
-            <button
-              class="rounded-md bg-green-100 px-3 py-2 text-sm font-medium text-green-700 hover:bg-green-200"
-              @click="markAllPresent"
-            >
-              Mark all present
-            </button>
-            <button
-              class="rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
-              @click="clearAllMarks"
-            >
-              Clear
-            </button>
+          <div
+            v-if="attendanceEntryMode === 'speed'"
+            class="mb-4 space-y-3 rounded-lg border border-indigo-100 bg-indigo-50 p-3"
+          >
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                class="rounded-md bg-green-100 px-3 py-2 text-sm font-medium text-green-700 hover:bg-green-200"
+                @click="markAllPresent"
+              >
+                Mark all present
+              </button>
+              <button
+                class="rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                @click="clearAllMarks"
+              >
+                Reset
+              </button>
+            </div>
+            <div class="text-sm text-indigo-700">
+              Tap a student row to cycle
+              <span class="font-medium">Present -> Absent -> Late</span>.
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs">
+              <span
+                class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 font-medium text-green-700"
+              >
+                {{ attendanceCounts.present }} present
+              </span>
+              <span
+                class="inline-flex items-center rounded-full bg-red-100 px-2 py-1 font-medium text-red-700"
+              >
+                {{ attendanceCounts.absent }} absent
+              </span>
+              <span
+                class="inline-flex items-center rounded-full bg-amber-100 px-2 py-1 font-medium text-amber-700"
+              >
+                {{ attendanceCounts.late }} late
+              </span>
+            </div>
           </div>
 
           <div class="overflow-x-auto">
@@ -559,6 +585,23 @@
                   v-for="student in filteredStudents"
                   :key="student.id"
                   class="hover:bg-gray-50"
+                  :class="{
+                    'cursor-pointer': attendanceEntryMode === 'speed',
+                    'bg-green-50/60':
+                      attendanceEntryMode === 'speed' &&
+                      studentAttendance[student.id] === 'PRESENT',
+                    'bg-red-50/60':
+                      attendanceEntryMode === 'speed' &&
+                      studentAttendance[student.id] === 'ABSENT',
+                    'bg-amber-50/60':
+                      attendanceEntryMode === 'speed' &&
+                      studentAttendance[student.id] === 'LATE',
+                  }"
+                  @click="
+                    attendanceEntryMode === 'speed'
+                      ? cycleStudentStatus(student.id)
+                      : null
+                  "
                 >
                   <td class="py-2 px-3 text-sm capitalize">
                     {{ student.name }} {{ student.surname }}
@@ -580,7 +623,9 @@
                     >
                       {{
                         studentAttendance[student.id] === undefined
-                          ? "Not marked"
+                          ? attendanceEntryMode === "speed"
+                            ? "Present"
+                            : "Not marked"
                           : formatAttendanceStatus(
                               studentAttendance[student.id],
                             )
@@ -595,10 +640,10 @@
                       <select
                         v-if="
                           studentAttendance[student.id] === 'ABSENT' ||
-                          studentAttendance[student.id] === 'LATE' ||
-                          studentAttendance[student.id] === 'EARLY_LEAVE'
+                          studentAttendance[student.id] === 'LATE'
                         "
                         v-model="studentAttendanceReason[student.id]"
+                        @click.stop
                         class="w-full rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                       >
                         <option value="">Select reason (optional)</option>
@@ -615,18 +660,24 @@
                       <input
                         v-if="
                           (studentAttendance[student.id] === 'ABSENT' ||
-                            studentAttendance[student.id] === 'LATE' ||
-                            studentAttendance[student.id] === 'EARLY_LEAVE') &&
+                            studentAttendance[student.id] === 'LATE') &&
                           studentAttendanceReason[student.id] === 'Other'
                         "
                         v-model="studentAttendanceReasonOther[student.id]"
+                        @click.stop
                         placeholder="Reason"
                         class="w-full rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                       />
                     </div>
                   </td>
                   <td class="py-2 px-3 text-sm text-center">
-                    <div class="flex justify-center gap-2">
+                    <div
+                      v-if="attendanceEntryMode === 'speed'"
+                      class="text-xs font-medium text-gray-500"
+                    >
+                      Tap row
+                    </div>
+                    <div v-else class="flex justify-center gap-2">
                       <button
                         @click="setStudentStatus(student.id, 'PRESENT')"
                         class="px-2 py-1 bg-green-200 text-green-700 text-xs rounded hover:bg-green-300 transition-colors"
@@ -638,7 +689,6 @@
                         Present
                       </button>
                       <button
-                        v-if="attendanceEntryMode === 'speed'"
                         @click="setStudentStatus(student.id, 'LATE')"
                         class="px-2 py-1 bg-amber-200 text-amber-800 text-xs rounded hover:bg-amber-300 transition-colors"
                         :class="{
@@ -649,7 +699,6 @@
                         Late
                       </button>
                       <button
-                        v-if="attendanceEntryMode === 'speed'"
                         @click="setStudentStatus(student.id, 'EARLY_LEAVE')"
                         class="px-2 py-1 bg-amber-200 text-amber-800 text-xs rounded hover:bg-amber-300 transition-colors"
                         :class="{
@@ -979,17 +1028,65 @@ const filteredAttendanceRecords = computed(() => {
   return filtered;
 });
 
-// Filter students for the mark attendance view
-const filteredStudents = computed(() => {
+const classStudents = computed(() => {
   if (!selectedClass.value) return [];
 
-  // Find the class object in class store that matches the selected class ID
   const classObj = classStore.allClasses.find(
     (cls) => cls.id === selectedClass.value,
   );
 
-  // Return the students from that class if available
   return classObj && classObj.students ? classObj.students : [];
+});
+
+// Filter students for the mark attendance view
+const filteredStudents = computed(() => {
+  const list = classStudents.value;
+  const query = String(studentSearchQuery.value || "")
+    .trim()
+    .toLowerCase();
+
+  if (!query) return list;
+
+  return list.filter((student) => {
+    const fullName = `${student?.name || ""} ${student?.surname || ""}`
+      .trim()
+      .toLowerCase();
+    return (
+      fullName.includes(query) ||
+      String(student?.name || "")
+        .toLowerCase()
+        .includes(query) ||
+      String(student?.surname || "")
+        .toLowerCase()
+        .includes(query)
+    );
+  });
+});
+
+const attendanceCounts = computed(() => {
+  const counts = { present: 0, absent: 0, late: 0 };
+
+  classStudents.value.forEach((student) => {
+    const status =
+      studentAttendance.value?.[student.id] ??
+      (attendanceEntryMode.value === "speed" ? "PRESENT" : undefined);
+
+    if (status === "ABSENT") {
+      counts.absent += 1;
+      return;
+    }
+
+    if (status === "LATE") {
+      counts.late += 1;
+      return;
+    }
+
+    if (status === "PRESENT") {
+      counts.present += 1;
+    }
+  });
+
+  return counts;
 });
 
 const scannedStudents = computed(() => {
@@ -1007,6 +1104,9 @@ const setAttendanceEntryMode = (mode) => {
   }
   if (mode !== "session") {
     stopAttendanceSession();
+  }
+  if ((mode === "speed" || mode === "manual") && selectedSubject.value) {
+    initializeStudentAttendance();
   }
 };
 
@@ -1320,11 +1420,12 @@ function initializeStudentAttendance() {
   studentAttendanceReasonOther.value = {};
 
   // Get students who should be marked for this lesson
-  const relevantStudents = filteredStudents.value;
+  const relevantStudents = classStudents.value;
 
   // Initialize attendance state for each student
   relevantStudents.forEach((student) => {
-    studentAttendance.value[student.id] = undefined;
+    studentAttendance.value[student.id] =
+      attendanceEntryMode.value === "speed" ? "PRESENT" : undefined;
     studentAttendanceReason.value[student.id] = "";
     studentAttendanceReasonOther.value[student.id] = "";
   });
@@ -1371,13 +1472,39 @@ const setStudentStatus = (studentId, status) => {
   }
 };
 
+const cycleStudentStatus = (studentId) => {
+  const current = String(
+    studentAttendance.value?.[studentId] ||
+      (attendanceEntryMode.value === "speed" ? "PRESENT" : ""),
+  )
+    .trim()
+    .toUpperCase();
+
+  if (current === "PRESENT") {
+    setStudentStatus(studentId, "ABSENT");
+    return;
+  }
+
+  if (current === "ABSENT") {
+    setStudentStatus(studentId, "LATE");
+    return;
+  }
+
+  setStudentStatus(studentId, "PRESENT");
+};
+
 const markAllPresent = () => {
-  filteredStudents.value.forEach((student) => {
+  classStudents.value.forEach((student) => {
     setStudentStatus(student.id, "PRESENT");
   });
 };
 
 const clearAllMarks = () => {
+  if (attendanceEntryMode.value === "speed") {
+    markAllPresent();
+    return;
+  }
+
   Object.keys(studentAttendance.value || {}).forEach((studentId) => {
     setStudentStatus(studentId, "");
   });
