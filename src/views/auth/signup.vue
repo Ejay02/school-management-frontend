@@ -178,6 +178,12 @@
                   class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurpleLight sm:text-sm/6"
                 />
               </div>
+              <p
+                v-if="formData.email && !isEmailValid"
+                class="mt-1 text-xs text-red-500"
+              >
+                Enter a valid email address.
+              </p>
             </div>
           </div>
 
@@ -197,6 +203,7 @@
                 id="password"
                 placeholder="my-super-secret-password"
                 required
+                minlength="8"
                 class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurpleLight sm:text-sm/6"
               />
               <button
@@ -210,6 +217,12 @@
                 ></i>
               </button>
             </div>
+            <p
+              v-if="formData.password && !isPasswordValid"
+              class="mt-1 text-xs text-red-500"
+            >
+              Password must be at least 8 characters.
+            </p>
           </div>
 
           <!-- btn -->
@@ -323,20 +336,28 @@ const Roles = Object.fromEntries(
   availableTargetRoles.map(role => [role.label.toUpperCase().replace('S', ''), role.value])
 );
 
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const isEmailValid = computed(() => emailPattern.test(formData.email.trim()));
+
+const isPasswordValid = computed(() => formData.password.length >= 8);
+
 const isFormValid = computed(() => {
   if (!selectedRole.value) return false;
 
   const commonFieldsFilled =
-    formData.name &&
-    formData.surname &&
-    formData.username &&
-    formData.email &&
-    formData.password;
+    formData.name.trim() &&
+    formData.surname.trim() &&
+    formData.username.trim() &&
+    formData.email.trim() &&
+    formData.password &&
+    isEmailValid.value &&
+    isPasswordValid.value;
 
   if (selectedRole.value === "student") {
     return (
       commonFieldsFilled &&
-      formData.parentId &&
+      formData.parentId.trim() &&
       formData.selectedClass
     );
   }
@@ -363,11 +384,11 @@ const handleSubmit = async () => {
   try {
     // Prepare base input
     const baseInput = {
-      username: formData.username,
-      name: formData.name,
-      surname: formData.surname,
+      username: formData.username.trim(),
+      name: formData.name.trim(),
+      surname: formData.surname.trim(),
       password: formData.password,
-      email: formData.email,
+      email: formData.email.trim(),
     };
 
     let result;
@@ -396,7 +417,7 @@ const handleSubmit = async () => {
           input: {
             ...baseInput,
             role: Roles.STUDENT,
-            parentId: formData.parentId,
+            parentId: formData.parentId.trim(),
             classId: formData.selectedClass,
           },
         });
