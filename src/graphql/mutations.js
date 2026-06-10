@@ -1182,3 +1182,70 @@ export const initiatePayment = gql`
     initiatePayment(invoiceId: $invoiceId, amount: $amount)
   }
 `;
+
+export const findOrCreateDirectConversation = gql`
+  mutation FindOrCreateDirectConversation($participantId: String!) {
+    findOrCreateDirectConversation(participantId: $participantId) {
+      id
+      type
+      unreadCount
+      createdAt
+      updatedAt
+      participants {
+        id
+        role
+        displayName
+        name
+        surname
+        image
+        email
+        subtitle
+      }
+      lastMessage {
+        id
+        conversationId
+        content
+        createdAt
+        updatedAt
+        sender {
+          id
+          role
+          displayName
+          name
+          surname
+          image
+          email
+          subtitle
+        }
+      }
+    }
+  }
+`;
+
+export const sendChatMessage = gql`
+  mutation SendChatMessage($conversationId: String!, $content: String!) {
+    sendChatMessage(conversationId: $conversationId, content: $content) {
+      id
+      conversationId
+      content
+      createdAt
+      updatedAt
+      sender {
+        id
+        role
+        displayName
+        name
+        surname
+        image
+        email
+        subtitle
+      }
+    }
+  }
+`;
+
+export const markChatConversationAsRead = gql`
+  mutation MarkChatConversationAsRead($conversationId: String!) {
+    markChatConversationAsRead(conversationId: $conversationId)
+  }
+`;

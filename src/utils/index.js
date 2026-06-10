@@ -113,7 +113,7 @@ export const menuItems = [
         icon: "/message.png",
         label: "Messages",
         href: "/messages",
-        visible: ["super_admin", "admin", "teacher", "student", "parent"],
+        visible: ["super_admin", "admin", "teacher", "parent"],
       },
       {
         icon: "/announcement.png",

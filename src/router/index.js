@@ -308,7 +308,7 @@ const routes = [
         name: "Messages",
         component: Messages,
         meta: {
-          role: ["admin", "super_admin", "teacher", "student", "parent"],
+          role: ["admin", "super_admin", "teacher", "parent"],
         },
       },
       {

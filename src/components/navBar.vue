@@ -22,6 +22,7 @@
       <div class="flex items-center gap-3 justify-end w-full text-center">
         <!-- msg -->
         <router-link
+          v-if="userStore.hasAccess('/messages')"
           to="/messages"
           class="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer hover:bg-eduSkyLight relative"
         >

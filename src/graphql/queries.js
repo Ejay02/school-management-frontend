@@ -1546,3 +1546,79 @@ export const calculateFinalGrade = gql`
     calculateFinalGrade(classId: $classId, studentId: $studentId)
   }
 `;
+
+export const getChatContacts = gql`
+  query getChatContacts($search: String) {
+    getChatContacts(search: $search) {
+      id
+      role
+      displayName
+      name
+      surname
+      image
+      email
+      subtitle
+    }
+  }
+`;
+
+export const getChatConversations = gql`
+  query getChatConversations {
+    getChatConversations {
+      id
+      type
+      unreadCount
+      createdAt
+      updatedAt
+      participants {
+        id
+        role
+        displayName
+        name
+        surname
+        image
+        email
+        subtitle
+      }
+      lastMessage {
+        id
+        conversationId
+        content
+        createdAt
+        updatedAt
+        sender {
+          id
+          role
+          displayName
+          name
+          surname
+          image
+          email
+          subtitle
+        }
+      }
+    }
+  }
+`;
+
+export const getChatMessages = gql`
+  query getChatMessages($conversationId: String!) {
+    getChatMessages(conversationId: $conversationId) {
+      id
+      conversationId
+      content
+      createdAt
+      updatedAt
+      sender {
+        id
+        role
+        displayName
+        name
+        surname
+        image
+        email
+        subtitle
+      }
+    }
+  }
+`;
