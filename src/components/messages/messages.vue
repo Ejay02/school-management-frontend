@@ -215,6 +215,13 @@
         </div>
 
         <div
+          v-if="activeConversation && typingText"
+          class="bg-gray-50 px-5 pb-2 text-xs text-gray-500"
+        >
+          {{ typingText }}
+        </div>
+
+        <div
           v-if="activeConversation"
           class="border-t border-gray-200 bg-white p-4"
         >
@@ -224,6 +231,8 @@
               rows="2"
               placeholder="Type a message..."
               class="min-h-[52px] flex-1 resize-none rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+              @input="handleDraftInput"
+              @blur="stopTyping"
               @keydown.enter.exact.prevent="submitMessage"
               @keydown.enter.shift.exact.stop
             ></textarea>
@@ -279,6 +288,10 @@ const messagesByConversation = ref({});
 const activeConversationId = ref(null);
 const draftMessage = ref("");
 const messagesContainer = ref(null);
+const typingFromUserId = ref(null);
+let typingClearTimeout;
+let typingStopEmitTimeout;
+let typingSent = false;
 const currentUserId = computed(() => userStore.userInfo?.id || null);
 const currentRole = computed(() =>
   String(userStore.userInfo?.role || "")
@@ -309,6 +322,16 @@ const activeParticipant = computed(() =>
 const activeMessages = computed(
   () => messagesByConversation.value[activeConversationId.value] || [],
 );
+const typingText = computed(() => {
+  if (!activeConversationId.value) return "";
+  if (!typingFromUserId.value) return "";
+
+  const participant = activeParticipant.value;
+  if (participant?.displayName) {
+    return `${participant.displayName} is typing...`;
+  }
+  return "Typing...";
+});
 const filteredContacts = computed(() =>
   filterItems(contacts.value, searchTerm.value, (contact) => [
     contact.displayName,
@@ -519,6 +542,8 @@ async function fetchMessages(conversationId) {
 }
 
 async function openConversation(conversationId) {
+  stopTyping();
+  typingFromUserId.value = null;
   activeConversationId.value = conversationId;
   if (!messagesByConversation.value[conversationId]) {
     await fetchMessages(conversationId);
@@ -554,6 +579,7 @@ async function submitMessage() {
   if (!activeConversationId.value || !draftMessage.value.trim()) return;
   sendingMessage.value = true;
   try {
+    stopTyping();
     await apolloClient.mutate({
       mutation: sendChatMessage,
       variables: {
@@ -567,6 +593,70 @@ async function submitMessage() {
   } finally {
     sendingMessage.value = false;
   }
+}
+
+function emitTyping(isTyping) {
+  if (!socket?.connected) return;
+  if (!activeConversationId.value) return;
+  socket.emit("chatTyping", {
+    conversationId: activeConversationId.value,
+    isTyping: Boolean(isTyping),
+  });
+}
+
+function stopTyping() {
+  if (typingStopEmitTimeout) {
+    clearTimeout(typingStopEmitTimeout);
+    typingStopEmitTimeout = null;
+  }
+
+  if (typingSent) {
+    emitTyping(false);
+    typingSent = false;
+  }
+}
+
+function handleDraftInput() {
+  if (!activeConversationId.value) return;
+
+  if (!typingSent) {
+    emitTyping(true);
+    typingSent = true;
+  }
+
+  if (typingStopEmitTimeout) {
+    clearTimeout(typingStopEmitTimeout);
+  }
+
+  typingStopEmitTimeout = setTimeout(() => {
+    stopTyping();
+  }, 1200);
+}
+
+function onChatTyping(payload) {
+  const conversationId = payload?.conversationId;
+  const userId = payload?.userId;
+  const isTyping = Boolean(payload?.isTyping);
+
+  if (!conversationId || conversationId !== activeConversationId.value) return;
+  if (!userId || userId === currentUserId.value) return;
+
+  if (!isTyping) {
+    if (typingFromUserId.value === userId) {
+      typingFromUserId.value = null;
+    }
+    return;
+  }
+
+  typingFromUserId.value = userId;
+
+  if (typingClearTimeout) {
+    clearTimeout(typingClearTimeout);
+  }
+
+  typingClearTimeout = setTimeout(() => {
+    typingFromUserId.value = null;
+  }, 2000);
 }
 
 function onConversationUpdated(conversation) {
@@ -593,11 +683,14 @@ function onMessageCreated(message) {
 onMounted(async () => {
   socket.on("chatConversationUpdated", onConversationUpdated);
   socket.on("chatMessageCreated", onMessageCreated);
+  socket.on("chatTyping", onChatTyping);
   await Promise.all([fetchContacts(), fetchConversations()]);
 });
 
 onBeforeUnmount(() => {
+  stopTyping();
   socket.off("chatConversationUpdated", onConversationUpdated);
   socket.off("chatMessageCreated", onMessageCreated);
+  socket.off("chatTyping", onChatTyping);
 });
 </script>
