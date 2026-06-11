@@ -413,6 +413,14 @@ function getConversationTitle(conversation) {
 }
 
 function getConversationPreview(conversation) {
+  if (
+    typingFromUserId.value &&
+    conversation?.id === activeConversationId.value &&
+    getOtherParticipant(conversation)?.id === typingFromUserId.value
+  ) {
+    return "Typing...";
+  }
+
   if (!conversation?.lastMessage?.content) return "No messages yet";
   return conversation.lastMessage.sender?.id === currentUserId.value
     ? `You: ${conversation.lastMessage.content}`
