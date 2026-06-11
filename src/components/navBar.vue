@@ -41,9 +41,10 @@
             />
           </svg>
           <div
+            v-if="chatStore.unreadCount > 0"
             class="absolute -top-3 -right-1 w-5 h-5 flex items-center justify-center bg-indigo-500 text-white rounded-full text-[8px] font-medium"
           >
-            124
+            {{ chatStore.unreadCountLabel }}
           </div>
         </router-link>
 
@@ -111,11 +112,13 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useAnnouncementStore } from "../store/announcementStore";
 import { useNotificationStore } from "../store/notification";
+import { useChatStore } from "../store/chatStore";
 import { useUserStore } from "../store/userStore";
 import { formatPersonName, getInitials } from "../utils/displayValue";
+import { socket } from "../socket/socket";
 import ProfileDropdown from "./dropdown/profileDropdown.vue";
 
 const userStore = useUserStore();
@@ -128,6 +131,7 @@ const initials = computed(() =>
 
 const notificationStore = useNotificationStore();
 const announcementStore = useAnnouncementStore();
+const chatStore = useChatStore();
 
 const role = userStore.currentRole;
 
@@ -155,4 +159,23 @@ const copyParentId = async () => {
     });
   }
 };
+
+const onChatConversationUpdated = (conversation) => {
+  chatStore.upsertConversation(conversation);
+};
+
+onMounted(async () => {
+  if (!userStore.hasAccess("/messages")) return;
+  try {
+    await chatStore.fetchConversations();
+  } catch {
+    // Keep navbar resilient if chat is unavailable.
+  }
+
+  socket.on("chatConversationUpdated", onChatConversationUpdated);
+});
+
+onBeforeUnmount(() => {
+  socket.off("chatConversationUpdated", onChatConversationUpdated);
+});
 </script>
