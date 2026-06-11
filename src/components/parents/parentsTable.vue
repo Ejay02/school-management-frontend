@@ -72,22 +72,25 @@
         <td class="hidden md:table-cell">{{ formatDisplayValue(item?.address) }}</td>
         <td>
           <div class="flex items-center gap-2">
-            <!-- <div
+            <div
+              v-if="
+                role.toLowerCase() === 'super_admin' ||
+                role.toLowerCase() === 'admin'
+              "
               class="group relative"
-              @click="showEditModal(item.id, item.title, item, 'parentList')"
             >
               <button
-                class="w-6 h-6 flex items-center justify-center rounded-full bg-eduSky"
+                class="text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
+                @click="startChat(item?.id)"
               >
-                <i class="fa-solid fa-pen-to-square text-xs text-gray-500"></i>
-                <span
-                  class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                >
-                  Edit
-                </span>
+                <i class="fa-solid fa-comment-dots"></i>
               </button>
-            </div> -->
-            <div class="p-2"></div>
+              <span
+                class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex whitespace-nowrap"
+              >
+                Message
+              </span>
+            </div>
 
             <button
               v-if="
@@ -138,6 +141,7 @@ import { apolloClient } from "../../../apollo-client";
 import { setUserActiveStatus } from "../../graphql/mutations";
 import { extractGraphQLErrorMessage } from "../../utils/graphqlError";
 import { useNotificationStore } from "../../store/notification";
+import { useStartDirectChat } from "../../composables/useStartDirectChat";
 
 const props = defineProps({
   columns: {
@@ -155,6 +159,7 @@ const notificationStore = useNotificationStore();
 
 const role = userStore.currentRole;
 const statusLoadingId = ref("");
+const { startDirectChat } = useStartDirectChat();
 
 const modalStore = useModalStore();
 
@@ -221,6 +226,10 @@ const toggleActiveStatus = async (item) => {
   } finally {
     statusLoadingId.value = "";
   }
+};
+
+const startChat = async (participantId) => {
+  await startDirectChat(participantId);
 };
 </script>
 

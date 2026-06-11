@@ -86,17 +86,23 @@
         </td>
         <td>
           <div class="flex items-center gap-2 relative">
-            <div class="group relative">
+            <div
+              v-if="
+                role.toLowerCase() === 'super_admin' ||
+                role.toLowerCase() === 'admin'
+              "
+              class="group relative"
+            >
               <button
-                :disabled="true"
-                class="text-gray-400 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300 cursor-not-allowed opacity-70"
+                class="text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300"
+                @click="startChat(item?.id)"
               >
                 <i class="fa-solid fa-comment-dots"></i>
               </button>
               <span
                 class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex whitespace-nowrap"
               >
-                Chat coming soon
+                Message
               </span>
             </div>
 
@@ -168,6 +174,7 @@ import {
 import { useNotificationStore } from "../../store/notification";
 import { useModalStore } from "../../store/useModalStore";
 import { useUserStore } from "../../store/userStore";
+import { useStartDirectChat } from "../../composables/useStartDirectChat";
 
 const props = defineProps({
   columns: {
@@ -185,6 +192,7 @@ const modalStore = useModalStore();
 const notificationStore = useNotificationStore();
 
 const role = userStore.currentRole;
+const { startDirectChat } = useStartDirectChat();
 
 const showDelModal = (id, title, type) => {
   modalStore.deleteModal = true;
@@ -217,6 +225,10 @@ const copyId = (id) => {
         message: `Error copying to clipboard - ${err.message}`,
       });
     });
+};
+
+const startChat = async (participantId) => {
+  await startDirectChat(participantId);
 };
 
 // const showAddModal = (id, title, type) => {

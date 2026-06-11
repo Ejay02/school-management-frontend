@@ -258,7 +258,15 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { apolloClient } from "../../../apollo-client";
 import {
   getChatContacts,
@@ -276,6 +284,8 @@ import { useUserStore } from "../../store/userStore";
 
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
+const route = useRoute();
+const router = useRouter();
 const searchTerm = ref("");
 const showContacts = ref(false);
 const loadingContacts = ref(false);
@@ -583,6 +593,23 @@ async function startConversation(contact) {
   }
 }
 
+async function handleConversationQuery() {
+  const conversationId = String(route.query?.conversationId || "").trim();
+  if (!conversationId) return;
+
+  const conversationExists = conversations.value.some(
+    (conversation) => conversation.id === conversationId,
+  );
+
+  if (!conversationExists) return;
+
+  if (activeConversationId.value !== conversationId) {
+    await openConversation(conversationId);
+  }
+
+  router.replace({ path: route.path, query: {} });
+}
+
 async function submitMessage() {
   if (!activeConversationId.value || !draftMessage.value.trim()) return;
   sendingMessage.value = true;
@@ -693,6 +720,7 @@ onMounted(async () => {
   socket.on("chatMessageCreated", onMessageCreated);
   socket.on("chatTyping", onChatTyping);
   await Promise.all([fetchContacts(), fetchConversations()]);
+  await handleConversationQuery();
 });
 
 onBeforeUnmount(() => {
@@ -701,4 +729,11 @@ onBeforeUnmount(() => {
   socket.off("chatMessageCreated", onMessageCreated);
   socket.off("chatTyping", onChatTyping);
 });
+
+watch(
+  () => route.query?.conversationId,
+  async () => {
+    await handleConversationQuery();
+  },
+);
 </script>

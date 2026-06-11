@@ -20,6 +20,18 @@
         />
       </div>
       <div class="w-full md:w-1/3">
+        <div
+          v-if="canAdminMessage && teacher?.id"
+          class="mb-4 rounded-md border border-indigo-100 bg-white p-4 shadow-sm"
+        >
+          <button
+            class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
+            @click="startChatWithTeacher"
+          >
+            <i class="fa-solid fa-comment-dots"></i>
+            Message {{ teacherName }}
+          </button>
+        </div>
         <RightSingleView :shortcuts="teacherShortcuts" :name="teacherName" />
       </div>
     </div>
@@ -29,9 +41,11 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { useStartDirectChat } from "../../composables/useStartDirectChat";
 import ErrorScreen from "../../components/errorScreen.vue";
 import LoadingScreen from "../../components/loadingScreen.vue";
 import { useTeacherStore } from "../../store/teacherStore";
+import { useUserStore } from "../../store/userStore";
 import { formatDate } from "../../utils/date.holidays";
 import LeftSingleView from "../../views/singleView/leftSingleView.vue";
 import RightSingleView from "../../views/singleView/rightSingleView.vue";
@@ -40,6 +54,8 @@ const route = useRoute();
 const teacherId = route.params.id;
 
 const teacherStore = useTeacherStore();
+const userStore = useUserStore();
+const { startDirectChat } = useStartDirectChat();
 
 onMounted(() => {
   teacherStore.fetchTeacherById(teacherId);
@@ -49,6 +65,10 @@ const teacher = computed(() => teacherStore.selectedTeacher);
 
 const loading = computed(() => teacherStore.loading);
 const error = computed(() => teacherStore.error);
+const canAdminMessage = computed(() => {
+  const currentRole = String(userStore.currentRole || "").toLowerCase();
+  return currentRole === "admin" || currentRole === "super_admin";
+});
 
 const teacherName = computed(() => {
   const name = teacher.value?.name;
@@ -142,6 +162,11 @@ const teacherShortcuts = computed(() => {
     },
   ];
 });
+
+const startChatWithTeacher = async () => {
+  if (!teacher.value?.id) return;
+  await startDirectChat(teacher.value.id);
+};
 </script>
 
 <style scoped></style>
