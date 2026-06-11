@@ -1205,6 +1205,13 @@ export const findOrCreateDirectConversation = gql`
         id
         conversationId
         content
+        attachments {
+          name
+          mimeType
+          size
+          url
+          kind
+        }
         createdAt
         updatedAt
         sender {
@@ -1223,11 +1230,26 @@ export const findOrCreateDirectConversation = gql`
 `;
 
 export const sendChatMessage = gql`
-  mutation SendChatMessage($conversationId: String!, $content: String!) {
-    sendChatMessage(conversationId: $conversationId, content: $content) {
+  mutation SendChatMessage(
+    $conversationId: String!
+    $content: String
+    $attachments: [ChatAttachmentInput!]
+  ) {
+    sendChatMessage(
+      conversationId: $conversationId
+      content: $content
+      attachments: $attachments
+    ) {
       id
       conversationId
       content
+      attachments {
+        name
+        mimeType
+        size
+        url
+        kind
+      }
       createdAt
       updatedAt
       sender {

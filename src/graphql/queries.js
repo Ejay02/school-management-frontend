@@ -1584,6 +1584,13 @@ export const getChatConversations = gql`
         id
         conversationId
         content
+        attachments {
+          name
+          mimeType
+          size
+          url
+          kind
+        }
         createdAt
         updatedAt
         sender {
@@ -1607,6 +1614,13 @@ export const getChatMessages = gql`
       id
       conversationId
       content
+      attachments {
+        name
+        mimeType
+        size
+        url
+        kind
+      }
       createdAt
       updatedAt
       sender {

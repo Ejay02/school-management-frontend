@@ -199,7 +199,36 @@
                       : 'rounded-bl-md bg-white text-gray-800'
                   "
                 >
-                  <p class="whitespace-pre-wrap break-words">
+                  <div
+                    v-if="message.attachments?.length"
+                    class="mb-2 space-y-2"
+                  >
+                    <div
+                      v-for="(attachment, index) in message.attachments"
+                      :key="`${message.id}-attachment-${index}`"
+                    >
+                      <img
+                        v-if="attachment.kind === 'image'"
+                        :src="attachment.url"
+                        :alt="attachment.name"
+                        class="max-h-64 w-full rounded-lg object-cover"
+                      />
+                      <a
+                        v-else
+                        :href="attachment.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="flex items-center gap-3 rounded-lg border border-gray-200 bg-white/80 px-3 py-2 text-left text-sm text-gray-700"
+                      >
+                        <i class="fa-solid fa-paperclip text-indigo-500"></i>
+                        <span class="truncate">{{ attachment.name }}</span>
+                      </a>
+                    </div>
+                  </div>
+                  <p
+                    v-if="message.content"
+                    class="whitespace-pre-wrap break-words"
+                  >
                     {{ message.content }}
                   </p>
                 </div>
@@ -225,21 +254,77 @@
           v-if="activeConversation"
           class="border-t border-gray-200 bg-white p-4"
         >
+          <input
+            ref="attachmentInput"
+            type="file"
+            multiple
+            class="hidden"
+            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+            @change="handleAttachmentChange"
+          />
           <form class="flex items-end gap-3" @submit.prevent="submitMessage">
-            <textarea
-              v-model="draftMessage"
-              rows="2"
-              placeholder="Type a message..."
-              class="min-h-[52px] flex-1 resize-none rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-              @input="handleDraftInput"
-              @blur="stopTyping"
-              @keydown.enter.exact.prevent="submitMessage"
-              @keydown.enter.shift.exact.stop
-            ></textarea>
+            <div class="flex-1 space-y-3">
+              <div
+                v-if="pendingAttachments.length"
+                class="flex flex-wrap gap-2 rounded-xl border border-gray-200 bg-gray-50 p-3"
+              >
+                <div
+                  v-for="attachment in pendingAttachments"
+                  :key="attachment.id"
+                  class="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs text-gray-600 shadow-sm"
+                >
+                  <img
+                    v-if="attachment.kind === 'image'"
+                    :src="attachment.previewUrl"
+                    :alt="attachment.name"
+                    class="h-10 w-10 rounded object-cover"
+                  />
+                  <i v-else class="fa-solid fa-paperclip text-indigo-500"></i>
+                  <div class="min-w-0">
+                    <p class="max-w-[180px] truncate font-medium text-gray-700">
+                      {{ attachment.name }}
+                    </p>
+                    <p class="text-[11px] text-gray-400">
+                      {{ formatAttachmentSize(attachment.size) }}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    class="text-gray-400 transition hover:text-red-500"
+                    @click="removePendingAttachment(attachment.id)"
+                  >
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="flex items-end gap-3">
+                <button
+                  type="button"
+                  class="rounded-full border border-gray-300 bg-white px-4 py-3 text-sm text-gray-600 transition hover:border-indigo-300 hover:text-indigo-600"
+                  @click="openAttachmentPicker"
+                >
+                  <i class="fa-solid fa-paperclip"></i>
+                </button>
+                <textarea
+                  v-model="draftMessage"
+                  rows="2"
+                  placeholder="Type a message..."
+                  class="min-h-[52px] flex-1 resize-none rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                  @input="handleDraftInput"
+                  @blur="stopTyping"
+                  @keydown.enter.exact.prevent="submitMessage"
+                  @keydown.enter.shift.exact.stop
+                ></textarea>
+              </div>
+            </div>
             <button
               type="submit"
               class="rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 px-4 py-3 text-sm font-medium text-white transition hover:from-blue-500 hover:to-purple-500 disabled:cursor-not-allowed disabled:opacity-60"
-              :disabled="sendingMessage || !draftMessage.trim()"
+              :disabled="
+                sendingMessage ||
+                (!draftMessage.trim() && !pendingAttachments.length)
+              "
             >
               {{ sendingMessage ? "Sending..." : "Send" }}
             </button>
@@ -298,6 +383,8 @@ const messagesByConversation = ref({});
 const activeConversationId = ref(null);
 const draftMessage = ref("");
 const messagesContainer = ref(null);
+const attachmentInput = ref(null);
+const pendingAttachments = ref([]);
 const typingFromUserId = ref(null);
 let typingClearTimeout;
 let typingStopEmitTimeout;
@@ -431,7 +518,14 @@ function getConversationPreview(conversation) {
     return "Typing...";
   }
 
-  if (!conversation?.lastMessage?.content) return "No messages yet";
+  if (!conversation?.lastMessage?.content) {
+    if (conversation?.lastMessage?.attachments?.length) {
+      return conversation.lastMessage.attachments.length === 1
+        ? "Attachment"
+        : `${conversation.lastMessage.attachments.length} attachments`;
+    }
+    return "No messages yet";
+  }
   return conversation.lastMessage.sender?.id === currentUserId.value
     ? `You: ${conversation.lastMessage.content}`
     : conversation.lastMessage.content;
@@ -458,6 +552,17 @@ function formatMessageTime(value) {
 
 function isOwnMessage(message) {
   return message?.sender?.id === currentUserId.value;
+}
+
+function formatAttachmentSize(size) {
+  const value = Number(size || 0);
+  if (value >= 1024 * 1024) {
+    return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+  }
+  if (value >= 1024) {
+    return `${Math.round(value / 1024)} KB`;
+  }
+  return `${value} B`;
 }
 
 async function scrollToBottom() {
@@ -562,6 +667,7 @@ async function fetchMessages(conversationId) {
 async function openConversation(conversationId) {
   stopTyping();
   typingFromUserId.value = null;
+  pendingAttachments.value = [];
   activeConversationId.value = conversationId;
   if (!messagesByConversation.value[conversationId]) {
     await fetchMessages(conversationId);
@@ -611,7 +717,12 @@ async function handleConversationQuery() {
 }
 
 async function submitMessage() {
-  if (!activeConversationId.value || !draftMessage.value.trim()) return;
+  if (
+    !activeConversationId.value ||
+    (!draftMessage.value.trim() && !pendingAttachments.value.length)
+  ) {
+    return;
+  }
   sendingMessage.value = true;
   try {
     stopTyping();
@@ -619,14 +730,79 @@ async function submitMessage() {
       mutation: sendChatMessage,
       variables: {
         conversationId: activeConversationId.value,
-        content: draftMessage.value.trim(),
+        content: draftMessage.value.trim() || null,
+        attachments: pendingAttachments.value.map((attachment) => ({
+          name: attachment.name,
+          mimeType: attachment.mimeType,
+          size: attachment.size,
+          dataUrl: attachment.dataUrl,
+        })),
       },
     });
     draftMessage.value = "";
+    pendingAttachments.value = [];
   } catch (error) {
     notifyError(error, "Failed to send message.");
   } finally {
     sendingMessage.value = false;
+  }
+}
+
+function openAttachmentPicker() {
+  attachmentInput.value?.click();
+}
+
+function removePendingAttachment(attachmentId) {
+  pendingAttachments.value = pendingAttachments.value.filter(
+    (attachment) => attachment.id !== attachmentId,
+  );
+}
+
+async function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Unable to read attachment"));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleAttachmentChange(event) {
+  const files = Array.from(event?.target?.files || []);
+  if (!files.length) return;
+
+  const nextTotal = pendingAttachments.value.length + files.length;
+  if (nextTotal > 5) {
+    notifyError(null, "You can attach up to 5 files per message.");
+    event.target.value = "";
+    return;
+  }
+
+  try {
+    const prepared = [];
+
+    for (const file of files) {
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error(`${file.name} exceeds the 5MB limit.`);
+      }
+
+      const dataUrl = await fileToDataUrl(file);
+      prepared.push({
+        id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
+        name: file.name,
+        mimeType: file.type || "application/octet-stream",
+        size: file.size,
+        dataUrl,
+        previewUrl: dataUrl,
+        kind: file.type?.startsWith("image/") ? "image" : "file",
+      });
+    }
+
+    pendingAttachments.value = [...pendingAttachments.value, ...prepared];
+  } catch (error) {
+    notifyError(error, "Failed to attach file.");
+  } finally {
+    event.target.value = "";
   }
 }
 
