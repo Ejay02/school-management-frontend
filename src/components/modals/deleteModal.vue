@@ -90,6 +90,7 @@ import { apolloClient } from "../../../apollo-client";
 import {
   deleteAssignment,
   deleteClass,
+  deleteChatMessage,
   deleteEvent,
   deleteExam,
   deleteFeeStructure,
@@ -134,21 +135,21 @@ watch(
   (newVal) => {
     isModalVisible.value = newVal;
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(
   () => modalStore.modalTitle,
   (newVal) => {
     title.value = newVal;
-  }
+  },
 );
 
 watch(
   () => modalStore.source,
   (newVal) => {
     source.value = newVal;
-  }
+  },
 );
 
 const handleCancel = () => {
@@ -300,6 +301,13 @@ const handleDelete = async () => {
       notificationStore.addNotification({
         type: "success",
         message: "Fee structure deleted successfully",
+      });
+    } else if (source.value === "chatMessage") {
+      await apolloClient.mutate({
+        mutation: deleteChatMessage,
+        variables: {
+          messageId: modalStore.modalId,
+        },
       });
     }
     modalStore.deleteModal = false;

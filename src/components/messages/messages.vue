@@ -252,7 +252,6 @@
                   v-if="canDeleteMessage(message)"
                   type="button"
                   class="absolute -right-2 -top-2 hidden h-8 w-8 items-center justify-center rounded-full bg-white text-gray-500 shadow-sm ring-1 ring-gray-200 transition hover:text-red-500 group-hover:flex"
-                  :disabled="deletingMessageId === message.id"
                   @click="deleteMessage(message)"
                 >
                   <i class="fa-solid fa-trash-can"></i>
@@ -406,9 +405,11 @@ import {
 import { socket } from "../../socket/socket";
 import { useNotificationStore } from "../../store/notification";
 import { useUserStore } from "../../store/userStore";
+import { useModalStore } from "../../store/useModalStore";
 
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
+const modalStore = useModalStore();
 const route = useRoute();
 const router = useRouter();
 const searchTerm = ref("");
@@ -427,7 +428,6 @@ const attachmentInput = ref(null);
 const pendingAttachments = ref([]);
 const isDraggingFiles = ref(false);
 const dragDepth = ref(0);
-const deletingMessageId = ref(null);
 const typingFromUserId = ref(null);
 let typingClearTimeout;
 let typingStopEmitTimeout;
@@ -958,24 +958,17 @@ function removeMessageLocally(conversationId, messageId) {
   };
 }
 
-async function deleteMessage(message) {
+function deleteMessage(message) {
   if (!message?.id) return;
-  if (deletingMessageId.value) return;
-  if (!window.confirm("Delete this message?")) return;
 
-  deletingMessageId.value = message.id;
-  try {
-    removeMessageLocally(message.conversationId, message.id);
-    await apolloClient.mutate({
-      mutation: deleteChatMessage,
-      variables: { messageId: message.id },
-    });
-  } catch (error) {
-    notifyError(error, "Failed to delete message.");
-    await fetchMessages(message.conversationId);
-  } finally {
-    deletingMessageId.value = null;
-  }
+  const title = String(message.content || "").trim();
+  modalStore.deleteModal = true;
+  modalStore.modalId = message.id;
+  modalStore.modalTitle = title || "this message";
+  modalStore.source = "chatMessage";
+  modalStore.data = {
+    conversationId: message.conversationId,
+  };
 }
 
 function emitTyping(isTyping) {
