@@ -296,6 +296,33 @@
             accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
             @change="handleAttachmentChange"
           />
+          <div
+            v-if="showEmojiPicker"
+            ref="emojiPickerRef"
+            class="absolute bottom-full left-4 mb-3 w-72 rounded-xl border border-gray-200 bg-white p-3 shadow-lg"
+          >
+            <div class="mb-2 flex items-center justify-between">
+              <p class="text-sm font-semibold text-gray-700">Emojis</p>
+              <button
+                type="button"
+                class="text-gray-400 transition hover:text-gray-600"
+                @click="showEmojiPicker = false"
+              >
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div class="grid grid-cols-8 gap-2">
+              <button
+                v-for="emoji in emojiOptions"
+                :key="emoji"
+                type="button"
+                class="rounded-lg p-2 text-xl transition hover:bg-gray-100"
+                @click="appendEmoji(emoji)"
+              >
+                {{ emoji }}
+              </button>
+            </div>
+          </div>
           <form class="flex items-end gap-3" @submit.prevent="submitMessage">
             <div class="flex-1 space-y-3">
               <div
@@ -339,12 +366,20 @@
               <div class="flex items-end gap-3">
                 <button
                   type="button"
+                  class="rounded-full border border-gray-300 bg-white px-4 py-3 text-sm text-gray-600 transition hover:border-yellow-300 hover:text-yellow-500"
+                  @click="toggleEmojiPicker"
+                >
+                  <i class="fa-regular fa-face-smile"></i>
+                </button>
+                <button
+                  type="button"
                   class="rounded-full border border-gray-300 bg-white px-4 py-3 text-sm text-gray-600 transition hover:border-indigo-300 hover:text-indigo-600"
                   @click="openAttachmentPicker"
                 >
                   <i class="fa-solid fa-paperclip"></i>
                 </button>
                 <textarea
+                  ref="messageInputRef"
                   v-model="draftMessage"
                   rows="2"
                   placeholder="Type a message..."
@@ -426,6 +461,9 @@ const draftMessage = ref("");
 const messagesContainer = ref(null);
 const attachmentInput = ref(null);
 const pendingAttachments = ref([]);
+const messageInputRef = ref(null);
+const emojiPickerRef = ref(null);
+const showEmojiPicker = ref(false);
 const isDraggingFiles = ref(false);
 const dragDepth = ref(0);
 const typingFromUserId = ref(null);
@@ -493,6 +531,40 @@ const filteredConversations = computed(() => {
     ];
   });
 });
+const emojiOptions = [
+  "😀",
+  "😂",
+  "😊",
+  "😍",
+  "😎",
+  "🤔",
+  "👏",
+  "🙏",
+  "👍",
+  "👎",
+  "❤️",
+  "🎉",
+  "🔥",
+  "✅",
+  "📚",
+  "✏️",
+  "🧑‍🏫",
+  "🏫",
+  "📌",
+  "📢",
+  "⏰",
+  "👋",
+  "😅",
+  "😢",
+  "😡",
+  "🤝",
+  "💯",
+  "✨",
+  "📎",
+  "📄",
+  "📩",
+  "🚀",
+];
 
 function filterItems(items, search, getValues) {
   const normalizedSearch = String(search || "")
@@ -782,6 +854,7 @@ async function openConversation(conversationId) {
   stopTyping();
   typingFromUserId.value = null;
   pendingAttachments.value = [];
+  showEmojiPicker.value = false;
   activeConversationId.value = conversationId;
   if (!messagesByConversation.value[conversationId]) {
     await fetchMessages(conversationId);
@@ -855,11 +928,23 @@ async function submitMessage() {
     });
     draftMessage.value = "";
     pendingAttachments.value = [];
+    showEmojiPicker.value = false;
   } catch (error) {
     notifyError(error, "Failed to send message.");
   } finally {
     sendingMessage.value = false;
   }
+}
+
+function toggleEmojiPicker() {
+  showEmojiPicker.value = !showEmojiPicker.value;
+}
+
+async function appendEmoji(emoji) {
+  draftMessage.value = `${draftMessage.value || ""}${emoji}`;
+  handleDraftInput();
+  await nextTick();
+  messageInputRef.value?.focus();
 }
 
 function openAttachmentPicker() {
@@ -1069,7 +1154,25 @@ function onMessageDeleted(payload) {
   removeMessageLocally(conversationId, messageId);
 }
 
+function handleDocumentClick(event) {
+  if (!showEmojiPicker.value) return;
+
+  const picker = emojiPickerRef.value;
+  const messageInput = messageInputRef.value;
+  if (picker?.contains(event.target) || messageInput?.contains(event.target)) {
+    return;
+  }
+
+  const button = event.target?.closest?.("button");
+  if (button?.querySelector?.(".fa-face-smile")) {
+    return;
+  }
+
+  showEmojiPicker.value = false;
+}
+
 onMounted(async () => {
+  document.addEventListener("click", handleDocumentClick);
   socket.on("chatConversationUpdated", onConversationUpdated);
   socket.on("chatMessageCreated", onMessageCreated);
   socket.on("chatMessageDeleted", onMessageDeleted);
@@ -1079,6 +1182,7 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  document.removeEventListener("click", handleDocumentClick);
   stopTyping();
   socket.off("chatConversationUpdated", onConversationUpdated);
   socket.off("chatMessageCreated", onMessageCreated);
