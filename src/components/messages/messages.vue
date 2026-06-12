@@ -622,10 +622,16 @@ function isOwnMessage(message) {
   return message?.sender?.id === currentUserId.value;
 }
 
+function isWithinDeleteWindow(message) {
+  if (!message?.createdAt) return false;
+  const createdAtMs = new Date(message.createdAt).getTime();
+  const ageMs = Date.now() - createdAtMs;
+  return ageMs <= 30 * 60 * 1000;
+}
+
 function canDeleteMessage(message) {
   if (!message?.id) return false;
-  if (isOwnMessage(message)) return true;
-  return currentRole.value === "admin" || currentRole.value === "super_admin";
+  return isOwnMessage(message) && isWithinDeleteWindow(message);
 }
 
 function getAttachmentIconClass(attachment) {
