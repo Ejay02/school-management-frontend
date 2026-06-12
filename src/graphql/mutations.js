@@ -1271,3 +1271,9 @@ export const markChatConversationAsRead = gql`
     markChatConversationAsRead(conversationId: $conversationId)
   }
 `;
+
+export const deleteChatMessage = gql`
+  mutation DeleteChatMessage($messageId: String!) {
+    deleteChatMessage(messageId: $messageId)
+  }
+`;

@@ -128,9 +128,22 @@
                 }}</span>
               </div>
               <div class="mt-1 flex items-center justify-between gap-3">
-                <p class="truncate text-xs text-gray-500">
-                  {{ getConversationPreview(conversation) }}
-                </p>
+                <div class="flex min-w-0 items-center gap-2">
+                  <img
+                    v-if="getConversationPreviewThumbnail(conversation)"
+                    :src="getConversationPreviewThumbnail(conversation)"
+                    alt="Attachment preview"
+                    class="h-6 w-6 rounded object-cover"
+                  />
+                  <i
+                    v-else-if="getConversationPreviewIcon(conversation)"
+                    :class="getConversationPreviewIcon(conversation)"
+                    class="shrink-0 text-indigo-500"
+                  ></i>
+                  <p class="truncate text-xs text-gray-500">
+                    {{ getConversationPreview(conversation) }}
+                  </p>
+                </div>
                 <span
                   v-if="conversation.unreadCount"
                   class="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-indigo-500 px-1.5 text-[11px] font-semibold text-white"
@@ -190,7 +203,7 @@
               class="flex"
               :class="isOwnMessage(message) ? 'justify-end' : 'justify-start'"
             >
-              <div class="max-w-xl">
+              <div class="group relative max-w-xl">
                 <div
                   class="rounded-2xl px-4 py-3 text-sm shadow-sm"
                   :class="
@@ -220,7 +233,10 @@
                         rel="noopener noreferrer"
                         class="flex items-center gap-3 rounded-lg border border-gray-200 bg-white/80 px-3 py-2 text-left text-sm text-gray-700"
                       >
-                        <i class="fa-solid fa-paperclip text-indigo-500"></i>
+                        <i
+                          :class="getAttachmentIconClass(attachment)"
+                          class="text-indigo-500"
+                        ></i>
                         <span class="truncate">{{ attachment.name }}</span>
                       </a>
                     </div>
@@ -232,6 +248,15 @@
                     {{ message.content }}
                   </p>
                 </div>
+                <button
+                  v-if="canDeleteMessage(message)"
+                  type="button"
+                  class="absolute -right-2 -top-2 hidden h-8 w-8 items-center justify-center rounded-full bg-white text-gray-500 shadow-sm ring-1 ring-gray-200 transition hover:text-red-500 group-hover:flex"
+                  :disabled="deletingMessageId === message.id"
+                  @click="deleteMessage(message)"
+                >
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
                 <p
                   class="mt-1 text-xs text-gray-400"
                   :class="isOwnMessage(message) ? 'text-right' : 'text-left'"
@@ -252,8 +277,18 @@
 
         <div
           v-if="activeConversation"
-          class="border-t border-gray-200 bg-white p-4"
+          class="relative border-t border-gray-200 bg-white p-4"
+          @dragenter.prevent="onDragEnter"
+          @dragover.prevent="onDragOver"
+          @dragleave.prevent="onDragLeave"
+          @drop.prevent="onDrop"
         >
+          <div
+            v-if="isDraggingFiles"
+            class="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-indigo-50/90 text-sm font-medium text-indigo-700 ring-2 ring-indigo-200"
+          >
+            Drop files to attach
+          </div>
           <input
             ref="attachmentInput"
             type="file"
@@ -279,7 +314,11 @@
                     :alt="attachment.name"
                     class="h-10 w-10 rounded object-cover"
                   />
-                  <i v-else class="fa-solid fa-paperclip text-indigo-500"></i>
+                  <i
+                    v-else
+                    :class="getAttachmentIconClass(attachment)"
+                    class="text-indigo-500"
+                  ></i>
                   <div class="min-w-0">
                     <p class="max-w-[180px] truncate font-medium text-gray-700">
                       {{ attachment.name }}
@@ -360,6 +399,7 @@ import {
 } from "../../graphql/queries";
 import {
   findOrCreateDirectConversation,
+  deleteChatMessage,
   markChatConversationAsRead,
   sendChatMessage,
 } from "../../graphql/mutations";
@@ -385,6 +425,9 @@ const draftMessage = ref("");
 const messagesContainer = ref(null);
 const attachmentInput = ref(null);
 const pendingAttachments = ref([]);
+const isDraggingFiles = ref(false);
+const dragDepth = ref(0);
+const deletingMessageId = ref(null);
 const typingFromUserId = ref(null);
 let typingClearTimeout;
 let typingStopEmitTimeout;
@@ -531,6 +574,31 @@ function getConversationPreview(conversation) {
     : conversation.lastMessage.content;
 }
 
+function getConversationPreviewThumbnail(conversation) {
+  const attachments = conversation?.lastMessage?.attachments;
+  const first = Array.isArray(attachments) ? attachments[0] : null;
+  if (first?.kind === "image" && first?.url) {
+    return first.url;
+  }
+  return "";
+}
+
+function getConversationPreviewIcon(conversation) {
+  if (
+    typingFromUserId.value &&
+    conversation?.id === activeConversationId.value &&
+    getOtherParticipant(conversation)?.id === typingFromUserId.value
+  ) {
+    return "";
+  }
+
+  const attachments = conversation?.lastMessage?.attachments;
+  const first = Array.isArray(attachments) ? attachments[0] : null;
+  if (!first) return "";
+  if (first.kind === "image") return "fa-solid fa-image";
+  return getAttachmentIconClass(first);
+}
+
 function formatConversationTime(value) {
   if (!value) return "";
   const date = new Date(value);
@@ -552,6 +620,46 @@ function formatMessageTime(value) {
 
 function isOwnMessage(message) {
   return message?.sender?.id === currentUserId.value;
+}
+
+function canDeleteMessage(message) {
+  if (!message?.id) return false;
+  if (isOwnMessage(message)) return true;
+  return currentRole.value === "admin" || currentRole.value === "super_admin";
+}
+
+function getAttachmentIconClass(attachment) {
+  const mimeType = String(attachment?.mimeType || "").toLowerCase();
+  const name = String(attachment?.name || "").toLowerCase();
+
+  if (mimeType.startsWith("image/")) return "fa-solid fa-image";
+  if (mimeType.includes("pdf") || name.endsWith(".pdf"))
+    return "fa-solid fa-file-pdf";
+  if (
+    mimeType.includes("word") ||
+    name.endsWith(".doc") ||
+    name.endsWith(".docx")
+  ) {
+    return "fa-solid fa-file-word";
+  }
+  if (
+    mimeType.includes("excel") ||
+    mimeType.includes("spreadsheet") ||
+    name.endsWith(".xls") ||
+    name.endsWith(".xlsx")
+  ) {
+    return "fa-solid fa-file-excel";
+  }
+  if (
+    mimeType.includes("powerpoint") ||
+    name.endsWith(".ppt") ||
+    name.endsWith(".pptx")
+  ) {
+    return "fa-solid fa-file-powerpoint";
+  }
+  if (mimeType.startsWith("text/") || name.endsWith(".txt"))
+    return "fa-solid fa-file-lines";
+  return "fa-solid fa-paperclip";
 }
 
 function formatAttachmentSize(size) {
@@ -767,42 +875,106 @@ async function fileToDataUrl(file) {
   });
 }
 
+async function handleFiles(files) {
+  const selectedFiles = Array.isArray(files) ? files : [];
+  if (!selectedFiles.length) return;
+
+  const nextTotal = pendingAttachments.value.length + selectedFiles.length;
+  if (nextTotal > 5) {
+    notifyError(null, "You can attach up to 5 files per message.");
+    return;
+  }
+
+  const prepared = [];
+
+  for (const file of selectedFiles) {
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error(`${file.name} exceeds the 5MB limit.`);
+    }
+
+    const dataUrl = await fileToDataUrl(file);
+    prepared.push({
+      id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
+      name: file.name,
+      mimeType: file.type || "application/octet-stream",
+      size: file.size,
+      dataUrl,
+      previewUrl: dataUrl,
+      kind: file.type?.startsWith("image/") ? "image" : "file",
+    });
+  }
+
+  pendingAttachments.value = [...pendingAttachments.value, ...prepared];
+}
+
 async function handleAttachmentChange(event) {
   const files = Array.from(event?.target?.files || []);
   if (!files.length) return;
 
-  const nextTotal = pendingAttachments.value.length + files.length;
-  if (nextTotal > 5) {
-    notifyError(null, "You can attach up to 5 files per message.");
-    event.target.value = "";
-    return;
-  }
-
   try {
-    const prepared = [];
-
-    for (const file of files) {
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error(`${file.name} exceeds the 5MB limit.`);
-      }
-
-      const dataUrl = await fileToDataUrl(file);
-      prepared.push({
-        id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
-        name: file.name,
-        mimeType: file.type || "application/octet-stream",
-        size: file.size,
-        dataUrl,
-        previewUrl: dataUrl,
-        kind: file.type?.startsWith("image/") ? "image" : "file",
-      });
-    }
-
-    pendingAttachments.value = [...pendingAttachments.value, ...prepared];
+    await handleFiles(files);
   } catch (error) {
     notifyError(error, "Failed to attach file.");
   } finally {
     event.target.value = "";
+  }
+}
+
+function onDragEnter() {
+  dragDepth.value += 1;
+  isDraggingFiles.value = true;
+}
+
+function onDragOver() {
+  isDraggingFiles.value = true;
+}
+
+function onDragLeave() {
+  dragDepth.value = Math.max(0, dragDepth.value - 1);
+  if (!dragDepth.value) {
+    isDraggingFiles.value = false;
+  }
+}
+
+async function onDrop(event) {
+  dragDepth.value = 0;
+  isDraggingFiles.value = false;
+
+  const files = Array.from(event?.dataTransfer?.files || []);
+  if (!files.length) return;
+
+  try {
+    await handleFiles(files);
+  } catch (error) {
+    notifyError(error, "Failed to attach file.");
+  }
+}
+
+function removeMessageLocally(conversationId, messageId) {
+  const existingMessages = messagesByConversation.value[conversationId] || [];
+  messagesByConversation.value = {
+    ...messagesByConversation.value,
+    [conversationId]: existingMessages.filter((item) => item.id !== messageId),
+  };
+}
+
+async function deleteMessage(message) {
+  if (!message?.id) return;
+  if (deletingMessageId.value) return;
+  if (!window.confirm("Delete this message?")) return;
+
+  deletingMessageId.value = message.id;
+  try {
+    removeMessageLocally(message.conversationId, message.id);
+    await apolloClient.mutate({
+      mutation: deleteChatMessage,
+      variables: { messageId: message.id },
+    });
+  } catch (error) {
+    notifyError(error, "Failed to delete message.");
+    await fetchMessages(message.conversationId);
+  } finally {
+    deletingMessageId.value = null;
   }
 }
 
@@ -891,9 +1063,17 @@ function onMessageCreated(message) {
   }
 }
 
+function onMessageDeleted(payload) {
+  const conversationId = payload?.conversationId;
+  const messageId = payload?.messageId;
+  if (!conversationId || !messageId) return;
+  removeMessageLocally(conversationId, messageId);
+}
+
 onMounted(async () => {
   socket.on("chatConversationUpdated", onConversationUpdated);
   socket.on("chatMessageCreated", onMessageCreated);
+  socket.on("chatMessageDeleted", onMessageDeleted);
   socket.on("chatTyping", onChatTyping);
   await Promise.all([fetchContacts(), fetchConversations()]);
   await handleConversationQuery();
@@ -903,6 +1083,7 @@ onBeforeUnmount(() => {
   stopTyping();
   socket.off("chatConversationUpdated", onConversationUpdated);
   socket.off("chatMessageCreated", onMessageCreated);
+  socket.off("chatMessageDeleted", onMessageDeleted);
   socket.off("chatTyping", onChatTyping);
 });
 
