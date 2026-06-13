@@ -1,5 +1,7 @@
 import Holidays from "date-holidays";
 
+const holidayCache = new Map();
+
 export const fetchCountry = async () => {
   try {
     const response = await fetch("http://ip-api.com/json");
@@ -11,17 +13,23 @@ export const fetchCountry = async () => {
   }
 };
 
-export const fetchHolidays = async (countryCode) => {
+export const fetchHolidays = async (countryCode, year = new Date().getFullYear()) => {
   try {
+    if (!countryCode) return [];
+
+    const cacheKey = `${countryCode}-${year}`;
+    if (holidayCache.has(cacheKey)) {
+      return holidayCache.get(cacheKey);
+    }
+
     // Initialize the Holidays instance
     const hd = new Holidays();
 
     // Add a specific country (e.g., United States)
     hd.init(countryCode);
 
-    // Get holidays for the current year
-    const currentYear = new Date().getFullYear();
-    const holidayList = hd.getHolidays(currentYear);
+    // Get holidays for the requested year
+    const holidayList = hd.getHolidays(year);
 
     // Map the holidays to match the structure of existing events
     const mappedHolidays = holidayList.map((holiday) => ({
@@ -33,10 +41,36 @@ export const fetchHolidays = async (countryCode) => {
       description: holiday.description || "Public Holiday", // Holiday description
     }));
 
+    holidayCache.set(cacheKey, mappedHolidays);
     return mappedHolidays;
   } catch (error) {
     console.error("Error fetching holidays:", error);
+    return [];
   }
+};
+
+export const getHolidayDateKey = (value) => {
+  if (!value) return "";
+
+  if (typeof value === "string") {
+    return value.includes("T") ? value.split("T")[0] : value;
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().split("T")[0];
+};
+
+export const createHolidayDateSet = (holidays = []) => {
+  return new Set(
+    holidays.map((holiday) => getHolidayDateKey(holiday?.date)).filter(Boolean),
+  );
+};
+
+export const isPublicHolidayDate = (value, holidays = []) => {
+  const dateKey = getHolidayDateKey(value);
+  if (!dateKey) return false;
+  return createHolidayDateSet(holidays).has(dateKey);
 };
 
 export const formatDate = (dateString) => {

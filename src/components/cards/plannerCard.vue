@@ -35,6 +35,13 @@
             <div class="text-sm text-gray-600 mb-4">
               {{ quickCreateLabel }}
             </div>
+            <div
+              v-if="isHolidaySelection"
+              class="mb-4 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700"
+            >
+              Public holiday selected. Lessons, exams, assignments, and breaks
+              are disabled for this date.
+            </div>
             <div v-if="isTeacher" class="grid grid-cols-1 gap-4 mb-5">
               <div>
                 <label
@@ -110,21 +117,25 @@
             <div class="grid grid-cols-1 gap-3">
               <button
                 @click="goToCreate('lesson')"
-                :disabled="!canCreateWithSelection || isBreakSlot"
+                :disabled="
+                  !canCreateWithSelection || isBreakSlot || isHolidaySelection
+                "
                 class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none"
               >
                 Add Lesson
               </button>
               <button
                 @click="goToCreate('exam')"
-                :disabled="!canCreateWithSelection || isBreakSlot"
+                :disabled="
+                  !canCreateWithSelection || isBreakSlot || isHolidaySelection
+                "
                 class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none"
               >
                 Add Exam
               </button>
               <button
                 @click="goToCreate('assignment')"
-                :disabled="!canCreateWithSelection"
+                :disabled="!canCreateWithSelection || isHolidaySelection"
                 class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none"
               >
                 Add Assignment
@@ -160,9 +171,11 @@ import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
 import { useUserStore } from "../../store/userStore";
 import {
+  createHolidayDateSet,
   fetchCountry,
   fetchHolidays,
   formatTime,
+  getHolidayDateKey,
 } from "../../utils/date.holidays.js";
 import CalenderSkeleton from "../skeletonLoaders/calenderSkeleton.vue";
 
@@ -294,6 +307,11 @@ const isBreakSlot = computed(() => {
   return isBreakOverlap(quickCreateStart.value, quickCreateEnd.value);
 });
 
+const isHolidaySelection = computed(() => {
+  if (!quickCreateStart.value) return false;
+  return isHolidayDate(quickCreateStart.value);
+});
+
 const quickCreateLabel = computed(() => {
   if (!quickCreateStart.value) return "";
   const date = formatDateForQuery(quickCreateStart.value);
@@ -305,6 +323,14 @@ const quickCreateLabel = computed(() => {
 
 const openQuickCreate = async (start, end) => {
   if (!canQuickCreate.value) return;
+  if (isHolidayDate(start)) {
+    notificationStore.addNotification({
+      type: "warning",
+      message:
+        "Public holiday selected. No lessons, exams, assignments, or breaks can be scheduled on this date.",
+    });
+    return;
+  }
   quickCreateStart.value = start || null;
   quickCreateEnd.value = end || null;
 
@@ -363,6 +389,14 @@ const closeQuickCreate = () => {
 const goToCreate = (type) => {
   if (!quickCreateStart.value) return;
   if (!canCreateWithSelection.value) return;
+  if (isHolidaySelection.value) {
+    notificationStore.addNotification({
+      type: "warning",
+      message:
+        "This date is a public holiday. Please choose a non-holiday date for school activities.",
+    });
+    return;
+  }
   if (isBreakSlot.value && (type === "lesson" || type === "exam")) {
     notificationStore.addNotification({
       type: "error",
@@ -454,6 +488,76 @@ const getStatusColor = (status) => {
 };
 
 const holidayEvents = ref([]);
+const holidayCountryCode = ref("");
+const loadedHolidayYears = new Set();
+
+const holidayDateSet = computed(() => createHolidayDateSet(holidayEvents.value));
+
+const isHolidayDate = (value) => {
+  return holidayDateSet.value.has(getHolidayDateKey(value));
+};
+
+const rangeTouchesHoliday = (startValue, endValue) => {
+  const start = new Date(startValue);
+  const end = endValue ? new Date(endValue) : new Date(startValue);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return false;
+
+  const cursor = new Date(start);
+  cursor.setHours(0, 0, 0, 0);
+
+  const finalDate = new Date(end);
+  finalDate.setHours(0, 0, 0, 0);
+
+  while (cursor.getTime() <= finalDate.getTime()) {
+    if (isHolidayDate(cursor)) {
+      return true;
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return false;
+};
+
+const mergeHolidayEvents = (holidays) => {
+  const existingIds = new Set(holidayEvents.value.map((event) => event.id));
+  const nextEvents = holidays
+    .map((holiday) => ({
+      id: holiday.id || `holiday-${holiday.date}-${holiday.title}`,
+      title: holiday.title,
+      start: holiday.date,
+      end: holiday.endDate || holiday.date,
+      allDay: true,
+      backgroundColor: "#DCFCE7",
+      borderColor: "#16A34A",
+      textColor: "#166534",
+      classNames: ["bg-green-300", "ring-green-600/20"],
+      extendedProps: {
+        isHoliday: true,
+        description: holiday.description,
+        type: holiday.type,
+      },
+    }))
+    .filter((holiday) => !existingIds.has(holiday.id));
+
+  if (nextEvents.length) {
+    holidayEvents.value = [...holidayEvents.value, ...nextEvents];
+  }
+};
+
+const ensureHolidaysForRange = async (rangeStart, rangeEnd) => {
+  if (!holidayCountryCode.value || !rangeStart || !rangeEnd) return;
+
+  const startYear = rangeStart.getFullYear();
+  const inclusiveEnd = new Date(rangeEnd.getTime() - 1);
+  const endYear = inclusiveEnd.getFullYear();
+
+  for (let year = startYear; year <= endYear; year += 1) {
+    if (loadedHolidayYears.has(year)) continue;
+    const holidays = await fetchHolidays(holidayCountryCode.value, year);
+    mergeHolidayEvents(holidays);
+    loadedHolidayYears.add(year);
+  }
+};
 
 const getBreakEventsInRange = (rangeStart, rangeEnd) => {
   const events = [];
@@ -468,7 +572,7 @@ const getBreakEventsInRange = (rangeStart, rangeEnd) => {
   while (cursor.getTime() < rangeEnd.getTime()) {
     const dayIndex = cursor.getDay();
     const isWeekday = dayIndex >= 1 && dayIndex <= 5;
-    if (isWeekday) {
+    if (isWeekday && !isHolidayDate(cursor)) {
       const start = new Date(cursor);
       start.setHours(12, 0, 0, 0);
       const end = new Date(cursor);
@@ -505,7 +609,8 @@ const getBreakEventsInRange = (rangeStart, rangeEnd) => {
   return events;
 };
 
-const syncCalendarEvents = (rangeStart, rangeEnd) => {
+const syncCalendarEvents = async (rangeStart, rangeEnd) => {
+  await ensureHolidaysForRange(rangeStart, rangeEnd);
   const breakEvents = getBreakEventsInRange(rangeStart, rangeEnd);
   const combined = [
     ...holidayEvents.value,
@@ -525,26 +630,28 @@ const userEvents = computed(() => {
   if (!eventStore.allEvents || eventStore.allEvents.length === 0) return [];
 
   // Map events to FullCalendar format
-  return eventStore.allEvents.map((event) => {
+  return eventStore.allEvents
+    .filter((event) => !rangeTouchesHoliday(event.startTime, event.endTime))
+    .map((event) => {
     // Get the color based on event status
-    const statusColor = getStatusColor(event.status);
+      const statusColor = getStatusColor(event.status);
 
-    return {
-      id: event.id,
-      title: event.title,
-      start: event.startTime,
-      end: event.endTime,
-      description: event.description,
-      location: event.location,
-      backgroundColor: statusColor,
-      borderColor: statusColor,
-      extendedProps: {
-        status: event.status,
-        type: event.type,
-        isUserEvent: true,
-      },
-    };
-  });
+      return {
+        id: event.id,
+        title: event.title,
+        start: event.startTime,
+        end: event.endTime,
+        description: event.description,
+        location: event.location,
+        backgroundColor: statusColor,
+        borderColor: statusColor,
+        extendedProps: {
+          status: event.status,
+          type: event.type,
+          isUserEvent: true,
+        },
+      };
+    });
 });
 
 const calendarOptions = ref({
@@ -576,7 +683,7 @@ const calendarOptions = ref({
 
   weekends: true,
   datesSet: function (info) {
-    syncCalendarEvents(info.start, info.end);
+    void syncCalendarEvents(info.start, info.end);
   },
   dateClick: function (info) {
     const calendarApi = info.view.calendar;
@@ -732,20 +839,14 @@ function handleEvents(events) {
 
 onMounted(async () => {
   try {
-    // Fetch holidays
-    const countryCode = await fetchCountry();
-    const holidays = await fetchHolidays(countryCode);
-    holidays.forEach((holiday) => {
-      holiday.classNames = ["bg-green-300", "ring-green-600/20"]; // Add holiday styles
-    });
-    holidayEvents.value = holidays;
+    holidayCountryCode.value = await fetchCountry();
 
     // Fetch events for the current user - only call fetchEvents once
     await eventStore.fetchEvents();
 
     if (calendarRef.value) {
       const calendarApi = calendarRef.value.getApi();
-      syncCalendarEvents(
+      await syncCalendarEvents(
         calendarApi.view.activeStart,
         calendarApi.view.activeEnd,
       );
@@ -762,7 +863,7 @@ watch(
   () => {
     if (!calendarRef.value) return;
     const calendarApi = calendarRef.value.getApi();
-    syncCalendarEvents(
+    void syncCalendarEvents(
       calendarApi.view.activeStart,
       calendarApi.view.activeEnd,
     );
