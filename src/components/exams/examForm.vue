@@ -448,7 +448,12 @@ import { useExamStore } from "../../store/examStore";
 import { useNotificationStore } from "../../store/notification";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useUserStore } from "../../store/userStore";
-import { formatEventDate } from "../../utils/date.holidays";
+import {
+  createHolidayDateSet,
+  fetchCountry,
+  fetchHolidays,
+  formatEventDate,
+} from "../../utils/date.holidays";
 import { questionTypes } from "../../utils/utility";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
@@ -483,6 +488,8 @@ const selectedSubject = ref("");
 const date = ref("");
 const startTime = ref("");
 const endTime = ref("");
+const holidayCountryCode = ref("");
+const holidayDateSet = ref(new Set());
 
 const effectiveRole = computed(() => {
   const current = String(userStore.currentRole || "").trim();
@@ -655,6 +662,16 @@ const getClassIdByName = (className) => {
   return classItem ? classItem.id : null;
 };
 
+const ensureHolidayDatesForYears = async (years = []) => {
+  if (!holidayCountryCode.value || !years.length) return;
+
+  const holidayEntries = await Promise.all(
+    years.map((year) => fetchHolidays(holidayCountryCode.value, year)),
+  );
+
+  holidayDateSet.value = createHolidayDateSet(holidayEntries.flat());
+};
+
 const handleSubmit = async () => {
   try {
     if (date.value) {
@@ -663,6 +680,18 @@ const handleSubmit = async () => {
         notificationStore.addNotification({
           type: "error",
           message: "Exams can only be scheduled Monday to Friday.",
+        });
+        return;
+      }
+    }
+    if (date.value) {
+      const examDate = new Date(`${date.value}T00:00:00`);
+      await ensureHolidayDatesForYears([examDate.getFullYear()]);
+      if (holidayDateSet.value.has(date.value)) {
+        notificationStore.addNotification({
+          type: "warning",
+          message:
+            "This date is a public holiday. Exams cannot be scheduled on public holidays.",
         });
         return;
       }
@@ -763,6 +792,7 @@ const handleSubmit = async () => {
 // Load exam data if editing
 onMounted(async () => {
   applyCalendarPrefill();
+  holidayCountryCode.value = await fetchCountry();
   if (!classStore.classes.length) {
     await classStore.fetchClasses();
   }

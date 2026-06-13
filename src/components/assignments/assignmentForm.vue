@@ -444,6 +444,11 @@ import Dropdown from "../dropdowns/dropdown.vue";
 import { useTeacherAccessCheck } from "../../composables/useTeacherAccessCheck";
 import { useLessonStore } from "../../store/lessonStore";
 import { useUserStore } from "../../store/userStore";
+import {
+  createHolidayDateSet,
+  fetchCountry,
+  fetchHolidays,
+} from "../../utils/date.holidays";
 import { questionTypes } from "../../utils/utility";
 
 const route = useRoute();
@@ -464,6 +469,8 @@ const dueDate = ref("");
 const selectedClass = ref("");
 const selectedSubject = ref("");
 const selectedLesson = ref("");
+const holidayCountryCode = ref("");
+const holidayDateSet = ref(new Set());
 
 const effectiveRole = computed(() => {
   const current = String(userStore.currentRole || "").trim();
@@ -612,6 +619,36 @@ const getClassIdByName = (className) => {
   return classItem ? classItem.id : null;
 };
 
+const ensureHolidayDatesForYears = async (years = []) => {
+  if (!holidayCountryCode.value || !years.length) return;
+
+  const holidayEntries = await Promise.all(
+    years.map((year) => fetchHolidays(holidayCountryCode.value, year)),
+  );
+
+  holidayDateSet.value = createHolidayDateSet(holidayEntries.flat());
+};
+
+const rangeTouchesHoliday = (startValue, endValue) => {
+  const start = new Date(`${startValue}T00:00:00`);
+  const end = new Date(`${endValue}T00:00:00`);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return false;
+
+  const cursor = new Date(start);
+  cursor.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
+
+  while (cursor.getTime() <= end.getTime()) {
+    const dateKey = cursor.toISOString().split("T")[0];
+    if (holidayDateSet.value.has(dateKey)) {
+      return true;
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return false;
+};
+
 const handleSubmit = async () => {
   try {
     const start = new Date(`${startDate.value}T00:00:00`);
@@ -636,6 +673,18 @@ const handleSubmit = async () => {
       notificationStore.addNotification({
         type: "error",
         message: "Assignments must be scheduled Monday to Friday.",
+      });
+      return;
+    }
+    await ensureHolidayDatesForYears([
+      start.getFullYear(),
+      ...(due.getFullYear() !== start.getFullYear() ? [due.getFullYear()] : []),
+    ]);
+    if (rangeTouchesHoliday(startDate.value, dueDate.value)) {
+      notificationStore.addNotification({
+        type: "warning",
+        message:
+          "This assignment range includes a public holiday. Please choose non-holiday dates.",
       });
       return;
     }
@@ -725,6 +774,7 @@ watch(
 
 onMounted(async () => {
   applyCalendarPrefill();
+  holidayCountryCode.value = await fetchCountry();
   if (!classStore.classes.length) await classStore.fetchClasses();
   if (!subjectStore.subjects.length) await subjectStore.fetchSubjects();
   if (!lessonStore.lessons.length) lessonStore.fetchLessons();
