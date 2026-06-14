@@ -1,5 +1,5 @@
 <template>
-  <CalenderSkeleton v-if="eventStore.loading || !holidaysFetched" />
+  <CalenderSkeleton v-if="showCalendarLoading" />
 
   <div v-else class="fc-custom-theme w-full">
     <div class="w-full">
@@ -162,10 +162,17 @@ import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import FullCalendar from "@fullcalendar/vue3";
+import { apolloClient } from "../../../apollo-client";
 
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
+import { useParentLinkedStudents } from "../../composables/useParentLinkedStudents";
+import {
+  getAllAssignments,
+  getAllLessons,
+  getClassExams,
+} from "../../graphql/queries";
 import { useEventStore } from "../../store/eventStore.js";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
@@ -187,16 +194,28 @@ const notificationStore = useNotificationStore();
 const userStore = useUserStore();
 const classStore = useClassStore();
 const router = useRouter();
+const { fetchLinkedStudents, isParent, selectedStudent, selectedStudentId } =
+  useParentLinkedStudents();
 
 const showQuickCreateModal = ref(false);
 const quickCreateStart = ref(null);
 const quickCreateEnd = ref(null);
 const selectedClassName = ref("");
 const selectedSubjectId = ref("");
+const parentLessons = ref([]);
+const parentAssignments = ref([]);
+const parentExams = ref([]);
+const parentCalendarEvents = ref([]);
+const parentScheduleLoading = ref(false);
+let parentScheduleRequestId = 0;
 
 const role = computed(() => String(userStore.currentRole || "").toLowerCase());
 const canQuickCreate = computed(() =>
   ["teacher", "admin", "super_admin"].includes(role.value),
+);
+const showCalendarLoading = computed(
+  () =>
+    eventStore.loading || !holidaysFetched.value || parentScheduleLoading.value,
 );
 
 const isTeacher = computed(() => role.value === "teacher");
@@ -487,11 +506,300 @@ const getStatusColor = (status) => {
   return "#FAE27C";
 };
 
+const parentScheduleColors = {
+  lesson: {
+    backgroundColor: "#BFDBFE",
+    borderColor: "#2563EB",
+    textColor: "#1E3A8A",
+  },
+  exam: {
+    backgroundColor: "#FECACA",
+    borderColor: "#DC2626",
+    textColor: "#7F1D1D",
+  },
+  assignment: {
+    backgroundColor: "#DDD6FE",
+    borderColor: "#7C3AED",
+    textColor: "#4C1D95",
+  },
+};
+
+const weekdayIndexByName = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
+
+const splitScheduleValue = (value) =>
+  String(value || "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
+const parseTimeParts = (value) => {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(String(value || "").trim());
+  if (!match) return null;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
+  return { hours, minutes };
+};
+
+const buildDateTime = (dateValue, timeValue) => {
+  const time = parseTimeParts(timeValue);
+  if (!time) return null;
+  const result = new Date(dateValue);
+  result.setHours(time.hours, time.minutes, 0, 0);
+  return result;
+};
+
+const formatTeacherName = (teacher) => {
+  return [teacher?.name, teacher?.surname].filter(Boolean).join(" ").trim();
+};
+
+const createParentLessonEvents = (rangeStart, rangeEnd) => {
+  const events = [];
+  if (!Array.isArray(parentLessons.value) || !rangeStart || !rangeEnd) {
+    return events;
+  }
+
+  for (const lesson of parentLessons.value) {
+    const days = splitScheduleValue(lesson?.day);
+    const starts = splitScheduleValue(lesson?.startTime);
+    const ends = splitScheduleValue(lesson?.endTime);
+    const slots = Math.min(days.length, starts.length, ends.length);
+
+    for (let index = 0; index < slots; index += 1) {
+      const weekdayIndex =
+        weekdayIndexByName[String(days[index] || "").toLowerCase()];
+      if (weekdayIndex === undefined) continue;
+
+      const cursor = new Date(rangeStart);
+      cursor.setHours(0, 0, 0, 0);
+
+      while (cursor.getDay() !== weekdayIndex && cursor < rangeEnd) {
+        cursor.setDate(cursor.getDate() + 1);
+      }
+
+      while (cursor < rangeEnd) {
+        if (!isHolidayDate(cursor)) {
+          const start = buildDateTime(cursor, starts[index]);
+          const end = buildDateTime(cursor, ends[index]);
+
+          if (start && end && end > start) {
+            const subjectName =
+              lesson?.subject?.name || lesson?.name || "Class";
+            const lessonName =
+              lesson?.name && lesson.name !== subjectName ? lesson.name : "";
+
+            events.push({
+              id: `parent-lesson-${lesson.id}-${cursor.toISOString().split("T")[0]}-${index}`,
+              title: lessonName
+                ? `Class: ${subjectName} (${lessonName})`
+                : `Class: ${subjectName}`,
+              start,
+              end,
+              backgroundColor: parentScheduleColors.lesson.backgroundColor,
+              borderColor: parentScheduleColors.lesson.borderColor,
+              textColor: parentScheduleColors.lesson.textColor,
+              editable: false,
+              extendedProps: {
+                isParentScheduleEvent: true,
+                scheduleType: "LESSON",
+                className: lesson?.class?.name || "",
+                subjectName,
+                teacherName: formatTeacherName(lesson?.teacher),
+              },
+            });
+          }
+        }
+
+        cursor.setDate(cursor.getDate() + 7);
+      }
+    }
+  }
+
+  return events;
+};
+
+const createParentExamEvents = () => {
+  if (!Array.isArray(parentExams.value)) return [];
+
+  return parentExams.value
+    .map((exam) => {
+      const start = exam?.startTime ? new Date(exam.startTime) : null;
+      const end = exam?.endTime ? new Date(exam.endTime) : null;
+
+      if (
+        !start ||
+        !end ||
+        Number.isNaN(start.getTime()) ||
+        Number.isNaN(end.getTime())
+      ) {
+        return null;
+      }
+
+      return {
+        id: `parent-exam-${exam.id}`,
+        title: `Exam: ${exam?.title || "Exam"}`,
+        start,
+        end,
+        backgroundColor: parentScheduleColors.exam.backgroundColor,
+        borderColor: parentScheduleColors.exam.borderColor,
+        textColor: parentScheduleColors.exam.textColor,
+        editable: false,
+        extendedProps: {
+          isParentScheduleEvent: true,
+          scheduleType: "EXAM",
+          className: exam?.class?.name || "",
+          subjectName: exam?.subject?.name || "",
+        },
+      };
+    })
+    .filter(Boolean);
+};
+
+const createParentAssignmentEvents = () => {
+  if (!Array.isArray(parentAssignments.value)) return [];
+
+  return parentAssignments.value
+    .map((assignment) => {
+      const dueDate = assignment?.dueDate ? new Date(assignment.dueDate) : null;
+      if (!dueDate || Number.isNaN(dueDate.getTime())) {
+        return null;
+      }
+
+      return {
+        id: `parent-assignment-${assignment.id}`,
+        title: `Assignment Due: ${assignment?.title || "Assignment"}`,
+        start: dueDate,
+        allDay: true,
+        backgroundColor: parentScheduleColors.assignment.backgroundColor,
+        borderColor: parentScheduleColors.assignment.borderColor,
+        textColor: parentScheduleColors.assignment.textColor,
+        editable: false,
+        extendedProps: {
+          isParentScheduleEvent: true,
+          scheduleType: "ASSIGNMENT",
+          className: assignment?.class?.name || "",
+          subjectName: assignment?.subject?.name || "",
+        },
+      };
+    })
+    .filter(Boolean);
+};
+
+const rebuildParentCalendarEvents = (rangeStart, rangeEnd) => {
+  if (!isParent.value || !selectedStudentId.value) {
+    parentCalendarEvents.value = [];
+    return;
+  }
+
+  parentCalendarEvents.value = [
+    ...createParentLessonEvents(rangeStart, rangeEnd),
+    ...createParentExamEvents(),
+    ...createParentAssignmentEvents(),
+  ];
+};
+
+const fetchParentScheduleData = async () => {
+  if (!isParent.value) {
+    parentLessons.value = [];
+    parentAssignments.value = [];
+    parentExams.value = [];
+    parentCalendarEvents.value = [];
+    return;
+  }
+
+  await fetchLinkedStudents();
+
+  if (!selectedStudentId.value) {
+    parentLessons.value = [];
+    parentAssignments.value = [];
+    parentExams.value = [];
+    parentCalendarEvents.value = [];
+    return;
+  }
+
+  const requestId = ++parentScheduleRequestId;
+  parentScheduleLoading.value = true;
+
+  try {
+    const classId = selectedStudent.value?.classId || "";
+    const [lessonResult, assignmentResult, examResult] = await Promise.all([
+      apolloClient.query({
+        query: getAllLessons,
+        variables: {
+          pagination: { page: 1, limit: 1000 },
+          studentId: selectedStudentId.value,
+        },
+        fetchPolicy: "network-only",
+      }),
+      apolloClient.query({
+        query: getAllAssignments,
+        variables: {
+          params: { page: 1, limit: 1000 },
+          studentId: selectedStudentId.value,
+        },
+        fetchPolicy: "network-only",
+      }),
+      classId
+        ? apolloClient.query({
+            query: getClassExams,
+            variables: {
+              classId,
+              params: { page: 1, limit: 1000 },
+            },
+            fetchPolicy: "network-only",
+          })
+        : Promise.resolve({ data: { getClassExams: [] } }),
+    ]);
+
+    if (requestId !== parentScheduleRequestId) return;
+
+    parentLessons.value = Array.isArray(lessonResult?.data?.getAllLessons)
+      ? lessonResult.data.getAllLessons
+      : [];
+    parentAssignments.value = Array.isArray(
+      assignmentResult?.data?.getAllAssignments,
+    )
+      ? assignmentResult.data.getAllAssignments
+      : [];
+    parentExams.value = Array.isArray(examResult?.data?.getClassExams)
+      ? examResult.data.getClassExams
+      : [];
+
+    if (calendarRef.value) {
+      const calendarApi = calendarRef.value.getApi();
+      rebuildParentCalendarEvents(
+        calendarApi.view.activeStart,
+        calendarApi.view.activeEnd,
+      );
+    }
+  } catch (error) {
+    if (requestId !== parentScheduleRequestId) return;
+    parentLessons.value = [];
+    parentAssignments.value = [];
+    parentExams.value = [];
+    parentCalendarEvents.value = [];
+  } finally {
+    if (requestId === parentScheduleRequestId) {
+      parentScheduleLoading.value = false;
+    }
+  }
+};
+
 const holidayEvents = ref([]);
 const holidayCountryCode = ref("");
 const loadedHolidayYears = new Set();
 
-const holidayDateSet = computed(() => createHolidayDateSet(holidayEvents.value));
+const holidayDateSet = computed(() =>
+  createHolidayDateSet(holidayEvents.value),
+);
 
 const isHolidayDate = (value) => {
   return holidayDateSet.value.has(getHolidayDateKey(value));
@@ -500,7 +808,8 @@ const isHolidayDate = (value) => {
 const rangeTouchesHoliday = (startValue, endValue) => {
   const start = new Date(startValue);
   const end = endValue ? new Date(endValue) : new Date(startValue);
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return false;
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()))
+    return false;
 
   const cursor = new Date(start);
   cursor.setHours(0, 0, 0, 0);
@@ -611,10 +920,12 @@ const getBreakEventsInRange = (rangeStart, rangeEnd) => {
 
 const syncCalendarEvents = async (rangeStart, rangeEnd) => {
   await ensureHolidaysForRange(rangeStart, rangeEnd);
+  rebuildParentCalendarEvents(rangeStart, rangeEnd);
   const breakEvents = getBreakEventsInRange(rangeStart, rangeEnd);
   const combined = [
     ...holidayEvents.value,
     ...userEvents.value,
+    ...parentCalendarEvents.value,
     ...breakEvents,
   ];
   calendarOptions.value.events = combined;
@@ -633,7 +944,7 @@ const userEvents = computed(() => {
   return eventStore.allEvents
     .filter((event) => !rangeTouchesHoliday(event.startTime, event.endTime))
     .map((event) => {
-    // Get the color based on event status
+      // Get the color based on event status
       const statusColor = getStatusColor(event.status);
 
       return {
@@ -840,9 +1151,11 @@ function handleEvents(events) {
 onMounted(async () => {
   try {
     holidayCountryCode.value = await fetchCountry();
+    await fetchLinkedStudents();
 
     // Fetch events for the current user - only call fetchEvents once
     await eventStore.fetchEvents();
+    await fetchParentScheduleData();
 
     if (calendarRef.value) {
       const calendarApi = calendarRef.value.getApi();
@@ -858,17 +1171,25 @@ onMounted(async () => {
   }
 });
 
-watch(
-  () => userEvents.value,
-  () => {
-    if (!calendarRef.value) return;
-    const calendarApi = calendarRef.value.getApi();
-    void syncCalendarEvents(
-      calendarApi.view.activeStart,
-      calendarApi.view.activeEnd,
-    );
-  },
-);
+watch(userEvents, () => {
+  if (!calendarRef.value) return;
+  const calendarApi = calendarRef.value.getApi();
+  void syncCalendarEvents(
+    calendarApi.view.activeStart,
+    calendarApi.view.activeEnd,
+  );
+});
+
+watch(selectedStudentId, async () => {
+  if (!isParent.value) return;
+  await fetchParentScheduleData();
+  if (!calendarRef.value) return;
+  const calendarApi = calendarRef.value.getApi();
+  void syncCalendarEvents(
+    calendarApi.view.activeStart,
+    calendarApi.view.activeEnd,
+  );
+});
 </script>
 
 <style>

@@ -1293,6 +1293,7 @@ export const getUserById = gql`
         deactivatedAt
         students {
           id
+          classId
           name
           surname
         }

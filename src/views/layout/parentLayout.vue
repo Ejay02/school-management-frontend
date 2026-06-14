@@ -22,6 +22,12 @@
               </p>
             </div>
 
+            <div
+              v-if="hasLinkedStudents"
+              class="mb-4"
+            >
+              <ParentChildSelector />
+            </div>
             <div class="flex-col w-full">
               <PlannerCard />
             </div>
@@ -38,9 +44,10 @@ import { useParentLinkedStudents } from "../../composables/useParentLinkedStuden
 import { useUserStore } from "../../store/userStore";
 import { formatNamePart } from "../../utils/displayValue";
 import PlannerCard from "../../components/cards/plannerCard.vue";
+import ParentChildSelector from "../../components/parents/parentChildSelector.vue";
 
 const userStore = useUserStore();
-const { fetchLinkedStudents, shouldShowParentLinkEmptyState } =
+const { fetchLinkedStudents, hasLinkedStudents, shouldShowParentLinkEmptyState } =
   useParentLinkedStudents();
 
 const parentName = computed(() => formatNamePart(userStore.userInfo?.name));
