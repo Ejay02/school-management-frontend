@@ -99,24 +99,6 @@
               </div>
             </div>
 
-            <div v-if="invoice.feeStructure?.term || invoice.feeStructure?.academicYear" class="mt-4 rounded-lg bg-white p-4">
-              <h4 class="mb-2 font-medium text-gray-600">Fee Details</h4>
-              <div class="space-y-2 text-sm text-gray-500">
-                <div class="flex justify-between">
-                  <span>Academic Year</span>
-                  <span>{{ invoice.feeStructure?.academicYear || "N/A" }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Term</span>
-                  <span>{{ invoice.feeStructure?.term || "N/A" }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Type</span>
-                  <span>{{ invoice.feeStructure?.type || "N/A" }}</span>
-                </div>
-              </div>
-            </div>
-
             <div class="mt-4 flex justify-end">
               <button
                 @click="handlePayInvoice(invoice)"
@@ -258,10 +240,7 @@ const totalOutstanding = computed(() =>
 );
 
 const invoiceLabel = (invoice) => {
-  const academicYear = invoice?.feeStructure?.academicYear || "";
-  const term = invoice?.feeStructure?.term || "";
-  const type = invoice?.feeStructure?.type || "Fee";
-  return [academicYear, term, type].filter(Boolean).join(" • ") || "School Fee";
+  return `School Fee`;
 };
 
 const paymentProgress = (invoice) => {
