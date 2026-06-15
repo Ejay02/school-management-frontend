@@ -6,12 +6,10 @@
           <div class="h-full bg-white p-4 rounded-md w-full">
             <div class="mb-6">
               <h1 class="text-xl font-semibold text-gray-600">
-                Family Overview
+                {{ hasLinkedStudents ? "Today" : "Calendar" }}
               </h1>
               <p class="mt-2 text-sm text-gray-500">
-                Welcome{{ parentName ? `, ${parentName}` : "" }}. Keep track of
-                your child&apos;s timetable, school updates, and upcoming items
-                from one place.
+                {{ welcomeSubtitle }}
               </p>
               <p
                 v-if="shouldShowParentLinkEmptyState"
@@ -25,167 +23,201 @@
             <div v-if="hasLinkedStudents" class="mb-4">
               <ParentChildSelector />
             </div>
+
+            <div v-if="hasLinkedStudents" class="mb-6">
+              <div
+                v-if="attendanceAlert"
+                class="rounded-xl border p-4"
+                :class="
+                  attendanceAlert.severity === 'danger'
+                    ? 'border-red-200 bg-red-50'
+                    : 'border-amber-200 bg-amber-50'
+                "
+              >
+                <div
+                  class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
+                >
+                  <div class="min-w-0">
+                    <div
+                      class="text-sm font-semibold"
+                      :class="
+                        attendanceAlert.severity === 'danger'
+                          ? 'text-red-900'
+                          : 'text-amber-900'
+                      "
+                    >
+                      {{ attendanceAlert.title }}
+                    </div>
+                    <div
+                      class="mt-1 text-sm"
+                      :class="
+                        attendanceAlert.severity === 'danger'
+                          ? 'text-red-800'
+                          : 'text-amber-800'
+                      "
+                    >
+                      {{ attendanceAlert.description }}
+                    </div>
+                  </div>
+                  <router-link
+                    to="/attendance"
+                    class="shrink-0 inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-medium text-indigo-600 ring-1 ring-inset ring-indigo-200 hover:bg-indigo-50"
+                  >
+                    View attendance
+                  </router-link>
+                </div>
+              </div>
+
+              <div
+                v-else
+                class="rounded-xl border border-emerald-200 bg-emerald-50 p-4"
+              >
+                <div class="flex items-center justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="text-sm font-semibold text-emerald-900">
+                      No attendance alerts
+                    </div>
+                    <div class="mt-1 text-sm text-emerald-800">
+                      No absences or lates recorded today or yesterday.
+                    </div>
+                  </div>
+                  <router-link
+                    to="/attendance"
+                    class="shrink-0 inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-medium text-indigo-600 ring-1 ring-inset ring-indigo-200 hover:bg-indigo-50"
+                  >
+                    View attendance
+                  </router-link>
+                </div>
+              </div>
+            </div>
+
             <div
               v-if="hasLinkedStudents"
               class="mb-6 grid gap-4 md:grid-cols-3 items-stretch auto-rows-fr"
             >
-              <router-link to="/attendance" class="block h-full">
-                <div
-                  class="h-full min-h-[180px] rounded-xl border border-gray-200 bg-white p-4 hover:bg-gray-50"
-                >
-                  <div class="flex h-full flex-col">
-                    <div class="flex items-start justify-between gap-3">
-                      <div class="min-w-0">
-                        <p class="text-sm font-semibold text-gray-900">
-                          Attendance today
-                        </p>
-                        <p class="mt-1 text-xs text-gray-500">
-                          {{ attendanceSubtitle }}
-                        </p>
-                      </div>
-                      <div
-                        class="h-9 w-9 shrink-0 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"
-                      >
-                        <i class="fa-solid fa-clipboard-check"></i>
-                      </div>
-                    </div>
-
-                    <div class="mt-5 min-h-[56px]">
-                      <p class="text-3xl font-semibold text-gray-900">
-                        {{ attendanceHeadline }}
+              <div
+                class="h-full min-h-[220px] rounded-xl border border-gray-200 bg-white p-4"
+              >
+                <div class="flex h-full flex-col">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                      <p class="text-sm font-semibold text-gray-900">
+                        Fees due
                       </p>
-                      <p class="mt-1 text-sm text-gray-600">
-                        {{ attendanceDetail }}
+                      <p class="mt-1 text-xs text-gray-500">
+                        Next payment on your parent account.
                       </p>
                     </div>
-
                     <div
-                      class="mt-auto pt-4 text-sm font-medium text-indigo-600"
+                      class="h-9 w-9 shrink-0 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"
                     >
-                      View attendance
+                      <i class="fa-solid fa-file-invoice-dollar"></i>
                     </div>
                   </div>
-                </div>
-              </router-link>
 
-              <router-link to="/settings/billing" class="block h-full">
-                <div
-                  class="h-full min-h-[180px] rounded-xl border border-gray-200 bg-white p-4 hover:bg-gray-50"
-                >
-                  <div class="flex h-full flex-col">
-                    <div class="flex items-start justify-between gap-3">
-                      <div class="min-w-0">
-                        <p class="text-sm font-semibold text-gray-900">
-                          Fees balance
-                        </p>
-                        <p class="mt-1 text-xs text-gray-500">
-                          Across your parent account.
-                        </p>
-                      </div>
-                      <div
-                        class="h-9 w-9 shrink-0 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"
-                      >
-                        <i class="fa-solid fa-file-invoice-dollar"></i>
-                      </div>
-                    </div>
+                  <div class="mt-5 min-h-[72px]">
+                    <p class="text-3xl font-semibold text-gray-900">
+                      {{ feesDueHeadline }}
+                    </p>
+                    <p class="mt-1 text-sm text-gray-600">
+                      {{ feesDueDetail }}
+                    </p>
+                  </div>
 
-                    <div class="mt-5 min-h-[56px]">
-                      <p class="text-3xl font-semibold text-gray-900">
-                        {{ feesHeadline }}
-                      </p>
-                      <p class="mt-1 text-sm text-gray-600">
-                        {{ feesDetail }}
-                      </p>
-                    </div>
-
-                    <div
-                      class="mt-auto pt-4 text-sm font-medium text-indigo-600"
+                  <div
+                    class="mt-auto pt-4 flex items-center justify-between gap-3"
+                  >
+                    <router-link
+                      :to="billingCtaTo"
+                      class="inline-flex items-center justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500"
+                      :class="{
+                        'pointer-events-none opacity-60': !hasFeesDue,
+                      }"
+                    >
+                      Pay
+                    </router-link>
+                    <router-link
+                      to="/settings/billing"
+                      class="text-sm font-medium text-indigo-600 hover:text-indigo-500"
                     >
                       View billing
-                    </div>
+                    </router-link>
                   </div>
                 </div>
-              </router-link>
+              </div>
 
-              <router-link to="/lessons" class="block h-full">
-                <div
-                  class="h-full min-h-[180px] rounded-xl border border-gray-200 bg-white p-4 hover:bg-gray-50"
-                >
-                  <div class="flex h-full flex-col">
-                    <div class="flex items-start justify-between gap-3">
-                      <div class="min-w-0">
-                        <p class="text-sm font-semibold text-gray-900">
-                          Today's timetable
-                        </p>
-                        <p class="mt-1 text-xs text-gray-500">
-                          {{ timetableSubtitle }}
-                        </p>
-                      </div>
-                      <div
-                        class="h-9 w-9 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"
-                      >
-                        <i class="fa-regular fa-clock"></i>
-                      </div>
-                    </div>
-
-                    <div class="mt-5 min-h-[56px]">
-                      <p
-                        v-if="nextTimetableTitle"
-                        class="text-base font-semibold text-gray-800 truncate"
-                      >
-                        {{ nextTimetableTitle }}
+              <div
+                class="h-full min-h-[220px] rounded-xl border border-gray-200 bg-white p-4"
+              >
+                <div class="flex h-full flex-col">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                      <p class="text-sm font-semibold text-gray-900">
+                        Today&apos;s timetable
                       </p>
-                      <p
-                        v-if="nextTimetableTime"
-                        class="mt-1 text-sm font-medium text-indigo-600"
-                      >
-                        {{ nextTimetableTime }}
-                      </p>
-                      <p
-                        v-if="!nextTimetableTitle"
-                        class="text-sm text-gray-600"
-                      >
-                        {{ timetableEmptyLabel }}
+                      <p class="mt-1 text-xs text-gray-500">
+                        {{ timetableSubtitle }}
                       </p>
                     </div>
-
                     <div
-                      v-if="moreTimetableEntries.length"
-                      class="mt-3 space-y-2"
+                      class="h-9 w-9 shrink-0 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"
                     >
-                      <div
-                        v-for="entry in moreTimetableEntries"
-                        :key="entry.id"
-                        class="flex items-center justify-between gap-3"
-                      >
-                        <div class="min-w-0 text-xs text-gray-600 truncate">
+                      <i class="fa-regular fa-clock"></i>
+                    </div>
+                  </div>
+
+                  <div v-if="lessonsLoading" class="mt-5 text-sm text-gray-600">
+                    Fetching today&apos;s timetable...
+                  </div>
+
+                  <div
+                    v-else-if="!todayTimetableEntries.length"
+                    class="mt-5 text-sm text-gray-600"
+                  >
+                    {{ timetableEmptyLabel }}
+                  </div>
+
+                  <div v-else class="mt-5 space-y-2">
+                    <div
+                      v-for="entry in todayTimetableEntries"
+                      :key="entry.id"
+                      class="flex items-start justify-between gap-3 rounded-lg bg-gray-50 px-3 py-2"
+                    >
+                      <div class="min-w-0">
+                        <div class="text-sm font-medium text-gray-800 truncate">
                           {{ entry.subjectName || entry.name }}
-                          <span v-if="entry.className" class="text-gray-400">
-                            • {{ entry.className }}
-                          </span>
                         </div>
-                        <div class="shrink-0 text-xs text-gray-500">
-                          {{ entry.startTime }} - {{ entry.endTime }}
+                        <div
+                          v-if="entry.className"
+                          class="text-xs text-gray-500 truncate"
+                        >
+                          {{ entry.className }}
                         </div>
                       </div>
+                      <div class="shrink-0 text-xs font-medium text-indigo-600">
+                        {{ entry.startTime }} - {{ entry.endTime }}
+                      </div>
                     </div>
+                  </div>
 
-                    <div
-                      class="mt-auto pt-4 text-sm font-medium text-indigo-600"
+                  <div
+                    class="mt-auto pt-4 flex items-center justify-between gap-3"
+                  >
+                    <router-link
+                      to="/lessons"
+                      class="text-sm font-medium text-indigo-600 hover:text-indigo-500"
                     >
                       View lessons
-                    </div>
+                    </router-link>
                   </div>
                 </div>
-              </router-link>
+              </div>
+
+              <AnnouncementCard class="h-full" />
             </div>
-            <h2
-              v-if="hasLinkedStudents"
-              class="text-xl font-semibold mb-4 mt-8 text-gray-500"
-            >
-              Schedule
-            </h2>
-            <div class="flex-col w-full">
+
+            <div class="mt-8">
+              <h2 class="text-xl font-semibold mb-4 text-gray-500">Calendar</h2>
               <PlannerCard />
             </div>
           </div>
@@ -205,7 +237,9 @@ import {
   getMyInvoices,
 } from "../../graphql/queries";
 import { useUserStore } from "../../store/userStore";
+import { formatDate } from "../../utils/date.holidays";
 import { formatNamePart } from "../../utils/displayValue";
+import AnnouncementCard from "../../components/cards/announcementCard.vue";
 import PlannerCard from "../../components/cards/plannerCard.vue";
 import ParentChildSelector from "../../components/parents/parentChildSelector.vue";
 
@@ -220,6 +254,13 @@ const {
 } = useParentLinkedStudents();
 
 const parentName = computed(() => formatNamePart(userStore.userInfo?.name));
+const welcomeSubtitle = computed(() => {
+  const greetingName = parentName.value ? `, ${parentName.value}` : "";
+  if (!hasLinkedStudents.value) {
+    return `Welcome${greetingName}. Review upcoming public holidays, breaks, and events below.`;
+  }
+  return `Welcome${greetingName}. Keep track of your child\u2019s timetable, school updates, and upcoming items from one place.`;
+});
 const attendanceRecords = ref([]);
 const lessons = ref([]);
 const invoices = ref([]);
@@ -388,33 +429,93 @@ const todayAttendanceRecords = computed(() => {
   );
 });
 
-const attendanceHeadline = computed(() => {
-  if (attendanceLoading.value) return "Loading...";
-  const total = todayAttendanceRecords.value.length;
-  if (!total) return "0";
-  const presentCount = todayAttendanceRecords.value.filter(
-    (attendance) => attendance?.present,
-  ).length;
-  return `${presentCount}/${total}`;
+const normalizeAttendanceStatus = (record) =>
+  String(record?.status || "")
+    .trim()
+    .toUpperCase();
+
+const getAttendanceAlertType = (record) => {
+  const status = normalizeAttendanceStatus(record);
+  if (status === "LATE") return "late";
+  if (status === "ABSENT") return "absent";
+  if (record?.present === false) return "absent";
+  return "";
+};
+
+const recentAttendanceAlertRecords = computed(() => {
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  return attendanceRecords.value.filter((record) => {
+    const matchesDay =
+      isSameDay(record?.date, today) || isSameDay(record?.date, yesterday);
+    if (!matchesDay) return false;
+    return Boolean(getAttendanceAlertType(record));
+  });
 });
 
-const attendanceSubtitle = computed(() => {
-  if (attendanceLoading.value) return "Loading today's attendance.";
-  const studentName = selectedStudentName.value || "your child";
-  return `Marked attendance for ${studentName}.`;
-});
+const pluralize = (count, singular, plural) => {
+  const normalizedCount = Number(count || 0);
+  if (normalizedCount === 1) return singular;
+  return plural || `${singular}s`;
+};
 
-const attendanceDetail = computed(() => {
-  if (attendanceLoading.value) return "Fetching today's attendance records.";
-  const total = todayAttendanceRecords.value.length;
-  const lessonsToday = todayTimetableEntries.value.length;
-  if (!lessonsToday) return "No classes are scheduled for today.";
-  if (!total) return "No attendance has been marked yet today.";
-  const absentCount = todayAttendanceRecords.value.filter(
-    (attendance) => !attendance?.present,
-  ).length;
-  if (!absentCount) return "All marked classes show present.";
-  return `${absentCount} marked class${absentCount === 1 ? "" : "es"} absent today.`;
+const attendanceAlert = computed(() => {
+  if (attendanceLoading.value) return null;
+
+  const studentName = selectedStudentName.value || "Your child";
+  const records = recentAttendanceAlertRecords.value;
+  if (!records.length) return null;
+
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  const counts = {
+    today: { absent: 0, late: 0 },
+    yesterday: { absent: 0, late: 0 },
+  };
+
+  records.forEach((record) => {
+    const dayKey = isSameDay(record?.date, today) ? "today" : "yesterday";
+    const type = getAttendanceAlertType(record);
+    if (!type) return;
+    counts[dayKey][type] += 1;
+  });
+
+  const hasAnyAbsent = counts.today.absent > 0 || counts.yesterday.absent > 0;
+  const severity = hasAnyAbsent ? "danger" : "warning";
+
+  const fragments = [];
+  if (counts.today.absent) {
+    fragments.push(
+      `${counts.today.absent} ${pluralize(counts.today.absent, "absence")} today`,
+    );
+  }
+  if (counts.today.late) {
+    fragments.push(
+      `${counts.today.late} ${pluralize(counts.today.late, "late arrival", "late arrivals")} today`,
+    );
+  }
+  if (counts.yesterday.absent) {
+    fragments.push(
+      `${counts.yesterday.absent} ${pluralize(counts.yesterday.absent, "absence")} yesterday`,
+    );
+  }
+  if (counts.yesterday.late) {
+    fragments.push(
+      `${counts.yesterday.late} ${pluralize(counts.yesterday.late, "late arrival", "late arrivals")} yesterday`,
+    );
+  }
+
+  const description = `${studentName} has ${fragments.join(" • ")}.`;
+
+  return {
+    title: "Attendance alert",
+    description,
+    severity,
+  };
 });
 
 const outstandingInvoices = computed(() =>
@@ -424,25 +525,58 @@ const outstandingInvoices = computed(() =>
   ),
 );
 
-const feesHeadline = computed(() => {
-  if (invoicesLoading.value) return "Loading...";
-  const outstandingAmount = outstandingInvoices.value.reduce((sum, invoice) => {
-    return (
-      sum +
-      Math.max(
-        Number(invoice?.totalAmount || 0) - Number(invoice?.paidAmount || 0),
-        0,
-      )
-    );
-  }, 0);
-  return formatCurrency(outstandingAmount);
+const hasFeesDue = computed(() => {
+  if (invoicesLoading.value) return false;
+  return outstandingInvoices.value.length > 0;
 });
 
-const feesDetail = computed(() => {
-  if (invoicesLoading.value) return "Fetching your current billing balance.";
-  const count = outstandingInvoices.value.length;
-  if (!count) return "No outstanding invoices on your account.";
-  return `${count} invoice${count === 1 ? "" : "s"} currently outstanding.`;
+const nextDueInvoice = computed(() => {
+  const invoicesList = outstandingInvoices.value || [];
+  if (!invoicesList.length) return null;
+
+  const sorted = [...invoicesList].sort((left, right) => {
+    const leftTime = new Date(left?.dueDate || 0).getTime();
+    const rightTime = new Date(right?.dueDate || 0).getTime();
+    const leftComparable = Number.isFinite(leftTime)
+      ? leftTime
+      : Number.MAX_SAFE_INTEGER;
+    const rightComparable = Number.isFinite(rightTime)
+      ? rightTime
+      : Number.MAX_SAFE_INTEGER;
+    return leftComparable - rightComparable;
+  });
+
+  return sorted[0] || null;
+});
+
+const nextDueAmount = computed(() => {
+  if (!nextDueInvoice.value) return 0;
+  return Math.max(
+    Number(nextDueInvoice.value?.totalAmount || 0) -
+      Number(nextDueInvoice.value?.paidAmount || 0),
+    0,
+  );
+});
+
+const feesDueHeadline = computed(() => {
+  if (invoicesLoading.value) return "Loading...";
+  if (!hasFeesDue.value) return "No fees due";
+  return formatCurrency(nextDueAmount.value);
+});
+
+const feesDueDetail = computed(() => {
+  if (invoicesLoading.value) return "Fetching fees due...";
+  if (!hasFeesDue.value) return "You have no outstanding invoices.";
+  const due = nextDueInvoice.value?.dueDate
+    ? formatDate(nextDueInvoice.value.dueDate)
+    : "N/A";
+  return `Due ${due}`;
+});
+
+const billingCtaTo = computed(() => {
+  const invoiceId = nextDueInvoice.value?.id;
+  if (!invoiceId) return "/settings/billing";
+  return { path: "/settings/billing", query: { invoiceId } };
 });
 
 const nextTimetableEntry = computed(() => {
