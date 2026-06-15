@@ -210,7 +210,7 @@
         </div>
       </div>
 
-      <div class="max-w-3xl mx-auto mt-10">
+      <div v-if="!isParent" class="max-w-3xl mx-auto mt-10">
         <div class="rounded-xl border border-gray-200 p-6 shadow-sm">
           <div
             class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b border-gray-200 pb-2"
@@ -422,6 +422,9 @@ const imageBase64 = ref(null);
 const initials = getInitials(
   userStore?.userInfo?.name,
   userStore?.userInfo?.surname,
+);
+const isParent = computed(
+  () => String(userStore?.userInfo?.role || "").toLowerCase() === "parent",
 );
 
 const roleId = computed(() => {
