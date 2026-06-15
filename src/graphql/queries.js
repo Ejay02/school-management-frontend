@@ -1449,6 +1449,13 @@ export const getMyInvoices = gql`
       dueDate
       status
       createdAt
+      feeStructure {
+        id
+        academicYear
+        term
+        type
+        totalAmount
+      }
       payments {
         id
         amount

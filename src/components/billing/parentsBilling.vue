@@ -240,7 +240,10 @@ const totalOutstanding = computed(() =>
 );
 
 const invoiceLabel = (invoice) => {
-  return `School Fee`;
+  const academicYear = invoice?.feeStructure?.academicYear || "";
+  const term = invoice?.feeStructure?.term || "";
+  const type = invoice?.feeStructure?.type || "Fee";
+  return [academicYear, term, type].filter(Boolean).join(" • ") || "School Fee";
 };
 
 const paymentProgress = (invoice) => {
