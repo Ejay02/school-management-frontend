@@ -319,6 +319,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { apolloClient } from "../../../apollo-client";
 import { initiatePayment } from "../../graphql/mutations";
 import { getAllPayments, getMyInvoices } from "../../graphql/queries";
@@ -330,6 +331,8 @@ import LoadingScreen from "../loadingScreen.vue";
 
 const notificationStore = useNotificationStore();
 const userStore = useUserStore();
+const route = useRoute();
+const router = useRouter();
 
 const loading = ref(false);
 const processingInvoiceId = ref("");
@@ -603,6 +606,28 @@ const fetchBillingData = async () => {
   loading.value = false;
 };
 
+const handlePaymentReturnState = () => {
+  const paymentState = String(route.query?.payment || "").toLowerCase();
+  if (!paymentState) return;
+
+  if (paymentState === "success") {
+    notificationStore.addNotification({
+      type: "success",
+      message: "Payment completed successfully.",
+    });
+  } else if (paymentState === "cancel") {
+    notificationStore.addNotification({
+      type: "info",
+      message: "Payment was cancelled before checkout completed.",
+    });
+  }
+
+  const nextQuery = { ...route.query };
+  delete nextQuery.payment;
+  delete nextQuery.session_id;
+  void router.replace({ path: route.path, query: nextQuery });
+};
+
 const handlePayInvoice = async (invoice) => {
   const amount = invoiceRemainingAmount(invoice);
   if (!amount) return;
@@ -634,6 +659,7 @@ const handlePayInvoice = async (invoice) => {
 };
 
 onMounted(() => {
+  handlePaymentReturnState();
   void fetchBillingData();
 });
 </script>
