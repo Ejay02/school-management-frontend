@@ -278,14 +278,46 @@
 
             <div class="w-1/2">
               <label
-                for="parentId"
+                for="parentSearch"
                 class="block text-sm font-medium text-gray-700 mb-1"
-                >Parent Id <span class="text-red-500">*</span></label
+                >Parent <span class="text-red-500">*</span></label
               >
-              <input
-                v-model="parentId"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
+              <div class="mt-1 space-y-2">
+                <input
+                  v-model="parentSearch"
+                  id="parentSearch"
+                  placeholder="Search parent by name, email, phone, or username"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+                <select
+                  v-model="parentId"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                >
+                  <option value="" disabled>
+                    {{
+                      parentsLoading
+                        ? "Loading parents..."
+                        : "Select a parent account"
+                    }}
+                  </option>
+                  <option
+                    v-for="parent in filteredParents"
+                    :key="parent.id"
+                    :value="parent.id"
+                  >
+                    {{ parent.label }}
+                  </option>
+                </select>
+                <p
+                  v-if="!parentsLoading && parentSearch.trim() && !filteredParents.length"
+                  class="text-xs text-amber-600"
+                >
+                  No parent matched that search.
+                </p>
+                <p v-if="selectedParentOption" class="text-xs text-gray-500">
+                  Linking to {{ selectedParentOption.label }}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -943,6 +975,7 @@ import {
   createEvent,
   createSubject,
 } from "../../graphql/mutations";
+import { getAllParents } from "../../graphql/queries";
 import { useAnnouncementStore } from "../../store/announcementStore";
 import { useClassStore } from "../../store/classStore";
 import { useEventStore } from "../../store/eventStore";
@@ -977,6 +1010,7 @@ const isModalVisible = ref(modalStore.editModal);
 const capacity = ref("");
 
 const name = ref("");
+const surname = ref("");
 const title = ref("");
 
 const email = ref("");
@@ -994,11 +1028,16 @@ const content = ref("");
 
 const phone = ref("");
 const student = ref("");
+const parentId = ref("");
+const parentSearch = ref("");
+const parentsLoading = ref(false);
+const availableParents = ref([]);
 
 const address = ref("");
 const date = ref("");
 
 const bloodGroup = ref("");
+const password = ref("");
 
 const startTime = ref("");
 const endTime = ref("");
@@ -1138,6 +1177,23 @@ const classOptions = computed(() => {
   return classStore.getClassNames?.map((classItem) => classItem.name) || [];
 });
 
+const filteredParents = computed(() => {
+  const query = parentSearch.value.trim().toLowerCase();
+  const parents = availableParents.value || [];
+
+  if (!query) {
+    return parents.slice(0, 50);
+  }
+
+  return parents
+    .filter((parent) => parent.searchText.includes(query))
+    .slice(0, 50);
+});
+
+const selectedParentOption = computed(() =>
+  availableParents.value.find((parent) => parent.id === parentId.value) || null,
+);
+
 const getClassIdByName = (className) => {
   const classItem = classStore.getClassNames.find((c) => c.name === className);
   return classItem ? classItem.id : null;
@@ -1164,6 +1220,7 @@ const isFormValid = computed(() => {
       email.value &&
       phone.value &&
       selectedClass.value &&
+      parentId.value &&
       password.value
     );
   } else if (source.value === "parents") {
@@ -1406,6 +1463,42 @@ const handleAdd = async () => {
   }
 };
 
+const fetchParents = async () => {
+  if (availableParents.value.length) return;
+
+  parentsLoading.value = true;
+  try {
+    const { data } = await apolloClient.query({
+      query: getAllParents,
+      variables: { pagination: { page: 1, limit: 1000 } },
+      fetchPolicy: "network-only",
+    });
+
+    availableParents.value = (data?.getAllParents || []).map((parent) => {
+      const fullName = [parent?.name, parent?.surname].filter(Boolean).join(" ").trim();
+      const emailValue = parent?.email || "No email";
+      const phoneValue = parent?.phone || "";
+      const usernameValue = parent?.username || "";
+
+      return {
+        id: parent.id,
+        label: fullName ? `${fullName} • ${emailValue}` : `${usernameValue} • ${emailValue}`,
+        searchText: [fullName, emailValue, phoneValue, usernameValue, parent?.id]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase(),
+      };
+    });
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: extractGraphQLErrorMessage(error, "Unable to load parents"),
+    });
+  } finally {
+    parentsLoading.value = false;
+  }
+};
+
 // Watchers to sync with modal store
 watch(
   () => modalStore.addModal,
@@ -1422,12 +1515,28 @@ watch(
   },
 );
 
+watch(
+  () => source.value,
+  async (nextSource) => {
+    if (nextSource === "students") {
+      await fetchParents();
+      return;
+    }
+
+    parentSearch.value = "";
+    parentId.value = "";
+  },
+);
+
 onMounted(async () => {
   await Promise.all([
     classStore.fetchClasses(),
     teacherStore.fetchTeachers(),
     subjectStore.fetchSubjects(),
   ]);
+  if (source.value === "students") {
+    await fetchParents();
+  }
 });
 
 onMounted(() => {

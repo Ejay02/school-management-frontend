@@ -97,20 +97,48 @@
           <div class="flex gap-4" v-if="selectedRole === 'student'">
             <div class="flex-1">
               <label
-                for="parentId"
+                for="parentSearch"
                 class="block text-sm font-medium text-indigo-600"
               >
-                Parent ID
+                Parent
               </label>
-              <div class="mt-1">
+              <div class="mt-1 space-y-2">
                 <input
                   type="text"
-                  v-model="formData.parentId"
-                  id="parentId"
-                  placeholder="Enter parent ID"
-                  required
+                  v-model="parentSearch"
+                  id="parentSearch"
+                  placeholder="Search by parent name, email, phone, or username"
                   class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:outline-eduPurpleLight sm:text-sm"
                 />
+                <select
+                  v-model="formData.parentId"
+                  required
+                  class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-800 outline outline-1 outline-gray-300 focus:outline focus:outline-2 focus:outline-eduPurpleLight sm:text-sm"
+                >
+                  <option value="" disabled>
+                    {{
+                      parentsLoading
+                        ? "Loading parents..."
+                        : "Select a parent account"
+                    }}
+                  </option>
+                  <option
+                    v-for="parent in filteredParents"
+                    :key="parent.id"
+                    :value="parent.id"
+                  >
+                    {{ parent.label }}
+                  </option>
+                </select>
+                <p
+                  v-if="!parentsLoading && parentSearch.trim() && !filteredParents.length"
+                  class="text-xs text-amber-600"
+                >
+                  No parent matched that search.
+                </p>
+                <p v-if="selectedParent" class="text-xs text-gray-500">
+                  Linking to {{ selectedParent.label }}
+                </p>
               </div>
             </div>
 
@@ -286,6 +314,7 @@
 import { useMutation } from "@vue/apollo-composable";
 import { computed, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import { apolloClient } from "../../../apollo-client";
 import { useNavigation } from "../../composables/useNavigation";
 import {
 adminSignupMutation,
@@ -293,6 +322,7 @@ parentSignupMutation,
 studentSignupMutation,
 teacherSignupMutation,
 } from "../../graphql/mutations";
+import { getAllParents } from "../../graphql/queries";
 import { useNotificationStore } from "../../store/notification";
 import { useUserStore } from "../../store/userStore";
 import { formatAuthErrorMessage } from "../../utils/graphqlError";
@@ -302,6 +332,9 @@ const router = useRouter();
 const showPassword = ref(false);
 const selectedRole = ref("");
 const isLoading = ref(false);
+const parentSearch = ref("");
+const parentsLoading = ref(false);
+const availableParents = ref([]);
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
 
@@ -342,6 +375,23 @@ const isEmailValid = computed(() => emailPattern.test(formData.email.trim()));
 
 const isPasswordValid = computed(() => formData.password.length >= 8);
 
+const filteredParents = computed(() => {
+  const query = parentSearch.value.trim().toLowerCase();
+  const parents = availableParents.value || [];
+
+  if (!query) {
+    return parents.slice(0, 50);
+  }
+
+  return parents
+    .filter((parent) => parent.searchText.includes(query))
+    .slice(0, 50);
+});
+
+const selectedParent = computed(() =>
+  availableParents.value.find((parent) => parent.id === formData.parentId) || null,
+);
+
 const isFormValid = computed(() => {
   if (!selectedRole.value) return false;
 
@@ -375,6 +425,41 @@ const { mutate: studentSignup, loading: studentLoading } = useMutation(
 );
 const { mutate: parentSignup, loading: parentLoading } =
   useMutation(parentSignupMutation);
+
+const fetchParents = async () => {
+  if (availableParents.value.length) return;
+
+  parentsLoading.value = true;
+  try {
+    const { data } = await apolloClient.query({
+      query: getAllParents,
+      variables: { pagination: { page: 1, limit: 1000 } },
+      fetchPolicy: "network-only",
+    });
+
+    availableParents.value = (data?.getAllParents || []).map((parent) => {
+      const name = [parent?.name, parent?.surname].filter(Boolean).join(" ").trim();
+      const email = parent?.email || "No email";
+      const phone = parent?.phone || "";
+      const username = parent?.username || "";
+      return {
+        id: parent.id,
+        label: name ? `${name} • ${email}` : `${username} • ${email}`,
+        searchText: [name, email, phone, username, parent?.id]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase(),
+      };
+    });
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: formatAuthErrorMessage(error, "Unable to load parents"),
+    });
+  } finally {
+    parentsLoading.value = false;
+  }
+};
 
 
 
@@ -471,6 +556,16 @@ watch(
     isLoading.value = admin || teacher || student || parent;
   }
 );
+
+watch(selectedRole, async (role) => {
+  if (role === "student") {
+    await fetchParents();
+    return;
+  }
+
+  parentSearch.value = "";
+  formData.parentId = "";
+});
 </script>
 
 <style scoped></style>
