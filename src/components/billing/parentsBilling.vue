@@ -3,6 +3,52 @@
     <LoadingScreen v-if="loading" message="Loading billing ..." />
 
     <div v-else class="space-y-8">
+      <section
+        class="overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 p-5 text-white shadow"
+      >
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div class="flex items-center gap-4">
+            <div
+              v-if="schoolLogo"
+              class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white/15 ring-1 ring-white/20"
+            >
+              <img
+                :src="schoolLogo"
+                :alt="`${schoolName} logo`"
+                class="h-full w-full object-contain p-2"
+              />
+            </div>
+            <div
+              v-else
+              class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 text-2xl ring-1 ring-white/20"
+            >
+              <i class="fa-solid fa-school"></i>
+            </div>
+
+            <div>
+              <p class="text-sm font-medium uppercase tracking-[0.2em] text-indigo-100">
+                Parent Fee Portal
+              </p>
+              <h1 class="mt-1 text-2xl font-bold md:text-3xl">
+                {{ schoolName }}
+              </h1>
+              <p class="mt-2 max-w-2xl text-sm text-indigo-100">
+                Review invoices, pay balances securely with Stripe, and download
+                school-branded receipts for your records.
+              </p>
+            </div>
+          </div>
+
+          <div class="rounded-2xl bg-white/10 p-4 text-sm text-indigo-50 ring-1 ring-white/15">
+            <p class="font-semibold">Secure checkout</p>
+            <p class="mt-1">
+              Stripe handles the card payment. Receipts are generated with your
+              school details after payment is recorded.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="rounded-xl bg-white p-4 shadow">
           <div class="flex items-center gap-4">
@@ -108,6 +154,9 @@
                 </div>
                 <p class="mt-1 text-sm text-gray-500">
                   Invoice {{ invoice.invoiceNumber }}
+                </p>
+                <p class="mt-1 text-sm text-gray-500">
+                  Issued by {{ schoolName }}
                 </p>
                 <div
                   class="mt-3 flex flex-col gap-2 text-sm text-gray-500 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4"
@@ -295,9 +344,14 @@
                     <button
                       v-if="canDownloadReceipt(payment)"
                       @click="downloadReceipt(payment)"
-                      class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white"
+                      :disabled="downloadingReceiptId === payment.id"
+                      class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      Download receipt PDF
+                      {{
+                        downloadingReceiptId === payment.id
+                          ? "Preparing receipt..."
+                          : "Download branded receipt PDF"
+                      }}
                     </button>
                   </div>
                 </div>
@@ -336,6 +390,7 @@ const router = useRouter();
 
 const loading = ref(false);
 const processingInvoiceId = ref("");
+const downloadingReceiptId = ref("");
 const invoices = ref([]);
 const payments = ref([]);
 
@@ -403,6 +458,16 @@ const totalOverdueAmount = computed(() =>
     return sum + invoiceRemainingAmount(invoice);
   }, 0),
 );
+
+const schoolName = computed(() => {
+  const value = String(userStore.schoolInfo?.schoolName || "").trim();
+  return value || "Your School";
+});
+
+const schoolLogo = computed(() => {
+  const value = String(userStore.schoolInfo?.schoolLogo || "").trim();
+  return value || "";
+});
 
 const upcomingInstallmentsSummary = computed(() => {
   if (!upcomingInstallments.value.length) return "No future payments scheduled";
@@ -492,71 +557,202 @@ const escapePdfText = (value) =>
     .replace(/\(/g, "\\(")
     .replace(/\)/g, "\\)");
 
-const buildSimplePdf = (lines) => {
-  const textCommands = lines
+const pdfEncoder = new TextEncoder();
+
+const bytesToPdfString = (bytes) => {
+  let result = "";
+  for (let index = 0; index < bytes.length; index += 1) {
+    result += String.fromCharCode(bytes[index]);
+  }
+  return result;
+};
+
+const createPdfBytes = (value) => {
+  if (value instanceof Uint8Array) return value;
+  return pdfEncoder.encode(String(value));
+};
+
+const decodeBase64 = (value) => {
+  const binary = window.atob(value);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  return bytes;
+};
+
+const loadLogoForReceipt = async () => {
+  if (!schoolLogo.value) return null;
+
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+
+    image.onload = () => {
+      const maxWidth = 96;
+      const maxHeight = 48;
+      const scale = Math.min(
+        maxWidth / image.width,
+        maxHeight / image.height,
+        1,
+      );
+
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(image.width * scale));
+      canvas.height = Math.max(1, Math.round(image.height * scale));
+
+      const context = canvas.getContext("2d");
+      if (!context) {
+        resolve(null);
+        return;
+      }
+
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+      const base64 = dataUrl.split(",")[1];
+
+      resolve({
+        width: canvas.width,
+        height: canvas.height,
+        bytes: decodeBase64(base64),
+      });
+    };
+
+    image.onerror = () => resolve(null);
+    image.src = schoolLogo.value;
+  });
+};
+
+const buildReceiptPdf = ({ schoolTitle, receiptTitle, lines, logoImage }) => {
+  const contentLines = [];
+  const titleX = logoImage ? 180 : 72;
+
+  if (logoImage) {
+    contentLines.push(
+      `q ${logoImage.width} 0 0 ${logoImage.height} 72 720 cm /Im1 Do Q`,
+    );
+  }
+
+  contentLines.push(
+    `BT /F1 18 Tf ${titleX} 748 Td (${escapePdfText(schoolTitle)}) Tj ET`,
+  );
+  contentLines.push(
+    `BT /F1 14 Tf ${titleX} 726 Td (${escapePdfText(receiptTitle)}) Tj ET`,
+  );
+  contentLines.push("0.85 w 72 706 m 540 706 l S");
+
+  lines
     .filter(Boolean)
-    .map((line, index) => {
-      const yPosition = 760 - index * 22;
-      return `BT /F1 12 Tf 72 ${yPosition} Td (${escapePdfText(line)}) Tj ET`;
-    })
-    .join("\n");
+    .forEach((line, index) => {
+      const yPosition = 678 - index * 22;
+      contentLines.push(
+        `BT /F1 12 Tf 72 ${yPosition} Td (${escapePdfText(line)}) Tj ET`,
+      );
+    });
+
+  const contentStream = contentLines.join("\n");
+  const resourceDictionary = logoImage
+    ? "<< /Font << /F1 4 0 R >> /XObject << /Im1 5 0 R >> >>"
+    : "<< /Font << /F1 4 0 R >> >>";
+  const contentsObjectId = logoImage ? 6 : 5;
 
   const objects = [
     "<< /Type /Catalog /Pages 2 0 R >>",
     "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources ${resourceDictionary} /Contents ${contentsObjectId} 0 R >>`,
     "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-    `<< /Length ${textCommands.length} >>\nstream\n${textCommands}\nendstream`,
   ];
 
-  let pdf = "%PDF-1.4\n";
+  if (logoImage) {
+    objects.push(
+      `<< /Type /XObject /Subtype /Image /Width ${logoImage.width} /Height ${logoImage.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${logoImage.bytes.length} >>\nstream\n${bytesToPdfString(logoImage.bytes)}\nendstream`,
+    );
+  }
+
+  objects.push(
+    `<< /Length ${contentStream.length} >>\nstream\n${contentStream}\nendstream`,
+  );
+
+  const chunks = [];
+  let currentOffset = 0;
   const offsets = [0];
 
+  const appendChunk = (value) => {
+    const bytes = createPdfBytes(value);
+    chunks.push(bytes);
+    currentOffset += bytes.length;
+  };
+
+  appendChunk("%PDF-1.4\n");
+
   objects.forEach((object, index) => {
-    offsets.push(pdf.length);
-    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+    offsets.push(currentOffset);
+    appendChunk(`${index + 1} 0 obj\n`);
+    appendChunk(object);
+    appendChunk("\nendobj\n");
   });
 
-  const xrefStart = pdf.length;
-  pdf += `xref\n0 ${objects.length + 1}\n`;
-  pdf += "0000000000 65535 f \n";
+  const xrefStart = currentOffset;
+  appendChunk(`xref\n0 ${objects.length + 1}\n`);
+  appendChunk("0000000000 65535 f \n");
   offsets.slice(1).forEach((offset) => {
-    pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
+    appendChunk(`${String(offset).padStart(10, "0")} 00000 n \n`);
   });
-  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+  appendChunk(
+    `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`,
+  );
 
-  return new Blob([pdf], { type: "application/pdf" });
+  return new Blob(chunks, { type: "application/pdf" });
 };
 
-const downloadReceipt = (payment) => {
+const downloadReceipt = async (payment) => {
   const invoice = invoiceMap.value[payment?.invoiceId];
-  const schoolName = userStore.schoolInfo?.schoolName || "School";
   const parentName = [userStore.userInfo?.name, userStore.userInfo?.surname]
     .filter(Boolean)
     .join(" ");
 
-  const lines = [
-    `${schoolName} Payment Receipt`,
-    "",
-    `Receipt ID: ${payment.id}`,
-    `Payment date: ${formatDateTime(payment.createdAt)}`,
-    `Parent: ${parentName || "Parent"}`,
-    `Student: ${[payment.studentName, payment.studentSurname].filter(Boolean).join(" ") || "N/A"}`,
-    `Description: ${paymentTitle(payment)}`,
-    `Invoice number: ${invoice?.invoiceNumber || payment.invoiceId || "N/A"}`,
-    `Amount paid: ${formatCurrency(payment.amount)}`,
-    `Payment method: ${normalizePaymentMethod(payment.paymentMethod)}`,
-    `Invoice due date: ${invoice?.dueDate ? formatDate(invoice.dueDate) : "N/A"}`,
-    `Status: ${normalizeStatusLabel(payment.status)}`,
-  ];
+  downloadingReceiptId.value = payment.id;
 
-  const blob = buildSimplePdf(lines);
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `receipt-${payment.id}.pdf`;
-  link.click();
-  URL.revokeObjectURL(url);
+  try {
+    const logoImage = await loadLogoForReceipt();
+    const lines = [
+      `Issued by: ${schoolName.value}`,
+      `Receipt ID: ${payment.id}`,
+      `Payment date: ${formatDateTime(payment.createdAt)}`,
+      `Parent: ${parentName || "Parent"}`,
+      `Student: ${[payment.studentName, payment.studentSurname].filter(Boolean).join(" ") || "N/A"}`,
+      `Description: ${paymentTitle(payment)}`,
+      `Invoice number: ${invoice?.invoiceNumber || payment.invoiceId || "N/A"}`,
+      `Amount paid: ${formatCurrency(payment.amount)}`,
+      `Payment method: ${normalizePaymentMethod(payment.paymentMethod)}`,
+      `Invoice due date: ${invoice?.dueDate ? formatDate(invoice.dueDate) : "N/A"}`,
+      `Status: ${normalizeStatusLabel(payment.status)}`,
+      "Processed securely with Stripe Checkout.",
+    ];
+
+    const blob = buildReceiptPdf({
+      schoolTitle: schoolName.value,
+      receiptTitle: "Payment Receipt",
+      lines,
+      logoImage,
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `receipt-${payment.id}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: "Unable to prepare the receipt right now.",
+    });
+  } finally {
+    downloadingReceiptId.value = "";
+  }
 };
 
 const fetchBillingData = async () => {
