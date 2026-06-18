@@ -240,6 +240,8 @@ export const getAllStudents = gql`
     getAllStudents(params: $pagination) {
       id
       studentId
+      parentId
+      classId
       username
       role
       name
@@ -255,8 +257,11 @@ export const getAllStudents = gql`
       isActive
       deactivatedAt
       parent {
+        id
         name
         surname
+        email
+        phone
       }
       class {
         id

@@ -175,39 +175,179 @@
 
         <!-- student List -->
         <template v-if="source === 'studentList'">
+          <div class="flex gap-2">
+            <div class="w-1/2">
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Name
+                <input
+                  v-model="data.name"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
+            </div>
+            <div class="w-1/2">
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Surname
+                <input
+                  v-model="data.surname"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <div class="w-1/2">
+              <label
+                for="studentEditClass"
+                class="block text-sm font-medium text-gray-700 mb-1 capitalize"
+              >
+                Class
+              </label>
+              <select
+                id="studentEditClass"
+                v-model="selectedClass"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              >
+                <option value="">No class assigned</option>
+                <option
+                  v-for="classItem in classOptions"
+                  :key="classItem.id"
+                  :value="classItem.name"
+                >
+                  {{ classItem.name }}
+                </option>
+              </select>
+            </div>
+
+            <div class="w-1/2">
+              <label
+                for="studentEditParentSearch"
+                class="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Parent
+              </label>
+              <div class="mt-1 space-y-2">
+                <input
+                  id="studentEditParentSearch"
+                  v-model="parentSearch"
+                  placeholder="Search parent by name, email, phone, or username"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+                <select
+                  v-model="parentId"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                >
+                  <option value="" disabled>
+                    {{
+                      parentsLoading
+                        ? "Loading parents..."
+                        : "Select a parent account"
+                    }}
+                  </option>
+                  <option
+                    v-for="parent in filteredParents"
+                    :key="parent.id"
+                    :value="parent.id"
+                  >
+                    {{ parent.label }}
+                  </option>
+                </select>
+                <p
+                  v-if="!parentsLoading && parentSearch.trim() && !filteredParents.length"
+                  class="text-xs text-amber-600"
+                >
+                  No parent matched that search.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-if="selectedParentOption"
+            class="rounded-md border border-emerald-100 bg-emerald-50 p-4"
+          >
+            <p class="text-sm font-medium text-emerald-800">Selected Parent</p>
+            <div class="mt-2 space-y-1 text-sm text-gray-700">
+              <p>{{ selectedParentOption.fullName || selectedParentOption.username }}</p>
+              <p>{{ selectedParentOption.email }}</p>
+              <p v-if="selectedParentOption.phone">
+                {{ selectedParentOption.phone }}
+              </p>
+              <p class="text-xs text-gray-500">
+                Linked students: {{ selectedParentOption.studentCount }}
+              </p>
+            </div>
+          </div>
+
+          <div
+            v-else-if="shouldShowInviteParentAction"
+            class="rounded-md border border-amber-200 bg-amber-50 p-4"
+          >
+            <p class="text-sm font-medium text-amber-800">
+              Can't find the parent?
+            </p>
+            <p class="mt-1 text-sm text-gray-600">
+              Send an invite now, then re-link this student after the invite is
+              accepted.
+            </p>
+            <div class="mt-3 flex gap-2">
+              <div class="w-1/2">
+                <label
+                  for="editInlineParentName"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Parent name
+                </label>
+                <input
+                  id="editInlineParentName"
+                  v-model="inlineParentName"
+                  type="text"
+                  placeholder="Parent name"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </div>
+              <div class="w-1/2">
+                <label
+                  for="editInlineParentEmail"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Parent email
+                </label>
+                <input
+                  id="editInlineParentEmail"
+                  v-model="inlineParentEmail"
+                  type="email"
+                  placeholder="parent@example.com"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </div>
+            </div>
+            <div class="mt-3 flex items-center justify-between gap-2">
+              <p class="text-xs text-gray-500">
+                This keeps the current edit form open.
+              </p>
+              <button
+                type="button"
+                @click="sendInlineParentInvite"
+                :disabled="!canSendInlineParentInvite || inlineParentInviteLoading"
+                class="rounded-md border border-amber-300 bg-white px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {{ inlineParentInviteLoading ? "Sending..." : "Invite Parent" }}
+              </button>
+            </div>
+          </div>
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Name
+              >Address
               <input
-                v-model="data.name"
+                v-model="data.address"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               />
             </label>
           </div>
 
-          <div class="flex gap-2">
-            <div>
-              <label
-                class="block text-sm font-medium text-gray-700 mb-1 capitalize"
-                >class
-                <input
-                  v-model="data.class"
-                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-                />
-              </label>
-            </div>
-
-            <div>
-              <label
-                class="block text-sm font-medium text-gray-700 mb-1 capitalize"
-                >grade
-                <input
-                  v-model="data.grade"
-                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-                />
-              </label>
-            </div>
-          </div>
           <div class="flex gap-2">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
@@ -229,14 +369,6 @@
               </label>
             </div>
           </div>
-
-          <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Address
-            <input
-              v-model="data.address"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </label>
         </template>
 
         <!-- parent list -->
@@ -696,13 +828,17 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useModalStore } from "@/store/useModalStore";
 import { apolloClient } from "../../../apollo-client";
 import {
+  adminUpdateStudent,
+  createInvitationMutation,
   editAnnouncement,
   updateClass,
   updateSubject,
 } from "../../graphql/mutations";
+import { getAllParents } from "../../graphql/queries";
 import { useAnnouncementStore } from "../../store/announcementStore";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
+import { useStudentStore } from "../../store/studentStore";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
 import { formatPersonName } from "../../utils/displayValue";
@@ -716,6 +852,7 @@ const modalStore = useModalStore();
 
 const classStore = useClassStore();
 const teacherStore = useTeacherStore();
+const studentStore = useStudentStore();
 const subjectStore = useSubjectStore();
 const userStore = useUserStore();
 
@@ -746,6 +883,13 @@ const content = ref("");
 
 const className = ref("");
 const classCapacity = ref("");
+const parentId = ref("");
+const parentSearch = ref("");
+const parentsLoading = ref(false);
+const availableParents = ref([]);
+const inlineParentName = ref("");
+const inlineParentEmail = ref("");
+const inlineParentInviteLoading = ref(false);
 
 const transformedData = ref({});
 const currentUserDisplayName = computed(() =>
@@ -815,6 +959,41 @@ const classOptions = computed(() => {
   return classStore.getClassNames || [];
 });
 
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const filteredParents = computed(() => {
+  const query = parentSearch.value.trim().toLowerCase();
+  const parents = availableParents.value || [];
+
+  if (!query) {
+    return parents.slice(0, 50);
+  }
+
+  return parents
+    .filter((parent) => parent.searchText.includes(query))
+    .slice(0, 50);
+});
+
+const selectedParentOption = computed(() =>
+  availableParents.value.find((parent) => parent.id === parentId.value) || null,
+);
+
+const shouldShowInviteParentAction = computed(() => {
+  return (
+    source.value === "studentList" &&
+    !parentsLoading.value &&
+    parentSearch.value.trim() &&
+    !filteredParents.value.length
+  );
+});
+
+const canSendInlineParentInvite = computed(() => {
+  return (
+    inlineParentName.value.trim() &&
+    emailPattern.test(inlineParentEmail.value.trim())
+  );
+});
+
 // Helper function to format source title
 const formatSourceTitle = (src) => {
   // Remove 'List' and capitalize first letter
@@ -832,6 +1011,82 @@ const getClassIdByName = (className) => {
   return classObj?.id || null;
 };
 
+const mapParentOption = (parent) => {
+  const fullName = [parent?.name, parent?.surname].filter(Boolean).join(" ").trim();
+  const emailValue = parent?.email || "No email";
+  const phoneValue = parent?.phone || "";
+  const usernameValue = parent?.username || "";
+  const studentCount = Array.isArray(parent?.students) ? parent.students.length : 0;
+
+  return {
+    id: parent.id,
+    label: fullName ? `${fullName} • ${emailValue}` : `${usernameValue} • ${emailValue}`,
+    fullName,
+    email: emailValue,
+    phone: phoneValue,
+    username: usernameValue,
+    studentCount,
+    searchText: [fullName, emailValue, phoneValue, usernameValue, parent?.id]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase(),
+  };
+};
+
+const fetchParents = async () => {
+  if (availableParents.value.length) return;
+
+  parentsLoading.value = true;
+  try {
+    const { data } = await apolloClient.query({
+      query: getAllParents,
+      variables: { pagination: { page: 1, limit: 1000 } },
+      fetchPolicy: "network-only",
+    });
+
+    availableParents.value = (data?.getAllParents || []).map(mapParentOption);
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: extractGraphQLErrorMessage(error, "Unable to load parents"),
+    });
+  } finally {
+    parentsLoading.value = false;
+  }
+};
+
+const sendInlineParentInvite = async () => {
+  if (!canSendInlineParentInvite.value || inlineParentInviteLoading.value) {
+    return;
+  }
+
+  try {
+    inlineParentInviteLoading.value = true;
+    await apolloClient.mutate({
+      mutation: createInvitationMutation,
+      variables: {
+        input: {
+          name: inlineParentName.value.trim(),
+          email: inlineParentEmail.value.trim(),
+          role: "PARENT",
+        },
+      },
+    });
+
+    notificationStore.addNotification({
+      type: "success",
+      message: "Parent invite sent. Re-link the student after the invite is accepted.",
+    });
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: extractGraphQLErrorMessage(error, "Unable to send parent invite"),
+    });
+  } finally {
+    inlineParentInviteLoading.value = false;
+  }
+};
+
 // Update the handleEdit function to use the refs
 const handleEdit = async () => {
   try {
@@ -844,7 +1099,49 @@ const handleEdit = async () => {
     } else if (source.value === "parentList") {
       console.log("hello from parents");
     } else if (source.value === "studentList") {
-      console.log("hello from students");
+      const resolvedClassId = selectedClass.value
+        ? getClassIdByName(selectedClass.value)
+        : data.value?.classId || undefined;
+
+      if (selectedClass.value && !resolvedClassId) {
+        notificationStore.addNotification({
+          type: "error",
+          message: "Please select a valid class",
+        });
+        return;
+      }
+
+      if (!parentId.value) {
+        notificationStore.addNotification({
+          type: "error",
+          message: "Please select a linked parent",
+        });
+        return;
+      }
+
+      await apolloClient.mutate({
+        mutation: adminUpdateStudent,
+        variables: {
+          studentId: modalStore.modalId,
+          input: {
+            name: String(data.value?.name || "").trim(),
+            surname: String(data.value?.surname || "").trim(),
+            studentId: String(data.value?.studentId || "").trim(),
+            phone: String(data.value?.phone || "").trim(),
+            address: String(data.value?.address || "").trim(),
+            parentId: parentId.value,
+            classId: resolvedClassId,
+          },
+        },
+      });
+
+      studentStore.allStudents = [];
+      await studentStore.fetchStudents();
+
+      notificationStore.addNotification({
+        type: "success",
+        message: "Student updated successfully",
+      });
     } else if (source.value === "classList") {
       const resolvedCapacity = Number.parseInt(String(classCapacity.value), 10);
       if (!Number.isFinite(resolvedCapacity)) {
@@ -1000,6 +1297,9 @@ watch(
   () => modalStore.source,
   (newVal) => {
     source.value = newVal;
+    if (newVal === "studentList") {
+      fetchParents();
+    }
   },
 );
 
@@ -1046,17 +1346,45 @@ watch(
             newVal.targetRoles.includes(role.value),
           );
         }
+      } else if (source.value === "studentList") {
+        selectedClass.value = newVal.class?.name || "";
+        parentId.value = newVal.parentId || newVal.parent?.id || "";
+        parentSearch.value = "";
+        inlineParentName.value = "";
+        inlineParentEmail.value = "";
       }
     }
   },
   { immediate: true },
 );
 
+watch(
+  () => parentSearch.value,
+  (value) => {
+    if (source.value !== "studentList") return;
+
+    const trimmedValue = value.trim();
+    if (!trimmedValue || filteredParents.value.length > 0) return;
+
+    if (emailPattern.test(trimmedValue)) {
+      inlineParentEmail.value = trimmedValue;
+    } else if (!inlineParentName.value.trim()) {
+      inlineParentName.value = trimmedValue;
+    }
+  },
+);
+
 onMounted(async () => {
   classes.value = classStore.getClassNames;
 
+  if (classStore.allClasses.length === 0) {
+    await classStore.fetchClasses();
+  }
   if (teachers.value.length === 0) {
     await teacherStore.fetchTeachers();
+  }
+  if (source.value === "studentList") {
+    await fetchParents();
   }
 });
 </script>

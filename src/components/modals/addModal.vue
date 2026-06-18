@@ -321,6 +321,81 @@
             </div>
           </div>
 
+          <div
+            v-if="selectedParentOption"
+            class="rounded-md border border-emerald-100 bg-emerald-50 p-4"
+          >
+            <p class="text-sm font-medium text-emerald-800">Selected Parent</p>
+            <div class="mt-2 space-y-1 text-sm text-gray-700">
+              <p>{{ selectedParentOption.fullName || selectedParentOption.username }}</p>
+              <p>{{ selectedParentOption.email }}</p>
+              <p v-if="selectedParentOption.phone">
+                {{ selectedParentOption.phone }}
+              </p>
+              <p class="text-xs text-gray-500">
+                Linked students: {{ selectedParentOption.studentCount }}
+              </p>
+            </div>
+          </div>
+
+          <div
+            v-else-if="shouldShowInviteParentAction"
+            class="rounded-md border border-amber-200 bg-amber-50 p-4"
+          >
+            <p class="text-sm font-medium text-amber-800">
+              Can't find the parent?
+            </p>
+            <p class="mt-1 text-sm text-gray-600">
+              Send an invite now so they can create their account, then link the
+              student once they accept.
+            </p>
+            <div class="mt-3 flex gap-2">
+              <div class="w-1/2">
+                <label
+                  for="inlineParentName"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Parent name
+                </label>
+                <input
+                  id="inlineParentName"
+                  v-model="inlineParentName"
+                  type="text"
+                  placeholder="Parent name"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </div>
+              <div class="w-1/2">
+                <label
+                  for="inlineParentEmail"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Parent email
+                </label>
+                <input
+                  id="inlineParentEmail"
+                  v-model="inlineParentEmail"
+                  type="email"
+                  placeholder="parent@example.com"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                />
+              </div>
+            </div>
+            <div class="mt-3 flex items-center justify-between gap-2">
+              <p class="text-xs text-gray-500">
+                This keeps the current student form open.
+              </p>
+              <button
+                type="button"
+                @click="sendInlineParentInvite"
+                :disabled="!canSendInlineParentInvite || inlineParentInviteLoading"
+                class="rounded-md border border-amber-300 bg-white px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {{ inlineParentInviteLoading ? "Sending..." : "Invite Parent" }}
+              </button>
+            </div>
+          </div>
+
           <!--  -->
 
           <label
@@ -1032,6 +1107,9 @@ const parentId = ref("");
 const parentSearch = ref("");
 const parentsLoading = ref(false);
 const availableParents = ref([]);
+const inlineParentName = ref("");
+const inlineParentEmail = ref("");
+const inlineParentInviteLoading = ref(false);
 
 const address = ref("");
 const date = ref("");
@@ -1194,6 +1272,22 @@ const selectedParentOption = computed(() =>
   availableParents.value.find((parent) => parent.id === parentId.value) || null,
 );
 
+const shouldShowInviteParentAction = computed(() => {
+  return (
+    source.value === "students" &&
+    !parentsLoading.value &&
+    parentSearch.value.trim() &&
+    !filteredParents.value.length
+  );
+});
+
+const canSendInlineParentInvite = computed(() => {
+  return (
+    inlineParentName.value.trim() &&
+    emailPattern.test(inlineParentEmail.value.trim())
+  );
+});
+
 const getClassIdByName = (className) => {
   const classItem = classStore.getClassNames.find((c) => c.name === className);
   return classItem ? classItem.id : null;
@@ -1256,6 +1350,60 @@ const isFormValid = computed(() => {
 
   return false;
 });
+
+const mapParentOption = (parent) => {
+  const fullName = [parent?.name, parent?.surname].filter(Boolean).join(" ").trim();
+  const emailValue = parent?.email || "No email";
+  const phoneValue = parent?.phone || "";
+  const usernameValue = parent?.username || "";
+  const studentCount = Array.isArray(parent?.students) ? parent.students.length : 0;
+
+  return {
+    id: parent.id,
+    label: fullName ? `${fullName} • ${emailValue}` : `${usernameValue} • ${emailValue}`,
+    fullName,
+    email: emailValue,
+    phone: phoneValue,
+    username: usernameValue,
+    studentCount,
+    searchText: [fullName, emailValue, phoneValue, usernameValue, parent?.id]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase(),
+  };
+};
+
+const sendInlineParentInvite = async () => {
+  if (!canSendInlineParentInvite.value || inlineParentInviteLoading.value) {
+    return;
+  }
+
+  try {
+    inlineParentInviteLoading.value = true;
+    await apolloClient.mutate({
+      mutation: createInvitationMutation,
+      variables: {
+        input: {
+          name: inlineParentName.value.trim(),
+          email: inlineParentEmail.value.trim(),
+          role: "PARENT",
+        },
+      },
+    });
+
+    notificationStore.addNotification({
+      type: "success",
+      message: "Parent invite sent. Link the student after the invite is accepted.",
+    });
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: extractGraphQLErrorMessage(error, "Unable to send parent invite"),
+    });
+  } finally {
+    inlineParentInviteLoading.value = false;
+  }
+};
 
 const handleAdd = async () => {
   if (!isFormValid.value) return;
@@ -1474,21 +1622,7 @@ const fetchParents = async () => {
       fetchPolicy: "network-only",
     });
 
-    availableParents.value = (data?.getAllParents || []).map((parent) => {
-      const fullName = [parent?.name, parent?.surname].filter(Boolean).join(" ").trim();
-      const emailValue = parent?.email || "No email";
-      const phoneValue = parent?.phone || "";
-      const usernameValue = parent?.username || "";
-
-      return {
-        id: parent.id,
-        label: fullName ? `${fullName} • ${emailValue}` : `${usernameValue} • ${emailValue}`,
-        searchText: [fullName, emailValue, phoneValue, usernameValue, parent?.id]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase(),
-      };
-    });
+    availableParents.value = (data?.getAllParents || []).map(mapParentOption);
   } catch (error) {
     notificationStore.addNotification({
       type: "error",
@@ -1525,6 +1659,24 @@ watch(
 
     parentSearch.value = "";
     parentId.value = "";
+    inlineParentName.value = "";
+    inlineParentEmail.value = "";
+  },
+);
+
+watch(
+  () => parentSearch.value,
+  (value) => {
+    if (source.value !== "students") return;
+
+    const trimmedValue = value.trim();
+    if (!trimmedValue || filteredParents.value.length > 0) return;
+
+    if (emailPattern.test(trimmedValue)) {
+      inlineParentEmail.value = trimmedValue;
+    } else if (!inlineParentName.value.trim()) {
+      inlineParentName.value = trimmedValue;
+    }
   },
 );
 

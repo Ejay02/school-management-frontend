@@ -342,6 +342,32 @@ export const updateStudentProfile = gql`
   }
 `;
 
+export const adminUpdateStudent = gql`
+  mutation AdminUpdateStudent($studentId: String!, $input: UpdateStudentAdminInput!) {
+    adminUpdateStudent(studentId: $studentId, input: $input) {
+      id
+      studentId
+      name
+      surname
+      phone
+      address
+      parentId
+      classId
+      parent {
+        id
+        name
+        surname
+        email
+        phone
+      }
+      class {
+        id
+        name
+      }
+    }
+  }
+`;
+
 export const updateParentProfile = gql`
   mutation UpdateParentProfile($input: UpdateProfileInput!) {
     updateParentProfile(input: $input) {

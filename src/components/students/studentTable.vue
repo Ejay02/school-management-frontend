@@ -101,8 +101,11 @@
               {{ item?.isActive === false ? "Activate" : "Suspend" }}
             </button>
 
-            <!-- admin shouldnt updateother  user deets just assign classes etc -->
-            <!-- <div
+            <div
+              v-if="
+                role.toLowerCase() === 'super_admin' ||
+                role.toLowerCase() === 'admin'
+              "
               class="group relative"
               @click="showEditModal(item.id, item.title, item, 'studentList')"
             >
@@ -116,7 +119,7 @@
               >
                 Edit
               </span>
-            </div> -->
+            </div>
 
             <button
               v-if="role.toLowerCase() === 'super_admin'"
