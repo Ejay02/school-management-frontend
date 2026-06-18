@@ -228,6 +228,20 @@
           <div class="flex gap-2">
             <div class="w-1/2">
               <label
+                for="studentUsername"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Username <span class="text-red-500">*</span></label
+              >
+              <input
+                id="studentUsername"
+                v-model="username"
+                placeholder="student.username"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+              />
+            </div>
+
+            <div class="w-1/2">
+              <label
                 for="email"
                 required
                 type="email"
@@ -309,7 +323,11 @@
                   </option>
                 </select>
                 <p
-                  v-if="!parentsLoading && parentSearch.trim() && !filteredParents.length"
+                  v-if="
+                    !parentsLoading &&
+                    parentSearch.trim() &&
+                    !filteredParents.length
+                  "
                   class="text-xs text-amber-600"
                 >
                   No parent matched that search.
@@ -327,7 +345,11 @@
           >
             <p class="text-sm font-medium text-emerald-800">Selected Parent</p>
             <div class="mt-2 space-y-1 text-sm text-gray-700">
-              <p>{{ selectedParentOption.fullName || selectedParentOption.username }}</p>
+              <p>
+                {{
+                  selectedParentOption.fullName || selectedParentOption.username
+                }}
+              </p>
               <p>{{ selectedParentOption.email }}</p>
               <p v-if="selectedParentOption.phone">
                 {{ selectedParentOption.phone }}
@@ -388,7 +410,9 @@
               <button
                 type="button"
                 @click="sendInlineParentInvite"
-                :disabled="!canSendInlineParentInvite || inlineParentInviteLoading"
+                :disabled="
+                  !canSendInlineParentInvite || inlineParentInviteLoading
+                "
                 class="rounded-md border border-amber-300 bg-white px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {{ inlineParentInviteLoading ? "Sending..." : "Invite Parent" }}
@@ -1044,6 +1068,7 @@ import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import { computed, onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
 import {
+  adminCreateStudent,
   createInvitationMutation,
   createAnnouncement,
   createClass,
@@ -1055,6 +1080,7 @@ import { useAnnouncementStore } from "../../store/announcementStore";
 import { useClassStore } from "../../store/classStore";
 import { useEventStore } from "../../store/eventStore";
 import { useNotificationStore } from "../../store/notification";
+import { useStudentStore } from "../../store/studentStore";
 import { useSubjectStore } from "../../store/subjectStore";
 import { useTeacherStore } from "../../store/teacherStore";
 import { useModalStore } from "../../store/useModalStore";
@@ -1077,6 +1103,7 @@ const eventStore = useEventStore();
 const subjectStore = useSubjectStore();
 const announcementStore = useAnnouncementStore();
 const notificationStore = useNotificationStore();
+const studentStore = useStudentStore();
 
 const userStore = useUserStore();
 
@@ -1086,6 +1113,7 @@ const capacity = ref("");
 
 const name = ref("");
 const surname = ref("");
+const username = ref("");
 const title = ref("");
 
 const email = ref("");
@@ -1268,8 +1296,10 @@ const filteredParents = computed(() => {
     .slice(0, 50);
 });
 
-const selectedParentOption = computed(() =>
-  availableParents.value.find((parent) => parent.id === parentId.value) || null,
+const selectedParentOption = computed(
+  () =>
+    availableParents.value.find((parent) => parent.id === parentId.value) ||
+    null,
 );
 
 const shouldShowInviteParentAction = computed(() => {
@@ -1302,8 +1332,7 @@ const handleCancel = () => {
 const isFormValid = computed(() => {
   if (canInviteUsers.value) {
     return (
-      name.value.trim() &&
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())
+      name.value.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())
     );
   } else if (source.value === "teachers") {
     return name.value && surname.value && phone.value;
@@ -1311,6 +1340,7 @@ const isFormValid = computed(() => {
     return (
       name.value &&
       surname.value &&
+      username.value &&
       email.value &&
       phone.value &&
       selectedClass.value &&
@@ -1352,15 +1382,22 @@ const isFormValid = computed(() => {
 });
 
 const mapParentOption = (parent) => {
-  const fullName = [parent?.name, parent?.surname].filter(Boolean).join(" ").trim();
+  const fullName = [parent?.name, parent?.surname]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
   const emailValue = parent?.email || "No email";
   const phoneValue = parent?.phone || "";
   const usernameValue = parent?.username || "";
-  const studentCount = Array.isArray(parent?.students) ? parent.students.length : 0;
+  const studentCount = Array.isArray(parent?.students)
+    ? parent.students.length
+    : 0;
 
   return {
     id: parent.id,
-    label: fullName ? `${fullName} • ${emailValue}` : `${usernameValue} • ${emailValue}`,
+    label: fullName
+      ? `${fullName} • ${emailValue}`
+      : `${usernameValue} • ${emailValue}`,
     fullName,
     email: emailValue,
     phone: phoneValue,
@@ -1393,12 +1430,16 @@ const sendInlineParentInvite = async () => {
 
     notificationStore.addNotification({
       type: "success",
-      message: "Parent invite sent. Link the student after the invite is accepted.",
+      message:
+        "Parent invite sent. Link the student after the invite is accepted.",
     });
   } catch (error) {
     notificationStore.addNotification({
       type: "error",
-      message: extractGraphQLErrorMessage(error, "Unable to send parent invite"),
+      message: extractGraphQLErrorMessage(
+        error,
+        "Unable to send parent invite",
+      ),
     });
   } finally {
     inlineParentInviteLoading.value = false;
@@ -1446,22 +1487,41 @@ const handleAdd = async () => {
       //   }
       // });
     } else if (source.value === "students") {
-      // Create student logic
-      console.log("Creating student...");
-      // Example: const result = await apolloClient.mutate({
-      //   mutation: createStudent,
-      //   variables: {
-      //     input: {
-      //       name: name.value,
-      //       surname: surname.value,
-      //       email: email.value,
-      //       phone: phone.value,
-      //       classId: selectedClass.value,
-      //       parentId: parentId.value,
-      //       password: password.value
-      //     }
-      //   }
-      // });
+      const resolvedClassId = getClassIdByName(selectedClass.value);
+      if (!resolvedClassId) {
+        notificationStore.addNotification({
+          type: "error",
+          message: "Please select a valid class",
+        });
+        return;
+      }
+
+      const { data } = await apolloClient.mutate({
+        mutation: adminCreateStudent,
+        variables: {
+          input: {
+            username: username.value.trim(),
+            name: name.value.trim(),
+            surname: surname.value.trim(),
+            email: email.value.trim(),
+            phone: phone.value.trim(),
+            password: password.value,
+            parentId: parentId.value,
+            classId: resolvedClassId,
+          },
+        },
+      });
+
+      studentStore.allStudents = [];
+      await studentStore.fetchStudents();
+
+      const createdStudent = data?.adminCreateStudent;
+      notificationStore.addNotification({
+        type: "success",
+        message: createdStudent?.studentId
+          ? `Student created successfully. Username: ${createdStudent.username}, Student ID: ${createdStudent.studentId}`
+          : `Student created successfully. Username: ${createdStudent?.username || username.value.trim()}`,
+      });
     } else if (source.value === "parents") {
       // Create parent logic
       console.log("Creating parent...");
