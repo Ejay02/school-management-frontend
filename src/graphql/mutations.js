@@ -343,10 +343,7 @@ export const updateStudentProfile = gql`
 `;
 
 export const adminUpdateStudent = gql`
-  mutation AdminUpdateStudent(
-    $studentId: String!
-    $input: UpdateStudentAdminInput!
-  ) {
+  mutation AdminUpdateStudent($studentId: String!, $input: UpdateStudentAdminInput!) {
     adminUpdateStudent(studentId: $studentId, input: $input) {
       id
       studentId
