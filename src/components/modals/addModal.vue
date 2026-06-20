@@ -303,25 +303,36 @@
                   placeholder="Search parent by name, email, phone, or username"
                   class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
                 />
-                <select
-                  v-model="parentId"
-                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+                <div
+                  class="max-h-40 overflow-y-auto rounded-md border border-gray-200 bg-white"
                 >
-                  <option value="" disabled>
-                    {{
-                      parentsLoading
-                        ? "Loading parents..."
-                        : "Select a parent account"
-                    }}
-                  </option>
-                  <option
+                  <button
                     v-for="parent in filteredParents"
                     :key="parent.id"
-                    :value="parent.id"
+                    type="button"
+                    @click="selectParent(parent.id)"
+                    class="flex w-full items-start justify-between gap-2 border-b border-gray-100 px-3 py-2 text-left text-sm transition-colors hover:bg-indigo-50"
+                    :class="
+                      parentId === parent.id
+                        ? 'bg-indigo-50 text-indigo-700'
+                        : ''
+                    "
                   >
-                    {{ parent.label }}
-                  </option>
-                </select>
+                    <span class="truncate">{{ parent.label }}</span>
+                    <span
+                      v-if="parentId === parent.id"
+                      class="shrink-0 text-xs font-medium"
+                    >
+                      Selected
+                    </span>
+                  </button>
+                  <div
+                    v-if="!parentsLoading && !filteredParents.length"
+                    class="px-3 py-2 text-sm text-gray-500"
+                  >
+                    No parent results yet.
+                  </div>
+                </div>
                 <p
                   v-if="
                     !parentsLoading &&
@@ -332,6 +343,14 @@
                 >
                   No parent matched that search.
                 </p>
+                <button
+                  v-if="parentId"
+                  type="button"
+                  @click="clearSelectedParent"
+                  class="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                >
+                  Clear selected parent
+                </button>
                 <p v-if="selectedParentOption" class="text-xs text-gray-500">
                   Linking to {{ selectedParentOption.label }}
                 </p>
@@ -1323,6 +1342,14 @@ const getClassIdByName = (className) => {
   return classItem ? classItem.id : null;
 };
 
+const selectParent = (id) => {
+  parentId.value = id;
+};
+
+const clearSelectedParent = () => {
+  parentId.value = "";
+};
+
 const handleCancel = () => {
   if (isLoading.value) return;
   modalStore.addModal = false;
@@ -1672,8 +1699,6 @@ const handleAdd = async () => {
 };
 
 const fetchParents = async () => {
-  if (availableParents.value.length) return;
-
   parentsLoading.value = true;
   try {
     const { data } = await apolloClient.query({
