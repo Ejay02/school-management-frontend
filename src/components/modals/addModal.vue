@@ -391,6 +391,15 @@
               student once they accept.
             </p>
             <div class="mt-3 flex gap-2">
+              <button
+                type="button"
+                @click="openParentCreationFlow"
+                class="rounded-md border border-indigo-200 bg-white px-3 py-2 text-sm font-medium text-indigo-700 transition-colors hover:bg-indigo-50"
+              >
+                Add Parent
+              </button>
+            </div>
+            <div class="mt-3 flex gap-2">
               <div class="w-1/2">
                 <label
                   for="inlineParentName"
@@ -1126,7 +1135,7 @@ const studentStore = useStudentStore();
 
 const userStore = useUserStore();
 
-const isModalVisible = ref(modalStore.editModal);
+const isModalVisible = ref(modalStore.addModal);
 
 const capacity = ref("");
 
@@ -1348,6 +1357,27 @@ const selectParent = (id) => {
 
 const clearSelectedParent = () => {
   parentId.value = "";
+};
+
+const openParentCreationFlow = () => {
+  const trimmedSearch = parentSearch.value.trim();
+  const trimmedEmail = inlineParentEmail.value.trim();
+  const trimmedName = inlineParentName.value.trim();
+
+  source.value = "parents";
+  modalStore.source = "parents";
+  name.value = trimmedName || trimmedSearch;
+  surname.value = "";
+  email.value = trimmedEmail;
+  phone.value = "";
+  address.value = "";
+};
+
+const resetStudentParentSearchState = () => {
+  parentSearch.value = "";
+  parentId.value = "";
+  inlineParentName.value = "";
+  inlineParentEmail.value = "";
 };
 
 const handleCancel = () => {
@@ -1723,6 +1753,10 @@ watch(
   () => modalStore.addModal,
   (newVal) => {
     isModalVisible.value = newVal;
+    if (newVal && modalStore.source === "students") {
+      resetStudentParentSearchState();
+      fetchParents();
+    }
   },
   { immediate: true },
 );
@@ -1738,14 +1772,12 @@ watch(
   () => source.value,
   async (nextSource) => {
     if (nextSource === "students") {
+      resetStudentParentSearchState();
       await fetchParents();
       return;
     }
 
-    parentSearch.value = "";
-    parentId.value = "";
-    inlineParentName.value = "";
-    inlineParentEmail.value = "";
+    resetStudentParentSearchState();
   },
 );
 
