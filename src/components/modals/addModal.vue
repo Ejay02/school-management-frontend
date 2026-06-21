@@ -1576,11 +1576,12 @@ const handleAdd = async () => {
       await studentStore.fetchStudents();
 
       const createdStudent = data?.adminCreateStudent;
+      const parentEmail = createdStudent?.parent?.email?.trim();
       notificationStore.addNotification({
         type: "success",
         message: createdStudent?.studentId
-          ? `Student created successfully. Username: ${createdStudent.username}, Student ID: ${createdStudent.studentId}`
-          : `Student created successfully. Username: ${createdStudent?.username || username.value.trim()}`,
+          ? `Student created successfully. Username: ${createdStudent.username}, Student ID: ${createdStudent.studentId}${parentEmail ? ". Parent notification sent." : ""}`
+          : `Student created successfully. Username: ${createdStudent?.username || username.value.trim()}${parentEmail ? ". Parent notification sent." : ""}`,
       });
     } else if (source.value === "parents") {
       // Create parent logic
