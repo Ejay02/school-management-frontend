@@ -169,17 +169,16 @@
               >
               <select
                 v-model="selectedClass"
-                @change="handleClassChange"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer max-h-40 overflow-y-auto"
               >
                 <option value="" selected>No class</option>
                 <option
-                  v-for="(name, index) in classes"
-                  :key="index"
-                  :value="name"
+                  v-for="className in classOptions"
+                  :key="className"
+                  :value="className"
                   class="cursor-pointer"
                 >
-                  {{ name }}
+                  {{ className }}
                 </option>
               </select>
             </div>
@@ -275,17 +274,16 @@
               >
               <select
                 v-model="selectedClass"
-                @change="handleClassChange"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
               >
                 <option value="" selected>No class</option>
                 <option
-                  v-for="(name, index) in classes"
-                  :key="index"
-                  :value="name"
+                  v-for="className in classOptions"
+                  :key="className"
+                  :value="className"
                   class="cursor-pointer"
                 >
-                  {{ name }}
+                  {{ className }}
                 </option>
               </select>
             </div>
