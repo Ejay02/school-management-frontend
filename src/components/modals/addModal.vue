@@ -304,6 +304,7 @@
                   class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
                 />
                 <div
+                  v-if="shouldShowParentResults"
                   class="max-h-40 overflow-y-auto rounded-md border border-gray-200 bg-white"
                 >
                   <button
@@ -326,12 +327,6 @@
                       Selected
                     </span>
                   </button>
-                  <div
-                    v-if="!parentsLoading && !filteredParents.length"
-                    class="px-3 py-2 text-sm text-gray-500"
-                  >
-                    No parent results yet.
-                  </div>
                 </div>
                 <p
                   v-if="
@@ -1316,7 +1311,7 @@ const filteredParents = computed(() => {
   const parents = availableParents.value || [];
 
   if (!query) {
-    return parents.slice(0, 50);
+    return [];
   }
 
   return parents
@@ -1339,6 +1334,15 @@ const shouldShowInviteParentAction = computed(() => {
   );
 });
 
+const shouldShowParentResults = computed(() => {
+  return (
+    source.value === "students" &&
+    !parentsLoading.value &&
+    parentSearch.value.trim() &&
+    filteredParents.value.length > 0
+  );
+});
+
 const canSendInlineParentInvite = computed(() => {
   return (
     inlineParentName.value.trim() &&
@@ -1357,6 +1361,7 @@ const selectParent = (id) => {
 
 const clearSelectedParent = () => {
   parentId.value = "";
+  parentSearch.value = "";
 };
 
 const openParentCreationFlow = () => {
