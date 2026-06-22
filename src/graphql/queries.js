@@ -35,6 +35,18 @@ export const validateInvitationTokenQuery = gql`
   }
 `;
 
+export const validatePasswordSetupTokenQuery = gql`
+  query ValidatePasswordSetupToken($token: String!) {
+    validatePasswordSetupToken(token: $token) {
+      role
+      username
+      name
+      surname
+      expiresAt
+    }
+  }
+`;
+
 export const invitationsQuery = gql`
   query Invitations(
     $params: PaginationInput

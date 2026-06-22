@@ -446,12 +446,18 @@
           <label
             for="password"
             class="block text-sm font-medium text-gray-700 mb-1"
-            >Password</label
+            >Student password (optional)</label
           >
           <input
             v-model="password"
+            type="password"
+            placeholder="Leave blank to send a setup link"
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
           />
+          <p class="mt-1 text-xs text-gray-500">
+            If left blank, the linked parent will receive a secure setup link to
+            set the password.
+          </p>
         </template>
 
         <!-- parent list -->
@@ -1397,6 +1403,7 @@ const isFormValid = computed(() => {
   } else if (source.value === "teachers") {
     return name.value && surname.value && phone.value;
   } else if (source.value === "students") {
+    const passwordOk = !password.value || password.value.length >= 8;
     return (
       name.value &&
       surname.value &&
@@ -1405,7 +1412,7 @@ const isFormValid = computed(() => {
       phone.value &&
       selectedClass.value &&
       parentId.value &&
-      password.value
+      passwordOk
     );
   } else if (source.value === "parents") {
     return (
@@ -1565,7 +1572,9 @@ const handleAdd = async () => {
             surname: surname.value.trim(),
             email: email.value.trim(),
             phone: phone.value.trim(),
-            password: password.value,
+            ...(password.value.trim().length
+              ? { password: password.value }
+              : {}),
             parentId: parentId.value,
             classId: resolvedClassId,
           },
@@ -1580,8 +1589,8 @@ const handleAdd = async () => {
       notificationStore.addNotification({
         type: "success",
         message: createdStudent?.studentId
-          ? `Student created successfully. Username: ${createdStudent.username}, Student ID: ${createdStudent.studentId}${parentEmail ? ". Parent notification sent." : ""}`
-          : `Student created successfully. Username: ${createdStudent?.username || username.value.trim()}${parentEmail ? ". Parent notification sent." : ""}`,
+          ? `Student created successfully. Username: ${createdStudent.username}, Student ID: ${createdStudent.studentId}${parentEmail && !password.value.trim().length ? ". Setup link sent to parent." : ""}`
+          : `Student created successfully. Username: ${createdStudent?.username || username.value.trim()}${parentEmail && !password.value.trim().length ? ". Setup link sent to parent." : ""}`,
       });
     } else if (source.value === "parents") {
       // Create parent logic

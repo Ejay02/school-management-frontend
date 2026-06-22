@@ -239,6 +239,12 @@ export const resetPasswordMutation = gql`
   }
 `;
 
+export const completePasswordSetupMutation = gql`
+  mutation CompletePasswordSetup($input: CompletePasswordSetupInput!) {
+    completePasswordSetup(input: $input)
+  }
+`;
+
 export const assignAdminRole = gql`
   mutation assignAdminRole($role: String!, $targetId: String!) {
     assignAdminRole(role: $role, targetId: $targetId) {
