@@ -46,6 +46,9 @@ export const useUserStore = defineStore("user", () => {
   const requiresProfileCompletion = ref(
     localStorage.getItem(PROFILE_COMPLETION_STORAGE_KEY) === "true",
   );
+  const requiresPasswordChange = ref(
+    localStorage.getItem("PASSWORD_CHANGE_REQUIRED") === "true",
+  );
 
   const currentRole = ref(userInfo.value.role.toLowerCase() || "");
   const schoolInfo = ref({ schoolName: "", schoolLogo: "" });
@@ -71,6 +74,17 @@ export const useUserStore = defineStore("user", () => {
     }
 
     localStorage.removeItem(PROFILE_COMPLETION_STORAGE_KEY);
+  };
+
+  const setPasswordChangeRequired = (required) => {
+    requiresPasswordChange.value = required;
+
+    if (required) {
+      localStorage.setItem("PASSWORD_CHANGE_REQUIRED", "true");
+      return;
+    }
+
+    localStorage.removeItem("PASSWORD_CHANGE_REQUIRED");
   };
 
   const syncProfileCompletionState = (userData = userInfo.value) => {
@@ -115,6 +129,7 @@ export const useUserStore = defineStore("user", () => {
 
     // Persist to localStorage
     localStorage.setItem("userInfo", JSON.stringify(userData));
+    setPasswordChangeRequired(Boolean(user.passwordChangeRequired));
     syncProfileCompletionState(userData);
   };
 
@@ -229,6 +244,7 @@ export const useUserStore = defineStore("user", () => {
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("bannerDismissed");
     setProfileCompletionRequired(false);
+    setPasswordChangeRequired(false);
   };
 
   // Updated to handle super_admin same as admin
@@ -382,6 +398,8 @@ export const useUserStore = defineStore("user", () => {
     totalCount,
     requiresProfileCompletion,
     setProfileCompletionRequired,
+    requiresPasswordChange,
+    setPasswordChangeRequired,
     userInfo,
     hasAccess,
     currentRole,

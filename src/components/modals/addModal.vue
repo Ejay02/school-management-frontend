@@ -442,8 +442,9 @@
           </div>
 
           <p class="text-xs text-gray-500">
-            Student password will be set via a secure setup link emailed to the
-            selected parent.
+            A temporary password is generated automatically and shown after you
+            create the student. The student will be forced to change it on first
+            login.
           </p>
         </template>
 
@@ -1564,13 +1565,15 @@ const handleAdd = async () => {
       studentStore.allStudents = [];
       await studentStore.fetchStudents();
 
-      const createdStudent = data?.adminCreateStudent;
+      const createdPayload = data?.adminCreateStudent;
+      const createdStudent = createdPayload?.student;
       const parentEmail = createdStudent?.parent?.email?.trim();
+      const tempPassword = createdPayload?.temporaryPassword;
       notificationStore.addNotification({
         type: "success",
         message: createdStudent?.studentId
-          ? `Student created successfully. Username: ${createdStudent.username}, Student ID: ${createdStudent.studentId}${parentEmail ? ". Setup link sent to parent." : ""}`
-          : `Student created successfully. Username: ${createdStudent?.username || username.value.trim()}${parentEmail ? ". Setup link sent to parent." : ""}`,
+          ? `Student created successfully. Username: ${createdStudent.username}, Student ID: ${createdStudent.studentId}${tempPassword ? `. Temporary password: ${tempPassword}` : ""}${parentEmail ? ". Parent notified." : ""}`
+          : `Student created successfully. Username: ${createdStudent?.username || username.value.trim()}${tempPassword ? `. Temporary password: ${tempPassword}` : ""}${parentEmail ? ". Parent notified." : ""}`,
       });
     } else if (source.value === "parents") {
       // Create parent logic

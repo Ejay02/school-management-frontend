@@ -6,6 +6,7 @@ import Login from "../views/auth/login.vue";
 import Signup from "../views/auth/signup.vue";
 import AcceptInvite from "../views/auth/acceptInvite.vue";
 import SetupStudentPassword from "../views/auth/setupStudentPassword.vue";
+import ForcePasswordChange from "../views/auth/forcePasswordChange.vue";
 import Home from "../views/home.vue";
 import AdminLayout from "../views/layout/adminLayout.vue";
 import Dashboard from "../views/layout/dashboard.vue";
@@ -84,6 +85,12 @@ const routes = [
     path: "/setup-student-password",
     name: "SetupStudentPassword",
     component: SetupStudentPassword,
+  },
+  {
+    path: "/force-password-change",
+    name: "ForcePasswordChange",
+    component: ForcePasswordChange,
+    meta: { requiresAuth: true, role: "student" },
   },
   {
     path: "/about",
@@ -454,6 +461,16 @@ router.beforeEach((to, from, next) => {
 
   const isProfileCompletionRoute =
     to.path === "/settings/profile" || to.path === "/settings";
+
+  const isPasswordChangeRoute = to.path === "/force-password-change";
+
+  if (
+    isAuthenticated &&
+    userStore.requiresPasswordChange &&
+    !isPasswordChangeRoute
+  ) {
+    return next("/force-password-change");
+  }
 
   if (
     isAuthenticated &&

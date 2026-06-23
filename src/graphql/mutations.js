@@ -199,6 +199,7 @@ export const loginMutation = gql`
       teacherId
       studentId
       institutionalEmail
+      passwordChangeRequired
       role
       email
       username
@@ -242,6 +243,12 @@ export const resetPasswordMutation = gql`
 export const completePasswordSetupMutation = gql`
   mutation CompletePasswordSetup($input: CompletePasswordSetupInput!) {
     completePasswordSetup(input: $input)
+  }
+`;
+
+export const changePasswordMutation = gql`
+  mutation ChangePassword($input: ChangePasswordInput!) {
+    changePassword(input: $input)
   }
 `;
 
@@ -349,7 +356,10 @@ export const updateStudentProfile = gql`
 `;
 
 export const adminUpdateStudent = gql`
-  mutation AdminUpdateStudent($studentId: String!, $input: UpdateStudentAdminInput!) {
+  mutation AdminUpdateStudent(
+    $studentId: String!
+    $input: UpdateStudentAdminInput!
+  ) {
     adminUpdateStudent(studentId: $studentId, input: $input) {
       id
       studentId
@@ -377,26 +387,29 @@ export const adminUpdateStudent = gql`
 export const adminCreateStudent = gql`
   mutation AdminCreateStudent($input: CreateStudentAdminInput!) {
     adminCreateStudent(input: $input) {
-      id
-      studentId
-      username
-      name
-      surname
-      email
-      phone
-      address
-      parentId
-      classId
-      parent {
+      temporaryPassword
+      student {
         id
+        studentId
+        username
         name
         surname
         email
         phone
-      }
-      class {
-        id
-        name
+        address
+        parentId
+        classId
+        parent {
+          id
+          name
+          surname
+          email
+          phone
+        }
+        class {
+          id
+          name
+        }
       }
     }
   }

@@ -201,6 +201,12 @@ const login = async () => {
 
       updateToken(userData.token, userData.refreshToken);
 
+      if (userData.passwordChangeRequired) {
+        userStore.setPasswordChangeRequired(true);
+        await router.push("/force-password-change");
+        return;
+      }
+
       const dashboardPath =
         role === "super_admin" ? "/dashboard/admin" : `/dashboard/${role}`;
       await router.push(dashboardPath);
