@@ -1568,12 +1568,12 @@ const handleAdd = async () => {
       const createdPayload = data?.adminCreateStudent;
       const createdStudent = createdPayload?.student;
       const parentEmail = createdStudent?.parent?.email?.trim();
-      const tempPassword = createdPayload?.temporaryPassword;
+      const studentEmail = createdStudent?.email?.trim();
       notificationStore.addNotification({
         type: "success",
         message: createdStudent?.studentId
-          ? `Student created successfully. Username: ${createdStudent.username}, Student ID: ${createdStudent.studentId}${tempPassword ? `. Temporary password: ${tempPassword}` : ""}${parentEmail ? ". Parent notified." : ""}`
-          : `Student created successfully. Username: ${createdStudent?.username || username.value.trim()}${tempPassword ? `. Temporary password: ${tempPassword}` : ""}${parentEmail ? ". Parent notified." : ""}`,
+          ? `Student created successfully. Username: ${createdStudent.username}, Student ID: ${createdStudent.studentId}${parentEmail || studentEmail ? ". Credentials emailed." : ""}`
+          : `Student created successfully. Username: ${createdStudent?.username || username.value.trim()}${parentEmail || studentEmail ? ". Credentials emailed." : ""}`,
       });
     } else if (source.value === "parents") {
       // Create parent logic
