@@ -63,6 +63,16 @@
 
         <!-- teacher list -->
         <template v-else-if="source === 'teachers'">
+          <div class="rounded-md border border-yellow-100 bg-yellow-50 p-4">
+            <p class="text-sm font-medium text-yellow-800">
+              Teachers are added via invite
+            </p>
+            <p class="mt-1 text-sm text-gray-600">
+              Use the invite flow from Admin Settings / Team (or sign in as an
+              Admin / Super Admin).
+            </p>
+          </div>
+
           <!-- Name and Email row -->
           <div class="flex gap-2">
             <div class="w-1/2">
@@ -1387,7 +1397,7 @@ const isFormValid = computed(() => {
       name.value.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())
     );
   } else if (source.value === "teachers") {
-    return false;
+    return true;
   } else if (source.value === "students") {
     return (
       name.value &&
