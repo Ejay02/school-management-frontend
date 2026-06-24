@@ -1387,7 +1387,7 @@ const isFormValid = computed(() => {
       name.value.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())
     );
   } else if (source.value === "teachers") {
-    return name.value && surname.value && phone.value;
+    return false;
   } else if (source.value === "students") {
     return (
       name.value &&
@@ -1520,23 +1520,11 @@ const handleAdd = async () => {
         message: `${inviteRoleLabel.value} invite sent successfully!`,
       });
     } else if (source.value === "teachers") {
-      // Create teacher logic
-      console.log("Creating teacher...");
-      // Example: const result = await apolloClient.mutate({
-      //   mutation: createTeacher,
-      //   variables: {
-      //     input: {
-      //       name: name.value,
-      //       surname: surname.value,
-      //       username: username.value,
-      //       bloodGroup: bloodGroup.value,
-      //       address: address.value,
-      //       subjects: subjects.value,
-      //       classId: selectedClass.value,
-      //       phone: phone.value
-      //     }
-      //   }
-      // });
+      notificationStore.addNotification({
+        type: "error",
+        message: "Teachers must be added via an invite.",
+      });
+      return;
     } else if (source.value === "students") {
       const resolvedClassId = getClassIdByName(selectedClass.value);
       if (!resolvedClassId) {
