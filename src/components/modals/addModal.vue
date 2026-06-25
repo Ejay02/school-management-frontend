@@ -63,146 +63,41 @@
 
         <!-- teacher list -->
         <template v-else-if="source === 'teachers'">
-          <div class="rounded-md border border-yellow-100 bg-yellow-50 p-4">
-            <p class="text-sm font-medium text-yellow-800">
-              Teachers are added via invite
-            </p>
+          <div class="rounded-md border border-indigo-100 bg-indigo-50 p-4">
+            <p class="text-sm font-medium text-indigo-700">Invite Teacher</p>
             <p class="mt-1 text-sm text-gray-600">
-              Use the invite flow from Admin Settings / Team (or sign in as an
-              Admin / Super Admin).
+              We will send a secure invite link by email so the teacher can set
+              up their own account.
+            </p>
+            <p
+              v-if="!canSendTeacherInvite"
+              class="mt-2 text-sm text-yellow-800"
+            >
+              Only Admin and Super Admin can invite teachers.
             </p>
           </div>
 
-          <!-- Name and Email row -->
-          <div class="flex gap-2">
-            <div class="w-1/2">
-              <label
-                for="name"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Name <span class="text-red-500">*</span></label
-              >
-              <input
-                v-model="name"
-                placeholder="John"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-            <div class="w-1/2">
-              <label
-                for="surname"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Surname<span class="text-red-500">*</span></label
-              >
-              <input
-                v-model="surname"
-                placeholder="Smith"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-          </div>
-
-          <!--  -->
-          <div class="flex gap-2">
-            <div class="w-1/2">
-              <label
-                for="username"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Username <span class="text-red-500">*</span></label
-              >
-              <input
-                v-model="username"
-                placeholder="Smith"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-            <div class="w-1/2">
-              <label
-                for="bloodGroup"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Blood Group</label
-              >
-              <input
-                type="text"
-                v-model="bloodGroup"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-          </div>
-
-          <!-- Image and Address row -->
-          <div class="flex gap-2">
-            <div class="w-1/2">
-              <label
-                for="image"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Image</label
-              >
-              <input
-                type="file"
-                accept=".jpg, .png, .jpeg"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-            <div class="w-1/2">
-              <label
-                for="address"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Address</label
-              >
-              <input
-                v-model="address"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-          </div>
-
-          <!-- Subjects field -->
           <div>
-            <label
-              for="subjects"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Subjects</label
-            >
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Name <span class="text-red-500">*</span>
+            </label>
             <input
-              v-model="subjects"
+              v-model="name"
+              placeholder="Teacher name"
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
 
-          <!-- Class and Phone row -->
-          <div class="flex gap-2">
-            <div class="w-1/2">
-              <label
-                for="class"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Select a class</label
-              >
-              <select
-                v-model="selectedClass"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer max-h-40 overflow-y-auto"
-              >
-                <option value="" selected>No class</option>
-                <option
-                  v-for="className in classOptions"
-                  :key="className"
-                  :value="className"
-                  class="cursor-pointer"
-                >
-                  {{ className }}
-                </option>
-              </select>
-            </div>
-            <div class="w-1/2">
-              <label
-                for="phone"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Phone</label
-              >
-              <input
-                v-model="phone"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Email <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="email"
+              type="email"
+              placeholder="name@example.com"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+            />
           </div>
         </template>
 
@@ -1190,18 +1085,25 @@ const canInviteUsers = computed(() => {
     ["teachers", "parents"].includes(source.value)
   );
 });
+const canSendTeacherInvite = computed(() => {
+  return (
+    ["admin", "super_admin"].includes(role.value) && source.value === "teachers"
+  );
+});
 const inviteRole = computed(() =>
   source.value === "teachers" ? "TEACHER" : "PARENT",
 );
 const inviteRoleLabel = computed(() =>
   inviteRole.value === "TEACHER" ? "Teacher" : "Parent",
 );
-const submitButtonLabel = computed(() =>
-  canInviteUsers.value ? "Send Invite" : "Add",
-);
-const submitLoadingLabel = computed(() =>
-  canInviteUsers.value ? "Sending..." : "Adding...",
-);
+const submitButtonLabel = computed(() => {
+  if (source.value === "teachers") return "Send Invite";
+  return canInviteUsers.value ? "Send Invite" : "Add";
+});
+const submitLoadingLabel = computed(() => {
+  if (source.value === "teachers") return "Sending...";
+  return canInviteUsers.value ? "Sending..." : "Adding...";
+});
 
 const haveAccess = computed(() => {
   const allowedRoles = ["admin", "super_admin", "teacher"];
@@ -1397,7 +1299,11 @@ const isFormValid = computed(() => {
       name.value.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())
     );
   } else if (source.value === "teachers") {
-    return true;
+    return (
+      canSendTeacherInvite.value &&
+      name.value.trim() &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())
+    );
   } else if (source.value === "students") {
     return (
       name.value &&
@@ -1513,7 +1419,7 @@ const handleAdd = async () => {
   try {
     isLoading.value = true;
 
-    if (canInviteUsers.value) {
+    if (canInviteUsers.value || canSendTeacherInvite.value) {
       await apolloClient.mutate({
         mutation: createInvitationMutation,
         variables: {
@@ -1532,7 +1438,7 @@ const handleAdd = async () => {
     } else if (source.value === "teachers") {
       notificationStore.addNotification({
         type: "error",
-        message: "Teachers must be added via an invite.",
+        message: "You don't have permission to invite teachers.",
       });
       return;
     } else if (source.value === "students") {
