@@ -355,73 +355,39 @@
 
         <!-- parent list -->
         <template v-else-if="source === 'parents'">
-          <div class="flex gap-2">
-            <div class="w-1/2">
-              <label
-                for="name"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Name <span class="text-red-500">*</span></label
-              >
-              <input
-                v-model="name"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
-            <div class="w-1/2">
-              <label
-                for="surname"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Surname <span class="text-red-500">*</span></label
-              >
-              <input
-                v-model="surname"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-              />
-            </div>
+          <div class="rounded-md border border-indigo-100 bg-indigo-50 p-4">
+            <p class="text-sm font-medium text-indigo-700">Invite Parent</p>
+            <p class="mt-1 text-sm text-gray-600">
+              We will send a secure invite link by email so the parent can set
+              up their own account.
+            </p>
+            <p v-if="!canSendParentInvite" class="mt-2 text-sm text-yellow-800">
+              Only Admin and Super Admin can invite parents.
+            </p>
           </div>
+
           <div>
-            <label
-              for="email"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Email <span class="text-red-500">*</span></label
-            >
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Name <span class="text-red-500">*</span>
+            </label>
             <input
-              v-model="email"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </div>
-          <div>
-            <label
-              for="studentName"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Student Name</label
-            >
-            <input
-              v-model="student"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-            />
-          </div>
-          <div>
-            <label
-              for="phone"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Phone</label
-            >
-            <input
-              v-model="phone"
+              v-model="name"
+              placeholder="Parent name"
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
             />
           </div>
 
-          <label
-            for="address"
-            class="block text-sm font-medium text-gray-700 mb-1"
-            >Address</label
-          >
-          <input
-            v-model="address"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
-          />
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Email <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="email"
+              type="email"
+              placeholder="parent@example.com"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm cursor-pointer"
+            />
+          </div>
         </template>
 
         <!-- class list -->
@@ -1090,6 +1056,11 @@ const canSendTeacherInvite = computed(() => {
     ["admin", "super_admin"].includes(role.value) && source.value === "teachers"
   );
 });
+const canSendParentInvite = computed(() => {
+  return (
+    ["admin", "super_admin"].includes(role.value) && source.value === "parents"
+  );
+});
 const inviteRole = computed(() =>
   source.value === "teachers" ? "TEACHER" : "PARENT",
 );
@@ -1097,11 +1068,11 @@ const inviteRoleLabel = computed(() =>
   inviteRole.value === "TEACHER" ? "Teacher" : "Parent",
 );
 const submitButtonLabel = computed(() => {
-  if (source.value === "teachers") return "Send Invite";
+  if (["teachers", "parents"].includes(source.value)) return "Send Invite";
   return canInviteUsers.value ? "Send Invite" : "Add";
 });
 const submitLoadingLabel = computed(() => {
-  if (source.value === "teachers") return "Sending...";
+  if (["teachers", "parents"].includes(source.value)) return "Sending...";
   return canInviteUsers.value ? "Sending..." : "Adding...";
 });
 
@@ -1316,7 +1287,9 @@ const isFormValid = computed(() => {
     );
   } else if (source.value === "parents") {
     return (
-      name.value && email.value && student.value && phone.value && address.value
+      canSendParentInvite.value &&
+      name.value.trim() &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())
     );
   } else if (source.value === "subjects") {
     return name.value && selectedTeacher.value && selectedClass.value;
@@ -1419,7 +1392,11 @@ const handleAdd = async () => {
   try {
     isLoading.value = true;
 
-    if (canInviteUsers.value || canSendTeacherInvite.value) {
+    if (
+      canInviteUsers.value ||
+      canSendTeacherInvite.value ||
+      canSendParentInvite.value
+    ) {
       await apolloClient.mutate({
         mutation: createInvitationMutation,
         variables: {
@@ -1480,20 +1457,11 @@ const handleAdd = async () => {
           : `Student created successfully. Username: ${createdStudent?.username || username.value.trim()}${parentEmail || studentEmail ? ". Credentials emailed." : ""}`,
       });
     } else if (source.value === "parents") {
-      // Create parent logic
-      console.log("Creating parent...");
-      // Example: const result = await apolloClient.mutate({
-      //   mutation: createParent,
-      //   variables: {
-      //     input: {
-      //       name: name.value,
-      //       email: email.value,
-      //       student: student.value,
-      //       phone: phone.value,
-      //       address: address.value
-      //     }
-      //   }
-      // });
+      notificationStore.addNotification({
+        type: "error",
+        message: "You don't have permission to invite parents.",
+      });
+      return;
     } else if (source.value === "subjects") {
       await apolloClient.mutate({
         mutation: createSubject,
