@@ -1068,6 +1068,12 @@ export const deleteAssignment = gql`
   }
 `;
 
+export const deleteUser = gql`
+  mutation deleteUser($targetId: String!) {
+    deleteUser(targetId: $targetId)
+  }
+`;
+
 export const gradeSubmissionMutation = gql`
   mutation GradeSubmission($input: GradeSubmissionInput!) {
     gradeSubmission(input: $input) {
@@ -1145,6 +1151,15 @@ export const updateSubject = gql`
 export const deleteSubject = gql`
   mutation deleteSubject($subjectId: String!) {
     deleteSubject(subjectId: $subjectId) {
+      success
+      message
+    }
+  }
+`;
+
+export const deleteResult = gql`
+  mutation deleteResult($id: String!) {
+    deleteResult(id: $id) {
       success
       message
     }

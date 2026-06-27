@@ -114,7 +114,9 @@ import {
   deleteExam,
   deleteFeeStructure,
   deleteLesson,
+  deleteResult,
   deleteSubject,
+  deleteUser,
   globalAnnouncementDelete,
   personalAnnouncementDelete,
 } from "../../graphql/mutations";
@@ -122,7 +124,10 @@ import { useClassStore } from "../../store/classStore";
 import { useEventStore } from "../../store/eventStore";
 import { useLessonStore } from "../../store/lessonStore";
 import { useNotificationStore } from "../../store/notification";
+import { useParentStore } from "../../store/parentStore";
+import { useStudentStore } from "../../store/studentStore";
 import { useSubjectStore } from "../../store/subjectStore";
+import { useTeacherStore } from "../../store/teacherStore";
 
 import { useExamStore } from "../../store/examStore";
 import { useFeeStructureStore } from "../../store/feeStructureStore";
@@ -139,6 +144,9 @@ const subjectStore = useSubjectStore();
 const assignmentStore = useAssignmentStore();
 const feeStructureStore = useFeeStructureStore();
 const notificationStore = useNotificationStore();
+const teacherStore = useTeacherStore();
+const parentStore = useParentStore();
+const studentStore = useStudentStore();
 
 const router = useRouter();
 
@@ -182,11 +190,48 @@ const handleDelete = async () => {
     isLoading.value = true;
 
     if (source.value === "teacherList") {
-      console.log("hello from teachers");
+      await apolloClient.mutate({
+        mutation: deleteUser,
+        variables: {
+          targetId: modalStore.modalId,
+        },
+      });
+
+      await teacherStore.refreshAllTeachers();
+      notificationStore.addNotification({
+        type: "success",
+        message: "Teacher deleted successfully",
+      });
     } else if (source.value === "parentList") {
-      console.log("hello from parents");
+      await apolloClient.mutate({
+        mutation: deleteUser,
+        variables: {
+          targetId: modalStore.modalId,
+        },
+      });
+
+      parentStore.allParents = [];
+      parentStore.parents = [];
+      await parentStore.fetchParents({ page: 1, limit: 10 });
+      notificationStore.addNotification({
+        type: "success",
+        message: "Parent deleted successfully",
+      });
     } else if (source.value === "studentList") {
-      console.log("hello from students");
+      await apolloClient.mutate({
+        mutation: deleteUser,
+        variables: {
+          targetId: modalStore.modalId,
+        },
+      });
+
+      studentStore.allStudents = [];
+      studentStore.students = [];
+      await studentStore.fetchStudents({ page: 1, limit: 10 });
+      notificationStore.addNotification({
+        type: "success",
+        message: "Student deleted successfully",
+      });
     } else if (source.value === "classList") {
       await apolloClient.mutate({
         mutation: deleteClass,
@@ -254,7 +299,16 @@ const handleDelete = async () => {
         message: "Assignment deleted successfully",
       });
     } else if (source.value === "resultList") {
-      console.log("hello from results");
+      await apolloClient.mutate({
+        mutation: deleteResult,
+        variables: {
+          id: modalStore.modalId,
+        },
+      });
+      notificationStore.addNotification({
+        type: "success",
+        message: "Result deleted successfully",
+      });
     } else if (source.value === "eventList") {
       await apolloClient.mutate({
         mutation: deleteEvent,
