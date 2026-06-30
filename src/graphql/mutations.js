@@ -183,6 +183,10 @@ export const updateSetupStateMutation = gql`
       academicYearCurrent
       academicYearNext
       currentTerm
+      weeklyDigestEnabled
+      weeklyDigestDayOfWeek
+      weeklyDigestSendHour
+      weeklyDigestSendMinute
       createdAt
       updatedAt
     }
@@ -427,6 +431,16 @@ export const updateParentProfile = gql`
       dateOfBirth
       aboutMe
       phone
+      weeklyDigestOptOut
+    }
+  }
+`;
+
+export const updateWeeklyDigestPreference = gql`
+  mutation UpdateWeeklyDigestPreference($optOut: Boolean!) {
+    updateWeeklyDigestPreference(optOut: $optOut) {
+      id
+      weeklyDigestOptOut
     }
   }
 `;

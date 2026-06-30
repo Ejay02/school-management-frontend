@@ -120,6 +120,10 @@ export const getSetupStateQuery = gql`
       academicYearCurrent
       academicYearNext
       currentTerm
+      weeklyDigestEnabled
+      weeklyDigestDayOfWeek
+      weeklyDigestSendHour
+      weeklyDigestSendMinute
       createdAt
       updatedAt
     }
@@ -1308,6 +1312,7 @@ export const getUserById = gql`
         parentRole: role
         isActive
         deactivatedAt
+        weeklyDigestOptOut
         students {
           id
           classId

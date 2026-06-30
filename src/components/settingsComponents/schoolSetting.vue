@@ -197,6 +197,109 @@
         </div>
       </div>
 
+      <div class="space-y-6">
+        <h3 class="text-sm font-semibold text-gray-600">
+          Weekly Parent Digest
+        </h3>
+
+        <div class="rounded-lg border border-gray-200 bg-white p-4 space-y-4">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-sm font-medium text-gray-700">
+                Send weekly digest emails to parents
+              </p>
+              <p class="text-sm text-gray-500">
+                Parents receive one scannable summary email for all their
+                children.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              @click="
+                formData.weeklyDigestEnabled = !formData.weeklyDigestEnabled
+              "
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out"
+              :class="[
+                formData.weeklyDigestEnabled ? 'bg-indigo-500' : 'bg-gray-200',
+              ]"
+            >
+              <span
+                class="inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1"
+                :class="[
+                  formData.weeklyDigestEnabled
+                    ? 'translate-x-6'
+                    : 'translate-x-1',
+                ]"
+              />
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-500"
+                >Send Day</label
+              >
+              <select
+                v-model.number="formData.weeklyDigestDayOfWeek"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6 disabled:bg-gray-50 disabled:text-gray-400"
+                :disabled="!formData.weeklyDigestEnabled"
+              >
+                <option
+                  v-for="day in weeklyDigestDayOptions"
+                  :key="day.value"
+                  :value="day.value"
+                >
+                  {{ day.label }}
+                </option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-500"
+                >Send Hour</label
+              >
+              <select
+                v-model.number="formData.weeklyDigestSendHour"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6 disabled:bg-gray-50 disabled:text-gray-400"
+                :disabled="!formData.weeklyDigestEnabled"
+              >
+                <option
+                  v-for="hour in weeklyDigestHourOptions"
+                  :key="hour.value"
+                  :value="hour.value"
+                >
+                  {{ hour.label }}
+                </option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-500"
+                >Send Minute</label
+              >
+              <select
+                v-model.number="formData.weeklyDigestSendMinute"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6 disabled:bg-gray-50 disabled:text-gray-400"
+                :disabled="!formData.weeklyDigestEnabled"
+              >
+                <option
+                  v-for="minute in weeklyDigestMinuteOptions"
+                  :key="minute.value"
+                  :value="minute.value"
+                >
+                  {{ minute.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <p class="text-xs text-gray-500">
+            Digest timing uses the school timezone above.
+          </p>
+        </div>
+      </div>
+
       <div class="flex justify-end mt-4 border-t border-gray-200 pt-4">
         <button
           type="submit"
@@ -244,6 +347,10 @@ const formData = reactive({
   academicYearCurrent: "",
   academicYearNext: "",
   currentTerm: "",
+  weeklyDigestEnabled: true,
+  weeklyDigestDayOfWeek: 0,
+  weeklyDigestSendHour: 18,
+  weeklyDigestSendMinute: 0,
 });
 
 const academicYearDefaults = computed(() => {
@@ -275,6 +382,26 @@ const timezoneOptions = computed(() => {
   ];
 });
 
+const weeklyDigestDayOptions = [
+  { value: 0, label: "Sunday" },
+  { value: 1, label: "Monday" },
+  { value: 2, label: "Tuesday" },
+  { value: 3, label: "Wednesday" },
+  { value: 4, label: "Thursday" },
+  { value: 5, label: "Friday" },
+  { value: 6, label: "Saturday" },
+];
+
+const weeklyDigestHourOptions = Array.from({ length: 24 }, (_, hour) => ({
+  value: hour,
+  label: `${String(hour).padStart(2, "0")}:00`,
+}));
+
+const weeklyDigestMinuteOptions = [0, 10, 20, 30, 40, 50].map((minute) => ({
+  value: minute,
+  label: String(minute).padStart(2, "0"),
+}));
+
 const initialized = ref(false);
 
 watch(
@@ -295,6 +422,20 @@ watch(
     formData.academicYearCurrent = academicYearDefaults.value.current;
     formData.academicYearNext = academicYearDefaults.value.next;
     formData.currentTerm = state.currentTerm || "";
+    formData.weeklyDigestEnabled = state.weeklyDigestEnabled ?? true;
+    formData.weeklyDigestDayOfWeek = Number.isInteger(
+      state.weeklyDigestDayOfWeek,
+    )
+      ? state.weeklyDigestDayOfWeek
+      : 0;
+    formData.weeklyDigestSendHour = Number.isInteger(state.weeklyDigestSendHour)
+      ? state.weeklyDigestSendHour
+      : 18;
+    formData.weeklyDigestSendMinute = Number.isInteger(
+      state.weeklyDigestSendMinute,
+    )
+      ? state.weeklyDigestSendMinute
+      : 0;
     initialized.value = true;
   },
   { immediate: true },
@@ -336,6 +477,10 @@ const saveSchoolSettings = async () => {
         academicYearCurrent: academicYearDefaults.value.current,
         academicYearNext: academicYearDefaults.value.next,
         currentTerm: formData.currentTerm || null,
+        weeklyDigestEnabled: Boolean(formData.weeklyDigestEnabled),
+        weeklyDigestDayOfWeek: Number(formData.weeklyDigestDayOfWeek),
+        weeklyDigestSendHour: Number(formData.weeklyDigestSendHour),
+        weeklyDigestSendMinute: Number(formData.weeklyDigestSendMinute),
       },
     });
 

@@ -39,6 +39,7 @@ export const useUserStore = defineStore("user", () => {
           image: "",
           dateOfBirth: "",
           aboutMe: "",
+          weeklyDigestOptOut: false,
         };
   };
 
@@ -122,6 +123,7 @@ export const useUserStore = defineStore("user", () => {
       username: user.username,
       dateOfBirth: user.dateOfBirth,
       aboutMe: user.aboutMe,
+      weeklyDigestOptOut: Boolean(user.weeklyDigestOptOut),
     };
 
     userInfo.value = userData;
