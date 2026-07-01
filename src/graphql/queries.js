@@ -1214,6 +1214,26 @@ export const getAttendances = gql`
   }
 `;
 
+export const getAttendancesByClass = gql`
+  query getAttendancesByClass($classId: String!, $startDate: DateTime!, $endDate: DateTime!) {
+    getAttendancesByClass(classId: $classId, startDate: $startDate, endDate: $endDate) {
+      id
+      date
+      present
+      status
+      reason
+      reasonCode
+      note
+      studentId
+      student {
+        id
+        name
+        surname
+      }
+    }
+  }
+`;
+
 export const getEvents = gql`
   query getEvents($params: PaginationInput, $filter: EventFilter!) {
     getEvents(params: $params, filter: $filter) {

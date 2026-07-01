@@ -21,6 +21,14 @@
           </button>
 
           <button
+            v-if="!markAttendanceMode && canExportAttendance"
+            @click="toggleExportPanel"
+            class="px-3 py-1 bg-gray-50 text-gray-700 text-sm rounded hover:bg-gray-100 transition-colors border border-gray-300"
+          >
+            Export
+          </button>
+
+          <button
             v-if="markAttendanceMode"
             @click="toggleMarkAttendanceMode"
             class="px-3 py-1 bg-gray-50 text-gray-600 text-sm rounded hover:bg-gray-100 transition-colors border border-gray-300"
@@ -61,6 +69,116 @@
           <option value="present">Present</option>
           <option value="absent">Absent</option>
         </select>
+      </div>
+
+      <div
+        v-if="exportOpen"
+        class="mb-4 rounded-lg border border-gray-200 bg-white p-4"
+      >
+        <div
+          class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-3 w-full">
+            <div class="md:col-span-2">
+              <label class="block text-xs font-medium text-gray-500"
+                >Class</label
+              >
+              <select
+                v-model="exportClassId"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-700 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
+              >
+                <option value="">Select a class</option>
+                <option
+                  v-for="cls in exportClassOptions"
+                  :key="cls.id"
+                  :value="cls.id"
+                >
+                  {{ cls.name }}
+                </option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-500"
+                >Scope</label
+              >
+              <select
+                v-model="exportScope"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-700 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
+              >
+                <option value="term">Term</option>
+                <option value="custom">Custom range</option>
+              </select>
+            </div>
+
+            <div v-if="exportScope === 'term'">
+              <label class="block text-xs font-medium text-gray-500"
+                >Term</label
+              >
+              <select
+                v-model="exportTerm"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-700 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
+              >
+                <option value="FIRST">First</option>
+                <option value="SECOND">Second</option>
+                <option value="THIRD">Third</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-500"
+                >Format</label
+              >
+              <select
+                v-model="exportFormat"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-700 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
+              >
+                <option value="xlsx">Excel (.xlsx)</option>
+                <option value="csv">CSV (.csv)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-500"
+                >Start</label
+              >
+              <input
+                v-model="exportStartDate"
+                type="date"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-700 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-500">End</label>
+              <input
+                v-model="exportEndDate"
+                type="date"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-700 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple"
+              />
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <button
+              type="button"
+              @click="exportAttendanceSpreadsheet"
+              class="px-3 py-2 text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              :disabled="exporting"
+            >
+              <span v-if="!exporting">Download</span>
+              <span v-else>Preparing...</span>
+            </button>
+            <button
+              type="button"
+              @click="exportOpen = false"
+              class="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-300"
+              :disabled="exporting"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Table -->
@@ -777,6 +895,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useQuery } from "@vue/apollo-composable";
+import * as XLSX from "xlsx";
 import { useAttendanceStore } from "../../store/attendanceStore";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
@@ -786,7 +905,10 @@ import { useUserStore } from "../../store/userStore";
 import { formatDate } from "../../utils/date.holidays";
 import { apolloClient } from "../../../apollo-client";
 import { createAttendanceSessionBySubject } from "../../graphql/mutations";
-import { getSetupStateQuery } from "../../graphql/queries";
+import {
+  getAttendancesByClass,
+  getSetupStateQuery,
+} from "../../graphql/queries";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
@@ -823,9 +945,17 @@ const formatReasonCodeLabel = (code) => {
 };
 
 const userRole = computed(() => userStore.currentRole);
-const userHasAccess = computed(() => ["teacher"].includes(userRole.value));
+const userHasAccess = computed(() =>
+  ["teacher", "admin", "super_admin"].includes(String(userRole.value || "")),
+);
 const isTeacher = computed(
   () => String(userRole.value || "").toLowerCase() === "teacher",
+);
+
+const canExportAttendance = computed(() =>
+  ["teacher", "admin", "super_admin"].includes(
+    String(userRole.value || "").toLowerCase(),
+  ),
 );
 
 // Regular attendance view
@@ -834,6 +964,15 @@ const searchQuery = ref("");
 const filterStatus = ref("all");
 const currentPage = ref(1);
 const pageSize = 10;
+
+const exportOpen = ref(false);
+const exporting = ref(false);
+const exportClassId = ref("");
+const exportScope = ref("term");
+const exportTerm = ref("FIRST");
+const exportFormat = ref("xlsx");
+const exportStartDate = ref(new Date().toISOString().split("T")[0]);
+const exportEndDate = ref(new Date().toISOString().split("T")[0]);
 
 // Mark attendance mode
 const markAttendanceMode = ref(false);
@@ -878,6 +1017,8 @@ const accessibleClasses = computed(() => {
     });
   });
 });
+
+const exportClassOptions = computed(() => accessibleClasses.value || []);
 
 const showClassSelect = computed(
   () => !isTeacher.value || accessibleClasses.value.length > 1,
@@ -1447,6 +1588,241 @@ async function toggleMarkAttendanceMode() {
   }
 }
 
+function toggleExportPanel() {
+  if (!canExportAttendance.value) return;
+  exportOpen.value = !exportOpen.value;
+
+  if (exportOpen.value) {
+    if (!exportClassId.value) {
+      exportClassId.value =
+        selectedClass.value ||
+        (exportClassOptions.value.length === 1
+          ? exportClassOptions.value[0].id
+          : "");
+    }
+    applyExportTermDefaults();
+  }
+}
+
+function applyExportTermDefaults() {
+  if (exportScope.value !== "term") return;
+
+  const setup = setupResult.value?.getSetupState || {};
+  const yearCurrent = Number.parseInt(
+    String(setup.academicYearCurrent || ""),
+    10,
+  );
+  const yearNext = Number.parseInt(String(setup.academicYearNext || ""), 10);
+  if (!Number.isFinite(yearCurrent) || !Number.isFinite(yearNext)) return;
+
+  const toInput = (date) => new Date(date).toISOString().split("T")[0];
+
+  if (exportTerm.value === "FIRST") {
+    exportStartDate.value = toInput(new Date(yearCurrent, 8, 1));
+    exportEndDate.value = toInput(new Date(yearCurrent, 11, 31));
+  } else if (exportTerm.value === "SECOND") {
+    exportStartDate.value = toInput(new Date(yearNext, 0, 1));
+    exportEndDate.value = toInput(new Date(yearNext, 2, 31));
+  } else if (exportTerm.value === "THIRD") {
+    exportStartDate.value = toInput(new Date(yearNext, 3, 1));
+    exportEndDate.value = toInput(new Date(yearNext, 6, 31));
+  }
+}
+
+watch([exportScope, exportTerm, () => setupResult.value?.getSetupState], () => {
+  applyExportTermDefaults();
+});
+
+function listWeekdaysBetween(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  start.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
+
+  const dates = [];
+  for (
+    let d = new Date(start);
+    d.getTime() <= end.getTime();
+    d.setDate(d.getDate() + 1)
+  ) {
+    const day = d.getDay();
+    if (day >= 1 && day <= 5) {
+      dates.push(new Date(d));
+    }
+  }
+  return dates;
+}
+
+function getDateKey(date) {
+  return new Date(date).toISOString().split("T")[0];
+}
+
+function getStatusCode(status) {
+  const normalized = String(status || "")
+    .trim()
+    .toUpperCase();
+  if (normalized === "LATE") return "L";
+  if (normalized === "ABSENT" || normalized === "EXCUSED_ABSENT") return "A";
+  return "P";
+}
+
+function pickDailyCode(existingCode, nextStatus) {
+  const next = getStatusCode(nextStatus);
+  if (existingCode === "A" || next === "A") return "A";
+  if (existingCode === "L" || next === "L") return "L";
+  return "P";
+}
+
+async function exportAttendanceSpreadsheet() {
+  if (!exportClassId.value) {
+    notificationStore.addNotification({
+      type: "error",
+      message: "Select a class first.",
+    });
+    return;
+  }
+
+  const start = new Date(exportStartDate.value);
+  const end = new Date(exportEndDate.value);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    notificationStore.addNotification({
+      type: "error",
+      message: "Select a valid date range.",
+    });
+    return;
+  }
+
+  if (start.getTime() > end.getTime()) {
+    notificationStore.addNotification({
+      type: "error",
+      message: "Start date must be before end date.",
+    });
+    return;
+  }
+
+  const selectedClassObj = classStore.getClassById(exportClassId.value);
+  const className = selectedClassObj?.name || "class";
+  const studentsList = Array.isArray(selectedClassObj?.students)
+    ? [...selectedClassObj.students]
+    : [];
+
+  if (!studentsList.length) {
+    notificationStore.addNotification({
+      type: "error",
+      message: "No students found for the selected class.",
+    });
+    return;
+  }
+
+  exporting.value = true;
+  try {
+    const weekdays = listWeekdaysBetween(start, end);
+    const dateKeys = weekdays.map(getDateKey);
+
+    const { data } = await apolloClient.query({
+      query: getAttendancesByClass,
+      variables: {
+        classId: exportClassId.value,
+        startDate: start,
+        endDate: end,
+      },
+      fetchPolicy: "network-only",
+    });
+
+    const records = data?.getAttendancesByClass || [];
+    const daily = new Map();
+
+    for (const record of records) {
+      const studentId = record?.studentId;
+      if (!studentId) continue;
+      const dayKey = getDateKey(record?.date);
+      if (!dateKeys.includes(dayKey)) continue;
+      const key = `${studentId}:${dayKey}`;
+      const existing = daily.get(key);
+      daily.set(key, pickDailyCode(existing, record?.status));
+    }
+
+    studentsList.sort((a, b) => {
+      const an = `${a?.surname || ""} ${a?.name || ""}`.trim().toLowerCase();
+      const bn = `${b?.surname || ""} ${b?.name || ""}`.trim().toLowerCase();
+      return an.localeCompare(bn);
+    });
+
+    const header = [
+      "Student ID",
+      "Student Name",
+      ...dateKeys,
+      "Total Present",
+      "Total Absent",
+      "Attendance %",
+    ];
+
+    const aoa = [header];
+
+    for (const student of studentsList) {
+      const studentId = student.id;
+      const studentName =
+        `${student?.name || ""} ${student?.surname || ""}`.trim();
+
+      let totalPresent = 0;
+      let totalAbsent = 0;
+
+      const rowCells = dateKeys.map((dateKey) => {
+        const code = daily.get(`${studentId}:${dateKey}`) || "";
+        if (code === "A") totalAbsent += 1;
+        if (code === "P" || code === "L") totalPresent += 1;
+        return code;
+      });
+
+      const denominator = totalPresent + totalAbsent;
+      const percent = denominator
+        ? Math.round((totalPresent / denominator) * 100)
+        : 0;
+
+      aoa.push([
+        studentId,
+        studentName,
+        ...rowCells,
+        totalPresent,
+        totalAbsent,
+        `${percent}%`,
+      ]);
+    }
+
+    const sheet = XLSX.utils.aoa_to_sheet(aoa);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, sheet, "Attendance");
+
+    const fileBase = `attendance_${className}_${exportStartDate.value}_to_${exportEndDate.value}`;
+    if (exportFormat.value === "csv") {
+      const csv = XLSX.utils.sheet_to_csv(sheet);
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${fileBase}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } else {
+      XLSX.writeFile(workbook, `${fileBase}.xlsx`);
+    }
+
+    notificationStore.addNotification({
+      type: "success",
+      message: "Attendance export downloaded.",
+    });
+  } catch (error) {
+    notificationStore.addNotification({
+      type: "error",
+      message: error?.message || "Unable to export attendance.",
+    });
+  } finally {
+    exporting.value = false;
+  }
+}
+
 const handleOnline = async () => {
   const result = await attendanceStore.flushPendingAttendance();
   if (result?.flushed) {
@@ -1718,6 +2094,8 @@ async function applyRouteMode() {
   const mode = String(route.query?.mode || "").toLowerCase();
   const mark = String(route.query?.mark || "").toLowerCase();
   const entry = String(route.query?.entry || "").toLowerCase();
+  const exportFlag = String(route.query?.export || "").toLowerCase();
+  const exportClass = String(route.query?.classId || route.query?.class || "");
 
   const wantsMarkMode = mode === "mark" || mark === "1" || mark === "true";
   if (wantsMarkMode && !markAttendanceMode.value) {
@@ -1735,6 +2113,20 @@ async function applyRouteMode() {
   }
 
   if (wantsMarkMode) {
+    await nextTick();
+    rootEl.value?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+  }
+
+  const wantsExport =
+    exportFlag === "1" || exportFlag === "true" || exportFlag === "yes";
+  if (wantsExport && canExportAttendance.value) {
+    if (exportClass) {
+      exportClassId.value = exportClass;
+    }
+    if (!exportOpen.value) {
+      exportOpen.value = true;
+      applyExportTermDefaults();
+    }
     await nextTick();
     rootEl.value?.scrollIntoView?.({ behavior: "smooth", block: "start" });
   }

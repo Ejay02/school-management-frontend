@@ -3,7 +3,19 @@
     <div class="bg-white p-4 rounded-md flex-1 m-1 mt-0 shadow-xl">
       <!-- top -->
       <div class="border-b p-4">
-        <TopList :txt="pageTitle" />
+        <div class="flex items-center justify-between gap-3">
+          <TopList :txt="pageTitle" />
+
+          <button
+            v-if="canExportAttendance"
+            type="button"
+            class="inline-flex items-center gap-2 rounded-md bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 border border-gray-300"
+            @click="openAttendanceExport"
+          >
+            Export attendance
+            <i class="fa-solid fa-file-export text-xs"></i>
+          </button>
+        </div>
       </div>
 
       <LoadingScreen v-if="loading" message="Loading Classes..." />
@@ -38,6 +50,7 @@ import TopList from "../lists/topList.vue";
 import Pagination from "../pagination.vue";
 
 import { computed, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import { useClassStore } from "../../store/classStore";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
@@ -51,11 +64,20 @@ const currentPage = ref(1);
 
 const classStore = useClassStore();
 const userStore = useUserStore();
+const router = useRouter();
 
 const role = computed(() => userStore.currentRole);
 const pageTitle = computed(() =>
   role.value?.toLowerCase?.() === "teacher" ? "My Classes" : "All Classes",
 );
+
+const canExportAttendance = computed(() =>
+  ["teacher", "admin", "super_admin"].includes(String(role.value || "").toLowerCase()),
+);
+
+const openAttendanceExport = () => {
+  router.push({ path: "/attendance", query: { export: "1" } });
+};
 
 const loading = computed(() => classStore.loading);
 const error = computed(() => classStore.error);
