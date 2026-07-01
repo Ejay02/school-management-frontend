@@ -125,6 +125,11 @@
                 >
                   Status
                 </th>
+                <th
+                  class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Reason
+                </th>
               </tr>
             </thead>
 
@@ -152,9 +157,15 @@
                     {{ getAttendanceChipLabel(record) }}
                   </span>
                 </td>
+                <td class="py-2 px-3 text-sm text-gray-600">
+                  <span v-if="getAttendanceReasonSummary(record)">
+                    {{ getAttendanceReasonSummary(record) }}
+                  </span>
+                  <span v-else class="text-gray-400">—</span>
+                </td>
               </tr>
               <tr v-if="attendanceRecords?.length === 0">
-                <td colspan="5" class="py-4 text-center text-gray-500">
+                <td colspan="6" class="py-4 text-center text-gray-500">
                   No attendance records found
                 </td>
               </tr>
@@ -1496,6 +1507,27 @@ const getAttendanceChipLabel = (record) => {
   const status = record && record.status;
   if (status) return formatAttendanceStatus(status);
   return record && record.present ? "Present" : "Absent";
+};
+
+const getAttendanceReasonSummary = (record) => {
+  const code = String(record?.reasonCode || "")
+    .trim()
+    .toUpperCase();
+  const note = String(record?.note || record?.reason || "").trim();
+
+  if (code && note) {
+    return `${formatReasonCodeLabel(code)} — ${note}`;
+  }
+
+  if (code) {
+    return formatReasonCodeLabel(code);
+  }
+
+  if (note) {
+    return note;
+  }
+
+  return "";
 };
 
 const setStudentStatus = (studentId, status) => {
