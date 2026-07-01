@@ -124,6 +124,7 @@ export const getSetupStateQuery = gql`
       weeklyDigestDayOfWeek
       weeklyDigestSendHour
       weeklyDigestSendMinute
+      attendanceReasonCodes
       createdAt
       updatedAt
     }
@@ -1192,6 +1193,8 @@ export const getAttendances = gql`
       present
       status
       reason
+      reasonCode
+      note
       studentId
       createdAt
       updatedAt

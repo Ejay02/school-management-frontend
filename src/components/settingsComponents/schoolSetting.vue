@@ -300,6 +300,25 @@
         </div>
       </div>
 
+      <div class="space-y-6">
+        <h3 class="text-sm font-semibold text-gray-600">Attendance</h3>
+
+        <div class="rounded-lg border border-gray-200 bg-white p-4 space-y-2">
+          <label class="block text-sm font-medium text-gray-500">
+            Reason codes (comma or new-line separated)
+          </label>
+          <textarea
+            v-model="formData.attendanceReasonCodesText"
+            rows="3"
+            class="cursor-pointer block w-full rounded-md bg-white px-3 py-2 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+            placeholder="SICK, FAMILY, UNCONTACTED"
+          />
+          <p class="text-xs text-gray-500">
+            Used to validate attendance reason codes sent by teachers.
+          </p>
+        </div>
+      </div>
+
       <div class="flex justify-end mt-4 border-t border-gray-200 pt-4">
         <button
           type="submit"
@@ -351,6 +370,7 @@ const formData = reactive({
   weeklyDigestDayOfWeek: 0,
   weeklyDigestSendHour: 18,
   weeklyDigestSendMinute: 0,
+  attendanceReasonCodesText: "",
 });
 
 const academicYearDefaults = computed(() => {
@@ -436,6 +456,11 @@ watch(
     )
       ? state.weeklyDigestSendMinute
       : 0;
+    formData.attendanceReasonCodesText = Array.isArray(
+      state.attendanceReasonCodes,
+    )
+      ? state.attendanceReasonCodes.join(", ")
+      : "";
     initialized.value = true;
   },
   { immediate: true },
@@ -462,6 +487,20 @@ const normalizeString = (value) => {
   return trimmed.length ? trimmed : null;
 };
 
+const parseAttendanceReasonCodes = (value) => {
+  const raw = typeof value === "string" ? value : "";
+  const parts = raw
+    .split(/[\n,]+/g)
+    .map((p) =>
+      String(p || "")
+        .trim()
+        .toUpperCase(),
+    )
+    .filter(Boolean)
+    .filter((p) => p.length <= 40);
+  return [...new Set(parts)];
+};
+
 const saveSchoolSettings = async () => {
   try {
     const res = await updateSetupState({
@@ -481,6 +520,9 @@ const saveSchoolSettings = async () => {
         weeklyDigestDayOfWeek: Number(formData.weeklyDigestDayOfWeek),
         weeklyDigestSendHour: Number(formData.weeklyDigestSendHour),
         weeklyDigestSendMinute: Number(formData.weeklyDigestSendMinute),
+        attendanceReasonCodes: parseAttendanceReasonCodes(
+          formData.attendanceReasonCodesText,
+        ),
       },
     });
 

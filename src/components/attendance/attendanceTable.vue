@@ -593,6 +593,9 @@
                     'bg-red-50/60':
                       attendanceEntryMode === 'speed' &&
                       studentAttendance[student.id] === 'ABSENT',
+                    'bg-blue-50/60':
+                      attendanceEntryMode === 'speed' &&
+                      studentAttendance[student.id] === 'EXCUSED_ABSENT',
                     'bg-amber-50/60':
                       attendanceEntryMode === 'speed' &&
                       studentAttendance[student.id] === 'LATE',
@@ -617,6 +620,8 @@
                           studentAttendance[student.id] === 'EARLY_LEAVE',
                         'bg-red-100 text-red-700':
                           studentAttendance[student.id] === 'ABSENT',
+                        'bg-blue-100 text-blue-700':
+                          studentAttendance[student.id] === 'EXCUSED_ABSENT',
                         'bg-gray-100 text-gray-600':
                           studentAttendance[student.id] === undefined,
                       }"
@@ -640,28 +645,30 @@
                       <select
                         v-if="
                           studentAttendance[student.id] === 'ABSENT' ||
-                          studentAttendance[student.id] === 'LATE'
+                          studentAttendance[student.id] === 'LATE' ||
+                          studentAttendance[student.id] === 'EXCUSED_ABSENT'
                         "
                         v-model="studentAttendanceReason[student.id]"
                         @click.stop
                         class="w-full rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                       >
                         <option value="">Select reason (optional)</option>
-                        <option value="Sick">Sick</option>
-                        <option value="Family emergency">
-                          Family emergency
+                        <option
+                          v-for="code in attendanceReasonCodeOptions"
+                          :key="code"
+                          :value="code"
+                        >
+                          {{ formatReasonCodeLabel(code) }}
                         </option>
-                        <option value="Transport issue">Transport issue</option>
-                        <option value="Permission/Excused">
-                          Permission/Excused
-                        </option>
-                        <option value="Other">Other</option>
+                        <option value="OTHER">Other</option>
                       </select>
                       <input
                         v-if="
                           (studentAttendance[student.id] === 'ABSENT' ||
-                            studentAttendance[student.id] === 'LATE') &&
-                          studentAttendanceReason[student.id] === 'Other'
+                            studentAttendance[student.id] === 'LATE' ||
+                            studentAttendance[student.id] ===
+                              'EXCUSED_ABSENT') &&
+                          studentAttendanceReason[student.id] === 'OTHER'
                         "
                         v-model="studentAttendanceReasonOther[student.id]"
                         @click.stop
@@ -718,6 +725,16 @@
                       >
                         Absent
                       </button>
+                      <button
+                        @click="setStudentStatus(student.id, 'EXCUSED_ABSENT')"
+                        class="px-2 py-1 bg-blue-200 text-blue-700 text-xs rounded hover:bg-blue-300 transition-colors"
+                        :class="{
+                          'ring-1 ring-inset ring-blue-600/10':
+                            studentAttendance[student.id] === 'EXCUSED_ABSENT',
+                        }"
+                      >
+                        Excused
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -748,6 +765,7 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { useQuery } from "@vue/apollo-composable";
 import { useAttendanceStore } from "../../store/attendanceStore";
 import { useClassStore } from "../../store/classStore";
 import { useNotificationStore } from "../../store/notification";
@@ -757,6 +775,7 @@ import { useUserStore } from "../../store/userStore";
 import { formatDate } from "../../utils/date.holidays";
 import { apolloClient } from "../../../apollo-client";
 import { createAttendanceSessionBySubject } from "../../graphql/mutations";
+import { getSetupStateQuery } from "../../graphql/queries";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import EmptyState from "../emptyState.vue";
 import ErrorScreen from "../errorScreen.vue";
@@ -771,6 +790,26 @@ const attendanceStore = useAttendanceStore();
 const classStore = useClassStore();
 const notificationStore = useNotificationStore();
 const { isParent, selectedStudentId } = useParentLinkedStudents();
+
+const { result: setupResult } = useQuery(getSetupStateQuery, null, {
+  fetchPolicy: "cache-first",
+});
+
+const defaultAttendanceReasonCodes = ["SICK", "FAMILY", "UNCONTACTED"];
+
+const attendanceReasonCodeOptions = computed(() => {
+  const codes = setupResult.value?.getSetupState?.attendanceReasonCodes;
+  if (Array.isArray(codes) && codes.length) return codes;
+  return defaultAttendanceReasonCodes;
+});
+
+const formatReasonCodeLabel = (code) => {
+  const normalized = String(code || "")
+    .trim()
+    .toLowerCase()
+    .replaceAll("_", " ");
+  return normalized.replace(/\b\w/g, (m) => m.toUpperCase());
+};
 
 const userRole = computed(() => userStore.currentRole);
 const userHasAccess = computed(() => ["teacher"].includes(userRole.value));
@@ -1340,6 +1379,8 @@ const submitScannedStudentId = async (studentIdValue) => {
           studentId,
           present: true,
           status: "PRESENT",
+          reasonCode: null,
+          note: null,
           reason: null,
           date: new Date(selectedDate.value),
         },
@@ -1436,12 +1477,14 @@ const formatAttendanceStatus = (status) => {
   if (status === "ABSENT") return "Absent";
   if (status === "LATE") return "Late";
   if (status === "EARLY_LEAVE") return "Left early";
+  if (status === "EXCUSED_ABSENT") return "Excused absent";
   return String(status || "");
 };
 
 const getAttendanceChipClass = (record) => {
   const present = Boolean(record && record.present);
   const status = record && record.status;
+  if (status === "EXCUSED_ABSENT") return "bg-blue-100 text-blue-800";
   if (!present) return "bg-red-100 text-red-800";
   if (status === "LATE" || status === "EARLY_LEAVE") {
     return "bg-amber-100 text-amber-800";
@@ -1548,19 +1591,29 @@ async function saveAttendance() {
         const normalized = String(status || "")
           .trim()
           .toUpperCase();
-        const present = normalized === "ABSENT" ? false : true;
-        const reasonSelection =
-          studentAttendanceReason.value?.[studentId] || "";
+        const present =
+          normalized === "ABSENT" || normalized === "EXCUSED_ABSENT"
+            ? false
+            : true;
+        const reasonSelection = String(
+          studentAttendanceReason.value?.[studentId] || "",
+        )
+          .trim()
+          .toUpperCase();
         const otherText = studentAttendanceReasonOther.value?.[studentId] || "";
-        const reason =
-          reasonSelection === "Other"
-            ? String(otherText || "").trim()
-            : String(reasonSelection || "").trim();
+        const reasonCode =
+          reasonSelection && reasonSelection !== "OTHER"
+            ? reasonSelection
+            : null;
+        const note =
+          reasonSelection === "OTHER" ? String(otherText || "").trim() : null;
         return {
           studentId,
           present,
           status: normalized,
-          reason: reason || null,
+          reasonCode,
+          note: note || null,
+          reason: note || null,
           date: new Date(selectedDate.value),
         };
       });

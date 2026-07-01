@@ -187,6 +187,7 @@ export const updateSetupStateMutation = gql`
       weeklyDigestDayOfWeek
       weeklyDigestSendHour
       weeklyDigestSendMinute
+      attendanceReasonCodes
       createdAt
       updatedAt
     }
@@ -456,6 +457,8 @@ export const markAttendance = gql`
       present
       status
       reason
+      reasonCode
+      note
       studentId
       lessonId
       student {
@@ -508,6 +511,8 @@ export const checkInAttendance = gql`
       present
       status
       reason
+      reasonCode
+      note
       studentId
       lessonId
       classId
@@ -533,6 +538,8 @@ export const markAttendanceBySubject = gql`
       present
       status
       reason
+      reasonCode
+      note
       studentId
       lessonId
       student {
