@@ -1174,6 +1174,60 @@ export const getStudentResults = gql`
   }
 `;
 
+export const getStudentTermReport = gql`
+  query GetStudentTermReport(
+    $studentId: String!
+    $academicPeriod: String!
+    $term: Term!
+  ) {
+    getStudentTermReport(
+      studentId: $studentId
+      academicPeriod: $academicPeriod
+      term: $term
+    ) {
+      studentId
+      studentName
+      studentCode
+      classId
+      className
+      academicPeriod
+      term
+      schoolName
+      schoolLogo
+      schoolAddress
+      overallAverage
+      ranking {
+        position
+        totalStudents
+      }
+      attendance {
+        presentClasses
+        absentClasses
+        totalClasses
+        attendanceRate
+      }
+      subjectGrades {
+        name
+        examAverage
+        assignmentAverage
+        finalScore
+      }
+      remark {
+        id
+        studentId
+        classId
+        academicPeriod
+        term
+        remark
+        authorId
+        authorRole
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
 export const getSchoolAttendanceStats = gql`
   query getSchoolAttendanceStats($startDate: DateTime!, $endDate: DateTime!) {
     getSchoolAttendanceStats(startDate: $startDate, endDate: $endDate) {

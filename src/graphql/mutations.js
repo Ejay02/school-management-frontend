@@ -194,6 +194,23 @@ export const updateSetupStateMutation = gql`
   }
 `;
 
+export const upsertTermReportRemarkMutation = gql`
+  mutation UpsertTermReportRemark($input: UpsertTermReportRemarkInput!) {
+    upsertTermReportRemark(input: $input) {
+      id
+      studentId
+      classId
+      academicPeriod
+      term
+      remark
+      authorId
+      authorRole
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 export const loginMutation = gql`
   mutation Login($input: BaseLoginInput!) {
     login(input: $input) {

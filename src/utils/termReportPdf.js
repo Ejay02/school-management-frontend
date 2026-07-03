@@ -5,10 +5,18 @@ const CANVAS_PAGE_WIDTH = 1240;
 const CANVAS_PAGE_HEIGHT = 1754;
 const PAGE_MARGIN = 80;
 const PAGE_FOOTER_HEIGHT = 72;
-const PAGE_CONTENT_BOTTOM = CANVAS_PAGE_HEIGHT - PAGE_MARGIN - PAGE_FOOTER_HEIGHT;
+const PAGE_CONTENT_BOTTOM =
+  CANVAS_PAGE_HEIGHT - PAGE_MARGIN - PAGE_FOOTER_HEIGHT;
 
 const logoCache = new Map();
 const encoder = new TextEncoder();
+const crcTable = new Uint32Array(256).map((_, index) => {
+  let current = index;
+  for (let bit = 0; bit < 8; bit += 1) {
+    current = current & 1 ? 0xedb88320 ^ (current >>> 1) : current >>> 1;
+  }
+  return current >>> 0;
+});
 
 function sanitizeText(value) {
   return String(value ?? "").trim();
@@ -36,6 +44,43 @@ function bytesToPdfString(bytes) {
 function createPdfBytes(value) {
   if (value instanceof Uint8Array) return value;
   return encoder.encode(String(value));
+}
+
+function computeCrc32(bytes) {
+  let crc = 0xffffffff;
+  for (let index = 0; index < bytes.length; index += 1) {
+    crc = crcTable[(crc ^ bytes[index]) & 0xff] ^ (crc >>> 8);
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function numberToLittleEndianBytes(value, byteLength) {
+  const bytes = new Uint8Array(byteLength);
+  let remaining = Number(value >>> 0);
+  for (let index = 0; index < byteLength; index += 1) {
+    bytes[index] = remaining & 0xff;
+    remaining >>>= 8;
+  }
+  return bytes;
+}
+
+function appendBytes(parts, bytes) {
+  parts.push(bytes instanceof Uint8Array ? bytes : createPdfBytes(bytes));
+}
+
+function getDosDateTimeParts(date = new Date()) {
+  const safeDate = date instanceof Date ? date : new Date(date);
+  const year = Math.max(safeDate.getFullYear(), 1980);
+  const month = safeDate.getMonth() + 1;
+  const day = safeDate.getDate();
+  const hours = safeDate.getHours();
+  const minutes = safeDate.getMinutes();
+  const seconds = Math.floor(safeDate.getSeconds() / 2);
+
+  const dosTime = (hours << 11) | (minutes << 5) | seconds;
+  const dosDate = ((year - 1980) << 9) | (month << 5) | day;
+
+  return { dosDate, dosTime };
 }
 
 function decodeBase64(value) {
@@ -127,14 +172,7 @@ function drawLabelValue(ctx, label, value, x, y, width) {
   ctx.fillText(label, x, y);
   ctx.fillStyle = "#111827";
   ctx.font = "500 22px Inter, Arial, sans-serif";
-  const wrapped = drawWrappedText(
-    ctx,
-    value || "-",
-    x,
-    y + 26,
-    width,
-    28,
-  );
+  const wrapped = drawWrappedText(ctx, value || "-", x, y + 26, width, 28);
   return wrapped.y;
 }
 
@@ -314,11 +352,7 @@ async function renderReportPages(report) {
     if (logo) {
       const maxWidth = 160;
       const maxHeight = 90;
-      const scale = Math.min(
-        maxWidth / logo.width,
-        maxHeight / logo.height,
-        1,
-      );
+      const scale = Math.min(maxWidth / logo.width, maxHeight / logo.height, 1);
       const drawWidth = logo.width * scale;
       const drawHeight = logo.height * scale;
       ctx.drawImage(logo, PAGE_MARGIN, PAGE_MARGIN, drawWidth, drawHeight);
@@ -359,7 +393,10 @@ async function renderReportPages(report) {
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(PAGE_MARGIN, Math.max(headerBottom, PAGE_MARGIN + 160) + 24);
-    ctx.lineTo(CANVAS_PAGE_WIDTH - PAGE_MARGIN, Math.max(headerBottom, PAGE_MARGIN + 160) + 24);
+    ctx.lineTo(
+      CANVAS_PAGE_WIDTH - PAGE_MARGIN,
+      Math.max(headerBottom, PAGE_MARGIN + 160) + 24,
+    );
     ctx.stroke();
 
     return {
@@ -468,8 +505,10 @@ async function renderReportPages(report) {
     current.y,
     250,
     120,
-    "Sessions",
-    `${report.attendance.present}/${report.attendance.total}`,
+    "Position",
+    report?.ranking?.position
+      ? `${report.ranking.position}/${report.ranking.totalStudents}`
+      : `-/${report?.ranking?.totalStudents || 0}`,
     "#be123c",
   );
   current.y += 156;
@@ -501,9 +540,10 @@ async function renderReportPages(report) {
   current.y += 18;
   current.y = drawSectionTitle(current.ctx, "Teacher Remarks", current.y);
 
-  const remarks = Array.isArray(report.teacherRemarks) && report.teacherRemarks.length
-    ? report.teacherRemarks
-    : ["No teacher comments were recorded for this term."];
+  const remarks =
+    Array.isArray(report.teacherRemarks) && report.teacherRemarks.length
+      ? report.teacherRemarks
+      : ["No teacher comments were recorded for this term."];
 
   remarks.forEach((remark) => {
     ensureSpace(56);
@@ -580,8 +620,116 @@ export async function downloadTermReportPdf(report) {
   }, 1000);
 }
 
+export async function downloadZipArchive(files, zipFileName = "reports.zip") {
+  const localParts = [];
+  const centralParts = [];
+  let offset = 0;
+  let centralDirectorySize = 0;
+
+  for (const file of files) {
+    const safeName =
+      sanitizeFileName(file?.name || "report.pdf") || "report.pdf";
+    const fileNameBytes = createPdfBytes(safeName);
+    const blobBytes = new Uint8Array(await file.blob.arrayBuffer());
+    const crc32 = computeCrc32(blobBytes);
+    const { dosDate, dosTime } = getDosDateTimeParts(new Date());
+
+    const localHeaderParts = [];
+    appendBytes(localHeaderParts, numberToLittleEndianBytes(0x04034b50, 4));
+    appendBytes(localHeaderParts, numberToLittleEndianBytes(20, 2));
+    appendBytes(localHeaderParts, numberToLittleEndianBytes(0, 2));
+    appendBytes(localHeaderParts, numberToLittleEndianBytes(0, 2));
+    appendBytes(localHeaderParts, numberToLittleEndianBytes(dosTime, 2));
+    appendBytes(localHeaderParts, numberToLittleEndianBytes(dosDate, 2));
+    appendBytes(localHeaderParts, numberToLittleEndianBytes(crc32, 4));
+    appendBytes(
+      localHeaderParts,
+      numberToLittleEndianBytes(blobBytes.length, 4),
+    );
+    appendBytes(
+      localHeaderParts,
+      numberToLittleEndianBytes(blobBytes.length, 4),
+    );
+    appendBytes(
+      localHeaderParts,
+      numberToLittleEndianBytes(fileNameBytes.length, 2),
+    );
+    appendBytes(localHeaderParts, numberToLittleEndianBytes(0, 2));
+    appendBytes(localHeaderParts, fileNameBytes);
+    appendBytes(localHeaderParts, blobBytes);
+
+    localHeaderParts.forEach((part) => appendBytes(localParts, part));
+
+    const centralHeaderParts = [];
+    appendBytes(centralHeaderParts, numberToLittleEndianBytes(0x02014b50, 4));
+    appendBytes(centralHeaderParts, numberToLittleEndianBytes(20, 2));
+    appendBytes(centralHeaderParts, numberToLittleEndianBytes(20, 2));
+    appendBytes(centralHeaderParts, numberToLittleEndianBytes(0, 2));
+    appendBytes(centralHeaderParts, numberToLittleEndianBytes(0, 2));
+    appendBytes(centralHeaderParts, numberToLittleEndianBytes(dosTime, 2));
+    appendBytes(centralHeaderParts, numberToLittleEndianBytes(dosDate, 2));
+    appendBytes(centralHeaderParts, numberToLittleEndianBytes(crc32, 4));
+    appendBytes(
+      centralHeaderParts,
+      numberToLittleEndianBytes(blobBytes.length, 4),
+    );
+    appendBytes(
+      centralHeaderParts,
+      numberToLittleEndianBytes(blobBytes.length, 4),
+    );
+    appendBytes(
+      centralHeaderParts,
+      numberToLittleEndianBytes(fileNameBytes.length, 2),
+    );
+    appendBytes(centralHeaderParts, numberToLittleEndianBytes(0, 2));
+    appendBytes(centralHeaderParts, numberToLittleEndianBytes(0, 2));
+    appendBytes(centralHeaderParts, numberToLittleEndianBytes(0, 2));
+    appendBytes(centralHeaderParts, numberToLittleEndianBytes(0, 2));
+    appendBytes(centralHeaderParts, numberToLittleEndianBytes(0, 4));
+    appendBytes(centralHeaderParts, numberToLittleEndianBytes(offset, 4));
+    appendBytes(centralHeaderParts, fileNameBytes);
+
+    centralHeaderParts.forEach((part) => appendBytes(centralParts, part));
+
+    const localSize = localHeaderParts.reduce(
+      (sum, part) => sum + part.length,
+      0,
+    );
+    const centralSize = centralHeaderParts.reduce(
+      (sum, part) => sum + part.length,
+      0,
+    );
+    offset += localSize;
+    centralDirectorySize += centralSize;
+  }
+
+  const endParts = [];
+  appendBytes(endParts, numberToLittleEndianBytes(0x06054b50, 4));
+  appendBytes(endParts, numberToLittleEndianBytes(0, 2));
+  appendBytes(endParts, numberToLittleEndianBytes(0, 2));
+  appendBytes(endParts, numberToLittleEndianBytes(files.length, 2));
+  appendBytes(endParts, numberToLittleEndianBytes(files.length, 2));
+  appendBytes(endParts, numberToLittleEndianBytes(centralDirectorySize, 4));
+  appendBytes(endParts, numberToLittleEndianBytes(offset, 4));
+  appendBytes(endParts, numberToLittleEndianBytes(0, 2));
+
+  const zipBlob = new Blob([...localParts, ...centralParts, ...endParts], {
+    type: "application/zip",
+  });
+  const objectUrl = URL.createObjectURL(zipBlob);
+  const anchor = document.createElement("a");
+  anchor.href = objectUrl;
+  anchor.download = sanitizeFileName(zipFileName) || "reports.zip";
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+
+  setTimeout(() => {
+    URL.revokeObjectURL(objectUrl);
+  }, 1000);
+}
+
 export function formatScoreLabel(value) {
   if (!Number.isFinite(Number(value))) return "N/A";
   return `${roundToOneDecimal(value)}%`;
 }
-
