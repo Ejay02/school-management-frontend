@@ -1,6 +1,9 @@
 <template>
   <TeacherResults v-if="userRole === 'teacher'" />
-  <ResultsTable v-else-if="userRole === 'admin' || userRole === 'super_admin'" />
+  <div v-else-if="userRole === 'admin' || userRole === 'super_admin'" class="w-full space-y-4">
+    <ResultsTable />
+    <TermReports />
+  </div>
 
   <div
     v-else-if="userRole === 'parent'"
@@ -108,6 +111,7 @@ import LoadingScreen from "../loadingScreen.vue";
 import ParentChildSelector from "../parents/parentChildSelector.vue";
 import ParentLinkedStudentEmptyState from "../parents/parentLinkedStudentEmptyState.vue";
 import ResultsTable from "./resultsTable.vue";
+import TermReports from "./termReports.vue";
 import TeacherResults from "./teacherResults.vue";
 
 const userStore = useUserStore();
