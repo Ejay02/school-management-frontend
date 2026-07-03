@@ -7,8 +7,9 @@
         <div>
           <h2 class="text-xl font-bold text-gray-700">Term Reports</h2>
           <p class="text-sm text-gray-500">
-            Manage official term remarks, class ranking, and generate student
-            PDFs or a single class ZIP.
+            Auto-calculated draft reports from marked exams, assessments, and
+            attendance. Review, save the final remark, then download one PDF or
+            a class ZIP.
           </p>
         </div>
 
@@ -88,7 +89,7 @@
         >
           {{
             downloadingStudentId === selectedStudent?.id
-              ? "Generating..."
+              ? "Preparing..."
               : "Download Student PDF"
           }}
         </button>
@@ -103,6 +104,12 @@
         </button>
       </div>
 
+      <div
+        class="rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm text-indigo-700"
+      >
+        Formula: {{ reportFormulaLabel }}
+      </div>
+
       <LoadingScreen
         v-if="initializing"
         message="Loading report generator..."
@@ -112,7 +119,7 @@
         v-else-if="!classStudents.length"
         icon="fa-regular fa-file-lines"
         heading="No students in this class"
-        description="Select a class with enrolled students to generate term reports."
+        description="Select a class with enrolled students to preview and download term reports."
       />
 
       <div v-else class="grid grid-cols-1 xl:grid-cols-3 gap-4">
@@ -204,7 +211,7 @@
             v-else-if="!reportPreview"
             icon="fa-regular fa-file-lines"
             heading="No report selected"
-            description="Choose a student, term, and academic period to preview and save the official term remark."
+            description="Choose a student, term, and academic period to preview the auto-calculated report and save the final term remark."
           />
 
           <div v-else class="space-y-4">
@@ -264,7 +271,7 @@
                 placeholder="Enter the official term remark that should appear on the report..."
               ></textarea>
               <p class="mt-2 text-xs text-gray-500">
-                Saved remark appears in generated PDFs and overrides scattered
+                Saved remark appears in downloaded PDFs and overrides scattered
                 result comments.
               </p>
             </div>
@@ -385,6 +392,17 @@ const previewPositionLabel = computed(() => {
   return `${position} / ${totalStudents}`;
 });
 
+const reportFormulaLabel = computed(() => {
+  const examWeight = Number(setupState.value?.reportExamWeight ?? 60);
+  const assessmentWeight = Number(
+    setupState.value?.reportAssessmentWeight ?? 30,
+  );
+  const attendanceWeight = Number(
+    setupState.value?.reportAttendanceWeight ?? 10,
+  );
+  return `${examWeight}% exams, ${assessmentWeight}% assessments, ${attendanceWeight}% attendance`;
+});
+
 function getStudentName(student) {
   return (
     [student?.name, student?.surname].filter(Boolean).join(" ") || "Student"
@@ -412,7 +430,7 @@ function validateInputs(notify = true) {
     if (notify) {
       notificationStore.addNotification({
         type: "warning",
-        message: "Select a class before generating reports.",
+        message: "Select a class before loading reports.",
       });
     }
     return false;
@@ -422,7 +440,7 @@ function validateInputs(notify = true) {
     if (notify) {
       notificationStore.addNotification({
         type: "warning",
-        message: "Enter the academic period to generate reports.",
+        message: "Enter the academic period to load reports.",
       });
     }
     return false;
@@ -595,10 +613,10 @@ async function downloadStudentReport(student) {
       message: `Downloaded ${getStudentName(student)}'s term report.`,
     });
   } catch (error) {
-    console.error("Failed to generate student term report", error);
+    console.error("Failed to download student term report", error);
     notificationStore.addNotification({
       type: "error",
-      message: `Failed to generate ${getStudentName(student)}'s report.`,
+      message: `Failed to download ${getStudentName(student)}'s report.`,
       timeout: 3500,
     });
   } finally {
@@ -645,7 +663,7 @@ async function downloadClassReports() {
       timeout: 3500,
     });
   } catch (error) {
-    console.error("Failed to generate class term reports", error);
+    console.error("Failed to build class term report ZIP", error);
     notificationStore.addNotification({
       type: "error",
       message: "Failed to finish the class report ZIP.",
@@ -703,7 +721,7 @@ onMounted(async () => {
     console.error("Failed to initialize term reports", error);
     notificationStore.addNotification({
       type: "error",
-      message: "Unable to load the term report generator.",
+      message: "Unable to load the term report workspace.",
       timeout: 3500,
     });
   } finally {

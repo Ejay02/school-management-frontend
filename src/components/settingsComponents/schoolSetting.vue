@@ -319,6 +319,69 @@
         </div>
       </div>
 
+      <div class="space-y-6">
+        <h3 class="text-sm font-semibold text-gray-600">Term Report Formula</h3>
+
+        <div class="rounded-lg border border-gray-200 bg-white p-4 space-y-4">
+          <p class="text-sm text-gray-500">
+            Draft term reports are auto-calculated from marked records using these
+            weights. The three values must add up to 100.
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-500">
+                Exam Weight (%)
+              </label>
+              <input
+                v-model.number="formData.reportExamWeight"
+                type="number"
+                min="0"
+                max="100"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-500">
+                Assessment Weight (%)
+              </label>
+              <input
+                v-model.number="formData.reportAssessmentWeight"
+                type="number"
+                min="0"
+                max="100"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-500">
+                Attendance Weight (%)
+              </label>
+              <input
+                v-model.number="formData.reportAttendanceWeight"
+                type="number"
+                min="0"
+                max="100"
+                class="cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-600 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-eduPurple sm:text-sm/6"
+              />
+            </div>
+          </div>
+
+          <div
+            class="rounded-md px-3 py-2 text-sm"
+            :class="
+              reportWeightTotal === 100
+                ? 'bg-emerald-50 text-emerald-700'
+                : 'bg-amber-50 text-amber-700'
+            "
+          >
+            Current total: {{ reportWeightTotal }}%
+          </div>
+        </div>
+      </div>
+
       <div class="flex justify-end mt-4 border-t border-gray-200 pt-4">
         <button
           type="submit"
@@ -371,6 +434,9 @@ const formData = reactive({
   weeklyDigestSendHour: 18,
   weeklyDigestSendMinute: 0,
   attendanceReasonCodesText: "",
+  reportExamWeight: 60,
+  reportAssessmentWeight: 30,
+  reportAttendanceWeight: 10,
 });
 
 const academicYearDefaults = computed(() => {
@@ -423,6 +489,13 @@ const weeklyDigestMinuteOptions = [0, 10, 20, 30, 40, 50].map((minute) => ({
 }));
 
 const initialized = ref(false);
+const reportWeightTotal = computed(() => {
+  return (
+    Number(formData.reportExamWeight || 0) +
+    Number(formData.reportAssessmentWeight || 0) +
+    Number(formData.reportAttendanceWeight || 0)
+  );
+});
 
 watch(
   () => result.value?.getSetupState,
@@ -461,6 +534,19 @@ watch(
     )
       ? state.attendanceReasonCodes.join(", ")
       : "";
+    formData.reportExamWeight = Number.isInteger(state.reportExamWeight)
+      ? state.reportExamWeight
+      : 60;
+    formData.reportAssessmentWeight = Number.isInteger(
+      state.reportAssessmentWeight,
+    )
+      ? state.reportAssessmentWeight
+      : 30;
+    formData.reportAttendanceWeight = Number.isInteger(
+      state.reportAttendanceWeight,
+    )
+      ? state.reportAttendanceWeight
+      : 10;
     initialized.value = true;
   },
   { immediate: true },
@@ -502,6 +588,14 @@ const parseAttendanceReasonCodes = (value) => {
 };
 
 const saveSchoolSettings = async () => {
+  if (reportWeightTotal.value !== 100) {
+    notificationStore.addNotification({
+      type: "error",
+      message: "Term report weights must add up to 100%.",
+    });
+    return;
+  }
+
   try {
     const res = await updateSetupState({
       input: {
@@ -523,6 +617,9 @@ const saveSchoolSettings = async () => {
         attendanceReasonCodes: parseAttendanceReasonCodes(
           formData.attendanceReasonCodesText,
         ),
+        reportExamWeight: Number(formData.reportExamWeight),
+        reportAssessmentWeight: Number(formData.reportAssessmentWeight),
+        reportAttendanceWeight: Number(formData.reportAttendanceWeight),
       },
     });
 

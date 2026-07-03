@@ -188,6 +188,9 @@ export const updateSetupStateMutation = gql`
       weeklyDigestSendHour
       weeklyDigestSendMinute
       attendanceReasonCodes
+      reportExamWeight
+      reportAssessmentWeight
+      reportAttendanceWeight
       createdAt
       updatedAt
     }

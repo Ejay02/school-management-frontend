@@ -125,6 +125,9 @@ export const getSetupStateQuery = gql`
       weeklyDigestSendHour
       weeklyDigestSendMinute
       attendanceReasonCodes
+      reportExamWeight
+      reportAssessmentWeight
+      reportAttendanceWeight
       createdAt
       updatedAt
     }
