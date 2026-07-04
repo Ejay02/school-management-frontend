@@ -105,6 +105,15 @@
 
         <button
           type="button"
+          class="rounded-md border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-700 shadow-sm transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
+          :disabled="!publishedCount || busy"
+          @click="revertPublishedClassReports"
+        >
+          {{ bulkReverting ? "Reverting..." : `Revert Published (${publishedCount})` }}
+        </button>
+
+        <button
+          type="button"
           class="rounded-md border border-indigo-300 bg-white px-4 py-2 text-sm font-semibold text-indigo-700 shadow-sm transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
           :disabled="!downloadableCount || busy"
           @click="downloadClassReports"
@@ -206,13 +215,57 @@
                   </span>
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700">
-                  <span
-                    class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
-                    :class="getSummaryReadinessMeta(student.id).className"
-                    :title="getSummaryReadinessMeta(student.id).title"
-                  >
-                    {{ getSummaryReadinessMeta(student.id).label }}
-                  </span>
+                  <div class="relative inline-block text-left">
+                    <button
+                      v-if="getSummaryReadinessMeta(student.id).issues.length"
+                      type="button"
+                      class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+                      :class="getSummaryReadinessMeta(student.id).className"
+                      @click="toggleIssuesPopover(student.id)"
+                    >
+                      {{ getSummaryReadinessMeta(student.id).label }}
+                    </button>
+                    <span
+                      v-else
+                      class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+                      :class="getSummaryReadinessMeta(student.id).className"
+                    >
+                      {{ getSummaryReadinessMeta(student.id).label }}
+                    </span>
+
+                    <div
+                      v-if="openIssuesStudentId === student.id"
+                      class="absolute right-0 z-20 mt-2 w-72 rounded-lg border border-amber-200 bg-white p-3 shadow-lg"
+                    >
+                      <div class="flex items-start justify-between gap-3">
+                        <div>
+                          <p class="text-xs font-semibold uppercase tracking-wide text-amber-600">
+                            Missing Items
+                          </p>
+                          <p class="mt-1 text-sm font-medium text-gray-700">
+                            {{ getStudentName(student) }}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          class="text-xs font-medium text-gray-400 transition hover:text-gray-600"
+                          @click="closeIssuesPopover"
+                        >
+                          Close
+                        </button>
+                      </div>
+
+                      <ul class="mt-3 space-y-2 text-sm text-gray-600">
+                        <li
+                          v-for="issue in getSummaryReadinessMeta(student.id).issues"
+                          :key="issue"
+                          class="rounded-md bg-amber-50 px-3 py-2"
+                        >
+                          {{ issue }}
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
                 </td>
                 <td class="px-4 py-3 text-right">
                   <button
@@ -447,6 +500,7 @@ const savingRemark = ref(false);
 const publishingReport = ref(false);
 const revertingReport = ref(false);
 const bulkPublishing = ref(false);
+const bulkReverting = ref(false);
 const selectedClassName = ref("");
 const selectedStudentId = ref("");
 const selectedTerm = ref("FIRST");
@@ -458,6 +512,7 @@ const remarkDraft = ref("");
 const downloadingStudentId = ref("");
 const bulkDownloading = ref(false);
 const bulkProgressText = ref("");
+const openIssuesStudentId = ref("");
 
 const termOptions = [
   { label: "First Term", value: "FIRST" },
@@ -501,7 +556,8 @@ const busy = computed(() => {
       savingRemark.value ||
       publishingReport.value ||
       revertingReport.value ||
-      bulkPublishing.value,
+      bulkPublishing.value ||
+      bulkReverting.value,
   );
 });
 
@@ -548,6 +604,12 @@ const readyDraftCount = computed(() => {
 const downloadableCount = computed(() => {
   return reportSummaries.value.filter((summary) =>
     canDownloadStudent(summary?.studentId),
+  ).length;
+});
+
+const publishedCount = computed(() => {
+  return reportSummaries.value.filter(
+    (summary) => summary?.status === "PUBLISHED",
   ).length;
 });
 
@@ -649,6 +711,7 @@ function getSummaryReadinessMeta(studentId) {
       label: summaryLoading.value ? "Loading" : "-",
       className: "bg-slate-100 text-slate-600",
       title: "",
+      issues: [],
     };
   }
 
@@ -657,6 +720,7 @@ function getSummaryReadinessMeta(studentId) {
       label: "Published",
       className: "bg-emerald-100 text-emerald-700",
       title: "This report is published and locked.",
+      issues: [],
     };
   }
 
@@ -665,6 +729,7 @@ function getSummaryReadinessMeta(studentId) {
       label: "Ready",
       className: "bg-emerald-100 text-emerald-700",
       title: "This draft report is ready for publishing and download.",
+      issues: [],
     };
   }
 
@@ -675,7 +740,17 @@ function getSummaryReadinessMeta(studentId) {
     label: issues.length ? `${issues.length} issue${issues.length > 1 ? "s" : ""}` : "Needs review",
     className: "bg-amber-100 text-amber-700",
     title: issues.join(" "),
+    issues,
   };
+}
+
+function toggleIssuesPopover(studentId) {
+  openIssuesStudentId.value =
+    openIssuesStudentId.value === studentId ? "" : studentId;
+}
+
+function closeIssuesPopover() {
+  openIssuesStudentId.value = "";
 }
 
 function canDownloadStudent(studentId) {
@@ -738,6 +813,7 @@ async function fetchStudentReportData(studentId) {
 async function loadClassReportSummaries() {
   if (!selectedClass.value?.id || !validateInputs(false)) {
     reportSummaries.value = [];
+    closeIssuesPopover();
     return;
   }
 
@@ -757,6 +833,14 @@ async function loadClassReportSummaries() {
     reportSummaries.value = Array.isArray(data?.getClassTermReportSummaries)
       ? data.getClassTermReportSummaries
       : [];
+    if (
+      openIssuesStudentId.value &&
+      !reportSummaries.value.some(
+        (summary) => summary.studentId === openIssuesStudentId.value,
+      )
+    ) {
+      closeIssuesPopover();
+    }
   } catch (error) {
     console.error("Failed to load class term report summaries", error);
     reportSummaries.value = [];
@@ -937,6 +1021,54 @@ async function publishReadyClassReports() {
   }
 }
 
+async function revertPublishedClassReports() {
+  if (!validateInputs() || !publishedCount.value) return;
+
+  const publishedReports = reportSummaries.value.filter(
+    (summary) => summary?.status === "PUBLISHED",
+  );
+
+  bulkReverting.value = true;
+  try {
+    for (let index = 0; index < publishedReports.length; index += 1) {
+      const summary = publishedReports[index];
+      bulkProgressText.value = `Reverting ${index + 1} of ${publishedReports.length}`;
+
+      await apolloClient.mutate({
+        mutation: revertStudentTermReportToDraftMutation,
+        variables: {
+          input: {
+            studentId: summary.studentId,
+            academicPeriod: academicPeriod.value,
+            term: selectedTerm.value,
+          },
+        },
+      });
+    }
+
+    await loadClassReportSummaries();
+    if (selectedStudent.value) {
+      await loadSelectedReportPreview();
+    }
+
+    notificationStore.addNotification({
+      type: "success",
+      message: `Reverted ${publishedReports.length} published report${publishedReports.length > 1 ? "s" : ""} to draft.`,
+      timeout: 3500,
+    });
+  } catch (error) {
+    console.error("Failed to revert published class reports", error);
+    notificationStore.addNotification({
+      type: "error",
+      message: error?.message || "Failed to bulk revert published reports.",
+      timeout: 3500,
+    });
+  } finally {
+    bulkProgressText.value = "";
+    bulkReverting.value = false;
+  }
+}
+
 async function revertReportToDraft() {
   if (!reportPreview.value) return;
 
@@ -1107,6 +1239,7 @@ watch(classStudents, (students) => {
 });
 
 watch([selectedClassName, selectedTerm, academicPeriod], async () => {
+  closeIssuesPopover();
   await loadClassReportSummaries();
 });
 
