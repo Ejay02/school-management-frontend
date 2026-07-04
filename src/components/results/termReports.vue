@@ -84,7 +84,7 @@
         <button
           type="button"
           class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
-          :disabled="!selectedStudent || busy"
+          :disabled="!selectedStudent || busy || !canDownloadStudent(selectedStudent?.id)"
           @click="downloadSelectedStudentReport"
         >
           {{
@@ -96,11 +96,24 @@
 
         <button
           type="button"
+          class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300"
+          :disabled="!readyDraftCount || busy"
+          @click="publishReadyClassReports"
+        >
+          {{ bulkPublishing ? "Publishing..." : `Publish Ready Reports (${readyDraftCount})` }}
+        </button>
+
+        <button
+          type="button"
           class="rounded-md border border-indigo-300 bg-white px-4 py-2 text-sm font-semibold text-indigo-700 shadow-sm transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
-          :disabled="!classStudents.length || busy"
+          :disabled="!downloadableCount || busy"
           @click="downloadClassReports"
         >
-          {{ bulkDownloading ? "Preparing ZIP..." : "Download Class ZIP" }}
+          {{
+            bulkDownloading
+              ? "Preparing ZIP..."
+              : `Download Class ZIP (${downloadableCount})`
+          }}
         </button>
       </div>
 
@@ -193,13 +206,19 @@
                   </span>
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700">
-                  {{ getSummaryReadinessLabel(student.id) }}
+                  <span
+                    class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+                    :class="getSummaryReadinessMeta(student.id).className"
+                    :title="getSummaryReadinessMeta(student.id).title"
+                  >
+                    {{ getSummaryReadinessMeta(student.id).label }}
+                  </span>
                 </td>
                 <td class="px-4 py-3 text-right">
                   <button
                     type="button"
                     class="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-indigo-300 hover:text-indigo-700 disabled:cursor-not-allowed disabled:text-gray-400"
-                    :disabled="busy"
+                    :disabled="busy || !canDownloadStudent(student.id)"
                     @click="downloadStudentReport(student)"
                   >
                     {{
@@ -427,6 +446,7 @@ const reportLoading = ref(false);
 const savingRemark = ref(false);
 const publishingReport = ref(false);
 const revertingReport = ref(false);
+const bulkPublishing = ref(false);
 const selectedClassName = ref("");
 const selectedStudentId = ref("");
 const selectedTerm = ref("FIRST");
@@ -480,7 +500,8 @@ const busy = computed(() => {
       bulkDownloading.value ||
       savingRemark.value ||
       publishingReport.value ||
-      revertingReport.value,
+      revertingReport.value ||
+      bulkPublishing.value,
   );
 });
 
@@ -516,6 +537,18 @@ const reportSummaryMap = computed(() => {
       (summary) => [summary.studentId, summary],
     ),
   );
+});
+
+const readyDraftCount = computed(() => {
+  return reportSummaries.value.filter(
+    (summary) => summary?.status !== "PUBLISHED" && summary?.readiness?.ready,
+  ).length;
+});
+
+const downloadableCount = computed(() => {
+  return reportSummaries.value.filter((summary) =>
+    canDownloadStudent(summary?.studentId),
+  ).length;
 });
 
 function getStudentName(student) {
@@ -607,6 +640,49 @@ function getSummaryReadinessLabel(studentId) {
   if (!summary) return summaryLoading.value ? "Loading..." : "-";
   if (summary.status === "PUBLISHED") return "Published";
   return summary.readiness?.ready ? "Ready" : "Needs review";
+}
+
+function getSummaryReadinessMeta(studentId) {
+  const summary = getReportSummary(studentId);
+  if (!summary) {
+    return {
+      label: summaryLoading.value ? "Loading" : "-",
+      className: "bg-slate-100 text-slate-600",
+      title: "",
+    };
+  }
+
+  if (summary.status === "PUBLISHED") {
+    return {
+      label: "Published",
+      className: "bg-emerald-100 text-emerald-700",
+      title: "This report is published and locked.",
+    };
+  }
+
+  if (summary.readiness?.ready) {
+    return {
+      label: "Ready",
+      className: "bg-emerald-100 text-emerald-700",
+      title: "This draft report is ready for publishing and download.",
+    };
+  }
+
+  const issues = Array.isArray(summary.readiness?.issues)
+    ? summary.readiness.issues
+    : [];
+  return {
+    label: issues.length ? `${issues.length} issue${issues.length > 1 ? "s" : ""}` : "Needs review",
+    className: "bg-amber-100 text-amber-700",
+    title: issues.join(" "),
+  };
+}
+
+function canDownloadStudent(studentId) {
+  const summary = getReportSummary(studentId);
+  if (!summary) return false;
+  if (summary.status === "PUBLISHED") return true;
+  return Boolean(summary.readiness?.ready);
 }
 
 function mapReportToPdfPayload(report) {
@@ -813,6 +889,54 @@ async function publishReport() {
   }
 }
 
+async function publishReadyClassReports() {
+  if (!validateInputs() || !readyDraftCount.value) return;
+
+  const readyDrafts = reportSummaries.value.filter(
+    (summary) => summary?.status !== "PUBLISHED" && summary?.readiness?.ready,
+  );
+
+  bulkPublishing.value = true;
+  try {
+    for (let index = 0; index < readyDrafts.length; index += 1) {
+      const summary = readyDrafts[index];
+      bulkProgressText.value = `Publishing ${index + 1} of ${readyDrafts.length}`;
+
+      await apolloClient.mutate({
+        mutation: publishStudentTermReportMutation,
+        variables: {
+          input: {
+            studentId: summary.studentId,
+            academicPeriod: academicPeriod.value,
+            term: selectedTerm.value,
+          },
+        },
+      });
+    }
+
+    await loadClassReportSummaries();
+    if (selectedStudent.value) {
+      await loadSelectedReportPreview();
+    }
+
+    notificationStore.addNotification({
+      type: "success",
+      message: `Published ${readyDrafts.length} report${readyDrafts.length > 1 ? "s" : ""}.`,
+      timeout: 3500,
+    });
+  } catch (error) {
+    console.error("Failed to publish ready class reports", error);
+    notificationStore.addNotification({
+      type: "error",
+      message: error?.message || "Failed to bulk publish ready reports.",
+      timeout: 3500,
+    });
+  } finally {
+    bulkProgressText.value = "";
+    bulkPublishing.value = false;
+  }
+}
+
 async function revertReportToDraft() {
   if (!reportPreview.value) return;
 
@@ -861,6 +985,18 @@ async function resolveReportForStudent(studentId) {
 async function downloadStudentReport(student) {
   if (!validateInputs() || !student) return;
 
+  if (!canDownloadStudent(student.id)) {
+    const summary = getReportSummary(student.id);
+    notificationStore.addNotification({
+      type: "warning",
+      message:
+        summary?.readiness?.issues?.join(" ") ||
+        "This draft report is not ready for download.",
+      timeout: 4000,
+    });
+    return;
+  }
+
   downloadingStudentId.value = student.id;
 
   try {
@@ -890,16 +1026,29 @@ async function downloadSelectedStudentReport() {
 
 async function downloadClassReports() {
   if (!validateInputs() || !classStudents.value.length) return;
+  if (!downloadableCount.value) {
+    notificationStore.addNotification({
+      type: "warning",
+      message: "No reports are ready for class download yet.",
+      timeout: 3500,
+    });
+    return;
+  }
 
   bulkDownloading.value = true;
 
   try {
     const files = [];
+    let skippedCount = 0;
 
     for (let index = 0; index < classStudents.value.length; index += 1) {
       const student = classStudents.value[index];
+      if (!canDownloadStudent(student.id)) {
+        skippedCount += 1;
+        continue;
+      }
       downloadingStudentId.value = student.id;
-      bulkProgressText.value = `Preparing ${index + 1} of ${classStudents.value.length}`;
+      bulkProgressText.value = `Preparing ${files.length + 1} of ${downloadableCount.value}`;
 
       const report = await resolveReportForStudent(student.id);
       const pdfBlob = await buildTermReportPdfBlob(
@@ -918,7 +1067,10 @@ async function downloadClassReports() {
 
     notificationStore.addNotification({
       type: "success",
-      message: `Downloaded ${classStudents.value.length} reports as a ZIP.`,
+      message:
+        skippedCount > 0
+          ? `Downloaded ${files.length} reports. Skipped ${skippedCount} not-ready draft reports.`
+          : `Downloaded ${files.length} reports as a ZIP.`,
       timeout: 3500,
     });
   } catch (error) {
