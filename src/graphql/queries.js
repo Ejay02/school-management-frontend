@@ -1199,6 +1199,10 @@ export const getStudentTermReport = gql`
       schoolLogo
       schoolAddress
       overallAverage
+      status
+      publishedAt
+      publishedById
+      publishedByRole
       ranking {
         position
         totalStudents
@@ -1208,6 +1212,10 @@ export const getStudentTermReport = gql`
         absentClasses
         totalClasses
         attendanceRate
+      }
+      readiness {
+        ready
+        issues
       }
       subjectGrades {
         name
@@ -1224,8 +1232,38 @@ export const getStudentTermReport = gql`
         remark
         authorId
         authorRole
+        status
+        publishedAt
+        publishedById
+        publishedByRole
         createdAt
         updatedAt
+      }
+    }
+  }
+`;
+
+export const getClassTermReportSummaries = gql`
+  query GetClassTermReportSummaries(
+    $classId: String!
+    $academicPeriod: String!
+    $term: Term!
+  ) {
+    getClassTermReportSummaries(
+      classId: $classId
+      academicPeriod: $academicPeriod
+      term: $term
+    ) {
+      studentId
+      studentName
+      overallAverage
+      attendanceRate
+      position
+      totalStudents
+      status
+      readiness {
+        ready
+        issues
       }
     }
   }

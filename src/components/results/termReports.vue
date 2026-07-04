@@ -150,6 +150,16 @@
                   Attendance
                 </th>
                 <th
+                  class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500"
+                >
+                  Status
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500"
+                >
+                  Readiness
+                </th>
+                <th
                   class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500"
                 >
                   Action
@@ -162,25 +172,28 @@
                   {{ getStudentName(student) }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700">
-                  {{
-                    previewMatchesStudent(student.id)
-                      ? previewPositionLabel
-                      : "-"
-                  }}
+                  {{ getSummaryPositionLabel(student.id) }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700">
-                  {{
-                    previewMatchesStudent(student.id)
-                      ? previewAverageLabel
-                      : "-"
-                  }}
+                  {{ getSummaryAverageLabel(student.id) }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-700">
-                  {{
-                    previewMatchesStudent(student.id)
-                      ? previewAttendanceLabel
-                      : "-"
-                  }}
+                  {{ getSummaryAttendanceLabel(student.id) }}
+                </td>
+                <td class="px-4 py-3 text-sm">
+                  <span
+                    class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+                    :class="
+                      getSummaryStatus(student.id) === 'PUBLISHED'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-amber-100 text-amber-700'
+                    "
+                  >
+                    {{ formatStatusLabel(getSummaryStatus(student.id)) }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-700">
+                  {{ getSummaryReadinessLabel(student.id) }}
                 </td>
                 <td class="px-4 py-3 text-right">
                   <button
@@ -191,7 +204,7 @@
                   >
                     {{
                       downloadingStudentId === student.id
-                        ? "Generating..."
+                        ? "Preparing..."
                         : "Download"
                     }}
                   </button>
@@ -222,6 +235,58 @@
               <p class="text-sm text-gray-500">
                 {{ reportPreview.className }} • {{ selectedTermLabel }} •
                 {{ reportPreview.academicPeriod }}
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <span
+                class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+                :class="
+                  reportPreview.status === 'PUBLISHED'
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : 'bg-amber-100 text-amber-700'
+                "
+              >
+                {{ formatStatusLabel(reportPreview.status) }}
+              </span>
+              <span class="text-xs text-gray-500">
+                {{ reportPreview.readiness?.ready ? "Ready to publish" : "Not ready to publish" }}
+              </span>
+              <span
+                v-if="reportPreview.publishedAt"
+                class="text-xs text-gray-500"
+              >
+                Published {{ formatTimestamp(reportPreview.publishedAt) }}
+              </span>
+            </div>
+
+            <div
+              class="rounded-lg border px-3 py-3"
+              :class="
+                reportPreview.readiness?.ready
+                  ? 'border-emerald-200 bg-emerald-50'
+                  : 'border-amber-200 bg-amber-50'
+              "
+            >
+              <p
+                class="text-sm font-medium"
+                :class="
+                  reportPreview.readiness?.ready
+                    ? 'text-emerald-700'
+                    : 'text-amber-700'
+                "
+              >
+                {{
+                  reportPreview.readiness?.ready
+                    ? "This report is ready for publishing."
+                    : "This report is still missing required items."
+                }}
+              </p>
+              <p
+                v-if="!reportPreview.readiness?.ready"
+                class="mt-2 text-sm text-amber-700"
+              >
+                {{ reportPreview.readiness?.issues?.join(" ") }}
               </p>
             </div>
 
@@ -267,6 +332,7 @@
               <textarea
                 v-model.trim="remarkDraft"
                 rows="7"
+                :disabled="reportPreview.status === 'PUBLISHED'"
                 class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 placeholder="Enter the official term remark that should appear on the report..."
               ></textarea>
@@ -274,16 +340,44 @@
                 Saved remark appears in downloaded PDFs and overrides scattered
                 result comments.
               </p>
+              <p
+                v-if="reportPreview.status === 'PUBLISHED'"
+                class="mt-2 text-xs text-amber-700"
+              >
+                Revert this report to draft before editing the remark.
+              </p>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
               <button
                 type="button"
                 class="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-indigo-300 hover:text-indigo-700 disabled:cursor-not-allowed disabled:text-gray-400"
-                :disabled="savingRemark || !reportPreview"
+                :disabled="
+                  savingRemark ||
+                  !reportPreview ||
+                  reportPreview.status === 'PUBLISHED'
+                "
                 @click="saveRemark"
               >
                 {{ savingRemark ? "Saving..." : "Save Remark" }}
+              </button>
+              <button
+                v-if="reportPreview.status !== 'PUBLISHED'"
+                type="button"
+                class="rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300"
+                :disabled="publishingReport || !reportPreview?.readiness?.ready"
+                @click="publishReport"
+              >
+                {{ publishingReport ? "Publishing..." : "Publish Report" }}
+              </button>
+              <button
+                v-else
+                type="button"
+                class="rounded-md border border-amber-300 bg-white px-3 py-2 text-sm font-medium text-amber-700 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:text-amber-300"
+                :disabled="revertingReport"
+                @click="revertReportToDraft"
+              >
+                {{ revertingReport ? "Reverting..." : "Revert To Draft" }}
               </button>
               <span
                 v-if="reportPreview.remark?.updatedAt"
@@ -302,8 +396,13 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { apolloClient } from "../../../apollo-client";
-import { upsertTermReportRemarkMutation } from "../../graphql/mutations";
 import {
+  publishStudentTermReportMutation,
+  revertStudentTermReportToDraftMutation,
+  upsertTermReportRemarkMutation,
+} from "../../graphql/mutations";
+import {
+  getClassTermReportSummaries,
   getSetupStateQuery,
   getStudentTermReport,
 } from "../../graphql/queries";
@@ -323,13 +422,17 @@ const classStore = useClassStore();
 const notificationStore = useNotificationStore();
 
 const initializing = ref(true);
+const summaryLoading = ref(false);
 const reportLoading = ref(false);
 const savingRemark = ref(false);
+const publishingReport = ref(false);
+const revertingReport = ref(false);
 const selectedClassName = ref("");
 const selectedStudentId = ref("");
 const selectedTerm = ref("FIRST");
 const academicPeriod = ref("");
 const setupState = ref(null);
+const reportSummaries = ref([]);
 const reportPreview = ref(null);
 const remarkDraft = ref("");
 const downloadingStudentId = ref("");
@@ -373,7 +476,11 @@ const selectedTermLabel = computed(() => {
 
 const busy = computed(() => {
   return Boolean(
-    downloadingStudentId.value || bulkDownloading.value || savingRemark.value,
+    downloadingStudentId.value ||
+      bulkDownloading.value ||
+      savingRemark.value ||
+      publishingReport.value ||
+      revertingReport.value,
   );
 });
 
@@ -403,6 +510,14 @@ const reportFormulaLabel = computed(() => {
   return `${examWeight}% exams, ${assessmentWeight}% assessments, ${attendanceWeight}% attendance`;
 });
 
+const reportSummaryMap = computed(() => {
+  return new Map(
+    (Array.isArray(reportSummaries.value) ? reportSummaries.value : []).map(
+      (summary) => [summary.studentId, summary],
+    ),
+  );
+});
+
 function getStudentName(student) {
   return (
     [student?.name, student?.surname].filter(Boolean).join(" ") || "Student"
@@ -412,6 +527,10 @@ function getStudentName(student) {
 function formatTimestamp(value) {
   if (!value) return "";
   return new Date(value).toLocaleString();
+}
+
+function formatStatusLabel(status) {
+  return status === "PUBLISHED" ? "Published" : "Draft";
 }
 
 function buildDefaultAcademicPeriod(state) {
@@ -459,8 +578,35 @@ function validateInputs(notify = true) {
   return true;
 }
 
-function previewMatchesStudent(studentId) {
-  return reportPreview.value?.studentId === studentId;
+function getReportSummary(studentId) {
+  return reportSummaryMap.value.get(studentId) || null;
+}
+
+function getSummaryAverageLabel(studentId) {
+  return formatScoreLabel(getReportSummary(studentId)?.overallAverage);
+}
+
+function getSummaryAttendanceLabel(studentId) {
+  return formatScoreLabel(getReportSummary(studentId)?.attendanceRate);
+}
+
+function getSummaryPositionLabel(studentId) {
+  const summary = getReportSummary(studentId);
+  const position = summary?.position;
+  const totalStudents = summary?.totalStudents || 0;
+  if (!position) return totalStudents ? `- / ${totalStudents}` : "-";
+  return `${position} / ${totalStudents}`;
+}
+
+function getSummaryStatus(studentId) {
+  return getReportSummary(studentId)?.status || "DRAFT";
+}
+
+function getSummaryReadinessLabel(studentId) {
+  const summary = getReportSummary(studentId);
+  if (!summary) return summaryLoading.value ? "Loading..." : "-";
+  if (summary.status === "PUBLISHED") return "Published";
+  return summary.readiness?.ready ? "Ready" : "Needs review";
 }
 
 function mapReportToPdfPayload(report) {
@@ -511,6 +657,41 @@ async function fetchStudentReportData(studentId) {
   });
 
   return data?.getStudentTermReport || null;
+}
+
+async function loadClassReportSummaries() {
+  if (!selectedClass.value?.id || !validateInputs(false)) {
+    reportSummaries.value = [];
+    return;
+  }
+
+  summaryLoading.value = true;
+
+  try {
+    const { data } = await apolloClient.query({
+      query: getClassTermReportSummaries,
+      variables: {
+        classId: selectedClass.value.id,
+        academicPeriod: academicPeriod.value,
+        term: selectedTerm.value,
+      },
+      fetchPolicy: "network-only",
+    });
+
+    reportSummaries.value = Array.isArray(data?.getClassTermReportSummaries)
+      ? data.getClassTermReportSummaries
+      : [];
+  } catch (error) {
+    console.error("Failed to load class term report summaries", error);
+    reportSummaries.value = [];
+    notificationStore.addNotification({
+      type: "error",
+      message: "Unable to load class report readiness.",
+      timeout: 3500,
+    });
+  } finally {
+    summaryLoading.value = false;
+  }
 }
 
 async function loadSelectedReportPreview() {
@@ -575,6 +756,8 @@ async function saveRemark() {
       ...reportPreview.value,
       remark: data?.upsertTermReportRemark || null,
     };
+    await loadClassReportSummaries();
+    await loadSelectedReportPreview();
 
     notificationStore.addNotification({
       type: "success",
@@ -589,6 +772,82 @@ async function saveRemark() {
     });
   } finally {
     savingRemark.value = false;
+  }
+}
+
+async function publishReport() {
+  if (!reportPreview.value) return;
+
+  publishingReport.value = true;
+  try {
+    const { data } = await apolloClient.mutate({
+      mutation: publishStudentTermReportMutation,
+      variables: {
+        input: {
+          studentId: reportPreview.value.studentId,
+          academicPeriod: academicPeriod.value,
+          term: selectedTerm.value,
+        },
+      },
+    });
+
+    if (data?.publishStudentTermReport) {
+      reportPreview.value = await fetchStudentReportData(reportPreview.value.studentId);
+      remarkDraft.value = String(reportPreview.value?.remark?.remark || "").trim();
+      await loadClassReportSummaries();
+    }
+
+    notificationStore.addNotification({
+      type: "success",
+      message: "Report published and locked.",
+    });
+  } catch (error) {
+    console.error("Failed to publish term report", error);
+    notificationStore.addNotification({
+      type: "error",
+      message: error?.message || "Failed to publish the report.",
+      timeout: 3500,
+    });
+  } finally {
+    publishingReport.value = false;
+  }
+}
+
+async function revertReportToDraft() {
+  if (!reportPreview.value) return;
+
+  revertingReport.value = true;
+  try {
+    const { data } = await apolloClient.mutate({
+      mutation: revertStudentTermReportToDraftMutation,
+      variables: {
+        input: {
+          studentId: reportPreview.value.studentId,
+          academicPeriod: academicPeriod.value,
+          term: selectedTerm.value,
+        },
+      },
+    });
+
+    if (data?.revertStudentTermReportToDraft) {
+      reportPreview.value = await fetchStudentReportData(reportPreview.value.studentId);
+      remarkDraft.value = String(reportPreview.value?.remark?.remark || "").trim();
+      await loadClassReportSummaries();
+    }
+
+    notificationStore.addNotification({
+      type: "success",
+      message: "Report reverted to draft.",
+    });
+  } catch (error) {
+    console.error("Failed to revert term report", error);
+    notificationStore.addNotification({
+      type: "error",
+      message: error?.message || "Failed to revert the report.",
+      timeout: 3500,
+    });
+  } finally {
+    revertingReport.value = false;
   }
 }
 
@@ -693,6 +952,10 @@ watch(classStudents, (students) => {
   if (!stillExists) {
     selectedStudentId.value = students[0].id;
   }
+});
+
+watch([selectedClassName, selectedTerm, academicPeriod], async () => {
+  await loadClassReportSummaries();
 });
 
 watch([selectedStudentId, selectedTerm, academicPeriod], async () => {

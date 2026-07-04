@@ -208,8 +208,62 @@ export const upsertTermReportRemarkMutation = gql`
       remark
       authorId
       authorRole
+      status
+      publishedAt
+      publishedById
+      publishedByRole
       createdAt
       updatedAt
+    }
+  }
+`;
+
+export const publishStudentTermReportMutation = gql`
+  mutation PublishStudentTermReport($input: ManageTermReportInput!) {
+    publishStudentTermReport(input: $input) {
+      studentId
+      status
+      publishedAt
+      publishedById
+      publishedByRole
+      readiness {
+        ready
+        issues
+      }
+      remark {
+        id
+        remark
+        status
+        publishedAt
+        publishedById
+        publishedByRole
+        updatedAt
+      }
+    }
+  }
+`;
+
+export const revertStudentTermReportToDraftMutation = gql`
+  mutation RevertStudentTermReportToDraft($input: ManageTermReportInput!) {
+    revertStudentTermReportToDraft(input: $input) {
+      studentId
+      status
+      publishedAt
+      publishedById
+      publishedByRole
+      readiness {
+        ready
+        issues
+      }
+      remark {
+        id
+        remark
+        status
+        publishedAt
+        publishedById
+        publishedByRole
+        updatedAt
+      }
     }
   }
 `;
