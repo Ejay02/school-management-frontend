@@ -524,6 +524,23 @@ export const getTeacherTodayOverview = gql`
       }
       attendanceDueCount
       assignmentsToGradeCount
+      supervisorAcademicPeriod
+      supervisorCurrentTerm
+      supervisorRemarkPendingCount
+      supervisorRemarkCompletedCount
+      supervisorRemarkTasks {
+        studentId
+        studentName
+        studentCode
+        classId
+        className
+        academicPeriod
+        term
+        completed
+        locked
+        remark
+        updatedAt
+      }
     }
   }
 `;
@@ -1310,8 +1327,16 @@ export const getAttendances = gql`
 `;
 
 export const getAttendancesByClass = gql`
-  query getAttendancesByClass($classId: String!, $startDate: DateTime!, $endDate: DateTime!) {
-    getAttendancesByClass(classId: $classId, startDate: $startDate, endDate: $endDate) {
+  query getAttendancesByClass(
+    $classId: String!
+    $startDate: DateTime!
+    $endDate: DateTime!
+  ) {
+    getAttendancesByClass(
+      classId: $classId
+      startDate: $startDate
+      endDate: $endDate
+    ) {
       id
       date
       present
