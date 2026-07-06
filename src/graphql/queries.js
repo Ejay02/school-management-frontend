@@ -545,6 +545,37 @@ export const getTeacherTodayOverview = gql`
   }
 `;
 
+export const getStudentTodayOverview = gql`
+  query getStudentTodayOverview {
+    getStudentTodayOverview {
+      dueAssignmentCount
+      overdueAssignmentCount
+      upcomingExamCount
+      dueAssignments {
+        assignmentId
+        title
+        subjectName
+        dueDate
+        submitted
+        overdue
+        statusLabel
+      }
+      upcomingExams {
+        studentExamId
+        examId
+        title
+        subjectName
+        date
+        startTime
+        endTime
+        hasTaken
+        missed
+        statusLabel
+      }
+    }
+  }
+`;
+
 export const getTeacherPendingSubmissions = gql`
   query getTeacherPendingSubmissions($params: PaginationInput) {
     getTeacherPendingSubmissions(params: $params) {
