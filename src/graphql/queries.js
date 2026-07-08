@@ -576,6 +576,52 @@ export const getStudentTodayOverview = gql`
   }
 `;
 
+export const getParentTodayOverview = gql`
+  query getParentTodayOverview {
+    getParentTodayOverview {
+      linkedStudentCount
+      pendingAssignmentCount
+      overdueAssignmentCount
+      upcomingExamCount
+      assignmentTasks {
+        studentId
+        studentName
+        className
+        assignmentId
+        title
+        subjectName
+        dueDate
+        overdue
+        statusLabel
+      }
+      examTasks {
+        studentId
+        studentName
+        className
+        examId
+        studentExamId
+        title
+        subjectName
+        date
+        startTime
+        endTime
+        missed
+        statusLabel
+      }
+      schoolNotices {
+        eventId
+        title
+        category
+        statusLabel
+        startTime
+        endTime
+        location
+        className
+      }
+    }
+  }
+`;
+
 export const getTeacherPendingSubmissions = gql`
   query getTeacherPendingSubmissions($params: PaginationInput) {
     getTeacherPendingSubmissions(params: $params) {

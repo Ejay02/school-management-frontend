@@ -235,6 +235,7 @@ import {
   getAllLessons,
   getAttendances,
   getMyInvoices,
+  getParentTodayOverview,
 } from "../../graphql/queries";
 import { useUserStore } from "../../store/userStore";
 import { formatDate } from "../../utils/date.holidays";
@@ -264,9 +265,19 @@ const welcomeSubtitle = computed(() => {
 const attendanceRecords = ref([]);
 const lessons = ref([]);
 const invoices = ref([]);
+const parentOverview = ref({
+  linkedStudentCount: 0,
+  pendingAssignmentCount: 0,
+  overdueAssignmentCount: 0,
+  upcomingExamCount: 0,
+  assignmentTasks: [],
+  examTasks: [],
+  schoolNotices: [],
+});
 const attendanceLoading = ref(false);
 const lessonsLoading = ref(false);
 const invoicesLoading = ref(false);
+const parentOverviewLoading = ref(false);
 let overviewRequestId = 0;
 
 const weekdayIndexByName = {
@@ -365,6 +376,39 @@ const fetchInvoiceSummary = async () => {
     invoices.value = [];
   } finally {
     invoicesLoading.value = false;
+  }
+};
+
+const fetchParentTodayOverview = async () => {
+  parentOverviewLoading.value = true;
+
+  try {
+    const { data } = await apolloClient.query({
+      query: getParentTodayOverview,
+      fetchPolicy: "network-only",
+    });
+
+    parentOverview.value = data?.getParentTodayOverview || {
+      linkedStudentCount: 0,
+      pendingAssignmentCount: 0,
+      overdueAssignmentCount: 0,
+      upcomingExamCount: 0,
+      assignmentTasks: [],
+      examTasks: [],
+      schoolNotices: [],
+    };
+  } catch (error) {
+    parentOverview.value = {
+      linkedStudentCount: 0,
+      pendingAssignmentCount: 0,
+      overdueAssignmentCount: 0,
+      upcomingExamCount: 0,
+      assignmentTasks: [],
+      examTasks: [],
+      schoolNotices: [],
+    };
+  } finally {
+    parentOverviewLoading.value = false;
   }
 };
 
@@ -615,9 +659,89 @@ const timetableEmptyLabel = computed(() => {
   return "No lessons scheduled for today.";
 });
 
+const formatDateTime = (value) => {
+  if (!value) return "";
+  return new Date(value).toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const parentStickyItems = computed(() => {
+  const assignmentItems = (parentOverview.value?.assignmentTasks || []).map(
+    (task) => ({
+      kind: "assignment",
+      id: task.assignmentId,
+      title: `${task.studentName}: ${task.title}`,
+      subtitle: `${task.className || "Class"} • ${task.subjectName || "Assignment"} • Due ${formatDate(task.dueDate)}`,
+      statusLabel: task.statusLabel,
+      statusClass: task.overdue
+        ? "bg-red-100 text-red-700"
+        : task.statusLabel === "Due today"
+          ? "bg-amber-100 text-amber-700"
+          : "bg-yellow-100 text-yellow-700",
+      link: `/assignment/${task.assignmentId}`,
+      linkLabel: "Open assignment",
+      sortTime: new Date(task.dueDate).getTime(),
+    }),
+  );
+
+  const examItems = (parentOverview.value?.examTasks || []).map((task) => ({
+    kind: "exam",
+    id: task.studentExamId,
+    title: `${task.studentName}: ${task.title}`,
+    subtitle: `${task.className || "Class"} • ${task.subjectName || "Exam"} • ${formatDate(task.date)}`,
+    statusLabel: task.statusLabel,
+    statusClass: task.statusLabel === "Missed"
+      ? "bg-red-100 text-red-700"
+      : task.statusLabel === "Today"
+        ? "bg-indigo-100 text-indigo-700"
+        : "bg-slate-100 text-slate-700",
+    link: `/exams/${task.examId}`,
+    linkLabel: "Open exam",
+    sortTime: new Date(task.date).getTime(),
+  }));
+
+  const noticeItems = (parentOverview.value?.schoolNotices || []).map(
+    (notice) => ({
+      kind: "notice",
+      id: notice.eventId,
+      title: notice.title,
+      subtitle: [
+        notice.category,
+        notice.className,
+        notice.location,
+        formatDateTime(notice.startTime),
+      ]
+        .filter(Boolean)
+        .join(" • "),
+      statusLabel: notice.statusLabel,
+      statusClass:
+        notice.category === "Holiday"
+          ? "bg-emerald-100 text-emerald-700"
+          : notice.category === "PTA"
+            ? "bg-purple-100 text-purple-700"
+            : "bg-blue-100 text-blue-700",
+      link: "/events",
+      linkLabel: "View events",
+      sortTime: new Date(notice.startTime).getTime(),
+    }),
+  );
+
+  return [...assignmentItems, ...examItems, ...noticeItems]
+    .sort((left, right) => left.sortTime - right.sortTime)
+    .slice(0, 12);
+});
+
 onMounted(async () => {
   await fetchLinkedStudents();
-  await Promise.all([fetchInvoiceSummary(), fetchSelectedStudentOverview()]);
+  await Promise.all([
+    fetchInvoiceSummary(),
+    fetchSelectedStudentOverview(),
+    fetchParentTodayOverview(),
+  ]);
 });
 
 watch(selectedStudentId, () => {
