@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { apolloClient } from "../../apollo-client";
-import { getAllPayments, getPaymentById } from "../graphql/queries";
+import { getAllPayments, getPaymentById, getFinanceReconciliation } from "../graphql/queries";
 import { useUserStore } from "./userStore";
 
 export const usePaymentStore = defineStore("paymentStore", {
@@ -13,6 +13,9 @@ export const usePaymentStore = defineStore("paymentStore", {
     hasMore: true,
     totalPages: 1,
     totalCount: 0,
+    reconciliationRecords: [],
+    reconciliationLoading: false,
+    reconciliationError: null,
   }),
 
   actions: {
@@ -117,10 +120,31 @@ export const usePaymentStore = defineStore("paymentStore", {
       }
     },
 
+    async fetchReconciliationData() {
+      this.reconciliationLoading = true;
+      this.reconciliationError = null;
+
+      try {
+        const { data } = await apolloClient.query({
+          query: getFinanceReconciliation,
+          fetchPolicy: "network-only",
+        });
+
+        this.reconciliationRecords = data.getFinanceReconciliation;
+        return this.reconciliationRecords;
+      } catch (err) {
+        this.reconciliationError = err.message || "Error fetching reconciliation data";
+        throw err;
+      } finally {
+        this.reconciliationLoading = false;
+      }
+    },
+
     // Reset payments to force a fresh fetch
     resetPayments() {
       this.allPayments = [];
       this.payments = [];
+      this.reconciliationRecords = [];
     },
 
     // Refresh payments by forcing a new fetch

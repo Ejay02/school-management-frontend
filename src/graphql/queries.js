@@ -1879,3 +1879,25 @@ export const getChatMessages = gql`
     }
   }
 `;
+
+export const getFinanceReconciliation = gql`
+  query getFinanceReconciliation {
+    getFinanceReconciliation {
+      invoiceId
+      invoiceNumber
+      studentId
+      studentName
+      studentSurname
+      classId
+      className
+      feeType
+      term
+      amount
+      paid
+      balance
+      status
+      dueDate
+      createdAt
+    }
+  }
+`;
