@@ -19,13 +19,13 @@
             v-for="termSum in termSummaries"
             :key="termSum.term"
             :class="[
-              'rounded-2xl shadow-md p-5 text-white transition duration-300 hover:scale-[1.02] cursor-default',
+              'rounded-2xl border p-5 transition duration-300 hover:scale-[1.02] cursor-default shadow-sm',
               termSum.bgClass
             ]"
           >
             <div class="flex justify-between items-center mb-3">
-              <span class="text-sm font-semibold tracking-wider uppercase opacity-90">{{ termSum.title }}</span>
-              <i :class="['fas', termSum.icon, 'text-lg opacity-85']"></i>
+              <span class="text-sm font-semibold tracking-wider uppercase opacity-80">{{ termSum.title }}</span>
+              <i :class="['fas', termSum.icon, 'text-lg opacity-80']"></i>
             </div>
             
             <div class="space-y-2">
@@ -37,7 +37,7 @@
                 <span class="text-xs opacity-75">Collected:</span>
                 <span class="text-lg font-bold">{{ formatCurrency(termSum.collected) }}</span>
               </div>
-              <div class="flex justify-between items-baseline border-t border-white/20 pt-2">
+              <div class="flex justify-between items-baseline border-t border-black/10 pt-2">
                 <span class="text-xs font-semibold">Outstanding:</span>
                 <span class="text-lg font-black">{{ formatCurrency(termSum.outstanding) }}</span>
               </div>
@@ -49,9 +49,9 @@
                 <span>Collection Rate</span>
                 <span class="font-bold">{{ termSum.rate.toFixed(1) }}%</span>
               </div>
-              <div class="w-full bg-white/25 rounded-full h-1.5 overflow-hidden">
+              <div class="w-full bg-black/5 rounded-full h-1.5 overflow-hidden">
                 <div
-                  class="bg-white h-1.5 rounded-full transition-all duration-500"
+                  :class="[termSum.barClass, 'h-1.5 rounded-full transition-all duration-500']"
                   :style="{ width: `${Math.min(termSum.rate, 100)}%` }"
                 ></div>
               </div>
@@ -442,7 +442,8 @@ const termSummaries = computed(() => {
       term: "FIRST",
       title: "First Term",
       icon: "fa-money-bill-wave",
-      bgClass: "bg-gradient-to-r from-blue-500 to-indigo-600",
+      bgClass: "bg-eduSky text-gray-800 border-eduSky/40",
+      barClass: "bg-sky-600",
       expected: 0,
       collected: 0,
       outstanding: 0,
@@ -452,7 +453,8 @@ const termSummaries = computed(() => {
       term: "SECOND",
       title: "Second Term",
       icon: "fa-coins",
-      bgClass: "bg-gradient-to-r from-purple-500 to-violet-600",
+      bgClass: "bg-eduPurple text-gray-800 border-eduPurple/40",
+      barClass: "bg-indigo-500",
       expected: 0,
       collected: 0,
       outstanding: 0,
@@ -462,7 +464,8 @@ const termSummaries = computed(() => {
       term: "THIRD",
       title: "Third Term",
       icon: "fa-vault",
-      bgClass: "bg-gradient-to-r from-emerald-500 to-teal-600",
+      bgClass: "bg-eduYellow text-gray-800 border-eduYellow/40",
+      barClass: "bg-amber-500",
       expected: 0,
       collected: 0,
       outstanding: 0,
@@ -472,7 +475,8 @@ const termSummaries = computed(() => {
       term: "YEARLY",
       title: "Yearly Fee",
       icon: "fa-calendar-days",
-      bgClass: "bg-gradient-to-r from-amber-500 to-orange-600",
+      bgClass: "bg-eduPurpleLight text-gray-800 border-eduPurple/30",
+      barClass: "bg-purple-500",
       expected: 0,
       collected: 0,
       outstanding: 0,
