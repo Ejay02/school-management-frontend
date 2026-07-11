@@ -1460,3 +1460,12 @@ export const deleteChatMessage = gql`
     deleteChatMessage(messageId: $messageId)
   }
 `;
+
+export const bulkGenerateClassInvoicesMutation = gql`
+  mutation BulkGenerateClassInvoices($classId: String!) {
+    bulkGenerateClassInvoices(classId: $classId) {
+      count
+      message
+    }
+  }
+`;

@@ -173,6 +173,21 @@
                       </span>
                     </div>
 
+                    <!-- Bulk Invoice Action -->
+                    <div v-if="fee?.classes?.[0]?.id" class="group relative">
+                      <button
+                        @click="confirmBulkInvoice(fee)"
+                        class="group relative text-emerald-600 hover:bg-emerald-50 px-3 py-1 rounded-md text-sm transition duration-300"
+                      >
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                      </button>
+                      <span
+                        class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex whitespace-nowrap"
+                      >
+                        Bulk Invoice
+                      </span>
+                    </div>
+
                     <button
                       @click="
                         showDelModal(fee.id, fee.description, 'feeStructure')
@@ -201,6 +216,46 @@
         />
       </div>
     </div>
+
+    <!-- Bulk Invoice Confirmation Modal -->
+    <div
+      v-if="showBulkInvoiceModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+    >
+      <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-xl space-y-4 border border-gray-150 transform transition-all duration-300">
+        <div class="flex items-start gap-4">
+          <div class="h-10 w-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-file-invoice-dollar text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-gray-900">Bulk Issue Invoices</h3>
+            <p class="text-sm text-gray-500 mt-2">
+              Are you sure you want to generate invoices for all active students in class 
+              <span class="font-semibold text-gray-800">{{ selectedClassForInvoice?.name }}</span>?
+            </p>
+            <p class="text-xs text-gray-400 mt-2">
+              This will create a new pending invoice for each parent. Parents who have already been invoiced for this structure will be skipped automatically.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button
+            @click="cancelBulkInvoice"
+            class="px-4 py-2 border border-gray-300 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 transition"
+          >
+            Cancel
+          </button>
+          <button
+            @click="executeBulkInvoice"
+            :disabled="feeStructureStore.loading"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-sm transition disabled:opacity-50"
+          >
+            {{ feeStructureStore.loading ? "Generating..." : "Generate Invoices" }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -221,6 +276,33 @@ const feeStructureStore = useFeeStructureStore();
 const searchQuery = ref("");
 const academicYearFilter = ref("");
 const termFilter = ref("");
+
+// Bulk Invoice Modal State & Actions
+const showBulkInvoiceModal = ref(false);
+const selectedClassForInvoice = ref(null);
+
+const confirmBulkInvoice = (fee) => {
+  if (fee?.classes?.[0]) {
+    selectedClassForInvoice.value = fee.classes[0];
+    showBulkInvoiceModal.value = true;
+  }
+};
+
+const cancelBulkInvoice = () => {
+  selectedClassForInvoice.value = null;
+  showBulkInvoiceModal.value = false;
+};
+
+const executeBulkInvoice = async () => {
+  if (!selectedClassForInvoice.value) return;
+  try {
+    await feeStructureStore.bulkGenerateInvoicesForClass(selectedClassForInvoice.value.id);
+  } catch (error) {
+    console.error("Bulk invoicing failed", error);
+  } finally {
+    cancelBulkInvoice();
+  }
+};
 
 const currentPage = ref(1);
 const itemsPerPage = 10;

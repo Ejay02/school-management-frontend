@@ -1,10 +1,8 @@
 import { defineStore } from "pinia";
 import { apolloClient } from "../../apollo-client";
-import { createFeeStructure, updateFeeStructure } from "../graphql/mutations";
+import { createFeeStructure, updateFeeStructure, bulkGenerateClassInvoicesMutation } from "../graphql/mutations";
 import { getAllFeeStructures, getFeeStructureById } from "../graphql/queries";
 import { useNotificationStore } from "./notification";
-
-
 
 export const useFeeStructureStore = defineStore("feeStructureStore", {
   state: () => ({
@@ -24,7 +22,6 @@ export const useFeeStructureStore = defineStore("feeStructureStore", {
       this.allFeeStructures = [];
       this.feeStructures = [];
     },
-
 
     // Refresh fee structures by forcing a new fetch
     async refreshFeeStructures(page = 1, limit = 10) {
@@ -89,7 +86,6 @@ export const useFeeStructureStore = defineStore("feeStructureStore", {
     },
 
     async createNewFeeStructure(feeStructureData) {
-      
       this.loading = true;
       this.error = null;
 
@@ -102,13 +98,10 @@ export const useFeeStructureStore = defineStore("feeStructureStore", {
         if (data?.createFeeStructure) {
           // Add the new fee structure to the store
           this.addFeeStructure(data.createFeeStructure);
-
           return data.createFeeStructure;
         }
-      
       } catch (error) {
         this.error = error.message || "Error creating fee structure";
-        
         throw error;
       } finally {
         this.loading = false;
@@ -154,43 +147,6 @@ export const useFeeStructureStore = defineStore("feeStructureStore", {
       }
     },
 
-    // Delete a fee structure
-    // async deleteFeeStructureById(id) {
-    //   const notificationStore = useNotificationStore();
-    //   this.loading = true;
-    //   this.error = null;
-
-    //   try {
-    //     const { data } = await apolloClient.mutate({
-    //       mutation: deleteFeeStructure,
-    //       variables: { id },
-    //     });
-
-    //     if (data?.deleteFeeStructure) {
-    //       // Remove the fee structure from the store
-    //       this.removeFeeStructure(id);
-
-    //       notificationStore.addNotification({
-    //         type: "success",
-    //         message: "Fee structure deleted successfully!",
-    //       });
-
-    //       return true;
-    //     }
-    //   } catch (error) {
-    //     this.error = error.message || "Error deleting fee structure";
-    //     notificationStore.addNotification({
-    //       type: "error",
-    //       message: "Error deleting fee structure",
-    //       error,
-    //     });
-    //     throw error;
-    //   } finally {
-    //     this.loading = false;
-    //   }
-    // },
-
-    // This approach is a common pattern in state management to ensure UI consistency and optimize performance by reducing API calls.
     // Add a new fee structure to the store after creation
     addFeeStructure(newFeeStructure) {
       this.allFeeStructures = [newFeeStructure, ...this.allFeeStructures];
@@ -218,6 +174,39 @@ export const useFeeStructureStore = defineStore("feeStructureStore", {
     removeFeeStructure(id) {
       this.allFeeStructures = this.allFeeStructures.filter((f) => f.id !== id);
       this.feeStructures = this.feeStructures.filter((f) => f.id !== id);
+    },
+
+    // Bulk generate invoices for all parents of students in a class
+    async bulkGenerateInvoicesForClass(classId) {
+      const notificationStore = useNotificationStore();
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const { data } = await apolloClient.mutate({
+          mutation: bulkGenerateClassInvoicesMutation,
+          variables: { classId },
+        });
+
+        if (data?.bulkGenerateClassInvoices) {
+          const result = data.bulkGenerateClassInvoices;
+          notificationStore.addNotification({
+            type: result.count > 0 ? "success" : "info",
+            message: result.message,
+          });
+          return result;
+        }
+      } catch (err) {
+        this.error = err.message || "Error bulk generating invoices";
+        notificationStore.addNotification({
+          type: "error",
+          message: "Failed to generate class invoices",
+          error: err,
+        });
+        throw err;
+      } finally {
+        this.loading = false;
+      }
     },
   },
 });
