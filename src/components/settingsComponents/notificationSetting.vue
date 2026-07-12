@@ -10,76 +10,76 @@
         </p>
       </div>
 
-      <div class="rounded-lg border border-gray-200 bg-white p-4 space-y-4">
-        <div class="flex items-start justify-between gap-4">
-          <div>
-            <h3 class="text-sm font-medium text-gray-700">
-              Weekly Parent Digest
-            </h3>
-            <p class="text-sm text-gray-500">
-              {{
-                isParent
-                  ? "Receive one weekly digest email with attendance, events, assignments, and fees for all your children."
-                  : "Parents can manage whether they receive the weekly digest email from here."
-              }}
-            </p>
+      <!-- Weekly Parent Digest Settings (Only for Parents) -->
+      <div v-if="isParent" class="space-y-4">
+        <div class="rounded-lg border border-gray-200 bg-white p-4 space-y-4">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h3 class="text-sm font-medium text-gray-700">
+                Weekly Parent Digest
+              </h3>
+              <p class="text-sm text-gray-500 mt-1">
+                Receive one weekly digest email with attendance, events, assignments, and fees for all your children.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              @click="
+                formData.weeklyDigestEnabled = !formData.weeklyDigestEnabled
+              "
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out"
+              :class="[
+                formData.weeklyDigestEnabled ? 'bg-indigo-500' : 'bg-gray-200',
+              ]"
+            >
+              <span
+                class="inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1"
+                :class="[
+                  formData.weeklyDigestEnabled
+                    ? 'translate-x-6'
+                    : 'translate-x-1',
+                ]"
+              />
+            </button>
           </div>
 
+          <div
+            class="rounded-md border border-indigo-100 bg-indigo-50 px-3 py-2 text-sm text-indigo-700"
+          >
+            <span v-if="formData.weeklyDigestEnabled">
+              Weekly digest emails are enabled.
+            </span>
+            <span v-else>
+              Weekly digest emails are disabled for your account.
+            </span>
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-4 border-t border-gray-200 pt-4">
           <button
-            v-if="isParent"
-            type="button"
-            @click="
-              formData.weeklyDigestEnabled = !formData.weeklyDigestEnabled
-            "
-            class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out"
-            :class="[
-              formData.weeklyDigestEnabled ? 'bg-indigo-500' : 'bg-gray-200',
-            ]"
+            type="submit"
+            class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+            :disabled="saving"
           >
-            <span
-              class="inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out mt-1"
-              :class="[
-                formData.weeklyDigestEnabled
-                  ? 'translate-x-6'
-                  : 'translate-x-1',
-              ]"
-            />
+            <span v-if="!saving">Save Changes</span>
+            <span v-else>Saving...</span>
           </button>
-        </div>
-
-        <div
-          v-if="isParent"
-          class="rounded-md border border-indigo-100 bg-indigo-50 px-3 py-2 text-sm text-indigo-700"
-        >
-          <span v-if="formData.weeklyDigestEnabled">
-            Weekly digest emails are enabled.
-          </span>
-          <span v-else
-            >Weekly digest emails are disabled for your account.</span
-          >
-        </div>
-
-        <div
-          v-else
-          class="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600"
-        >
-          School-wide digest timing is managed by admins in the School settings
-          tab.
         </div>
       </div>
 
-      <div
-        v-if="isParent"
-        class="flex justify-end mt-4 border-t border-gray-200 pt-4"
-      >
-        <button
-          type="submit"
-          class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
-          :disabled="saving"
-        >
-          <span v-if="!saving">Save Changes</span>
-          <span v-else>Saving...</span>
-        </button>
+      <!-- Staff / Administrator Info (Non-Parents) -->
+      <div v-else class="rounded-lg border border-gray-200 bg-white p-8 text-center space-y-4">
+        <div class="h-12 w-12 rounded-full bg-eduSky flex items-center justify-center mx-auto text-blue-600">
+          <i class="fa-solid fa-bell text-xl"></i>
+        </div>
+        <div class="space-y-2">
+          <h3 class="text-sm font-semibold text-gray-700">Notification Settings</h3>
+          <p class="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed">
+            As a staff member, your notifications are managed globally by school administrators. 
+            You will automatically receive email alerts for important announcements and class-related events.
+          </p>
+        </div>
       </div>
     </form>
   </div>
