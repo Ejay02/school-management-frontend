@@ -111,6 +111,11 @@
                         Send Message
                       </span>
                     </div>
+                    <div v-else>
+                      <span class="inline-flex items-center rounded-full bg-eduPurpleLight px-2.5 py-0.5 text-xs font-semibold text-purple-700 italic border border-purple-200">
+                        That's you
+                      </span>
+                    </div>
                   </div>
 
                   <template v-else>
