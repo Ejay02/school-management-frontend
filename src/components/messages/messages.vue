@@ -888,19 +888,36 @@ async function startConversation(contact) {
 
 async function handleConversationQuery() {
   const conversationId = String(route.query?.conversationId || "").trim();
-  if (!conversationId) return;
+  if (conversationId) {
+    const conversationExists = conversations.value.some(
+      (conversation) => conversation.id === conversationId,
+    );
 
-  const conversationExists = conversations.value.some(
-    (conversation) => conversation.id === conversationId,
-  );
-
-  if (!conversationExists) return;
-
-  if (activeConversationId.value !== conversationId) {
-    await openConversation(conversationId);
+    if (conversationExists) {
+      if (activeConversationId.value !== conversationId) {
+        await openConversation(conversationId);
+      }
+      router.replace({ path: route.path, query: {} });
+    }
+    return;
   }
 
-  router.replace({ path: route.path, query: {} });
+  const participantId = String(route.query?.participantId || "").trim();
+  if (participantId) {
+    try {
+      const { data } = await apolloClient.mutate({
+        mutation: findOrCreateDirectConversation,
+        variables: { participantId },
+      });
+      const conversation = upsertConversation(
+        data?.findOrCreateDirectConversation,
+      );
+      await openConversation(conversation.id);
+      router.replace({ path: route.path, query: {} });
+    } catch (error) {
+      notifyError(error, "Failed to start conversation.");
+    }
+  }
 }
 
 async function submitMessage() {

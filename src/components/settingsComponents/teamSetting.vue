@@ -98,17 +98,17 @@
                     v-if="role === 'teacher'"
                     class="flex w-full items-center justify-end sm:w-auto"
                   >
-                    <div class="group relative">
-                      <button
-                        :disabled="true"
-                        class="text-gray-400 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300 cursor-not-allowed opacity-70"
+                    <div v-if="user.id !== userStore.userInfo.id" class="group relative">
+                      <router-link
+                        :to="`/messages?participantId=${user.id}`"
+                        class="text-indigo-600 hover:bg-eduSkyLight px-3 py-1 rounded-md text-sm transition duration-300 flex items-center justify-center"
                       >
-                        <i class="fa-solid fa-comment-dots"></i>
-                      </button>
+                        <i class="fa-solid fa-comment-dots text-base"></i>
+                      </router-link>
                       <span
                         class="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 bg-gray-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex whitespace-nowrap"
                       >
-                        Chat coming soon
+                        Send Message
                       </span>
                     </div>
                   </div>

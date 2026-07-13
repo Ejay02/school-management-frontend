@@ -1901,3 +1901,26 @@ export const getFinanceReconciliation = gql`
     }
   }
 `;
+
+export const getGradebookQuery = gql`
+  query getGradebook($classId: String!, $subjectId: String!) {
+    getGradebook(classId: $classId, subjectId: $subjectId) {
+      students {
+        id
+        name
+        surname
+      }
+      columns {
+        id
+        title
+        type
+      }
+      cells {
+        studentId
+        columnId
+        resultId
+        score
+      }
+    }
+  }
+`;

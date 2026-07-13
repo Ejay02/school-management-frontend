@@ -1469,3 +1469,22 @@ export const bulkGenerateClassInvoicesMutation = gql`
     }
   }
 `;
+
+export const upsertGradeMutation = gql`
+  mutation UpsertGrade(
+    $studentId: String!
+    $score: Int!
+    $examId: String
+    $assignmentId: String
+  ) {
+    upsertGrade(
+      studentId: $studentId
+      score: $score
+      examId: $examId
+      assignmentId: $assignmentId
+    ) {
+      id
+      score
+    }
+  }
+`;

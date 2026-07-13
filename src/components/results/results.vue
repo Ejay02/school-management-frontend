@@ -1,5 +1,26 @@
 <template>
-  <TeacherResults v-if="userRole === 'teacher'" />
+  <div v-if="userRole === 'teacher'" class="w-full space-y-4">
+    <!-- Teacher view sub-tab navigation -->
+    <div class="flex border-b border-gray-200 bg-white px-4 py-2 rounded-lg shadow-sm gap-6">
+      <button
+        @click="activeTeacherTab = 'summary'"
+        class="pb-2 text-sm font-semibold transition"
+        :class="activeTeacherTab === 'summary' ? 'border-b-2 border-indigo-600 text-indigo-650' : 'text-gray-500 hover:text-gray-700'"
+      >
+        Term Summary
+      </button>
+      <button
+        @click="activeTeacherTab = 'gradebook'"
+        class="pb-2 text-sm font-semibold transition"
+        :class="activeTeacherTab === 'gradebook' ? 'border-b-2 border-indigo-600 text-indigo-650' : 'text-gray-500 hover:text-gray-700'"
+      >
+        Gradebook Grid
+      </button>
+    </div>
+
+    <TeacherResults v-if="activeTeacherTab === 'summary'" />
+    <GradebookGrid v-else />
+  </div>
   <div v-else-if="userRole === 'admin' || userRole === 'super_admin'" class="w-full space-y-4">
     <ResultsTable />
     <TermReports />
@@ -99,7 +120,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import { useParentLinkedStudents } from "../../composables/useParentLinkedStudents";
 import { useResultStore } from "../../store/resultStore";
@@ -113,10 +134,12 @@ import ParentLinkedStudentEmptyState from "../parents/parentLinkedStudentEmptySt
 import ResultsTable from "./resultsTable.vue";
 import TermReports from "./termReports.vue";
 import TeacherResults from "./teacherResults.vue";
+import GradebookGrid from "./gradebookGrid.vue";
 
 const userStore = useUserStore();
 const resultStore = useResultStore();
 const userRole = computed(() => userStore.currentRole?.toLowerCase());
+const activeTeacherTab = ref("summary");
 const studentResults = computed(() => resultStore.studentResults);
 const resultLoading = computed(() => resultStore.loading);
 const resultError = computed(() => resultStore.error);

@@ -5,12 +5,15 @@ import {
   getClassResults,
   getResultStatistics,
   getStudentResults,
+  getGradebookQuery,
 } from "../graphql/queries";
+import { upsertGradeMutation } from "../graphql/mutations";
 
 export const useResultStore = defineStore("resultStore", {
   state: () => ({
     results: [],
     studentResults: [],
+    gradebookData: null,
     activeStudentId: null,
     loading: false,
     error: null,
@@ -95,6 +98,64 @@ export const useResultStore = defineStore("resultStore", {
           : [];
       } catch (error) {
         this.error = error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchGradebook(classId, subjectId) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const res = await apolloClient.query({
+          query: getGradebookQuery,
+          variables: { classId, subjectId },
+          fetchPolicy: "network-only",
+        });
+        this.gradebookData = res.data?.getGradebook || { students: [], columns: [], cells: [] };
+      } catch (err) {
+        this.error = err;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async saveGrade({ studentId, score, columnId, type }) {
+      this.loading = true;
+      this.error = null;
+      const isExam = type === "EXAM";
+      try {
+        const res = await apolloClient.mutate({
+          mutation: upsertGradeMutation,
+          variables: {
+            studentId,
+            score: parseInt(score),
+            examId: isExam ? columnId : null,
+            assignmentId: !isExam ? columnId : null,
+          },
+        });
+
+        const updated = res.data?.upsertGrade;
+        if (updated && this.gradebookData) {
+          const cellIndex = this.gradebookData.cells.findIndex(
+            (c) => c.studentId === studentId && c.columnId === columnId
+          );
+          if (cellIndex !== -1) {
+            this.gradebookData.cells[cellIndex].score = updated.score;
+            this.gradebookData.cells[cellIndex].resultId = updated.id;
+          } else {
+            this.gradebookData.cells.push({
+              studentId,
+              columnId,
+              resultId: updated.id,
+              score: updated.score,
+            });
+          }
+        }
+        return updated;
+      } catch (err) {
+        this.error = err;
+        throw err;
       } finally {
         this.loading = false;
       }
