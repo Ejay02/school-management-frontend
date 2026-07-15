@@ -33,18 +33,24 @@
     <div class="bg-white p-4 rounded-md flex-1 m-1 mt-0 shadow-xl space-y-4">
       <div class="border-b p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <TopList :txt="pageTitle" />
-        <div class="flex rounded-md shadow-sm border border-gray-200 p-0.5 bg-gray-50 self-start sm:self-auto">
+        <div class="relative flex rounded-md shadow-sm border border-gray-200 p-0.5 bg-gray-50 self-start sm:self-auto w-64 h-9">
+          <!-- Sliding indicator background -->
+          <div
+            class="absolute top-0.5 bottom-0.5 left-0.5 w-[calc(50%-2px)] bg-indigo-600 rounded-md shadow-sm transition-transform duration-300 ease-out"
+            :class="activeParentTab === 'history' ? 'translate-x-[calc(100%+2px)]' : 'translate-x-0'"
+          ></div>
+
           <button
             @click="activeParentTab = 'dashboard'"
-            class="px-4 py-1.5 rounded-md text-xs font-semibold transition"
-            :class="activeParentTab === 'dashboard' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-indigo-650'"
+            class="relative z-10 w-1/2 text-center text-xs font-semibold transition-colors duration-300 focus:outline-none"
+            :class="activeParentTab === 'dashboard' ? 'text-white' : 'text-gray-500 hover:text-indigo-650'"
           >
             Academic Progress
           </button>
           <button
             @click="activeParentTab = 'history'"
-            class="px-4 py-1.5 rounded-md text-xs font-semibold transition"
-            :class="activeParentTab === 'history' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-indigo-650'"
+            class="relative z-10 w-1/2 text-center text-xs font-semibold transition-colors duration-300 focus:outline-none"
+            :class="activeParentTab === 'history' ? 'text-white' : 'text-gray-500 hover:text-indigo-650'"
           >
             Results History
           </button>
