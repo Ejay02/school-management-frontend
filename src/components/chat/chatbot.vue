@@ -95,11 +95,25 @@
 <script setup>
 import axios from "axios";
 import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { useQuery } from "@vue/apollo-composable";
 import ChatMessage from "../../components/chat/chatMessage.vue";
 import { schoolProfile } from "../../utils/aiResponse";
 import { useUserStore } from "../../store/userStore";
+import { getSetupStateQuery } from "../../graphql/queries";
 
 const userStore = useUserStore();
+
+// Query school setup state to ensure phone/email is loaded
+const { onResult } = useQuery(getSetupStateQuery, null, {
+  fetchPolicy: "cache-first",
+});
+
+onResult((queryResult) => {
+  const state = queryResult?.data?.getSetupState;
+  if (state) {
+    userStore.setSchoolInfo(state);
+  }
+});
 
 const isChatOpen = ref(false);
 const messages = ref([]);
@@ -127,10 +141,22 @@ const quickActions = [
 ];
 
 const getFallbackResponse = (userMessage) => {
-  return (
-    schoolProfile.findResponse(userMessage) ||
-    "I may not have that information right now. Please contact the school office for more details."
-  );
+  const queryResponse = schoolProfile.findResponse(userMessage);
+  if (queryResponse) return queryResponse;
+
+  const phone = userStore.schoolInfo?.schoolPhone || "";
+  const email = userStore.schoolInfo?.schoolEmail || "";
+
+  let contactInfo = "";
+  if (phone && email) {
+    contactInfo = ` on ${phone} or email ${email}`;
+  } else if (phone) {
+    contactInfo = ` on ${phone}`;
+  } else if (email) {
+    contactInfo = ` via email ${email}`;
+  }
+
+  return `I may not have specific information about that. Could you please contact the school office${contactInfo} for detailed inquiries?`;
 };
 
 const checkLocalData = (userMessage) => {
