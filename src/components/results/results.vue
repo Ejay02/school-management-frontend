@@ -58,87 +58,91 @@
         <ParentChildSelector />
       </div>
 
-      <template v-if="activeParentTab === 'dashboard'">
-        <ParentProgressDashboard v-if="hasLinkedStudents" />
-        <ParentLinkedStudentEmptyState
-          v-else
-          description="There’s nothing to show here yet. Once the school links your child to this parent account, this page will start showing their results."
-        />
-      </template>
+      <Transition name="slide" mode="out-in">
+        <div :key="activeParentTab" class="w-full">
+          <template v-if="activeParentTab === 'dashboard'">
+            <ParentProgressDashboard v-if="hasLinkedStudents" />
+            <ParentLinkedStudentEmptyState
+              v-else
+              description="There’s nothing to show here yet. Once the school links your child to this parent account, this page will start showing their results."
+            />
+          </template>
 
-      <template v-else>
-        <LoadingScreen
-          v-if="parentCheckLoading || resultLoading"
-          message="Loading results..."
-        />
+          <template v-else>
+            <LoadingScreen
+              v-if="parentCheckLoading || resultLoading"
+              message="Loading results..."
+            />
 
-      <ParentLinkedStudentEmptyState
-        v-else-if="parentCheckLoaded && !hasLinkedStudents"
-        description="There’s nothing to show here yet. Once the school links your child to this parent account, this page will start showing their results."
-      />
+            <ParentLinkedStudentEmptyState
+              v-else-if="parentCheckLoaded && !hasLinkedStudents"
+              description="There’s nothing to show here yet. Once the school links your child to this parent account, this page will start showing their results."
+            />
 
-      <ErrorScreen v-else-if="resultError" />
+            <ErrorScreen v-else-if="resultError" />
 
-      <EmptyState
-        v-else-if="!studentResults.length"
-        icon="fa-regular fa-file-lines"
-        heading="No results yet"
-        description="Results will appear here once your child's school publishes them."
-      />
+            <EmptyState
+              v-else-if="!studentResults.length"
+              icon="fa-regular fa-file-lines"
+              heading="No results yet"
+              description="Results will appear here once your child's school publishes them."
+            />
 
-      <div v-else class="overflow-x-auto p-4">
-        <table class="min-w-full bg-white rounded-lg overflow-hidden">
-          <thead class="bg-gray-100">
-            <tr>
-              <th class="py-3 px-4 text-left text-sm font-medium text-gray-600">
-                Subject
-              </th>
-              <th class="py-3 px-4 text-left text-sm font-medium text-gray-600">
-                Assessment
-              </th>
-              <th class="py-3 px-4 text-left text-sm font-medium text-gray-600">
-                Term
-              </th>
-              <th class="py-3 px-4 text-left text-sm font-medium text-gray-600">
-                Period
-              </th>
-              <th class="py-3 px-4 text-left text-sm font-medium text-gray-600">
-                Score
-              </th>
-              <th class="py-3 px-4 text-left text-sm font-medium text-gray-600">
-                Comment
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr
-              v-for="result in studentResults"
-              :key="result.id"
-              class="hover:bg-gray-50"
-            >
-              <td class="py-3 px-4 text-sm text-gray-700">
-                {{ getResultSubject(result) }}
-              </td>
-              <td class="py-3 px-4 text-sm text-gray-700">
-                {{ getResultAssessment(result) }}
-              </td>
-              <td class="py-3 px-4 text-sm text-gray-700">
-                {{ result.term || "N/A" }}
-              </td>
-              <td class="py-3 px-4 text-sm text-gray-700">
-                {{ result.academicPeriod || "N/A" }}
-              </td>
-              <td class="py-3 px-4 text-sm font-medium text-gray-900">
-                {{ typeof result.score === "number" ? `${result.score}%` : "N/A" }}
-              </td>
-              <td class="py-3 px-4 text-sm text-gray-700">
-                {{ result.comments || "-" }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      </template>
+            <div v-else class="overflow-x-auto p-4">
+              <table class="min-w-full bg-white rounded-lg overflow-hidden">
+                <thead class="bg-gray-100">
+                  <tr>
+                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-600">
+                      Subject
+                    </th>
+                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-600">
+                      Assessment
+                    </th>
+                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-600">
+                      Term
+                    </th>
+                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-600">
+                      Period
+                    </th>
+                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-600">
+                      Score
+                    </th>
+                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-600">
+                      Comment
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr
+                    v-for="result in studentResults"
+                    :key="result.id"
+                    class="hover:bg-gray-50"
+                  >
+                    <td class="py-3 px-4 text-sm text-gray-700">
+                      {{ getResultSubject(result) }}
+                    </td>
+                    <td class="py-3 px-4 text-sm text-gray-700">
+                      {{ getResultAssessment(result) }}
+                    </td>
+                    <td class="py-3 px-4 text-sm text-gray-700">
+                      {{ result.term || "N/A" }}
+                    </td>
+                    <td class="py-3 px-4 text-sm text-gray-700">
+                      {{ result.academicPeriod || "N/A" }}
+                    </td>
+                    <td class="py-3 px-4 text-sm font-medium text-gray-900">
+                      {{ typeof result.score === "number" ? `${result.score}%` : "N/A" }}
+                    </td>
+                    <td class="py-3 px-4 text-sm text-gray-700">
+                      {{ result.comments || "-" }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </template>
+        </div>
+      </Transition>
     </div>
   </div>
 
@@ -212,3 +216,20 @@ watch(selectedStudentId, async (studentId) => {
   await fetchParentResults();
 });
 </script>
+
+<style scoped>
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.slide-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.slide-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+</style>
