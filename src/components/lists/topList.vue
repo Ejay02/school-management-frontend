@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center justify-between">
-    <h1 class="hidden md:block text-lg font-semibold">{{ txt }}</h1>
+    <h1 class="hidden md:block text-lg font-semibold mr-4">{{ txt }}</h1>
     <div class="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
       <TableSearch />
       <div class="flex items-center gap-4 self-end">
