@@ -1697,6 +1697,12 @@ export const getMyInvoices = gql`
         term
         type
         totalAmount
+        components {
+          id
+          name
+          description
+          amount
+        }
       }
       payments {
         id

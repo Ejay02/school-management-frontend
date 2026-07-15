@@ -30,22 +30,47 @@
     v-else-if="userRole === 'parent'"
     class="rounded border border-gray-300 p-2 w-full"
   >
-    <div class="bg-white p-4 rounded-md flex-1 m-1 mt-0 shadow-xl">
-      <div class="border-b p-4">
+    <div class="bg-white p-4 rounded-md flex-1 m-1 mt-0 shadow-xl space-y-4">
+      <div class="border-b p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <TopList :txt="pageTitle" />
+        <div class="flex rounded-md shadow-sm border border-gray-200 p-0.5 bg-gray-50 self-start sm:self-auto">
+          <button
+            @click="activeParentTab = 'dashboard'"
+            class="px-4 py-1.5 rounded-md text-xs font-semibold transition"
+            :class="activeParentTab === 'dashboard' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-indigo-650'"
+          >
+            Academic Progress
+          </button>
+          <button
+            @click="activeParentTab = 'history'"
+            class="px-4 py-1.5 rounded-md text-xs font-semibold transition"
+            :class="activeParentTab === 'history' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-indigo-650'"
+          >
+            Results History
+          </button>
+        </div>
       </div>
 
       <div
         v-if="hasLinkedStudents"
-        class="border-b border-gray-100 px-4 py-3"
+        class="border-b border-gray-100 px-4 py-2"
       >
         <ParentChildSelector />
       </div>
 
-      <LoadingScreen
-        v-if="parentCheckLoading || resultLoading"
-        message="Loading results..."
-      />
+      <template v-if="activeParentTab === 'dashboard'">
+        <ParentProgressDashboard v-if="hasLinkedStudents" />
+        <ParentLinkedStudentEmptyState
+          v-else
+          description="There’s nothing to show here yet. Once the school links your child to this parent account, this page will start showing their results."
+        />
+      </template>
+
+      <template v-else>
+        <LoadingScreen
+          v-if="parentCheckLoading || resultLoading"
+          message="Loading results..."
+        />
 
       <ParentLinkedStudentEmptyState
         v-else-if="parentCheckLoaded && !hasLinkedStudents"
@@ -113,6 +138,7 @@
           </tbody>
         </table>
       </div>
+      </template>
     </div>
   </div>
 
@@ -135,11 +161,13 @@ import ResultsTable from "./resultsTable.vue";
 import TermReports from "./termReports.vue";
 import TeacherResults from "./teacherResults.vue";
 import GradebookGrid from "./gradebookGrid.vue";
+import ParentProgressDashboard from "./parentProgressDashboard.vue";
 
 const userStore = useUserStore();
 const resultStore = useResultStore();
 const userRole = computed(() => userStore.currentRole?.toLowerCase());
 const activeTeacherTab = ref("summary");
+const activeParentTab = ref("dashboard");
 const studentResults = computed(() => resultStore.studentResults);
 const resultLoading = computed(() => resultStore.loading);
 const resultError = computed(() => resultStore.error);

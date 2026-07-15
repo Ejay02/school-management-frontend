@@ -192,17 +192,26 @@
                     ></div>
                   </div>
                 </div>
-                <button
-                  @click="handlePayInvoice(invoice)"
-                  :disabled="processingInvoiceId === invoice.id"
-                  class="mt-4 w-full rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:from-blue-500 hover:to-purple-500 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {{
-                    processingInvoiceId === invoice.id
-                      ? "Redirecting..."
-                      : `Pay ${formatCurrency(invoiceRemainingAmount(invoice))}`
-                  }}
-                </button>
+                <div class="mt-4 flex flex-col gap-2">
+                  <button
+                    @click="handlePayInvoice(invoice)"
+                    :disabled="processingInvoiceId === invoice.id"
+                    class="w-full rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:from-blue-500 hover:to-purple-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {{
+                      processingInvoiceId === invoice.id
+                        ? "Redirecting..."
+                        : `Pay ${formatCurrency(invoiceRemainingAmount(invoice))}`
+                    }}
+                  </button>
+                  <button
+                    @click="downloadInvoicePdf(invoice)"
+                    :disabled="downloadingReceiptId === invoice.id"
+                    class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+                  >
+                    {{ downloadingReceiptId === invoice.id ? "Preparing statement..." : "Download Invoice Statement" }}
+                  </button>
+                </div>
               </div>
             </div>
           </article>
@@ -259,13 +268,23 @@
                   {{ formatCurrency(invoiceRemainingAmount(invoice)) }}
                 </p>
               </div>
-              <button
-                @click="handlePayInvoice(invoice)"
-                :disabled="processingInvoiceId === invoice.id"
-                class="rounded-lg border border-indigo-200 px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Pay
-              </button>
+              <div class="flex gap-2">
+                <button
+                  @click="downloadInvoicePdf(invoice)"
+                  :disabled="downloadingReceiptId === invoice.id"
+                  class="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-65"
+                  title="Download Invoice Statement"
+                >
+                  <i class="fa-solid fa-file-invoice text-sm"></i>
+                </button>
+                <button
+                  @click="handlePayInvoice(invoice)"
+                  :disabled="processingInvoiceId === invoice.id"
+                  class="rounded-lg border border-indigo-200 px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Pay
+                </button>
+              </div>
             </div>
           </article>
         </div>
@@ -749,6 +768,80 @@ const downloadReceipt = async (payment) => {
     notificationStore.addNotification({
       type: "error",
       message: "Unable to prepare the receipt right now.",
+    });
+  } finally {
+    downloadingReceiptId.value = "";
+  }
+};
+
+const downloadInvoicePdf = async (invoice) => {
+  const parentName = [userStore.userInfo?.name, userStore.userInfo?.surname]
+    .filter(Boolean)
+    .join(" ");
+
+  downloadingReceiptId.value = invoice.id;
+
+  try {
+    const logoImage = await loadLogoForReceipt();
+    const lines = [
+      `Issued by: ${schoolName.value}`,
+      `Invoice Number: ${invoice.invoiceNumber || "N/A"}`,
+      `Academic Period: ${invoice.feeStructure?.academicYear || "N/A"}`,
+      `Term: ${normalizeStatusLabel(invoice.feeStructure?.term)}`,
+      `Fee Type: ${normalizeStatusLabel(invoice.feeStructure?.type)}`,
+      `Due Date: ${formatDate(invoice.dueDate)}`,
+      `Parent: ${parentName || "Parent"}`,
+      `--------------------------------------------------`,
+      `Fee Components Breakdown:`,
+    ];
+
+    const components = invoice.feeStructure?.components || [];
+    if (components.length) {
+      components.forEach((c) => {
+        lines.push(`  - ${c.name}: ${formatCurrency(c.amount)}`);
+      });
+    } else {
+      lines.push("  - Core Fee Amount: " + formatCurrency(invoice.totalAmount));
+    }
+
+    lines.push(`--------------------------------------------------`);
+    lines.push(`Total Amount: ${formatCurrency(invoice.totalAmount)}`);
+    lines.push(`Total Paid Amount: ${formatCurrency(invoice.paidAmount)}`);
+    lines.push(`Remaining Balance: ${formatCurrency(invoiceRemainingAmount(invoice))}`);
+    lines.push(`Status: ${normalizeStatusLabel(invoice.status)}`);
+    lines.push(`--------------------------------------------------`);
+
+    // Find completed payments matching this invoice
+    const matchedPayments = (payments.value || []).filter(
+      (p) => p.invoiceId === invoice.id && String(p.status).toUpperCase() === "COMPLETED"
+    );
+
+    if (matchedPayments.length) {
+      lines.push("Settlement Timeline:");
+      matchedPayments.forEach((p) => {
+        lines.push(`  * ${formatCurrency(p.amount)} paid via ${normalizePaymentMethod(p.paymentMethod)} on ${formatDateTime(p.createdAt)}`);
+      });
+    } else {
+      lines.push("No payments completed on this invoice yet.");
+    }
+
+    const blob = buildReceiptPdf({
+      schoolTitle: schoolName.value,
+      receiptTitle: "Invoice Statement",
+      lines,
+      logoImage,
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `invoice-${invoice.invoiceNumber || invoice.id}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Invoice compilation error", error);
+    notificationStore.addNotification({
+      type: "error",
+      message: "Unable to prepare the invoice statement right now.",
     });
   } finally {
     downloadingReceiptId.value = "";

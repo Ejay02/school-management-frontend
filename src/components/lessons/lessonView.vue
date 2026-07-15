@@ -547,6 +547,14 @@ const editLesson = () => {
 const downloadLesson = () => {
   if (!lesson.value) return;
 
+  const rawContent = lesson.value.content;
+  const isMarkdown = rawContent && typeof rawContent === "object" && rawContent.type === "markdown";
+  const fileExt = isMarkdown ? "md" : "txt";
+
+  const formattedBody = isMarkdown
+    ? (rawContent.markdown || "")
+    : (rawContent ? rawContent.replace(/<[^>]*>/g, "") : "No content available.");
+
   // Create content for the download
   const lessonContent = `
 # ${lesson.value.name}
@@ -559,11 +567,7 @@ ${lesson.value.day} | ${formatTime(lesson.value.startTime)} - ${formatTime(
 ${lesson.value.description || "No description provided."}
 
 ### Content
-${
-  lesson.value.content
-    ? lesson.value.content.replace(/<[^>]*>/g, "")
-    : "No content available."
-}
+${formattedBody}
   `.trim();
 
   // Create a blob and download link
@@ -571,7 +575,7 @@ ${
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${lesson.value.name.replace(/\s+/g, "_")}.txt`;
+  a.download = `${lesson.value.name.replace(/\s+/g, "_")}.${fileExt}`;
   document.body.appendChild(a);
   a.click();
 

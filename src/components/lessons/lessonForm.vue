@@ -154,21 +154,61 @@
             </div>
 
             <!-- Content -->
-            <div class="h-[200px]">
-              <label
-                for="quill"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Content <span class="text-red-500">*</span></label
-              >
-              <div class="h-[calc(100%-28px)]">
-                <QuillEditor
-                  v-model:content="content"
-                  contentType="html"
-                  theme="snow"
-                  toolbar="essential"
-                  class="cursor-pointer"
-                  placeholder="Enter your lesson content here..."
-                />
+            <div class="h-auto space-y-2">
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-medium text-gray-700">Content <span class="text-red-500">*</span></label>
+                <div class="flex rounded-md shadow-sm">
+                  <button
+                    type="button"
+                    @click="changeContentMode('quill')"
+                    class="px-3 py-1.5 text-xs font-semibold rounded-l-md border transition-all"
+                    :class="contentMode === 'quill' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+                  >
+                    Rich Text
+                  </button>
+                  <button
+                    type="button"
+                    @click="changeContentMode('markdown')"
+                    class="px-3 py-1.5 text-xs font-semibold rounded-r-md border-t border-b border-r transition-all"
+                    :class="contentMode === 'markdown' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+                  >
+                    Markdown
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quill Rich Text Editor -->
+              <div v-show="contentMode === 'quill'" class="h-[250px] mb-6">
+                <div class="h-[calc(100%-28px)]">
+                  <QuillEditor
+                    v-model:content="content"
+                    contentType="html"
+                    theme="snow"
+                    toolbar="essential"
+                    class="cursor-pointer"
+                    placeholder="Enter your lesson content here..."
+                  />
+                </div>
+              </div>
+
+              <!-- Markdown Notes Builder Editor -->
+              <div v-show="contentMode === 'markdown'" class="grid grid-cols-1 md:grid-cols-2 gap-4 h-[350px] mb-6">
+                <!-- Write Pane -->
+                <div class="flex flex-col h-full">
+                  <textarea
+                    v-model="markdownText"
+                    class="w-full flex-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm resize-none custom-scrollbar bg-gray-50/50"
+                    placeholder="Type study guide or lesson notes here in Markdown..."
+                  ></textarea>
+                </div>
+                <!-- Preview Pane -->
+                <div class="flex flex-col h-full border border-gray-300 rounded-md overflow-hidden bg-white">
+                  <div class="bg-gray-50 px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-600 flex justify-between items-center">
+                    <span>Live Preview</span>
+                    <span class="text-[10px] text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100 font-medium">Rendered</span>
+                  </div>
+                  <div class="flex-1 p-3 overflow-y-auto prose max-w-none custom-scrollbar" v-html="markdownPreviewHtml"></div>
+                </div>
               </div>
             </div>
 
@@ -288,6 +328,7 @@
 
 <script setup>
 import { QuillEditor } from "@vueup/vue-quill";
+import MarkdownIt from "markdown-it";
 import { computed, nextTick, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { apolloClient } from "../../../apollo-client";
@@ -301,6 +342,12 @@ import { useUserStore } from "../../store/userStore";
 import CustomDropdown from "../dropdowns/customDropdown.vue";
 import Dropdown from "../dropdowns/dropdown.vue";
 
+const md = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
+});
+
 const route = useRoute();
 const router = useRouter();
 const classStore = useClassStore();
@@ -313,6 +360,8 @@ const userStore = useUserStore();
 const title = ref("");
 const description = ref("");
 const content = ref("");
+const contentMode = ref("quill");
+const markdownText = ref("");
 const selectedClass = ref("");
 const selectedSubject = ref("");
 const day = ref("Monday");
@@ -320,6 +369,17 @@ const startTime = ref("");
 const endTime = ref("");
 const videoUrl = ref("");
 const liveLessonUrl = ref("");
+
+const markdownPreviewHtml = computed(() => {
+  return md.render(markdownText.value || "");
+});
+
+const changeContentMode = (mode) => {
+  if (mode === "quill" && contentMode.value === "markdown") {
+    content.value = markdownPreviewHtml.value;
+  }
+  contentMode.value = mode;
+};
 
 const isEditing = computed(() => route.params.id !== undefined);
 
@@ -610,7 +670,13 @@ const handleSubmit = async () => {
       return;
     }
 
-    const formattedContent = content.value || "";
+    const formattedContent = contentMode.value === "markdown"
+      ? {
+          type: "markdown",
+          markdown: markdownText.value || "",
+          html: markdownPreviewHtml.value || "",
+        }
+      : content.value || "";
     const formattedDescription = description.value || "";
 
     const lessonData = {
@@ -694,7 +760,16 @@ onMounted(async () => {
     const lesson = data.getLessonById;
     title.value = lesson.name;
     description.value = lesson.description;
-    content.value = lesson.content;
+    const rawContent = lesson.content;
+    if (rawContent && typeof rawContent === "object" && rawContent.type === "markdown") {
+      contentMode.value = "markdown";
+      markdownText.value = rawContent.markdown || "";
+      content.value = rawContent.html || "";
+    } else {
+      contentMode.value = "quill";
+      content.value = rawContent || "";
+      markdownText.value = "";
+    }
     day.value = lesson.day;
     startTime.value = lesson.startTime;
     endTime.value = lesson.endTime;
