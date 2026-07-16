@@ -382,6 +382,76 @@
         </div>
       </div>
 
+      <!-- Branding & Theme Customizer -->
+      <div class="space-y-6">
+        <h3 class="text-sm font-semibold text-gray-650">School Branding & Theme Customizer</h3>
+
+        <div class="rounded-lg border border-gray-200 bg-white p-5 space-y-6">
+          <p class="text-xs text-gray-500 leading-relaxed">
+            Customize the primary and secondary branding colors of your school dashboard. Presets and colors update the interface instantly and persist across sessions.
+          </p>
+
+          <!-- Presets -->
+          <div class="space-y-2">
+            <label class="block text-xs font-semibold text-gray-650">Theme Presets</label>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="preset in themePresets"
+                :key="preset.name"
+                type="button"
+                @click="applyPreset(preset)"
+                class="px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-2 hover:bg-slate-50 transition active:scale-95"
+                :class="currentPresetName === preset.name ? 'border-indigo-500 bg-indigo-50/20 text-indigo-750' : 'border-gray-200 text-gray-600'"
+              >
+                <span class="h-2.5 w-2.5 rounded-full ring-1 ring-black/10" :style="{ backgroundColor: preset.primary }"></span>
+                {{ preset.name }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Color Pickers -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-gray-600">Primary Color</label>
+              <div class="flex items-center gap-3">
+                <input
+                  v-model="themeState.primary"
+                  type="color"
+                  @input="handleThemeColorChange"
+                  class="h-9 w-9 rounded-lg border border-gray-300 p-0.5 cursor-pointer bg-white"
+                />
+                <input
+                  v-model="themeState.primary"
+                  type="text"
+                  @change="handleThemeColorChange"
+                  class="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 focus:outline-none"
+                  placeholder="#4f46e5"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-gray-600">Secondary Color</label>
+              <div class="flex items-center gap-3">
+                <input
+                  v-model="themeState.secondary"
+                  type="color"
+                  @input="handleThemeColorChange"
+                  class="h-9 w-9 rounded-lg border border-gray-300 p-0.5 cursor-pointer bg-white"
+                />
+                <input
+                  v-model="themeState.secondary"
+                  type="text"
+                  @change="handleThemeColorChange"
+                  class="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 focus:outline-none"
+                  placeholder="#7c3aed"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="flex justify-end mt-4 border-t border-gray-200 pt-4">
         <button
           type="submit"
@@ -399,6 +469,7 @@
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
 import { useQuery, useMutation } from "@vue/apollo-composable";
+import { updateCssVariables } from "../../utils/theme";
 import LoadingScreen from "../loadingScreen.vue";
 import ErrorScreen from "../errorScreen.vue";
 import { useNotificationStore } from "../../store/notification";
@@ -638,6 +709,67 @@ const saveSchoolSettings = async () => {
     });
   }
 };
+
+// Theme presets definition
+const themePresets = [
+  { name: "Classic Indigo", primary: "#4f46e5", secondary: "#7c3aed" },
+  { name: "Deep Ocean", primary: "#0284c7", secondary: "#0369a1" },
+  { name: "Forest Green", primary: "#059669", secondary: "#047857" },
+  { name: "Sunset Orange", primary: "#ea580c", secondary: "#b45309" },
+  { name: "Crimson Red", primary: "#dc2626", secondary: "#b91c1c" },
+];
+
+const themeState = reactive({
+  primary: "#4f46e5",
+  secondary: "#7c3aed",
+});
+
+const currentPresetName = ref("Classic Indigo");
+
+const loadSavedThemeConfig = () => {
+  const saved = localStorage.getItem("school_theme");
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed.primary && parsed.secondary) {
+        themeState.primary = parsed.primary;
+        themeState.secondary = parsed.secondary;
+        
+        // Find if matches a preset
+        const matched = themePresets.find(
+          (p) => p.primary.toLowerCase() === parsed.primary.toLowerCase() &&
+                 p.secondary.toLowerCase() === parsed.secondary.toLowerCase()
+        );
+        currentPresetName.value = matched ? matched.name : "Custom";
+      }
+    } catch {
+      localStorage.removeItem("school_theme");
+    }
+  }
+};
+
+const applyPreset = (preset) => {
+  themeState.primary = preset.primary;
+  themeState.secondary = preset.secondary;
+  currentPresetName.value = preset.name;
+  saveThemeConfig();
+};
+
+const handleThemeColorChange = () => {
+  currentPresetName.value = "Custom";
+  saveThemeConfig();
+};
+
+const saveThemeConfig = () => {
+  localStorage.setItem("school_theme", JSON.stringify({
+    primary: themeState.primary,
+    secondary: themeState.secondary,
+  }));
+  updateCssVariables(themeState.primary, themeState.secondary);
+};
+
+// Load saved config on script initialization
+loadSavedThemeConfig();
 </script>
 
 <style scoped></style>

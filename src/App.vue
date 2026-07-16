@@ -13,7 +13,6 @@
  |                                              |
  *──────────────────────────────────────────────*/
 
-
 <template>
   <RouterView />
   <EditModal v-if="modalStore.editModal" />
@@ -21,8 +20,8 @@
   <AddModal v-if="modalStore.addModal" />
   <CancelModal v-if="modalStore.cancelModal" />
   <SuspendModal v-if="modalStore.suspendModal" />
-   <CreateFeeStructureModal v-if="modalStore.createFeeStructureModal" />
-   <ViewFeeDetailsModal v-if="modalStore.viewFeeDetailsModal" />
+  <CreateFeeStructureModal v-if="modalStore.createFeeStructureModal" />
+  <ViewFeeDetailsModal v-if="modalStore.viewFeeDetailsModal" />
   <NotificationContainer />
 </template>
 
@@ -38,11 +37,13 @@ import SuspendModal from "./components/modals/suspendModal.vue";
 import CreateFeeStructureModal from "./components/modals/CreateFeeStructureModal.vue";
 import ViewFeeDetailsModal from "./components/modals/viewFeeDetailsModal.vue";
 import { useUserStore } from "./store/userStore";
+import { loadSavedTheme } from "./utils/theme";
 
 const modalStore = useModalStore();
 const userStore = useUserStore();
 
 onMounted(async () => {
+  loadSavedTheme();
   await userStore.fetchSchoolInfo().catch(() => null);
 });
 </script>
